@@ -1,0 +1,11 @@
+@keyframes pulse {
+  0% {
+    color: #333;
+  }
+  50% {
+    color: #e7e7e7;
+  }
+  100% {
+    color: #333;
+  }
+}

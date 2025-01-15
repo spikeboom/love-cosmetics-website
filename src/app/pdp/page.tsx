@@ -30,7 +30,7 @@ import IconPix from "./payments/icon-pix";
 import IconCredCard from "./payments/icon-credcard";
 import IconReembolso from "./payments/icon-reembolso";
 import CarouselProducts from "./carousel-products/carousel-products";
-import IconSallveFooter from "./footer/icon-sallve";
+import "./styles.css";
 
 const timeTransition = 500;
 
@@ -103,6 +103,13 @@ export default function PdpPage() {
     </div>
   );
 
+  const stylesPulseLove = {
+    animatedBox: {
+      color: "#333",
+      animation: "pulse 3s infinite",
+    },
+  };
+
   return (
     <>
       <div className="font-lato text-[#333]">
@@ -125,7 +132,11 @@ export default function PdpPage() {
             </div>
 
             <div>
-              <a href="/" className="font-playfair text-[32px]">
+              <a
+                href="/"
+                className="font-playfair text-[32px]"
+                style={stylesPulseLove.animatedBox}
+              >
                 LOVÉ
               </a>
             </div>
