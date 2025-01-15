@@ -1,0 +1,8 @@
+.my-scrollable-element {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.my-scrollable-element::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
