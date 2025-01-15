@@ -8,7 +8,7 @@ const Review = ({ review }) => {
   const nota = review.nota;
 
   const starSettings = {
-    color: "#9f77ff",
+    color: "#FF69B4",
     size: 16,
   };
 

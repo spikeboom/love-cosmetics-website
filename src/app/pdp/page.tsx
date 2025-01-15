@@ -411,11 +411,11 @@ export default function PdpPage() {
                     <div className="flex w-full flex-col items-center">
                       <div className="mb-[24px] flex flex-col gap-2">
                         <div className="flex justify-center">
-                          <FaStar color="#9f77ff" size={26} />
-                          <FaStar color="#9f77ff" size={26} />
-                          <FaStar color="#9f77ff" size={26} />
-                          <FaStar color="#9f77ff" size={26} />
-                          <FaRegStarHalfStroke color="#9f77ff" size={26} />
+                          <FaStar color="#FF69B4" size={26} />
+                          <FaStar color="#FF69B4" size={26} />
+                          <FaStar color="#FF69B4" size={26} />
+                          <FaStar color="#FF69B4" size={26} />
+                          <FaRegStarHalfStroke color="#FF69B4" size={26} />
                         </div>
                         <div className="text-[18px] font-semibold">
                           4.4 de 5 (103 resenhas)
@@ -425,11 +425,11 @@ export default function PdpPage() {
                       <div className="mb-[24px] flex flex-col gap-[10px]">
                         <div className="flex h-fit items-center gap-[16px]">
                           <div className="flex items-center gap-[2px]">
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaRegStarHalfStroke color="#9f77ff" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaRegStarHalfStroke color="#FF69B4" size={14} />
                           </div>
                           <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                             <div
@@ -442,11 +442,11 @@ export default function PdpPage() {
 
                         <div className="flex h-fit items-center gap-[16px]">
                           <div className="flex items-center gap-[2px]">
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaRegStarHalfStroke color="#9f77ff" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaRegStarHalfStroke color="#FF69B4" size={14} />
                           </div>
                           <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080] opacity-[0.8]">
                             <div
@@ -459,11 +459,11 @@ export default function PdpPage() {
 
                         <div className="flex h-fit items-center gap-[16px]">
                           <div className="flex items-center gap-[2px]">
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaRegStarHalfStroke color="#9f77ff" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaRegStarHalfStroke color="#FF69B4" size={14} />
                           </div>
                           <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080] opacity-[0.6]">
                             <div
@@ -476,11 +476,11 @@ export default function PdpPage() {
 
                         <div className="flex h-fit items-center gap-[16px]">
                           <div className="flex items-center gap-[2px]">
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaRegStarHalfStroke color="#9f77ff" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaRegStarHalfStroke color="#FF69B4" size={14} />
                           </div>
                           <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080] opacity-[0.4]">
                             <div
@@ -493,11 +493,11 @@ export default function PdpPage() {
 
                         <div className="flex h-fit items-center gap-[16px]">
                           <div className="flex items-center gap-[2px]">
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaStar color="#9f77ff" size={14} />
-                            <FaRegStarHalfStroke color="#9f77ff" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaStar color="#FF69B4" size={14} />
+                            <FaRegStarHalfStroke color="#FF69B4" size={14} />
                           </div>
                           <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                             <div
