@@ -64,7 +64,7 @@ const Product = ({ data }: any) => (
       </span>
     </div>
     <div className="w-full">
-      <button className="flex items-center rounded-[100px] bg-[#7045f5] px-[32px] py-[8px]">
+      <button className="flex items-center rounded-[100px] bg-[#FF69B4] px-[32px] py-[8px]">
         <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
           comprar
         </span>

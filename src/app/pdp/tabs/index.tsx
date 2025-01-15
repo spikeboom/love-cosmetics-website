@@ -25,12 +25,12 @@ export default function Tabs() {
       <div className="flex flex-wrap">
         <div className="my-[8px] flex w-full justify-center">
           <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#7045f5] underline"
+            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#FF69B4] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
             fechar detalhes
-            <IoChevronUp color="#7045f5" size={10} />
+            <IoChevronUp color="#FF69B4" size={10} />
           </button>
         </div>
         <h2 className="m-[1%] px-[14px] py-[6px] font-poppins text-[14px]">
@@ -109,26 +109,26 @@ export default function Tabs() {
         </div> */}
         <div className="mt-[8px] flex w-full justify-center">
           <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#7045f5] underline"
+            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#FF69B4] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={openDetailsTab1 ? { display: "none" } : {}}
           >
             ver detalhes dos ingredientes
-            <IoChevronDown color="#7045f5" size={10} />
+            <IoChevronDown color="#FF69B4" size={10} />
           </button>
           <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#7045f5] underline"
+            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#FF69B4] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
             fechar detalhes
-            <IoChevronUp color="#7045f5" size={10} />
+            <IoChevronUp color="#FF69B4" size={10} />
           </button>
         </div>
       </div>
     </div>,
     <div className="pt-[12px] lowercase">
-      <h2 className="leadin-[150%] my-[16px] font-poppins text-[20px] font-semibold text-[#7045f5]">
+      <h2 className="leadin-[150%] my-[16px] font-poppins text-[20px] font-semibold text-[#FF69B4]">
         ele é
       </h2>
       <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
@@ -149,14 +149,14 @@ export default function Tabs() {
         Clínica independente, com participantes que fizeram uso do produto
         diariamente. Estes são os resultados de algumas avaliações:
       </p>
-      <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#7045f5]">
+      <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#FF69B4]">
         após 28 dias de uso:
       </h2>
       <table className="mb-[16px]">
         <tbody>
           <tr>
             <td className="px-[8px]">
-              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#7045f5]">
+              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
                 100%
               </h2>
               <p className="mb-[16px] text-center text-[12px] leading-[130%]">
@@ -164,7 +164,7 @@ export default function Tabs() {
               </p>
             </td>
             <td className="px-[8px]">
-              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#7045f5]">
+              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
                 98%
               </h2>
               <p className="mb-[16px] text-center text-[12px] leading-[130%]">
@@ -174,7 +174,7 @@ export default function Tabs() {
           </tr>
           <tr>
             <td className="px-[8px]">
-              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#7045f5]">
+              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
                 95%
               </h2>
               <p className="mb-[16px] text-center text-[12px] leading-[130%]">
@@ -185,7 +185,7 @@ export default function Tabs() {
         </tbody>
       </table>
 
-      <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#7045f5]">
+      <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#FF69B4]">
         avaliações de segurança
       </h2>
       <p className="mb-[16px] text-[14px] leading-[150%]">
@@ -213,7 +213,7 @@ export default function Tabs() {
             onClick={() => setActiveTab(index)}
             className={`cursor-pointer ${
               activeTab === index
-                ? "border-b-[3px] border-b-[#7045f5] font-semibold text-[#7045f5]"
+                ? "border-b-[3px] border-b-[#FF69B4] font-semibold text-[#FF69B4]"
                 : "text-[#999]"
             }`}
           >

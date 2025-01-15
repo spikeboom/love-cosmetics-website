@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         lato: ["var(--font-lato)", ...fontFamily.sans],
         poppins: ["var(--font-poppins)", ...fontFamily.sans],
+        playfair: ["var(--font-playfair)", ...fontFamily.sans],
       },
     },
   },

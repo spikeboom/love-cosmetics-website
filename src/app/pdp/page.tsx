@@ -106,7 +106,7 @@ export default function PdpPage() {
   return (
     <>
       <div className="font-lato text-[#333]">
-        <div className="flex w-full justify-center bg-[#9277fd]">
+        <div className="flex w-full justify-center bg-[#FF69B4]">
           <div className="text-white">
             <p className="p-[8px] text-[12px]">
               compre e receba antes do natal *consulte o prazo da sua região🚛
@@ -114,8 +114,8 @@ export default function PdpPage() {
           </div>
         </div>
         <section>
-          <div className="flex items-center justify-between border-b border-b-[#e5e7eb] px-[16px] py-[22px]">
-            <div className="flex">
+          <div className="flex items-center justify-between border-b border-b-[#e5e7eb] px-[16px] py-[12px]">
+            <div className="flex grow">
               <span className="mr-[24px] flex items-center">
                 <IconHambuger />
               </span>
@@ -125,17 +125,12 @@ export default function PdpPage() {
             </div>
 
             <div>
-              <a href="/">
-                <Image
-                  src="/Sallve_Logo_54px.gif"
-                  alt="Logo"
-                  width={100}
-                  height={26.72}
-                />
+              <a href="/" className="font-playfair text-[32px]">
+                LOVÉ
               </a>
             </div>
 
-            <div className="flex">
+            <div className="flex grow justify-end">
               <span className="mx-[16px] flex items-center">
                 <IconLogin />
               </span>
@@ -320,7 +315,7 @@ export default function PdpPage() {
               <div className="">
                 <p className="flex items-center gap-[12px] text-[12px]">
                   <IconPlus />
-                  <span className="bg-[#f8f4ff] px-[6px] py-[2px] font-poppins text-[14px] font-semibold leading-[130%] text-[#7045f5]">
+                  <span className="bg-[#f8f4ff] px-[6px] py-[2px] font-poppins text-[14px] font-semibold leading-[130%] text-[#FF69B4]">
                     399
                   </span>
                   pontos para resgatar no Minha Sallve
@@ -371,7 +366,7 @@ export default function PdpPage() {
               </div>
 
               <div className="my-[16px] flex flex-col rounded-[8px] border-[1px] border-[#ddd]">
-                <h2 className="mt-[10px] self-center font-poppins text-[14px] text-[#7045f5]">
+                <h2 className="mt-[10px] self-center font-poppins text-[14px] text-[#FF69B4]">
                   Pague com
                 </h2>
                 <div className="flex justify-center gap-[8px]">
@@ -563,7 +558,7 @@ export default function PdpPage() {
                   placeholder="email"
                   style={{ border: "1px solid #e0e0e0" }}
                 />
-                <button className="flex h-fit items-center gap-1 rounded-[100px] bg-[#7045f5] px-[16px] py-[12px] text-[14px] text-[#fff]">
+                <button className="flex h-fit items-center gap-1 rounded-[100px] bg-[#FF69B4] px-[16px] py-[12px] text-[14px] text-[#fff]">
                   <span>enviar</span> <FaArrowRight color="#fff" size={16} />
                 </button>
               </div>
@@ -1043,8 +1038,8 @@ export default function PdpPage() {
               <div className="px-[24px]">
                 <div className="flex flex-col items-center px-[20px] pt-[36px]">
                   <div className="mb-[12px]">
-                    <a href="/">
-                      <IconSallveFooter />
+                    <a href="/" className="font-playfair text-[32px]">
+                      LOVÉ
                     </a>
                   </div>
 
@@ -1098,7 +1093,7 @@ export default function PdpPage() {
           </div>
 
           <div className="w-full">
-            <button className="w-full rounded-[100px] bg-[#7045f5] px-[20px] py-[12px] text-[16px] font-semibold text-[#fff]">
+            <button className="w-full rounded-[100px] bg-[#FF69B4] px-[20px] py-[12px] text-[16px] font-semibold text-[#fff]">
               <span>comprar</span>
             </button>
           </div>
