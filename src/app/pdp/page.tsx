@@ -116,8 +116,8 @@ export default function PdpPage() {
         <section className="fixed top-0 z-[11] w-full bg-white">
           <div className="flex w-full justify-center bg-[#FF69B4]">
             <div className="text-white">
-              <p className="p-[8px] text-[12px]">
-                compre e receba antes do natal *consulte o prazo da sua região🚛
+              <p className="p-[8px] text-center text-[12px] lowercase">
+                Entrega exclusiva para Manaus! 🚛
               </p>
             </div>
           </div>
