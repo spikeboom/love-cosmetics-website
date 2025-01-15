@@ -112,15 +112,15 @@ export default function PdpPage() {
 
   return (
     <>
-      <div className="font-lato text-[#333]">
-        <div className="flex w-full justify-center bg-[#FF69B4]">
-          <div className="text-white">
-            <p className="p-[8px] text-[12px]">
-              compre e receba antes do natal *consulte o prazo da sua região🚛
-            </p>
+      <div className="pt-[110px] font-lato text-[#333]">
+        <section className="fixed top-0 z-[11] w-full bg-white">
+          <div className="flex w-full justify-center bg-[#FF69B4]">
+            <div className="text-white">
+              <p className="p-[8px] text-[12px]">
+                compre e receba antes do natal *consulte o prazo da sua região🚛
+              </p>
+            </div>
           </div>
-        </div>
-        <section>
           <div className="flex items-center justify-between border-b border-b-[#e5e7eb] px-[16px] py-[12px]">
             <div className="flex grow">
               <span className="mr-[24px] flex items-center">
