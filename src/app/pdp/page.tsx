@@ -222,13 +222,13 @@ export default function PdpPage() {
                 className="absolute left-[1em] top-[50%] z-10 flex h-[34px] w-[34px] -translate-y-2/4 items-center justify-center rounded-full bg-[#fafafa]"
                 onClick={handlePrev}
               >
-                <FaChevronLeft color="#8a5eff" size={16} />
+                <FaChevronLeft color="#FF69B4" size={16} />
               </button>
               <button
                 className="absolute right-[1em] top-[50%] z-10 flex h-[34px] w-[34px] -translate-y-2/4 items-center justify-center rounded-full bg-[#fafafa]"
                 onClick={handleNext}
               >
-                <FaChevronRight color="#8a5eff" size={16} />
+                <FaChevronRight color="#FF69B4" size={16} />
               </button>
               <div
                 className="flex w-fit"
