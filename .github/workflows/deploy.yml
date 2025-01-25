@@ -27,7 +27,10 @@ jobs:
       # 3. Sincroniza código com o servidor
       - name: Deploy code to server
         run: |
-          rsync -avz --delete ./ root@147.93.9.224:/root/wordpress/next_project
+          ssh root@147.93.9.224 << EOF
+            cd /root/wordpress/next_project || exit 1
+            git pull origin master || exit 1
+          EOF
 
       # 4. Executa o docker-compose no servidor
       - name: Start docker-compose
