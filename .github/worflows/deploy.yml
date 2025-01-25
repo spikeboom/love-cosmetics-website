@@ -1,0 +1,31 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main # Ou outra branch usada para deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checa o código do repositório
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Configura acesso SSH ao servidor
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # 3. Sincroniza código com o servidor
+      - name: Deploy code to server
+        run: |
+          rsync -avz --delete ./ root@147.93.9.224:/root/wordpress/next_project
+
+      # 4. Executa o docker-compose no servidor
+      - name: Start docker-compose
+        run: |
+          ssh root@147.93.9.224 "cd /root/wordpress/next_project && docker-compose up -d --build love-cosmetics"
