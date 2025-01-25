@@ -18,13 +18,22 @@ import { PontosDisponiveis } from "./pontos-disponiveis/pontos-disponiveis";
 import { ListaRedesSociais } from "./lista-redes-sociais/lista-resdes-sociais";
 import { CartoesAceitos } from "./cartoes-aceitos/cartoes-aceitos";
 import { CadastreSeuEmail } from "./cadastre-seu-email/cadastre-seu-email";
+import { fetchProdutos } from "@/modules/produto/domain";
 
-export default function PdpPage() {
+export default async function PdpPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const { data } = await fetchProdutos({ slug });
+  const [produto] = data;
+
   return (
     <>
       <div className="pt-[110px] font-lato text-[#333]">
-        teste123
         <Cabecalho />
+
         <section>
           <Breadcrumbs />
 
@@ -34,7 +43,11 @@ export default function PdpPage() {
             <CarouselImagensTop />
 
             <article className="px-[16px] text-[#333]">
-              <ProductDescricao />
+              <ProductDescricao
+                descricao_resumida={produto?.descricaoResumida}
+                titulo_lista={produto?.tituloLista}
+                lista_descricao={produto?.listaDescricao}
+              />
 
               <PontosDisponiveis />
 
