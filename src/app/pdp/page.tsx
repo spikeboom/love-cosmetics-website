@@ -23,7 +23,7 @@ export default function PdpPage() {
   return (
     <>
       <div className="pt-[110px] font-lato text-[#333]">
-        teste
+        teste123
         <Cabecalho />
         <section>
           <Breadcrumbs />
