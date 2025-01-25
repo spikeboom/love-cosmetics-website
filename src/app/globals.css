@@ -19,3 +19,14 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+body {
+  max-width: 400px; /* Limita a largura da página */
+  margin: 0 auto; /* Centraliza o conteúdo */
+}
+
+.fixed {
+  max-width: inherit; /* Herdar a largura do contêiner principal */
+  left: auto; /* Ajuste conforme necessário */
+  right: auto; /* Ajuste conforme necessário */
+}

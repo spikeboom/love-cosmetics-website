@@ -31,9 +31,9 @@ export default async function PdpPage({
 
   return (
     <>
-      <div className="pt-[110px] font-lato text-[#333]">
-        <Cabecalho />
+      <Cabecalho />
 
+      <div className="pt-[110px] font-lato text-[#333]">
         <section>
           <Breadcrumbs />
 
