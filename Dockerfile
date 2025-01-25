@@ -28,6 +28,9 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/public ./public
 
+# Copie o arquivo .env para o ambiente de produção
+COPY --from=builder /app/.env ./
+
 # Configure a variável de ambiente para produção
 ENV NODE_ENV=production
 

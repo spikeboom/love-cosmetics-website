@@ -16,7 +16,7 @@ export const fetchProdutos = async ({
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch articles");
+    throw new Error("Failed to fetch produtos");
   }
 
   return response.json();
