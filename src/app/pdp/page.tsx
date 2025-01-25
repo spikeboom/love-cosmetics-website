@@ -23,8 +23,8 @@ export default function PdpPage() {
   return (
     <>
       <div className="pt-[110px] font-lato text-[#333]">
+        teste
         <Cabecalho />
-
         <section>
           <Breadcrumbs />
 
@@ -58,7 +58,6 @@ export default function PdpPage() {
             <CadastreSeuEmail />
           </main>
         </section>
-
         <footer className="mt-[15px]">
           <div className="flex flex-col items-center">
             <ListaRedesSociais />
@@ -72,7 +71,6 @@ export default function PdpPage() {
             <Rodape />
           </div>
         </footer>
-
         <div className="h-[100px] bg-[#333]"></div>
       </div>
 
