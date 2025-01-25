@@ -18,7 +18,7 @@ import { PontosDisponiveis } from "./pontos-disponiveis/pontos-disponiveis";
 import { ListaRedesSociais } from "./lista-redes-sociais/lista-resdes-sociais";
 import { CartoesAceitos } from "./cartoes-aceitos/cartoes-aceitos";
 import { CadastreSeuEmail } from "./cadastre-seu-email/cadastre-seu-email";
-import { fetchProdutos } from "@/modules/produto/domain";
+import { fetchProdutoBySlug } from "@/modules/produto/domain";
 
 export default async function PdpPage({
   params,
@@ -26,7 +26,7 @@ export default async function PdpPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { data } = await fetchProdutos({ slug });
+  const { data } = await fetchProdutoBySlug({ slug });
   const [produto] = data;
 
   return (
