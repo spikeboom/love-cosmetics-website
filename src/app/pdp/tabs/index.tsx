@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 
-export default function Tabs() {
+export function Tabs() {
   const [activeTab, setActiveTab] = useState(0);
 
   const [openDetailsTab1, setOpenDetailsTab1] = useState(false);

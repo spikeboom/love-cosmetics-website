@@ -12,16 +12,12 @@ const Review = ({ review }) => {
     size: 16,
   };
 
-  const stars = {
-    full: <FaStar {...starSettings} />,
-    half: <FaRegStarHalfStroke {...starSettings} />,
-    empty: <FaRegStar {...starSettings} />,
-  };
-
   const arrayStars = Array.from({ length: 5 }, (_, index) => {
-    if (index < Math.floor(nota)) return stars.full;
-    if (index === Math.floor(nota)) return stars.half;
-    return stars.empty;
+    if (index < Math.floor(nota))
+      return <FaStar key={`full-${index}`} {...starSettings} />;
+    if (index === Math.floor(nota))
+      return <FaRegStarHalfStroke key={`half-${index}`} {...starSettings} />;
+    return <FaRegStar key={`empty-${index}`} {...starSettings} />;
   });
 
   return (

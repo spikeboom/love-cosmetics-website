@@ -2,7 +2,7 @@
 
 import DoubtsItem from "./item";
 
-export default function Doubts() {
+export function Duvidas() {
   return (
     <div className="mb-[30px] pt-[20px] font-poppins lowercase">
       <div className="">

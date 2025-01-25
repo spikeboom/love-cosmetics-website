@@ -1,5 +1,4 @@
 "use client";
-
 import { useRef, useState } from "react";
 import Image from "next/image";
 import IconSacola from "./icon-sacola";
@@ -76,7 +75,7 @@ const Product = ({ data }: any) => (
   </div>
 );
 
-export default function CarouselProducts() {
+export function CarouselProducts() {
   const scrollableRef = useRef(null);
   const [scrollPercentage, setScrollPercentage] = useState(0);
 
@@ -95,77 +94,86 @@ export default function CarouselProducts() {
   const breaks = [base, base * 2];
 
   return (
-    <div>
-      <div
-        className="my-scrollable-element w-full overflow-scroll"
-        ref={scrollableRef}
-        onScroll={handleScroll}
-      >
-        <div className="flex gap-4">
-          {arrayProducts.map((product, index) => (
-            <Product key={index} data={product} />
-          ))}
+    <div className="px-[16px] py-[24px] font-poppins">
+      <h2 className="mb-[4px] text-[16px]">
+        complete sua rotina e ganhe descontos
+      </h2>
+      <p className="mb-[24px] text-[12px] text-[#333333BF]">
+        até 15% OFF na compra de 2 ou + fórmulas
+      </p>
+
+      <div>
+        <div
+          className="my-scrollable-element w-full overflow-scroll"
+          ref={scrollableRef}
+          onScroll={handleScroll}
+        >
+          <div className="flex gap-4">
+            {arrayProducts.map((product, index) => (
+              <Product key={index} data={product} />
+            ))}
+          </div>
         </div>
+        <ul className="mt-[24px] flex w-full justify-center gap-2">
+          <li>
+            <button
+              className={`h-[16px] rounded-[100px]`}
+              style={
+                scrollPercentage < breaks[0]
+                  ? {
+                      width: 69,
+                      backgroundColor: "#dbdbdb",
+                      transition: "background-color 2s ease, width 2s ease",
+                    }
+                  : {
+                      width: 16,
+                      backgroundColor: "#f1f1f1",
+                      transition: "background-color 2s ease, width 2s ease",
+                    }
+              }
+              type="button"
+            ></button>
+          </li>
+          <li>
+            <button
+              className={`h-[16px] rounded-[100px]`}
+              style={
+                scrollPercentage >= breaks[0] && scrollPercentage < breaks[1]
+                  ? {
+                      width: 69,
+                      backgroundColor: "#dbdbdb",
+                      transition: "background-color 2s ease, width 2s ease",
+                    }
+                  : {
+                      width: 16,
+                      backgroundColor: "#f1f1f1",
+                      transition: "background-color 2s ease, width 2s ease",
+                    }
+              }
+              type="button"
+            ></button>
+          </li>
+          <li>
+            <button
+              className={`h-[16px] rounded-[100px]`}
+              style={
+                scrollPercentage >= breaks[1]
+                  ? {
+                      width: 69,
+                      backgroundColor: "#dbdbdb",
+                      transition: "background-color 2s ease, width 2s ease",
+                    }
+                  : {
+                      width: 16,
+                      backgroundColor: "#f1f1f1",
+                      transition: "background-color 2s ease, width 2s ease",
+                    }
+              }
+              type="button"
+            ></button>
+          </li>
+        </ul>
       </div>
-      <ul className="mt-[24px] flex w-full justify-center gap-2">
-        <li>
-          <button
-            className={`h-[16px] rounded-[100px]`}
-            style={
-              scrollPercentage < breaks[0]
-                ? {
-                    width: 69,
-                    backgroundColor: "#dbdbdb",
-                    transition: "background-color 2s ease, width 2s ease",
-                  }
-                : {
-                    width: 16,
-                    backgroundColor: "#f1f1f1",
-                    transition: "background-color 2s ease, width 2s ease",
-                  }
-            }
-            type="button"
-          ></button>
-        </li>
-        <li>
-          <button
-            className={`h-[16px] rounded-[100px]`}
-            style={
-              scrollPercentage >= breaks[0] && scrollPercentage < breaks[1]
-                ? {
-                    width: 69,
-                    backgroundColor: "#dbdbdb",
-                    transition: "background-color 2s ease, width 2s ease",
-                  }
-                : {
-                    width: 16,
-                    backgroundColor: "#f1f1f1",
-                    transition: "background-color 2s ease, width 2s ease",
-                  }
-            }
-            type="button"
-          ></button>
-        </li>
-        <li>
-          <button
-            className={`h-[16px] rounded-[100px]`}
-            style={
-              scrollPercentage >= breaks[1]
-                ? {
-                    width: 69,
-                    backgroundColor: "#dbdbdb",
-                    transition: "background-color 2s ease, width 2s ease",
-                  }
-                : {
-                    width: 16,
-                    backgroundColor: "#f1f1f1",
-                    transition: "background-color 2s ease, width 2s ease",
-                  }
-            }
-            type="button"
-          ></button>
-        </li>
-      </ul>
     </div>
   );
 }
