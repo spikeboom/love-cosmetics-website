@@ -19,8 +19,7 @@ export function CarouselImagensTop({
 
   const slides = imagens.map(
     (item) =>
-      (process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337") +
-      item.imagem.formats.medium.url,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
   );
 
   console.log({ slides });
