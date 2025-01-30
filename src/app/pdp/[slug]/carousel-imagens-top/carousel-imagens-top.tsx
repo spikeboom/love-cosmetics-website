@@ -22,8 +22,6 @@ export function CarouselImagensTop({
       `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
   );
 
-  console.log({ slides });
-
   const totalSlides = slides.length + qtySlidesBefore + qtySlidesAfter;
 
   const percentToMove = 100 / totalSlides;
@@ -96,6 +94,7 @@ export function CarouselImagensTop({
           >
             <Image
               src={slide}
+              loader={({ src }) => src}
               alt={`Slide Before ${index + 1}`}
               fill
               style={{
@@ -111,6 +110,7 @@ export function CarouselImagensTop({
           >
             <Image
               src={slide}
+              loader={({ src }) => src}
               alt={`Slide ${index + 1}`}
               fill
               style={{
@@ -126,6 +126,7 @@ export function CarouselImagensTop({
           >
             <Image
               src={slide}
+              loader={({ src }) => src}
               alt={`Slide After ${index + 1}`}
               fill
               style={{
