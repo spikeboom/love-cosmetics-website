@@ -15,13 +15,13 @@ export function BarraFixaComprar({ preco }: BarraFixaComprarProps) {
         <div className="h-fit w-fit">
           <p className="flex w-fit flex-col">
             <strong className="text-[14px]">
-              R$ {preco.toString().replace(".", ",")}
+              R$ {preco?.toString().replace(".", ",")}
             </strong>
 
             <span className="text-[12px] text-[#333333BF]">
               ou 3x R${" "}
               {(Math.round((preco * 100) / 3) / 100)
-                .toString()
+                ?.toString()
                 .replace(".", ",")}
             </span>
           </p>
