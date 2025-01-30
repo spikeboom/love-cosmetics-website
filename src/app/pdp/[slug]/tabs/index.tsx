@@ -20,7 +20,6 @@ export function Tabs({
     texto2: string;
   };
 }) {
-  console.log({ resultados });
   const [activeTab, setActiveTab] = useState(0);
 
   const [openDetailsTab1, setOpenDetailsTab1] = useState(false);

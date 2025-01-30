@@ -3,6 +3,7 @@
 import DoubtsItem from "./item";
 
 interface Duvida {
+  id: number;
   pergunta: string;
   texto: string;
 }
@@ -22,6 +23,7 @@ export function Duvidas({ duvidas }: DuvidasProps) {
             </h3>
             {duvidas?.map((item) => (
               <DoubtsItem
+                key={item?.id}
                 title={<>{item?.pergunta}</>}
                 text={<>{item?.texto}</>}
               />

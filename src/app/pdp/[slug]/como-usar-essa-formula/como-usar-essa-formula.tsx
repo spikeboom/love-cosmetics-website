@@ -1,5 +1,5 @@
 interface ComoUsarEssaFormulaProps {
-  como_usar_essa_formula: { numero: number; texto: string }[];
+  como_usar_essa_formula: { id: number; numero: number; texto: string }[];
 }
 
 export function ComoUsarEssaFormula({
@@ -11,7 +11,10 @@ export function ComoUsarEssaFormula({
         como usar essa fórmula?
       </h2>
       {como_usar_essa_formula?.map((item) => (
-        <div className="flex gap-2 rounded-[8px] bg-[#fff] px-[14px] py-[20px]">
+        <div
+          className="flex gap-2 rounded-[8px] bg-[#fff] px-[14px] py-[20px]"
+          key={item?.id}
+        >
           <div className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-[2px] border-[#333] p-[16px] text-[16px] font-black text-[#333]">
             <span>{item?.numero}</span>
           </div>

@@ -5,8 +5,6 @@ import { GoPerson } from "react-icons/go";
 import { MdCheckCircle } from "react-icons/md";
 
 const Review = ({ review }) => {
-  console.log({ review });
-
   const nota = review.nota;
 
   const starSettings = {
@@ -63,7 +61,7 @@ const Review = ({ review }) => {
 
       <div className="leading-[1.4]">
         <div className="text-[15px]">
-          <p>{review.resposta_texto}</p>
+          <p>{review.texto}</p>
         </div>
         <div className="my-[16px] p-[12px]">
           <div className="mb-[16px]">
