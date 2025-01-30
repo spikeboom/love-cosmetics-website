@@ -5,20 +5,26 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 
 const timeTransition = 500;
 
-const slides = [
-  "/carousel/IMG_7986.jpg",
-  "/carousel/IMG_7996.jpg",
-  "/carousel/IMG_7985.jpg",
-  "/carousel/IMG_7994.jpg",
-  "/carousel/IMG_7995.jpg",
-];
-
 const qtySlidesBefore = 2;
 const qtySlidesAfter = 2;
 
-const totalSlides = slides.length + qtySlidesBefore + qtySlidesAfter;
+export function CarouselImagensTop({
+  imagens,
+}: {
+  imagens: { imagem: { formats: { medium: { url: string } } } }[];
+}) {
+  if (!imagens) {
+    return null;
+  }
 
-export function CarouselImagensTop() {
+  const slides = imagens.map(
+    (item) =>
+      (process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337") +
+      item.imagem.formats.medium.url,
+  );
+
+  const totalSlides = slides.length + qtySlidesBefore + qtySlidesAfter;
+
   const percentToMove = 100 / totalSlides;
 
   const [translateCarousel, setTranslateCarousel] = useState(

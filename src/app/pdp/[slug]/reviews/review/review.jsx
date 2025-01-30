@@ -5,6 +5,8 @@ import { GoPerson } from "react-icons/go";
 import { MdCheckCircle } from "react-icons/md";
 
 const Review = ({ review }) => {
+  console.log({ review });
+
   const nota = review.nota;
 
   const starSettings = {
@@ -59,7 +61,7 @@ const Review = ({ review }) => {
 
       <div className="leading-[1.4]">
         <div className="text-[15px]">
-          <p>{review.comentario}</p>
+          <p>{review.resposta_texto}</p>
         </div>
         <div className="my-[16px] p-[12px]">
           <div className="mb-[16px]">
@@ -67,27 +69,29 @@ const Review = ({ review }) => {
               <b className="text-[14px]">
                 você recomendaria ele para uma amiga ou amigo?
               </b>
-              <span className="text-[12px]">{review.questions.recomenda}</span>
+              <span className="text-[12px]">
+                {review.voce_recomenda ? "sim" : "não"}
+              </span>
             </div>
             <div className="flex flex-col">
               <b className="text-[14px]">qual sua idade?</b>
-              <span className="text-[12px]">{review.questions.idade}</span>
+              <span className="text-[12px]">{review.idade}</span>
             </div>
             <div className="flex flex-col">
               <b className="text-[14px]">qual é o seu tipo de pele do rosto?</b>
-              <span className="text-[12px]">{review.questions.tipo_pele}</span>
+              <span className="text-[12px]">{review.tipo_pele}</span>
             </div>
             <div className="flex flex-col">
               <b className="text-[14px]">e sua pele do rosto é sensível?</b>
               <span className="text-[12px]">
-                {review.questions.pele_rosto_sensivel}
+                {review.pele_sensivel ? "sim" : "não"}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {review.resposta && (
+      {review.resposta_texto && (
         <div
           className="my-[5px] rounded-[8px] px-[16px] py-[10px] text-[15px]"
           style={{
@@ -95,11 +99,11 @@ const Review = ({ review }) => {
           }}
         >
           <div className="mb-[5px]">
-            <b className="">{review.resposta.usuario}</b> respondeu:
+            <b className="">{review.resposta_autor}</b> respondeu:
           </div>
 
           <div>
-            <p>{review.resposta.resposta}</p>
+            <p>{review.resposta_texto}</p>
           </div>
         </div>
       )}

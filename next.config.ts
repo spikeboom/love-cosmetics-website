@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    domains: ["strapi.lovecosmeticos.xyz"],
+  },
 };
 
 export default nextConfig;

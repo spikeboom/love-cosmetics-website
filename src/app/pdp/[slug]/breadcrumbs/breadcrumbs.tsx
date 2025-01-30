@@ -1,20 +1,28 @@
-export function Breadcrumbs() {
+export function Breadcrumbs({
+  items,
+}: {
+  items: { id: number; nome: string; link: string }[];
+}) {
   return (
     <div className="px-[18px] pb-[4px] pt-[16px] text-[14px] lowercase text-[#828282]">
       <section className="">
         <nav className="">
           <ol className="flex gap-2">
             <li className="">
-              <a href="/pdp" className="underline" rel="home" title="Love">
+              <a href="/" className="underline" rel="home" title="Love">
                 início
               </a>
             </li>
 
-            <li className="">/</li>
+            {items.map((item) => (
+              <div key={item.id} className="flex gap-2">
+                <li className="">/</li>
 
-            <li className="">
-              <span className="font-bold">hidratante facial</span>
-            </li>
+                <li className="">
+                  <span className="font-bold">{item?.nome}</span>
+                </li>
+              </div>
+            ))}
           </ol>
         </nav>
       </section>

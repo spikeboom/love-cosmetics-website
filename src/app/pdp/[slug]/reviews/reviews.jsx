@@ -108,11 +108,11 @@ const reviewsArray = [
   },
 ];
 
-const Reviews = () => {
+const Reviews = ({ avaliacoes }) => {
   return (
     <div className="font-poppins">
-      {reviewsArray.map((review, index) => (
-        <Review key={index} review={review} />
+      {avaliacoes?.map((review, index) => (
+        <Review key={review.id} review={review} />
       ))}
     </div>
   );

@@ -26,8 +26,11 @@ export default async function PdpPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { data } = await fetchProdutoBySlug({ slug });
-  const [produto] = data;
+  const {
+    data: [produto],
+  } = await fetchProdutoBySlug({ slug });
+
+  console.log(JSON.stringify({ produto }, null, 6));
 
   return (
     <>
@@ -35,12 +38,18 @@ export default async function PdpPage({
 
       <div className="pt-[110px] font-lato text-[#333]">
         <section>
-          <Breadcrumbs />
+          <Breadcrumbs items={produto?.breadcrumbItems} />
 
           <main className="">
-            <ProductInfoTop />
+            <ProductInfoTop
+              nome={produto?.nome}
+              unidade={produto?.unidade}
+              adesivo={produto?.adesivo}
+              nota={produto?.nota}
+              quantidadeResenhas={produto?.quantidadeResenhas}
+            />
 
-            <CarouselImagensTop />
+            <CarouselImagensTop imagens={produto?.carouselImagensPrincipal} />
 
             <article className="px-[16px] text-[#333]">
               <ProductDescricao
@@ -52,11 +61,17 @@ export default async function PdpPage({
               <PontosDisponiveis />
 
               <div className="my-[16px]">
-                <Tabs />
+                <Tabs
+                  o_que_ele_tem={produto?.o_que_ele_tem}
+                  o_que_ele_e={produto?.o_que_ele_e}
+                  resultados={produto?.resultados}
+                />
 
-                <ComoUsarEssaFormula />
+                <ComoUsarEssaFormula
+                  como_usar_essa_formula={produto?.como_usar_essa_formula}
+                />
 
-                <Duvidas />
+                <Duvidas duvidas={produto?.duvidas} />
               </div>
 
               <Adesivos />
@@ -66,7 +81,12 @@ export default async function PdpPage({
 
             <CarouselProducts />
 
-            <AvaliacoesClientes />
+            <AvaliacoesClientes
+              nota={produto?.nota}
+              quantidadeResenhas={produto?.quantidadeResenhas}
+              detalhe_notas={produto?.detalhe_notas}
+              avaliacoes={produto?.avaliacoes}
+            />
 
             <CadastreSeuEmail />
           </main>
@@ -87,7 +107,7 @@ export default async function PdpPage({
         <div className="h-[100px] bg-[#333]"></div>
       </div>
 
-      <BarraFixaComprar />
+      <BarraFixaComprar preco={produto?.preco} />
     </>
   );
 }

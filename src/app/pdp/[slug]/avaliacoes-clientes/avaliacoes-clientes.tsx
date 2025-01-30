@@ -1,7 +1,68 @@
-import { FaChevronDown, FaRegStarHalfStroke, FaStar } from "react-icons/fa6";
+import {
+  FaChevronDown,
+  FaRegStar,
+  FaRegStarHalfStroke,
+  FaStar,
+} from "react-icons/fa6";
 import Reviews from "../reviews/reviews";
 
-export function AvaliacoesClientes() {
+interface AvaliacoesClientesProps {
+  nota: number;
+  quantidadeResenhas: number;
+  detalhe_notas: {
+    um: number;
+    dois: number;
+    tres: number;
+    quatro: number;
+    cinco: number;
+  };
+  avaliacoes: any[];
+}
+
+export function AvaliacoesClientes({
+  nota,
+  quantidadeResenhas,
+  detalhe_notas,
+  avaliacoes,
+}: AvaliacoesClientesProps) {
+  const starSettings = {
+    color: "#FF69B4",
+    size: 26,
+  };
+
+  const arrayStars = Array.from({ length: 5 }, (_, index) => {
+    if (index < Math.floor(nota))
+      return <FaStar key={`full-${index}`} {...starSettings} />;
+    if (index === Math.floor(nota))
+      return <FaRegStarHalfStroke key={`half-${index}`} {...starSettings} />;
+    return <FaRegStar key={`empty-${index}`} {...starSettings} />;
+  });
+
+  const minOpacity = 1;
+  const maxOpacity = 0.3;
+
+  const rating1 = detalhe_notas?.um / quantidadeResenhas || 0;
+  const rating2 = detalhe_notas?.dois / quantidadeResenhas || 0;
+  const rating3 = detalhe_notas?.tres / quantidadeResenhas || 0;
+  const rating4 = detalhe_notas?.quatro / quantidadeResenhas || 0;
+  const rating5 = detalhe_notas?.cinco / quantidadeResenhas || 0;
+
+  const opacity1 =
+    Math.round(((1 - rating1) * (maxOpacity - minOpacity) + minOpacity) * 100) /
+    100;
+  const opacity2 =
+    Math.round(((1 - rating2) * (maxOpacity - minOpacity) + minOpacity) * 100) /
+    100;
+  const opacity3 =
+    Math.round(((1 - rating3) * (maxOpacity - minOpacity) + minOpacity) * 100) /
+    100;
+  const opacity4 =
+    Math.round(((1 - rating4) * (maxOpacity - minOpacity) + minOpacity) * 100) /
+    100;
+  const opacity5 =
+    Math.round(((1 - rating5) * (maxOpacity - minOpacity) + minOpacity) * 100) /
+    100;
+
   return (
     <section className="px-[16px] font-poppins">
       <div>
@@ -15,15 +76,9 @@ export function AvaliacoesClientes() {
             </h2>
             <div className="flex w-full flex-col items-center">
               <div className="mb-[24px] flex flex-col gap-2">
-                <div className="flex justify-center">
-                  <FaStar color="#FF69B4" size={26} />
-                  <FaStar color="#FF69B4" size={26} />
-                  <FaStar color="#FF69B4" size={26} />
-                  <FaStar color="#FF69B4" size={26} />
-                  <FaRegStarHalfStroke color="#FF69B4" size={26} />
-                </div>
+                <div className="flex justify-center">{arrayStars}</div>
                 <div className="text-[18px] font-semibold">
-                  4.4 de 5 (103 resenhas)
+                  {nota} de 5 ({quantidadeResenhas} resenhas)
                 </div>
               </div>
 
@@ -34,15 +89,20 @@ export function AvaliacoesClientes() {
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
-                    <FaRegStarHalfStroke color="#FF69B4" size={14} />
+                    <FaStar color="#FF69B4" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
                       className="h-full rounded-full bg-[#333]"
-                      style={{ width: "71%" }}
+                      style={{
+                        width: `${Math.round((detalhe_notas?.cinco / quantidadeResenhas) * 100)}%`,
+                        opacity: opacity5,
+                      }}
                     ></div>
                   </div>
-                  <div className="text-[12px] text-[#7b7b7b]">73</div>
+                  <div className="text-[12px] text-[#7b7b7b]">
+                    {detalhe_notas?.cinco}
+                  </div>
                 </div>
 
                 <div className="flex h-fit items-center gap-[16px]">
@@ -51,12 +111,15 @@ export function AvaliacoesClientes() {
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
-                    <FaRegStarHalfStroke color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
                   </div>
-                  <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080] opacity-[0.8]">
+                  <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
                       className="h-full rounded-full bg-[#333]"
-                      style={{ width: "11%" }}
+                      style={{
+                        width: `${Math.round((detalhe_notas?.quatro / quantidadeResenhas) * 100)}%`,
+                        opacity: opacity4,
+                      }}
                     ></div>
                   </div>
                   <div className="text-[12px] text-[#7b7b7b]">11</div>
@@ -67,13 +130,16 @@ export function AvaliacoesClientes() {
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStarHalfStroke color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
                   </div>
-                  <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080] opacity-[0.6]">
+                  <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
                       className="h-full rounded-full bg-[#333]"
-                      style={{ width: "12%" }}
+                      style={{
+                        width: `${Math.round((detalhe_notas?.tres / quantidadeResenhas) * 100)}%`,
+                        opacity: opacity3,
+                      }}
                     ></div>
                   </div>
                   <div className="text-[12px] text-[#7b7b7b]">12</div>
@@ -83,14 +149,17 @@ export function AvaliacoesClientes() {
                   <div className="flex items-center gap-[2px]">
                     <FaStar color="#FF69B4" size={14} />
                     <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStarHalfStroke color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
                   </div>
-                  <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080] opacity-[0.4]">
+                  <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
                       className="h-full rounded-full bg-[#333]"
-                      style={{ width: "3%" }}
+                      style={{
+                        width: `${Math.round((detalhe_notas?.dois / quantidadeResenhas) * 100)}%`,
+                        opacity: opacity2,
+                      }}
                     ></div>
                   </div>
                   <div className="text-[12px] text-[#7b7b7b]">3</div>
@@ -99,15 +168,18 @@ export function AvaliacoesClientes() {
                 <div className="flex h-fit items-center gap-[16px]">
                   <div className="flex items-center gap-[2px]">
                     <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStarHalfStroke color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaRegStar color="#FF69B4" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
-                      className="h-full rounded-full bg-[#333] opacity-[0.2]"
-                      style={{ width: "4%" }}
+                      className="h-full rounded-full bg-[#333]"
+                      style={{
+                        width: `${Math.round((detalhe_notas?.um / quantidadeResenhas) * 100)}%`,
+                        opacity: opacity1,
+                      }}
                     ></div>
                   </div>
                   <div className="text-[12px] text-[#7b7b7b]">4</div>
@@ -142,7 +214,7 @@ export function AvaliacoesClientes() {
             </div>
           </div>
 
-          <Reviews />
+          <Reviews avaliacoes={avaliacoes} />
         </div>
       </div>
     </section>

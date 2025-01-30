@@ -2,8 +2,25 @@
 
 import { useState } from "react";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-export function Tabs() {
+export function Tabs({
+  o_que_ele_tem,
+  o_que_ele_e,
+  resultados,
+}: {
+  o_que_ele_tem: { id: number; titulo: string; descricao: string }[];
+  o_que_ele_e: string;
+  resultados: {
+    texto1: string;
+    titulo1: string;
+    itens_resultado: { id: number; numero: string; texto: string }[];
+    titulo2: string;
+    texto2: string;
+  };
+}) {
+  console.log({ resultados });
   const [activeTab, setActiveTab] = useState(0);
 
   const [openDetailsTab1, setOpenDetailsTab1] = useState(false);
@@ -33,59 +50,21 @@ export function Tabs() {
             <IoChevronUp color="#FF69B4" size={10} />
           </button>
         </div>
-        <h2 className="m-[1%] px-[14px] py-[6px] font-poppins text-[14px]">
-          Niacinamida (Vitamina B3)
-        </h2>
-        <p
-          className="mb-[16px] font-poppins text-[14px] leading-[150%]"
-          style={!openDetailsTab1 ? { display: "none" } : {}}
-        >
-          Hidrata profundamente, controla a oleosidade, uniformiza o tom, reduz
-          manchas e melhora a textura da pele. Auxilia na reestruturação da
-          barreira cutânea e na prevenção do envelhecimento precoce.
-        </p>
-        <h2 className="m-[1%] px-[14px] py-[6px] font-poppins text-[14px]">
-          Ácido Hialurônico
-        </h2>
-        <p
-          className="mb-[16px] font-poppins text-[14px] leading-[150%]"
-          style={!openDetailsTab1 ? { display: "none" } : {}}
-        >
-          Atrai e retém água, reduz rugas e linhas de expressão, suaviza
-          olheiras e aumenta a flexibilidade e firmeza da pele. Estimula a
-          produção de colágeno e ajuda na cicatrização.
-        </p>
-        <h2 className="m-[1%] px-[14px] py-[6px] font-poppins text-[14px]">
-          Manteiga de Tucumã
-        </h2>
-        <p
-          className="mb-[16px] font-poppins text-[14px] leading-[150%]"
-          style={!openDetailsTab1 ? { display: "none" } : {}}
-        >
-          Rica em vitaminas, promove nutrição intensa, hidratação, elasticidade
-          e regeneração da pele. Reduz ressecamentos e rachaduras, deixando a
-          pele macia e sedosa.
-        </p>
-        <h2 className="m-[1%] px-[14px] py-[6px] font-poppins text-[14px]">
-          Ação antioxidante
-        </h2>
-        <p
-          className="mb-[16px] font-poppins text-[14px] leading-[150%]"
-          style={!openDetailsTab1 ? { display: "none" } : {}}
-        >
-          Protege contra radicais livres, combate o envelhecimento precoce e
-          fortalece a barreira natural da pele.
-        </p>
-        <h2 className="m-[1%] px-[14px] py-[6px] font-poppins text-[14px]">
-          Reparação intensiva
-        </h2>
-        <p
-          className="mb-[16px] font-poppins text-[14px] leading-[150%]"
-          style={!openDetailsTab1 ? { display: "none" } : {}}
-        >
-          Estimula a renovação celular e repara danos causados por exposição ao
-          sol, poluição e outros agentes externos.
-        </p>
+
+        {o_que_ele_tem?.map((item) => (
+          <div key={item.id} className="inline-block">
+            <h2 className="m-[1%] whitespace-nowrap px-[14px] py-[6px] font-poppins text-[14px]">
+              {item?.titulo}
+            </h2>
+            <p
+              className="mb-[16px] font-poppins text-[14px] leading-[150%]"
+              style={!openDetailsTab1 ? { display: "none" } : {}}
+            >
+              {item?.descricao}
+            </p>
+          </div>
+        ))}
+
         {/* <div
           className="mt-[24px] text-[10px] leading-[150%]"
           style={!openDetailsTab1 ? { display: "none" } : {}}
@@ -132,74 +111,36 @@ export function Tabs() {
         ele é
       </h2>
       <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
-        um hidratante facial prático e ideal para uso diário, com poderosa ação
-        hidratante que fortalece a barreira natural da pele. Sua fórmula leve e
-        nutritiva auxilia na prevenção e no tratamento de ressecamentos, manchas
-        e inflamações, promovendo conforto e revitalização para a pele do rosto.
-        Seus ativos antioxidantes, calmantes e reparadores ajudam a regenerar
-        áreas sensibilizadas, acalmando a pele imediatamente e deixando-a mais
-        uniforme e macia. Além disso, oferece rápida absorção e não deixa a pele
-        oleosa ou pegajosa​.
+        {o_que_ele_e}
       </p>
     </div>,
     <div className="pt-[12px] font-poppins lowercase">
       <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
-        Antes de chegar até você, o nosso Hidratante Facial passou por uma série
-        de avaliações de segurança e eficácia em um Instituto de Pesquisa
-        Clínica independente, com participantes que fizeram uso do produto
-        diariamente. Estes são os resultados de algumas avaliações:
+        {resultados?.texto1}
       </p>
       <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#FF69B4]">
-        após 28 dias de uso:
+        {resultados?.titulo1}
       </h2>
-      <table className="mb-[16px]">
-        <tbody>
-          <tr>
-            <td className="px-[8px]">
-              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
-                100%
-              </h2>
-              <p className="mb-[16px] text-center text-[12px] leading-[130%]">
-                sentiram a pele profundamente hidratada e revitalizada*
-              </p>
-            </td>
-            <td className="px-[8px]">
-              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
-                98%
-              </h2>
-              <p className="mb-[16px] text-center text-[12px] leading-[130%]">
-                notaram melhora na uniformidade e textura da pele**
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td className="px-[8px]">
-              <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
-                95%
-              </h2>
-              <p className="mb-[16px] text-center text-[12px] leading-[130%]">
-                perceberam redução de áreas ressecadas e sinais de inflamação**
-              </p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="mb-[16px] flex flex-wrap">
+        {resultados?.itens_resultado?.map((item) => (
+          <div className="w-1/2 px-[8px]" key={item.id}>
+            <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#FF69B4]">
+              {item?.numero}
+            </h2>
+            <p className="mb-[16px] text-center text-[12px] leading-[130%]">
+              {item?.texto}
+            </p>
+          </div>
+        ))}
+      </div>
 
       <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#FF69B4]">
-        avaliações de segurança
+        {resultados?.titulo2}
       </h2>
-      <p className="mb-[16px] text-[14px] leading-[150%]">
-        <strong>Dermatologicamente e Clinicamente testado</strong> - produto
-        seguro para uso em todos os tipos de pele, incluindo as mais sensíveis.
-      </p>
-
-      <p className="mb-[16px] text-[14px] leading-[150%]">
-        <i>
-          * Eficácia instrumental da hidratação e renovação celular realizada em
-          Instituto de Pesquisa Clínica independente. ** Eficácia comprovada em
-          pesquisa realizada por Instituto de Pesquisa Clínica independente, com
-          participantes que usaram o produto diariamente​ .
-        </i>
+      <p className="prose mb-[16px] text-[14px] leading-[150%]">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {resultados?.texto2}
+        </ReactMarkdown>
       </p>
     </div>,
   ];

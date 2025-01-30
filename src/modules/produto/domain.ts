@@ -4,7 +4,7 @@ export const fetchProdutoBySlug = async ({
   slug: string;
 }): Promise<any> => {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?filters[slug][$eq]=${slug}&populate=*`;
+  const endpoint = `${baseURL}/api/produtos?filters[slug][$eq]=${slug}&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes`;
 
   const response = await fetch(endpoint, {
     method: "GET",
