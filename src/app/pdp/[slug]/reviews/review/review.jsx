@@ -51,9 +51,11 @@ const Review = ({ review }) => {
           </div>
 
           <span className="flex h-fit items-center gap-2">
-            <span className="text-[16px]">Gabriela R.</span>
+            <span className="text-[16px]">{review.nome}</span>
             <span className="h-fit rounded-[4px] bg-[#333] px-[8px]">
-              <span className="text-[12px] text-[#fff]">verificado</span>
+              {review.verificado && (
+                <span className="text-[12px] text-[#fff]">verificado</span>
+              )}
             </span>
           </span>
         </div>

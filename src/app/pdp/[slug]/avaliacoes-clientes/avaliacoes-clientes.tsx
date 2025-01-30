@@ -122,7 +122,9 @@ export function AvaliacoesClientes({
                       }}
                     ></div>
                   </div>
-                  <div className="text-[12px] text-[#7b7b7b]">11</div>
+                  <div className="text-[12px] text-[#7b7b7b]">
+                    {detalhe_notas?.quatro}
+                  </div>
                 </div>
 
                 <div className="flex h-fit items-center gap-[16px]">
@@ -142,7 +144,9 @@ export function AvaliacoesClientes({
                       }}
                     ></div>
                   </div>
-                  <div className="text-[12px] text-[#7b7b7b]">12</div>
+                  <div className="text-[12px] text-[#7b7b7b]">
+                    {detalhe_notas?.tres}
+                  </div>
                 </div>
 
                 <div className="flex h-fit items-center gap-[16px]">
@@ -162,7 +166,9 @@ export function AvaliacoesClientes({
                       }}
                     ></div>
                   </div>
-                  <div className="text-[12px] text-[#7b7b7b]">3</div>
+                  <div className="text-[12px] text-[#7b7b7b]">
+                    {detalhe_notas?.dois}
+                  </div>
                 </div>
 
                 <div className="flex h-fit items-center gap-[16px]">
@@ -182,7 +188,9 @@ export function AvaliacoesClientes({
                       }}
                     ></div>
                   </div>
-                  <div className="text-[12px] text-[#7b7b7b]">4</div>
+                  <div className="text-[12px] text-[#7b7b7b]">
+                    {detalhe_notas?.um}
+                  </div>
                 </div>
               </div>
 
