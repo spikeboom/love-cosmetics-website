@@ -23,6 +23,8 @@ export function CarouselImagensTop({
       item.imagem.formats.medium.url,
   );
 
+  console.log({ slides });
+
   const totalSlides = slides.length + qtySlidesBefore + qtySlidesAfter;
 
   const percentToMove = 100 / totalSlides;
