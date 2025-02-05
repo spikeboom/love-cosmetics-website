@@ -7,6 +7,7 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
+import { MeuContextoProvider } from "../components/context/context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,7 +53,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
       >
-        {children}
+        <MeuContextoProvider>{children}</MeuContextoProvider>
       </body>
     </html>
   );

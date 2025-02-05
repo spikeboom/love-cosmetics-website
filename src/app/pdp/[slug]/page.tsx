@@ -19,6 +19,7 @@ import { ListaRedesSociais } from "./lista-redes-sociais/lista-resdes-sociais";
 import { CartoesAceitos } from "./cartoes-aceitos/cartoes-aceitos";
 import { CadastreSeuEmail } from "./cadastre-seu-email/cadastre-seu-email";
 import { fetchProdutoBySlug } from "@/modules/produto/domain";
+import { ModalCart } from "./modal-cart/modal-cart";
 
 export default async function PdpPage({
   params,
@@ -30,7 +31,7 @@ export default async function PdpPage({
     data: [produto],
   } = await fetchProdutoBySlug({ slug });
 
-  console.log(JSON.stringify({ produto }, null, 6));
+  // console.log(JSON.stringify({ produto }, null, 6));
 
   return (
     <>
@@ -107,7 +108,9 @@ export default async function PdpPage({
         <div className="h-[100px] bg-[#333]"></div>
       </div>
 
-      <BarraFixaComprar preco={produto?.preco} />
+      <BarraFixaComprar produto={produto} />
+
+      <ModalCart />
     </>
   );
 }
