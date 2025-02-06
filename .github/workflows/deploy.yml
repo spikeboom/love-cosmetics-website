@@ -27,9 +27,17 @@ jobs:
       # 3. Sincroniza código com o servidor
       - name: Deploy code to server
         run: |
-          ssh root@147.93.9.224 << EOF
+          ssh root@147.93.9.224 << 'EOF'
             cd /root/wordpress/next_project || exit 1
             git pull origin master || exit 1
+
+            # Verifica se o schema do Prisma mudou
+            if git diff --name-only HEAD^ HEAD | grep -q 'prisma/schema.prisma'; then
+              echo "Changes detected in prisma/schema.prisma. Running prisma generate..."
+              npx prisma generate || exit 1
+            else
+              echo "No changes detected in prisma/schema.prisma. Skipping prisma generate."
+            fi
           EOF
 
       # 4. Executa o docker-compose no servidor
