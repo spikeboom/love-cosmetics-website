@@ -1,11 +1,20 @@
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
     // Parse do JSON enviado pelo client
     const body = await req.json();
 
-    console.dir({ example1: body }, { depth: null, colors: true });
+    console.dir({ StatusPagamento: body }, { depth: null, colors: true });
+
+    const novoDado = await prisma.StatusPagamento.create({
+      data: {
+        info: body,
+      },
+    });
 
     // Simula um processamento (exemplo: salvar no banco de dados)
     const responseData = {

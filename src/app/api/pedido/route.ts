@@ -28,6 +28,65 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log({
+      area: body.numero.substring(0, 2),
+      number: body.numero.substring(2),
+    });
+
+    const bodyCheckoutPagSeguro = {
+      customer: {
+        phone: {
+          country: "+55",
+          area: body.telefone.substring(0, 2),
+          number: body.telefone.substring(2),
+        },
+        name: `${body.nome} ${body.sobrenome}`,
+        email: body.email,
+        tax_id: "01055044248",
+      },
+      reference_id: "teste_love_123",
+      customer_modifiable: false,
+      items: [
+        {
+          reference_id: "teste_produto_love_123",
+          name: "espuma facial",
+          quantity: 3,
+          unit_amount: 13089,
+        },
+      ],
+      redirect_url: "https://www.lovecosmeticos.xyz",
+      notification_urls: [
+        "https://www.lovecosmeticos.xyz/api/checkout_notification",
+      ],
+      payment_notification_urls: [
+        "https://www.lovecosmeticos.xyz/api/payment_notification",
+      ],
+    };
+
+    const fetchResponse = await fetch(
+      "https://sandbox.api.pagseguro.com/checkouts",
+      {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${process.env.PAGSEGURO_TOKEN_DEV}`,
+          accept: "*/*",
+        },
+        body: JSON.stringify(bodyCheckoutPagSeguro),
+      },
+    );
+    const responseData = await fetchResponse.json();
+    console.log(responseData);
+
+    if (!fetchResponse.ok) {
+      const errorResponse = await responseData.json();
+      console.error("Erro na API PagSeguro:", errorResponse);
+      return NextResponse.json(
+        { error: "Erro ao processar pagamento", details: errorResponse },
+        { status: 500 },
+      );
+    }
+
     return NextResponse.json(
       { message: "Pedido criado com sucesso", data: pedido },
       { status: 201 },

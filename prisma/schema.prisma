@@ -33,3 +33,15 @@ model Pedido {
   destinatario              String?  // Campo opcional
   createdAt                 DateTime @default(now())
 }
+
+model StatusCheckout {
+  id   Int    @id @default(autoincrement())
+  info Json
+}
+
+
+model StatusPagamento {
+  id   Int    @id @default(autoincrement())
+  info Json
+}
+
