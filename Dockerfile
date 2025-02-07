@@ -10,6 +10,9 @@ COPY package.json package-lock.json* ./
 # Instale as dependências
 RUN npm install
 
+# Copie a pasta Prisma para o container
+COPY prisma ./prisma
+
 # Gere o cliente Prisma
 RUN npx prisma generate
 
@@ -30,7 +33,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
 
 # Copie o arquivo .env para o ambiente de produção
 COPY --from=builder /app/.env ./
