@@ -17,7 +17,7 @@ model Pedido {
   id                        String   @id @default(uuid())
   nome                      String
   sobrenome                 String
-  email                     String   @unique
+  email                     String
   telefone                  String
   data_nascimento           DateTime
   pais                      String
