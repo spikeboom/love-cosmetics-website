@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Pedido" ALTER COLUMN "cpf" DROP DEFAULT;

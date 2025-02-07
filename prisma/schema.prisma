@@ -19,6 +19,7 @@ model Pedido {
   sobrenome                 String
   email                     String
   telefone                  String
+  cpf                       String
   data_nascimento           DateTime
   pais                      String
   cep                       String

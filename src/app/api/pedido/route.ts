@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
         nome: body.nome,
         sobrenome: body.sobrenome,
         email: body.email,
+        cpf: body.cpf,
         telefone: body.telefone,
         data_nascimento: new Date(body.data_nascimento),
         pais: body.pais,
@@ -29,8 +30,7 @@ export async function POST(req: NextRequest) {
     });
 
     console.log({
-      area: body.numero.substring(0, 2),
-      number: body.numero.substring(2),
+      pedido,
     });
 
     const bodyCheckoutPagSeguro = {
@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
         },
         name: `${body.nome} ${body.sobrenome}`,
         email: body.email,
-        tax_id: "01055044248",
+        tax_id: body.cpf,
       },
-      reference_id: "teste_love_123",
+      reference_id: pedido.id,
       customer_modifiable: false,
       items: [
         {
@@ -88,7 +88,13 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "Pedido criado com sucesso", data: pedido },
+      {
+        message: "Pedido criado com sucesso",
+        id: pedido.id,
+        link: responseData.links.find(
+          (link: { rel: string }) => link.rel === "PAY",
+        )?.href,
+      },
       { status: 201 },
     );
   } catch (error) {

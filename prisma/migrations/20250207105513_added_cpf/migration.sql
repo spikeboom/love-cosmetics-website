@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Pedido" ADD COLUMN     "cpf" TEXT NOT NULL DEFAULT '000.000.000-00';

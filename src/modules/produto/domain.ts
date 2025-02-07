@@ -36,6 +36,8 @@ export const fetchProdutosForHome = async (): Promise<any> => {
   });
 
   if (!response.ok) {
+    // logue o por que do erro
+    console.error("Failed to fetch produtos for home", response);
     throw new Error("Failed to fetch produtos for home");
   }
 
