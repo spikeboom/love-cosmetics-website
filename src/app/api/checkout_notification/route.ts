@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
     console.dir({ StatusCheckout: body }, { depth: null, colors: true });
 
-    const novoDado = await prisma.StatusCheckout.create({
+    const novoDado = await prisma.statusCheckout.create({
       data: {
         info: body,
       },

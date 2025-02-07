@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
     console.dir({ StatusPagamento: body }, { depth: null, colors: true });
 
-    const novoDado = await prisma.StatusPagamento.create({
+    const novoDado = await prisma.statusPagamento.create({
       data: {
         info: body,
       },
