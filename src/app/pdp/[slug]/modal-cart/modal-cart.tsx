@@ -10,6 +10,7 @@ import { IoMdPricetag } from "react-icons/io";
 import { MdOutlineChevronRight } from "react-icons/md";
 import { RiCoupon2Line } from "react-icons/ri";
 import { useMeuContexto } from "@/components/context/context";
+import Link from "next/link";
 
 export function ModalCart() {
   const {
@@ -191,9 +192,12 @@ export function ModalCart() {
                     comprando
                   </span>
 
-                  <button className="rounded-[3px] bg-[#fa8cff] px-[18px] py-[12px] font-bold">
+                  <Link
+                    href="/checkout"
+                    className="rounded-[3px] bg-[#fa8cff] px-[18px] py-[12px] font-bold"
+                  >
                     finalizar pedido
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

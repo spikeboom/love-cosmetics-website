@@ -1,3 +1,4 @@
+import { getBaseURL } from "@/utils/getBaseUrl";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -33,6 +34,8 @@ export async function POST(req: NextRequest) {
       pedido,
     });
 
+    console.log({ getBaseURL: getBaseURL({ STAGE: "PRODUCTION" }) });
+
     const bodyCheckoutPagSeguro = {
       customer: {
         phone: {
@@ -45,16 +48,9 @@ export async function POST(req: NextRequest) {
         tax_id: body.cpf,
       },
       reference_id: pedido.id,
-      customer_modifiable: false,
-      items: [
-        {
-          reference_id: "teste_produto_love_123",
-          name: "espuma facial",
-          quantity: 3,
-          unit_amount: 13089,
-        },
-      ],
-      redirect_url: "https://www.lovecosmeticos.xyz",
+      customer_modifiable: true,
+      items: body.items,
+      redirect_url: getBaseURL({ STAGE: "PRODUCTION" }),
       notification_urls: [
         "https://www.lovecosmeticos.xyz/api/checkout_notification",
       ],
@@ -62,6 +58,8 @@ export async function POST(req: NextRequest) {
         "https://www.lovecosmeticos.xyz/api/payment_notification",
       ],
     };
+
+    console.dir({ bodyCheckoutPagSeguro }, { depth: null, colors: true });
 
     const fetchResponse = await fetch(
       "https://sandbox.api.pagseguro.com/checkouts",
