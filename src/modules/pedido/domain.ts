@@ -1,6 +1,6 @@
 "use server";
 
-import { PedidoFormData } from "@/app/checkout/page";
+import { PedidoFormData } from "@/app/(global)/checkout/page";
 import { getBaseURL } from "@/utils/getBaseUrl";
 
 export async function postPedido(data: PedidoFormData) {

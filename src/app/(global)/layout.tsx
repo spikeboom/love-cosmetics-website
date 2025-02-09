@@ -7,7 +7,7 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
-import { MeuContextoProvider } from "../components/context/context";
+import { MeuContextoProvider } from "../../components/context/context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
