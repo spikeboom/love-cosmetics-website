@@ -37,6 +37,9 @@ COPY --from=builder /app/public ./public
 # Declare o argumento que define qual arquivo de ambiente usar (padrão: .env)
 ARG ENV_FILE=.env
 
+# Log: imprime no build o arquivo de ambiente que foi recebido
+RUN echo "Dockerfile build argument ENV_FILE: ${ENV_FILE}"
+
 # Copie o arquivo de ambiente selecionado, renomeando-o para .env no container
 COPY --from=builder /app/${ENV_FILE} .env
 

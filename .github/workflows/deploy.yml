@@ -35,9 +35,10 @@ jobs:
       # 4. Executa o docker-compose no servidor com o build argument apropriado
       - name: Start docker-compose
         run: |
-          # Se a branch for master, passa o build-arg ENV_FILE=.env.master
           if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && docker-compose build --build-arg ENV_FILE=.env.master love-cosmetics && docker-compose up -d love-cosmetics"
+            echo "Deploying with .env.master"  # Log local na Action
+            ssh root@147.93.9.224 "cd /root/wordpress/next_project && echo 'Using .env.master' && docker-compose build --build-arg ENV_FILE=.env.master love-cosmetics && docker-compose up -d love-cosmetics"
           else
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && docker-compose up -d --build love-cosmetics"
+            echo "Deploying with .env"  # Log local na Action
+            ssh root@147.93.9.224 "cd /root/wordpress/next_project && echo 'Using .env' && docker-compose up -d --build love-cosmetics"
           fi
