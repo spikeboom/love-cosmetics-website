@@ -29,6 +29,8 @@ model Pedido {
   bairro                    String
   cidade                    String
   estado                    String
+  total_pedido              Float @default(0)
+  items                     Json[]
   salvar_minhas_informacoes Boolean
   aceito_receber_whatsapp   Boolean
   destinatario              String?  // Campo opcional

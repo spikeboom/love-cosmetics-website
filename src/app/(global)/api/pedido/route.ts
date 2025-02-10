@@ -24,16 +24,15 @@ export async function POST(req: NextRequest) {
         bairro: body.bairro,
         cidade: body.cidade,
         estado: body.estado,
+        items: body.items,
+        total_pedido: body.total_pedido,
         salvar_minhas_informacoes: body.salvar_minhas_informacoes,
         aceito_receber_whatsapp: body.aceito_receber_whatsapp,
         destinatario: body.destinatario,
       },
     });
 
-    console.log({
-      pedido,
-    });
-
+    console.log({ pedido });
     console.log({ getBaseURL: getBaseURL({ STAGE: "PRODUCTION" }) });
 
     const bodyCheckoutPagSeguro = {
@@ -77,10 +76,9 @@ export async function POST(req: NextRequest) {
     console.log(responseData);
 
     if (!fetchResponse.ok) {
-      const errorResponse = await responseData.json();
-      console.error("Erro na API PagSeguro:", errorResponse);
+      console.error("Erro na API PagSeguro:", responseData);
       return NextResponse.json(
-        { error: "Erro ao processar pagamento", details: errorResponse },
+        { error: "Erro ao processar pagamento", details: responseData },
         { status: 500 },
       );
     }
@@ -106,39 +104,4 @@ export async function POST(req: NextRequest) {
 
 export async function OPTIONS() {
   return NextResponse.json({}, { status: 200 });
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    // Se preferir receber os parâmetros via query string, pode usar:
-    // const { searchParams } = new URL(req.url);
-    // const page = Number(searchParams.get("page") || 1);
-    // const pageSize = Number(searchParams.get("pageSize") || 10);
-
-    // Caso queira receber o JSON no corpo da requisição:
-    const { page = 1, pageSize = 10 } = await req.json();
-    const offset = (page - 1) * pageSize;
-
-    // Consulta raw que retorna os pedidos com os pagamentos agregados em um array
-    const pedidosComPagamentos = await prisma.$queryRaw`
-      SELECT
-        p.*,
-        (
-          SELECT json_agg(sp.*)
-          FROM "StatusPagamento" sp
-          WHERE sp.info->>'reference_id' = p.id
-        ) AS pagamentos
-      FROM "Pedido" p
-      ORDER BY p."createdAt" DESC
-      LIMIT ${pageSize} OFFSET ${offset}
-    `;
-
-    return NextResponse.json(pedidosComPagamentos);
-  } catch (error) {
-    console.error("Erro ao buscar pedidos com pagamentos:", error);
-    return NextResponse.json(
-      { error: "Erro interno no servidor" },
-      { status: 500 },
-    );
-  }
 }

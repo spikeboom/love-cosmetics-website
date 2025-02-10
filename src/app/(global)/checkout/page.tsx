@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,17 +9,17 @@ import {
   Button,
   Checkbox,
   FormControl,
+  FormControlLabel,
   FormLabel,
-  Input,
+  TextField,
   Stack,
-  Text,
-  Heading,
-  ChakraProvider,
-  useToast,
-  Spinner,
-} from "@chakra-ui/react";
+  Typography,
+  CircularProgress,
+} from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { postPedido } from "@/modules/pedido/domain";
 import { useMeuContexto } from "@/components/context/context";
+import MaskedInput from "./MaskedInput";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -47,71 +48,12 @@ const pedidoSchema = z.object({
 });
 
 // Define o tipo do formulário a partir do schema
-export type PedidoFormData = z.infer<typeof pedidoSchema> & { items?: any[] };
+export type PedidoFormData = z.infer<typeof pedidoSchema> & {
+  items?: any[];
+  total_pedido?: number;
+};
 
-/**
- * Função que aplica a máscara.
- * O caractere "9" no mask representa um dígito.
- * Todos os outros caracteres são literais.
- */
-function applyMask(value: string, mask: string): string {
-  // Remove qualquer caractere que não seja dígito
-  const digits = value.replace(/\D/g, "");
-
-  // Se não houver dígitos, retorna string vazia
-  if (digits.length === 0) return "";
-
-  let result = "";
-  let digitIndex = 0;
-
-  for (let i = 0; i < mask.length; i++) {
-    if (mask[i] === "9") {
-      if (digitIndex < digits.length) {
-        result += digits[digitIndex++];
-      } else {
-        break;
-      }
-    } else {
-      result += mask[i];
-    }
-  }
-
-  return result;
-}
-
-interface MaskedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  mask: string;
-  value?: string;
-  onChange?: (event: { target: { value: string } }) => void;
-}
-
-/**
- * Componente customizado para inputs com máscara.
- * Ele utiliza a função applyMask para formatar o valor conforme o padrão.
- */
-const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  ({ mask, onChange, value, ...rest }, ref) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const rawValue = e.target.value.replace(/\D/g, "");
-      if (onChange) {
-        onChange({ target: { value: rawValue } });
-      }
-    };
-
-    return (
-      // @ts-ignore
-      <Input
-        ref={ref}
-        value={applyMask(value || "", mask)}
-        onChange={handleChange}
-        {...rest}
-      />
-    );
-  },
-);
-MaskedInput.displayName = "MaskedInput";
-
-// Defina esse objeto uma vez, por exemplo, acima do componente PedidoForm
+// Dados iniciais do formulário
 const defaultPedidoFormData: PedidoFormData = {
   nome: "",
   sobrenome: "",
@@ -132,9 +74,12 @@ const defaultPedidoFormData: PedidoFormData = {
   destinatario: "",
 };
 
+// export const metadata = {
+//   title: "Lové Cosméticos - Checkout",
+// };
+
 const PedidoForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
-
   const { cart, total } = useMeuContexto();
 
   const {
@@ -149,14 +94,41 @@ const PedidoForm: React.FC = () => {
     defaultValues: defaultPedidoFormData,
   });
 
-  const toast = useToast();
+  async function onSubmit(data: PedidoFormData) {
+    setLoading(true);
+    console.log("Dados do formulário:", data);
 
-  // 🔹 Função para salvar no localStorage sempre que houver mudanças
+    try {
+      const items: any[] = Object.entries(cart).map(([id, product]: any) => ({
+        reference_id: id,
+        name: product.nome,
+        quantity: product.quantity,
+        unit_amount: Math.trunc(product.preco * 100),
+        image_url:
+          process.env.NEXT_PUBLIC_STRAPI_URL +
+          product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url,
+      }));
+      const result = await postPedido({
+        ...data,
+        items: items,
+        total_pedido: total,
+      });
+      console.log("Resposta da API:", result);
+      window.location.href = result?.link;
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+    setLoading(false);
+  }
+
+  const theme = createTheme();
+  const [loadingFormData, setLoadingFormData] = useState(true);
+
+  // Salva os dados no localStorage sempre que houver mudanças
   const saveToLocalStorage = (data: PedidoFormData) => {
     localStorage.setItem("formulario_pedido", JSON.stringify(data));
   };
 
-  // 🔹 Recuperar dados do localStorage ao carregar a página
   useEffect(() => {
     const savedData = localStorage.getItem("formulario_pedido");
     if (savedData) {
@@ -168,12 +140,12 @@ const PedidoForm: React.FC = () => {
         );
       });
     }
+    setLoadingFormData(false); // indica que os dados foram carregados
   }, [setValue]);
 
-  // 🔹 Atualizar localStorage automaticamente ao mudar um campo
+  // Atualiza o localStorage automaticamente ao mudar um campo
   useEffect(() => {
     const subscription = watch((data) => {
-      // Mescla os dados atuais com os valores padrão para garantir que todos os campos estejam presentes
       const completeData: PedidoFormData = {
         ...defaultPedidoFormData,
         ...data,
@@ -183,248 +155,272 @@ const PedidoForm: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [watch]);
 
-  async function onSubmit(data: PedidoFormData) {
-    setLoading(true);
-    console.log("Dados do formulário:", data);
-
-    try {
-      console.log({ cart });
-      const items: any[] = Object.entries(cart).map(([id, product]: any) => ({
-        reference_id: id,
-        name: product.nome,
-        quantity: product.quantity,
-        unit_amount: Math.trunc(product.preco * 100),
-        image_url:
-          process.env.NEXT_PUBLIC_STRAPI_URL +
-          product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url,
-      }));
-      console.log({ items });
-      const result = await postPedido({ ...data, items: items });
-      console.log("Resposta da API:", result);
-
-      window.location.href = result?.link;
-    } catch (error) {
-      console.error("Erro:", error);
-    }
-    setLoading(false);
+  if (loadingFormData) {
+    return <div>Carregando...</div>; // ou algum indicador de loading
   }
 
   return (
-    <ChakraProvider>
-      <Box maxW="800px" mx="auto" p={8}>
-        <Heading mb={6}>Formulário de Pedido</Heading>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ maxWidth: 800, margin: "auto", padding: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Formulário de Pedido
+        </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={4}>
+          <Stack spacing={2}>
             {/* Nome */}
-            <FormControl isInvalid={!!errors.nome}>
-              <FormLabel>Nome</FormLabel>
-              <Input placeholder="Seu nome" {...register("nome")} />
-              {errors.nome && (
-                <Text color="red.500">{errors.nome.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Nome"
+              placeholder="Seu nome"
+              error={!!errors.nome}
+              helperText={errors.nome?.message}
+              {...register("nome")}
+            />
 
             {/* Sobrenome */}
-            <FormControl isInvalid={!!errors.sobrenome}>
-              <FormLabel>Sobrenome</FormLabel>
-              <Input placeholder="Seu sobrenome" {...register("sobrenome")} />
-              {errors.sobrenome && (
-                <Text color="red.500">{errors.sobrenome.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Sobrenome"
+              placeholder="Seu sobrenome"
+              error={!!errors.sobrenome}
+              helperText={errors.sobrenome?.message}
+              {...register("sobrenome")}
+            />
 
             {/* Email */}
-            <FormControl isInvalid={!!errors.email}>
-              <FormLabel>Email</FormLabel>
-              <Input
-                type="email"
-                placeholder="seuemail@exemplo.com"
-                {...register("email")}
-              />
-              {errors.email && (
-                <Text color="red.500">{errors.email.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              placeholder="seuemail@exemplo.com"
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              {...register("email")}
+            />
 
-            {/* Telefone com máscara usando Controller */}
-            <FormControl isInvalid={!!errors.telefone}>
+            {/* Telefone com máscara utilizando IMaskInput */}
+            <FormControl fullWidth error={!!errors.telefone}>
               <FormLabel>Telefone</FormLabel>
               <Controller
                 name="telefone"
                 control={control}
                 render={({ field }) => (
-                  <MaskedInput
-                    mask="(99) 99999-9999"
+                  <TextField
+                    {...field}
+                    fullWidth
                     placeholder="(00) 00000-0000"
-                    value={field.value}
-                    onChange={field.onChange}
+                    InputProps={{
+                      // Usa o componente customizado como input do TextField
+                      inputComponent: MaskedInput as any,
+                      // Passa as props extras para o MaskedInput
+                      inputProps: { mask: "(00) 00000-0000", name: field.name },
+                    }}
+                    error={!!errors.telefone}
+                    helperText={errors.telefone?.message}
                   />
                 )}
               />
               {errors.telefone && (
-                <Text color="red.500">{errors.telefone.message}</Text>
+                <Typography variant="caption" color="error">
+                  {errors.telefone.message}
+                </Typography>
               )}
             </FormControl>
 
-            {/* CPF com máscara usando Controller */}
-            <FormControl isInvalid={!!errors.cpf}>
+            {/* CPF com máscara utilizando IMaskInput */}
+            <FormControl fullWidth error={!!errors.cpf}>
               <FormLabel>CPF</FormLabel>
               <Controller
                 name="cpf"
                 control={control}
                 render={({ field }) => (
-                  <MaskedInput
-                    mask="999.999.999-99"
+                  <TextField
+                    {...field}
+                    fullWidth
                     placeholder="000.000.000-00"
-                    value={field.value}
-                    onChange={field.onChange}
+                    InputProps={{
+                      inputComponent: MaskedInput as any,
+                      inputProps: { mask: "000.000.000-00", name: field.name },
+                    }}
+                    error={!!errors.cpf}
+                    helperText={errors.cpf?.message}
                   />
                 )}
               />
-              {errors.cpf && <Text color="red.500">{errors.cpf.message}</Text>}
+
+              {errors.cpf && (
+                <Typography variant="caption" color="error">
+                  {errors.cpf.message}
+                </Typography>
+              )}
             </FormControl>
 
             {/* Data de Nascimento */}
-            <FormControl isInvalid={!!errors.data_nascimento}>
-              <FormLabel>Data de Nascimento</FormLabel>
-              <Input type="date" {...register("data_nascimento")} />
-              {errors.data_nascimento && (
-                <Text color="red.500">
-                  {errors.data_nascimento.message as string}
-                </Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Data de Nascimento"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              error={!!errors.data_nascimento}
+              helperText={errors.data_nascimento?.message as string}
+              {...register("data_nascimento")}
+            />
 
             {/* País */}
-            <FormControl isInvalid={!!errors.pais}>
-              <FormLabel>País</FormLabel>
-              <Input placeholder="País" {...register("pais")} />
-              {errors.pais && (
-                <Text color="red.500">{errors.pais.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="País"
+              placeholder="País"
+              error={!!errors.pais}
+              helperText={errors.pais?.message}
+              {...register("pais")}
+            />
 
-            {/* CEP com máscara usando Controller */}
-            <FormControl isInvalid={!!errors.cep}>
+            {/* CEP com máscara utilizando IMaskInput */}
+            <FormControl fullWidth error={!!errors.cep}>
               <FormLabel>CEP</FormLabel>
               <Controller
                 name="cep"
                 control={control}
                 render={({ field }) => (
-                  <MaskedInput
-                    mask="99999-999"
+                  <TextField
+                    {...field}
+                    fullWidth
                     placeholder="00000-000"
-                    value={field.value}
-                    onChange={field.onChange}
+                    InputProps={{
+                      inputComponent: MaskedInput as any,
+                      inputProps: { mask: "00000-000", name: field.name },
+                    }}
+                    error={!!errors.cep}
+                    helperText={errors.cep?.message}
                   />
                 )}
               />
-              {errors.cep && <Text color="red.500">{errors.cep.message}</Text>}
+
+              {errors.cep && (
+                <Typography variant="caption" color="error">
+                  {errors.cep.message}
+                </Typography>
+              )}
             </FormControl>
 
             {/* Endereço */}
-            <FormControl isInvalid={!!errors.endereco}>
-              <FormLabel>Endereço</FormLabel>
-              <Input placeholder="Endereço" {...register("endereco")} />
-              {errors.endereco && (
-                <Text color="red.500">{errors.endereco.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Endereço"
+              placeholder="Endereço"
+              error={!!errors.endereco}
+              helperText={errors.endereco?.message}
+              {...register("endereco")}
+            />
 
             {/* Número */}
-            <FormControl isInvalid={!!errors.numero}>
-              <FormLabel>Número</FormLabel>
-              <Input placeholder="Número" {...register("numero")} />
-              {errors.numero && (
-                <Text color="red.500">{errors.numero.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Número"
+              placeholder="Número"
+              error={!!errors.numero}
+              helperText={errors.numero?.message}
+              {...register("numero")}
+            />
 
             {/* Complemento (opcional) */}
-            <FormControl>
-              <FormLabel>Complemento</FormLabel>
-              <Input
-                placeholder="Complemento (opcional)"
-                {...register("complemento")}
-              />
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Complemento"
+              placeholder="Complemento (opcional)"
+              {...register("complemento")}
+            />
 
             {/* Bairro */}
-            <FormControl isInvalid={!!errors.bairro}>
-              <FormLabel>Bairro</FormLabel>
-              <Input placeholder="Bairro" {...register("bairro")} />
-              {errors.bairro && (
-                <Text color="red.500">{errors.bairro.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Bairro"
+              placeholder="Bairro"
+              error={!!errors.bairro}
+              helperText={errors.bairro?.message}
+              {...register("bairro")}
+            />
 
             {/* Cidade */}
-            <FormControl isInvalid={!!errors.cidade}>
-              <FormLabel>Cidade</FormLabel>
-              <Input placeholder="Cidade" {...register("cidade")} />
-              {errors.cidade && (
-                <Text color="red.500">{errors.cidade.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Cidade"
+              placeholder="Cidade"
+              error={!!errors.cidade}
+              helperText={errors.cidade?.message}
+              {...register("cidade")}
+            />
 
             {/* Estado */}
-            <FormControl isInvalid={!!errors.estado}>
-              <FormLabel>Estado</FormLabel>
-              <Input placeholder="Estado" {...register("estado")} />
-              {errors.estado && (
-                <Text color="red.500">{errors.estado.message}</Text>
+            <TextField
+              fullWidth
+              label="Estado"
+              placeholder="Estado"
+              error={!!errors.estado}
+              helperText={errors.estado?.message}
+              {...register("estado")}
+            />
+
+            {/* Checkbox: Salvar minhas informações */}
+            <Controller
+              name="salvar_minhas_informacoes"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label="Salvar minhas informações"
+                />
               )}
-            </FormControl>
+            />
 
-            {/* Checkbox: Salvar minhas informações usando Controller */}
-            <FormControl>
-              <Controller
-                name="salvar_minhas_informacoes"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    isChecked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  >
-                    Salvar minhas informações
-                  </Checkbox>
-                )}
-              />
-            </FormControl>
-
-            {/* Checkbox: Aceito receber WhatsApp usando Controller */}
-            <FormControl>
-              <Controller
-                name="aceito_receber_whatsapp"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    isChecked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  >
-                    Aceito receber WhatsApp
-                  </Checkbox>
-                )}
-              />
-            </FormControl>
+            {/* Checkbox: Aceito receber WhatsApp */}
+            <Controller
+              name="aceito_receber_whatsapp"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label="Aceito receber WhatsApp"
+                />
+              )}
+            />
 
             {/* Destinatário (opcional) */}
-            <FormControl isInvalid={!!errors.destinatario}>
-              <FormLabel>Destinatário (opcional)</FormLabel>
-              <Input placeholder="Destinatário" {...register("destinatario")} />
-              {errors.destinatario && (
-                <Text color="red.500">{errors.destinatario.message}</Text>
-              )}
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Destinatário (opcional)"
+              placeholder="Destinatário"
+              error={!!errors.destinatario}
+              helperText={errors.destinatario?.message}
+              {...register("destinatario")}
+            />
 
             {/* Botão de submit */}
-            <Button colorScheme="blue" type="submit">
-              Enviar Pedido {loading && <Spinner className="ml-4" />}
+            <Button type="submit" variant="contained" color="primary">
+              Enviar Pedido{" "}
+              {loading && (
+                <CircularProgress
+                  size={20}
+                  // sx={{ ml: 1 }}
+                  style={{ color: "#fff", marginLeft: 8 }}
+                />
+              )}
             </Button>
           </Stack>
         </form>
       </Box>
-    </ChakraProvider>
+    </ThemeProvider>
   );
 };
 

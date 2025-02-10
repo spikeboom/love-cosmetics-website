@@ -14,12 +14,24 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Collapse,
+  IconButton,
 } from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 interface Pagamento {
   id: string;
   info: any; // ajuste o tipo conforme necessário
   status: string;
+}
+
+interface Item {
+  name: string;
+  quantity: number;
+  image_url: string;
+  unit_amount: number;
+  reference_id: string;
 }
 
 interface Pedido {
@@ -38,11 +50,123 @@ interface Pedido {
   bairro: string;
   cidade: string;
   estado: string;
+  total_pedido: number;
+  items: Item[];
   salvar_minhas_informacoes: boolean;
   aceito_receber_whatsapp: boolean;
   destinatario?: string | null;
   createdAt: string;
   pagamentos?: Pagamento[] | null;
+}
+
+// export const metadata = {
+//   title: "Admin - Painel de Pedidos",
+// };
+
+function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Linha principal do pedido com estilo zebra */}
+      <TableRow
+        sx={{
+          backgroundColor: index % 2 === 0 ? "white" : "#f5f5f5",
+        }}
+      >
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell>{pedido.id}</TableCell>
+        <TableCell>{pedido.nome}</TableCell>
+        <TableCell>{pedido.sobrenome}</TableCell>
+        <TableCell>{pedido.email}</TableCell>
+        <TableCell>
+          {pedido.total_pedido.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })}
+        </TableCell>
+        <TableCell>
+          {new Date(pedido.createdAt).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })}
+        </TableCell>
+        <TableCell>
+          {pedido.pagamentos && pedido.pagamentos.length > 0 ? (
+            pedido.pagamentos.map((pagamento, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  mb: 1,
+                  p: 1,
+                  border: "1px solid #ccc",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="body2">
+                  <strong>ID:</strong> {pagamento.id}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Status:</strong> {pagamento.status}
+                </Typography>
+              </Box>
+            ))
+          ) : (
+            <Typography variant="body2">Sem pagamentos</Typography>
+          )}
+        </TableCell>
+      </TableRow>
+
+      {/* Linha com os itens do pedido, exibida via Collapse */}
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box margin={1}>
+              {pedido.items && pedido.items.length > 0 && (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Nome do Item</TableCell>
+                      <TableCell>Quantidade</TableCell>
+                      <TableCell>Valor Unitário</TableCell>
+                      <TableCell>Reference ID</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {pedido.items.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{item.name}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>
+                          {(item.unit_amount / 100).toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                        </TableCell>
+                        <TableCell>{item.reference_id}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  );
 }
 
 export default function PedidosPage() {
@@ -115,49 +239,20 @@ export default function PedidosPage() {
         <Table size="small">
           <TableHead>
             <TableRow>
+              {/* Coluna para o botão de expandir */}
+              <TableCell />
               <TableCell>ID</TableCell>
               <TableCell>Nome</TableCell>
               <TableCell>Sobrenome</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>Total do Pedido</TableCell>
               <TableCell>Criado Em</TableCell>
               <TableCell>Pagamentos</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {pedidos.map((pedido) => (
-              <TableRow key={pedido.id}>
-                <TableCell>{pedido.id}</TableCell>
-                <TableCell>{pedido.nome}</TableCell>
-                <TableCell>{pedido.sobrenome}</TableCell>
-                <TableCell>{pedido.email}</TableCell>
-                <TableCell>
-                  {new Date(pedido.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {pedido.pagamentos && pedido.pagamentos.length > 0 ? (
-                    pedido.pagamentos.map((pagamento, index) => (
-                      <Box
-                        key={index}
-                        sx={{
-                          mb: 1,
-                          p: 1,
-                          border: "1px solid #ccc",
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Typography variant="body2">
-                          <strong>ID:</strong> {pagamento.id}
-                        </Typography>
-                        <Typography variant="body2">
-                          <strong>Status:</strong> {pagamento.status}
-                        </Typography>
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography variant="body2">Sem pagamentos</Typography>
-                  )}
-                </TableCell>
-              </TableRow>
+            {pedidos.map((pedido, index) => (
+              <PedidoRow key={pedido.id} pedido={pedido} index={index} />
             ))}
           </TableBody>
         </Table>
