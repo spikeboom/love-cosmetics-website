@@ -34,8 +34,11 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/public ./public
 
-# Copie o arquivo .env para o ambiente de produção
-COPY --from=builder /app/.env ./
+# Declare o argumento que define qual arquivo de ambiente usar (padrão: .env)
+ARG ENV_FILE=.env
+
+# Copie o arquivo de ambiente selecionado, renomeando-o para .env no container
+COPY --from=builder /app/${ENV_FILE} .env
 
 # Configure a variável de ambiente para produção
 ENV NODE_ENV=production
