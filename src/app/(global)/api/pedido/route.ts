@@ -1,16 +1,18 @@
 import { getBaseURL } from "@/utils/getBaseUrl";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
 // @ts-ignore
 function logMessage(message, data) {
+  const logHash = crypto.randomBytes(4).toString("hex");
   if (process.env.STAGE === "LOCAL") {
-    console.dir({ message, data }, { depth: null, colors: true });
+    console.dir({ logHash, message, data }, { depth: null, colors: true });
   } else {
     console.log(
-      JSON.stringify({ message, data }, null, 0), // Gera uma única linha de log
+      JSON.stringify({ logHash, message, data }, null, 0), // Gera uma única linha de log
     );
   }
 }
