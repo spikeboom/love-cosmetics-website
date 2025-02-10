@@ -4,6 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
+// @ts-ignore
+function logMessage(message, data) {
+  if (process.env.STAGE === "LOCAL") {
+    console.dir({ message, data }, { depth: null, colors: true });
+  } else {
+    console.log(
+      JSON.stringify({ message, data }, null, 0), // Gera uma única linha de log
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -32,8 +43,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log({ pedido });
-    console.log({ getBaseURL: getBaseURL({ STAGE: "PRODUCTION" }) });
+    logMessage("Pedido Criado", pedido);
+    logMessage("Base URL", getBaseURL({ STAGE: "PRODUCTION" }));
 
     const bodyCheckoutPagSeguro = {
       customer: {
@@ -58,7 +69,7 @@ export async function POST(req: NextRequest) {
       ],
     };
 
-    console.dir({ bodyCheckoutPagSeguro }, { depth: null, colors: true });
+    logMessage("Body Checkout PagSeguro", bodyCheckoutPagSeguro);
 
     const fetchResponse = await fetch(
       "https://sandbox.api.pagseguro.com/checkouts",
@@ -72,11 +83,12 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify(bodyCheckoutPagSeguro),
       },
     );
+
     const responseData = await fetchResponse.json();
-    console.log(responseData);
+    logMessage("Resposta PagSeguro", responseData);
 
     if (!fetchResponse.ok) {
-      console.error("Erro na API PagSeguro:", responseData);
+      logMessage("Erro na API PagSeguro", responseData);
       return NextResponse.json(
         { error: "Erro ao processar pagamento", details: responseData },
         { status: 500 },
@@ -87,14 +99,13 @@ export async function POST(req: NextRequest) {
       {
         message: "Pedido criado com sucesso",
         id: pedido.id,
-        link: responseData.links.find(
-          (link: { rel: string }) => link.rel === "PAY",
-        )?.href,
+        // @ts-ignore
+        link: responseData.links.find((link) => link.rel === "PAY")?.href,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Erro ao criar pedido:", error);
+    logMessage("Erro ao criar pedido", error);
     return NextResponse.json(
       { error: "Erro ao criar pedido" },
       { status: 500 },
