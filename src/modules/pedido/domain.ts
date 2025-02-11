@@ -1,6 +1,6 @@
 "use server";
 
-import { PedidoFormData } from "@/app/(global)/checkout/page";
+import { PedidoFormData } from "@/app/(global)/checkout/PedidoForm";
 import { getBaseURL } from "@/utils/getBaseUrl";
 
 export async function postPedido(data: PedidoFormData) {
@@ -18,9 +18,14 @@ export async function postPedido(data: PedidoFormData) {
     }),
   });
 
+  // Obtém o conteúdo JSON da resposta
+  const json = await response.json();
+
+  // Em vez de lançar um erro genérico, retorne o JSON,
+  // permitindo que o frontend trate os detalhes do erro
   if (!response.ok) {
-    throw new Error("Erro ao enviar o pedido");
+    return json;
   }
 
-  return await response.json();
+  return json;
 }

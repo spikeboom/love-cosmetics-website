@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    // Cria o registro do pedido no banco
     const pedido = await prisma.pedido.create({
       data: {
         nome: body.nome,
@@ -37,16 +38,20 @@ export async function POST(req: NextRequest) {
     logMessage("Pedido Criado", pedido);
     logMessage("Base URL", getBaseURL({ STAGE: "PRODUCTION" }));
 
+    // Remove quaisquer caracteres não numéricos de telefone e CPF
+    const cleanedPhone = body.telefone.replace(/\D/g, "");
+    const cleanedCPF = body.cpf.replace(/\D/g, "");
+
     const bodyCheckoutPagSeguro = {
       customer: {
         phone: {
           country: "+55",
-          area: body.telefone.substring(0, 2),
-          number: body.telefone.substring(2),
+          area: cleanedPhone.substring(0, 2),
+          number: cleanedPhone.substring(2),
         },
         name: `${body.nome} ${body.sobrenome}`,
         email: body.email,
-        tax_id: body.cpf,
+        tax_id: cleanedCPF,
       },
       reference_id: pedido.id,
       customer_modifiable: true,
@@ -78,8 +83,10 @@ export async function POST(req: NextRequest) {
     const responseData = await fetchResponse.json();
     logMessage("Resposta PagSeguro", responseData);
 
+    // Se a requisição falhar, remove o pedido criado
     if (!fetchResponse.ok) {
       logMessage("Erro na API PagSeguro", responseData);
+      await prisma.pedido.delete({ where: { id: pedido.id } });
       return NextResponse.json(
         { error: "Erro ao processar pagamento", details: responseData },
         { status: 500 },

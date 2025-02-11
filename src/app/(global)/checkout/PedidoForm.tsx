@@ -15,13 +15,14 @@ import {
   Stack,
   Typography,
   CircularProgress,
-  Snackbar,
-  Alert,
+  IconButton,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { postPedido } from "@/modules/pedido/domain";
 import { useMeuContexto } from "@/components/context/context";
 import MaskedInput from "./MaskedInput";
+import { useSnackbar } from "notistack";
+import CloseIcon from "@mui/icons-material/Close";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -79,6 +80,7 @@ const defaultPedidoFormData: PedidoFormData = {
 const PedidoForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { cart, total } = useMeuContexto();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const {
     register,
@@ -91,19 +93,6 @@ const PedidoForm: React.FC = () => {
     resolver: zodResolver(pedidoSchema),
     defaultValues: defaultPedidoFormData,
   });
-
-  // Estado para os snackbars (toasts)
-  const [snackbars, setSnackbars] = useState<
-    Array<{ id: number; message: string }>
-  >([]);
-
-  const addSnackbar = (message: string) => {
-    setSnackbars((prev) => [...prev, { id: Date.now(), message }]);
-  };
-
-  const handleCloseSnackbar = (id: number) => {
-    setSnackbars((prev) => prev.filter((snack) => snack.id !== id));
-  };
 
   async function onSubmit(data: PedidoFormData) {
     setLoading(true);
@@ -128,24 +117,44 @@ const PedidoForm: React.FC = () => {
 
       console.log("Resposta da API:", result);
 
-      // Caso a API retorne erro, exiba os toasts específicos
+      // Caso a API retorne erro, exibe as mensagens específicas usando notistack
       if (result.error) {
         const errorMessages = result.details?.error_messages;
         if (Array.isArray(errorMessages)) {
           errorMessages.forEach((err: any) => {
             if (err.parameter_name === "customer.tax_id") {
-              addSnackbar(
+              enqueueSnackbar(
                 "CPF inválido. Verifique se o CPF possui 11 dígitos.",
+                {
+                  variant: "error",
+                  persist: true,
+                  action: (key) => (
+                    <IconButton onClick={() => closeSnackbar(key)} size="small">
+                      <CloseIcon sx={{ color: "white" }} />
+                    </IconButton>
+                  ),
+                },
               );
             }
             if (err.parameter_name === "customer.phone.number") {
-              addSnackbar(
+              enqueueSnackbar(
                 "Telefone inválido. Verifique se o telefone possui o número correto de dígitos.",
+                {
+                  variant: "error",
+                  persist: true,
+                  action: (key) => (
+                    <IconButton onClick={() => closeSnackbar(key)} size="small">
+                      <CloseIcon sx={{ color: "white" }} />
+                    </IconButton>
+                  ),
+                },
               );
             }
           });
         } else {
-          addSnackbar("Erro ao processar o pagamento.");
+          enqueueSnackbar("Erro ao processar o pagamento.", {
+            variant: "error",
+          });
         }
         setLoading(false);
         return;
@@ -155,7 +164,7 @@ const PedidoForm: React.FC = () => {
       window.location.href = result?.link;
     } catch (error) {
       console.error("Erro:", error);
-      addSnackbar("Erro ao enviar o pedido.");
+      enqueueSnackbar("Erro ao enviar o pedido.", { variant: "error" });
     }
     setLoading(false);
   }
@@ -428,25 +437,6 @@ const PedidoForm: React.FC = () => {
           </Stack>
         </form>
       </Box>
-
-      {/* Renderiza os Snackbars para os toasts */}
-      {snackbars.map((snack) => (
-        <Snackbar
-          key={snack.id}
-          open={true}
-          autoHideDuration={6000}
-          onClose={() => handleCloseSnackbar(snack.id)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => handleCloseSnackbar(snack.id)}
-            severity="error"
-            sx={{ width: "100%" }}
-          >
-            {snack.message}
-          </Alert>
-        </Snackbar>
-      ))}
     </ThemeProvider>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { SnackbarProvider } from "notistack";
 
 const MeuContexto = createContext();
 
@@ -62,21 +63,26 @@ export const MeuContextoProvider = ({ children }) => {
   }, [cart]);
 
   return (
-    <MeuContexto.Provider
-      value={{
-        cart,
-        setCart,
-        sidebarMounted,
-        setSidebarMounted,
-        addProductToCart,
-        addQuantityProductToCart,
-        subtractQuantityProductToCart,
-        removeProductFromCart,
-        total,
-      }}
+    <SnackbarProvider
+      maxSnack={3}
+      anchorOrigin={{ vertical: "top", horizontal: "right" }}
     >
-      {children}
-    </MeuContexto.Provider>
+      <MeuContexto.Provider
+        value={{
+          cart,
+          setCart,
+          sidebarMounted,
+          setSidebarMounted,
+          addProductToCart,
+          addQuantityProductToCart,
+          subtractQuantityProductToCart,
+          removeProductFromCart,
+          total,
+        }}
+      >
+        {children}
+      </MeuContexto.Provider>
+    </SnackbarProvider>
   );
 };
 
