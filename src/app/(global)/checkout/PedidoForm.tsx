@@ -15,8 +15,6 @@ import {
   Stack,
   Typography,
   CircularProgress,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { postPedido } from "@/modules/pedido/domain";
@@ -76,6 +74,10 @@ const defaultPedidoFormData: PedidoFormData = {
   destinatario: "",
 };
 
+// export const metadata = {
+//   title: "Lové Cosméticos - Checkout",
+// };
+
 const PedidoForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { cart, total } = useMeuContexto();
@@ -92,19 +94,6 @@ const PedidoForm: React.FC = () => {
     defaultValues: defaultPedidoFormData,
   });
 
-  // Estado para os snackbars (toasts)
-  const [snackbars, setSnackbars] = useState<
-    Array<{ id: number; message: string }>
-  >([]);
-
-  const addSnackbar = (message: string) => {
-    setSnackbars((prev) => [...prev, { id: Date.now(), message }]);
-  };
-
-  const handleCloseSnackbar = (id: number) => {
-    setSnackbars((prev) => prev.filter((snack) => snack.id !== id));
-  };
-
   async function onSubmit(data: PedidoFormData) {
     setLoading(true);
     console.log("Dados do formulário:", data);
@@ -119,43 +108,15 @@ const PedidoForm: React.FC = () => {
           process.env.NEXT_PUBLIC_STRAPI_URL +
           product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url,
       }));
-
       const result = await postPedido({
         ...data,
         items: items,
         total_pedido: total,
       });
-
       console.log("Resposta da API:", result);
-
-      // Caso a API retorne erro, exiba os toasts específicos
-      if (result.error) {
-        const errorMessages = result.details?.error_messages;
-        if (Array.isArray(errorMessages)) {
-          errorMessages.forEach((err: any) => {
-            if (err.parameter_name === "customer.tax_id") {
-              addSnackbar(
-                "CPF inválido. Verifique se o CPF possui 11 dígitos.",
-              );
-            }
-            if (err.parameter_name === "customer.phone.number") {
-              addSnackbar(
-                "Telefone inválido. Verifique se o telefone possui o número correto de dígitos.",
-              );
-            }
-          });
-        } else {
-          addSnackbar("Erro ao processar o pagamento.");
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Se tudo ocorrer bem, redireciona para o link de pagamento
       window.location.href = result?.link;
     } catch (error) {
       console.error("Erro:", error);
-      addSnackbar("Erro ao enviar o pedido.");
     }
     setLoading(false);
   }
@@ -195,7 +156,7 @@ const PedidoForm: React.FC = () => {
   }, [watch]);
 
   if (loadingFormData) {
-    return <div>Carregando...</div>;
+    return <div>Carregando...</div>; // ou algum indicador de loading
   }
 
   return (
@@ -206,7 +167,7 @@ const PedidoForm: React.FC = () => {
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
-            {/* Campos do formulário (nome, sobrenome, email, etc.) */}
+            {/* Nome */}
             <TextField
               fullWidth
               label="Nome"
@@ -215,6 +176,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.nome?.message}
               {...register("nome")}
             />
+
+            {/* Sobrenome */}
             <TextField
               fullWidth
               label="Sobrenome"
@@ -223,6 +186,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.sobrenome?.message}
               {...register("sobrenome")}
             />
+
+            {/* Email */}
             <TextField
               fullWidth
               label="Email"
@@ -233,7 +198,7 @@ const PedidoForm: React.FC = () => {
               {...register("email")}
             />
 
-            {/* Telefone com máscara */}
+            {/* Telefone com máscara utilizando IMaskInput */}
             <FormControl fullWidth error={!!errors.telefone}>
               <FormLabel>Telefone</FormLabel>
               <Controller
@@ -245,7 +210,9 @@ const PedidoForm: React.FC = () => {
                     fullWidth
                     placeholder="(00) 00000-0000"
                     InputProps={{
+                      // Usa o componente customizado como input do TextField
                       inputComponent: MaskedInput as any,
+                      // Passa as props extras para o MaskedInput
                       inputProps: { mask: "(00) 00000-0000", name: field.name },
                     }}
                     error={!!errors.telefone}
@@ -260,7 +227,7 @@ const PedidoForm: React.FC = () => {
               )}
             </FormControl>
 
-            {/* CPF com máscara */}
+            {/* CPF com máscara utilizando IMaskInput */}
             <FormControl fullWidth error={!!errors.cpf}>
               <FormLabel>CPF</FormLabel>
               <Controller
@@ -280,6 +247,7 @@ const PedidoForm: React.FC = () => {
                   />
                 )}
               />
+
               {errors.cpf && (
                 <Typography variant="caption" color="error">
                   {errors.cpf.message}
@@ -287,7 +255,7 @@ const PedidoForm: React.FC = () => {
               )}
             </FormControl>
 
-            {/* Demais campos (data de nascimento, país, CEP, endereço, número, etc.) */}
+            {/* Data de Nascimento */}
             <TextField
               fullWidth
               label="Data de Nascimento"
@@ -297,6 +265,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.data_nascimento?.message as string}
               {...register("data_nascimento")}
             />
+
+            {/* País */}
             <TextField
               fullWidth
               label="País"
@@ -305,6 +275,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.pais?.message}
               {...register("pais")}
             />
+
+            {/* CEP com máscara utilizando IMaskInput */}
             <FormControl fullWidth error={!!errors.cep}>
               <FormLabel>CEP</FormLabel>
               <Controller
@@ -324,12 +296,15 @@ const PedidoForm: React.FC = () => {
                   />
                 )}
               />
+
               {errors.cep && (
                 <Typography variant="caption" color="error">
                   {errors.cep.message}
                 </Typography>
               )}
             </FormControl>
+
+            {/* Endereço */}
             <TextField
               fullWidth
               label="Endereço"
@@ -338,6 +313,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.endereco?.message}
               {...register("endereco")}
             />
+
+            {/* Número */}
             <TextField
               fullWidth
               label="Número"
@@ -346,12 +323,16 @@ const PedidoForm: React.FC = () => {
               helperText={errors.numero?.message}
               {...register("numero")}
             />
+
+            {/* Complemento (opcional) */}
             <TextField
               fullWidth
               label="Complemento"
               placeholder="Complemento (opcional)"
               {...register("complemento")}
             />
+
+            {/* Bairro */}
             <TextField
               fullWidth
               label="Bairro"
@@ -360,6 +341,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.bairro?.message}
               {...register("bairro")}
             />
+
+            {/* Cidade */}
             <TextField
               fullWidth
               label="Cidade"
@@ -368,6 +351,8 @@ const PedidoForm: React.FC = () => {
               helperText={errors.cidade?.message}
               {...register("cidade")}
             />
+
+            {/* Estado */}
             <TextField
               fullWidth
               label="Estado"
@@ -377,6 +362,7 @@ const PedidoForm: React.FC = () => {
               {...register("estado")}
             />
 
+            {/* Checkbox: Salvar minhas informações */}
             <Controller
               name="salvar_minhas_informacoes"
               control={control}
@@ -392,6 +378,8 @@ const PedidoForm: React.FC = () => {
                 />
               )}
             />
+
+            {/* Checkbox: Aceito receber WhatsApp */}
             <Controller
               name="aceito_receber_whatsapp"
               control={control}
@@ -407,6 +395,8 @@ const PedidoForm: React.FC = () => {
                 />
               )}
             />
+
+            {/* Destinatário (opcional) */}
             <TextField
               fullWidth
               label="Destinatário (opcional)"
@@ -416,11 +406,13 @@ const PedidoForm: React.FC = () => {
               {...register("destinatario")}
             />
 
+            {/* Botão de submit */}
             <Button type="submit" variant="contained" color="primary">
               Enviar Pedido{" "}
               {loading && (
                 <CircularProgress
                   size={20}
+                  // sx={{ ml: 1 }}
                   style={{ color: "#fff", marginLeft: 8 }}
                 />
               )}
@@ -428,25 +420,6 @@ const PedidoForm: React.FC = () => {
           </Stack>
         </form>
       </Box>
-
-      {/* Renderiza os Snackbars para os toasts */}
-      {snackbars.map((snack) => (
-        <Snackbar
-          key={snack.id}
-          open={true}
-          autoHideDuration={6000}
-          onClose={() => handleCloseSnackbar(snack.id)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={() => handleCloseSnackbar(snack.id)}
-            severity="error"
-            sx={{ width: "100%" }}
-          >
-            {snack.message}
-          </Alert>
-        </Snackbar>
-      ))}
     </ThemeProvider>
   );
 };
