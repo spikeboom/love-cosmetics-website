@@ -1,11 +1,21 @@
-// MaskedInput.tsx
 import React from "react";
 import { IMaskInput, IMaskInputProps } from "react-imask";
 
 interface TextMaskCustomProps
   // @ts-ignore
   extends Omit<IMaskInputProps, "mask" | "onAccept"> {
-  mask: string;
+  /**
+   * Pode ser uma string ou um objeto com múltiplas máscaras.
+   */
+  mask:
+    | string
+    | {
+        mask: Array<string | object>;
+        /**
+         * Função que escolhe a máscara adequada com base no valor atual.
+         */
+        dispatch: (appended: string, dynamicMasked: any) => any;
+      };
   /**
    * Função chamada quando o valor muda.
    * O valor passado já é o unmasked.

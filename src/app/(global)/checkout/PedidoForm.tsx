@@ -255,7 +255,17 @@ const PedidoForm: React.FC = () => {
                     placeholder="(00) 00000-0000"
                     InputProps={{
                       inputComponent: MaskedInput as any,
-                      inputProps: { mask: "(00) 00000-0000", name: field.name },
+                      inputProps: {
+                        mask: [
+                          {
+                            mask: "(00) 0000-0000",
+                          },
+                          {
+                            mask: "(00) 00000-0000",
+                          },
+                        ],
+                        name: field.name,
+                      },
                     }}
                     error={!!errors.telefone}
                     helperText={errors.telefone?.message}
