@@ -97,6 +97,7 @@ const PedidoForm: React.FC = () => {
   async function onSubmit(data: PedidoFormData) {
     setLoading(true);
     console.log("Dados do formulário:", data);
+    closeSnackbar();
 
     try {
       const items: any[] = Object.entries(cart).map(([id, product]: any) => ({
@@ -123,32 +124,26 @@ const PedidoForm: React.FC = () => {
         if (Array.isArray(errorMessages)) {
           errorMessages.forEach((err: any) => {
             if (err.parameter_name === "customer.tax_id") {
-              enqueueSnackbar(
-                "CPF inválido. Verifique se o CPF possui 11 dígitos.",
-                {
-                  variant: "error",
-                  persist: true,
-                  action: (key) => (
-                    <IconButton onClick={() => closeSnackbar(key)} size="small">
-                      <CloseIcon sx={{ color: "white" }} />
-                    </IconButton>
-                  ),
-                },
-              );
+              enqueueSnackbar("CPF inválido.", {
+                variant: "error",
+                persist: true,
+                action: (key) => (
+                  <IconButton onClick={() => closeSnackbar(key)} size="small">
+                    <CloseIcon sx={{ color: "white" }} />
+                  </IconButton>
+                ),
+              });
             }
             if (err.parameter_name === "customer.phone.number") {
-              enqueueSnackbar(
-                "Telefone inválido. Verifique se o telefone possui o número correto de dígitos.",
-                {
-                  variant: "error",
-                  persist: true,
-                  action: (key) => (
-                    <IconButton onClick={() => closeSnackbar(key)} size="small">
-                      <CloseIcon sx={{ color: "white" }} />
-                    </IconButton>
-                  ),
-                },
-              );
+              enqueueSnackbar("Telefone inválido.", {
+                variant: "error",
+                persist: true,
+                action: (key) => (
+                  <IconButton onClick={() => closeSnackbar(key)} size="small">
+                    <CloseIcon sx={{ color: "white" }} />
+                  </IconButton>
+                ),
+              });
             }
           });
         } else {
@@ -159,6 +154,11 @@ const PedidoForm: React.FC = () => {
         setLoading(false);
         return;
       }
+
+      // add snackbar redirecting to payment link
+      enqueueSnackbar("Redirecionando para o pagamento...", {
+        variant: "success",
+      });
 
       // Se tudo ocorrer bem, redireciona para o link de pagamento
       window.location.href = result?.link;
