@@ -58,10 +58,10 @@ export async function POST(req: NextRequest) {
       items: body.items,
       redirect_url: getBaseURL({ STAGE: "PRODUCTION" }),
       notification_urls: [
-        "https://www.lovecosmeticos.xyz/api/checkout_notification",
+        "https://www.lovecosmetics.com.br/api/checkout_notification",
       ],
       payment_notification_urls: [
-        "https://www.lovecosmeticos.xyz/api/payment_notification",
+        "https://www.lovecosmetics.com.br/api/payment_notification",
       ],
     };
 
