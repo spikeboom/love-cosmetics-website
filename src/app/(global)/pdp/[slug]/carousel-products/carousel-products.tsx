@@ -42,7 +42,7 @@ const arrayProducts = [
   },
 ];
 
-const Product = ({ data }: any) => (
+export const Product = ({ data }: any) => (
   <div>
     <div className="relative h-[168px] w-[168px]">
       <Image

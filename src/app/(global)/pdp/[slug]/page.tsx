@@ -35,78 +35,71 @@ export default async function PdpPage({
 
   return (
     <>
-      <Cabecalho />
+      <section>
+        <Breadcrumbs items={produto?.breadcrumbItems} />
 
-      <div className="pt-[110px] font-lato text-[#333]">
-        <section>
-          <Breadcrumbs items={produto?.breadcrumbItems} />
+        <main className="">
+          <ProductInfoTop
+            nome={produto?.nome}
+            unidade={produto?.unidade}
+            adesivo={produto?.adesivo}
+            nota={produto?.nota}
+            quantidadeResenhas={produto?.quantidadeResenhas}
+          />
 
-          <main className="">
-            <ProductInfoTop
-              nome={produto?.nome}
-              unidade={produto?.unidade}
-              adesivo={produto?.adesivo}
-              nota={produto?.nota}
-              quantidadeResenhas={produto?.quantidadeResenhas}
+          <CarouselImagensTop imagens={produto?.carouselImagensPrincipal} />
+
+          <article className="px-[16px] text-[#333]">
+            <ProductDescricao
+              descricao_resumida={produto?.descricaoResumida}
+              titulo_lista={produto?.tituloLista}
+              lista_descricao={produto?.listaDescricao}
             />
 
-            <CarouselImagensTop imagens={produto?.carouselImagensPrincipal} />
+            <PontosDisponiveis />
 
-            <article className="px-[16px] text-[#333]">
-              <ProductDescricao
-                descricao_resumida={produto?.descricaoResumida}
-                titulo_lista={produto?.tituloLista}
-                lista_descricao={produto?.listaDescricao}
+            <div className="my-[16px]">
+              <Tabs
+                o_que_ele_tem={produto?.o_que_ele_tem}
+                o_que_ele_e={produto?.o_que_ele_e}
+                resultados={produto?.resultados}
               />
 
-              <PontosDisponiveis />
+              <ComoUsarEssaFormula
+                como_usar_essa_formula={produto?.como_usar_essa_formula}
+              />
 
-              <div className="my-[16px]">
-                <Tabs
-                  o_que_ele_tem={produto?.o_que_ele_tem}
-                  o_que_ele_e={produto?.o_que_ele_e}
-                  resultados={produto?.resultados}
-                />
+              <Duvidas duvidas={produto?.duvidas} />
+            </div>
 
-                <ComoUsarEssaFormula
-                  como_usar_essa_formula={produto?.como_usar_essa_formula}
-                />
+            <Adesivos />
 
-                <Duvidas duvidas={produto?.duvidas} />
-              </div>
+            <PagueCom />
+          </article>
 
-              <Adesivos />
+          <CarouselProducts />
 
-              <PagueCom />
-            </article>
+          <AvaliacoesClientes
+            nota={produto?.nota}
+            quantidadeResenhas={produto?.quantidadeResenhas}
+            detalhe_notas={produto?.detalhe_notas}
+            avaliacoes={produto?.avaliacoes}
+          />
 
-            <CarouselProducts />
+          <CadastreSeuEmail />
+        </main>
+      </section>
+      <footer className="mt-[15px]">
+        <div className="flex flex-col items-center">
+          <ListaRedesSociais />
 
-            <AvaliacoesClientes
-              nota={produto?.nota}
-              quantidadeResenhas={produto?.quantidadeResenhas}
-              detalhe_notas={produto?.detalhe_notas}
-              avaliacoes={produto?.avaliacoes}
-            />
+          <MaisLinks />
 
-            <CadastreSeuEmail />
-          </main>
-        </section>
-        <footer className="mt-[15px]">
-          <div className="flex flex-col items-center">
-            <ListaRedesSociais />
+          <ListaAtivos />
 
-            <MaisLinks />
-
-            <ListaAtivos />
-
-            <CartoesAceitos />
-
-            <Rodape />
-          </div>
-        </footer>
-        <div className="h-[100px] bg-[#333]"></div>
-      </div>
+          <CartoesAceitos />
+        </div>
+      </footer>
 
       <BarraFixaComprar produto={produto} />
 

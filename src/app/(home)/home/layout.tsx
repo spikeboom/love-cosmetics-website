@@ -7,10 +7,11 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
-import { MeuContextoProvider } from "../../components/context/context";
+import { MeuContextoProvider } from "../../../components/context/context";
 import Script from "next/script";
-import { Cabecalho } from "./pdp/[slug]/cabecalho/cabecalho";
-import { Rodape } from "./pdp/[slug]/rodape/rodape";
+import { Cabecalho } from "../../(global)/pdp/[slug]/cabecalho/cabecalho";
+import { Rodape } from "../../(global)/pdp/[slug]/rodape/rodape";
+import "./style.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -78,9 +79,9 @@ export default function RootLayout({
       >
         <MeuContextoProvider>
           <>
-            <Cabecalho />
+            <Cabecalho isHome={true} />
 
-            <div className="pt-[110px] font-lato text-[#333]"></div>
+            <div className="section-master pt-[110px] font-lato text-[#333]"></div>
           </>
 
           {children}

@@ -4,7 +4,7 @@ import IconLogin from "../header/icon-login";
 import IconSearch from "../header/icon-search";
 import "./styles.css";
 
-export function Cabecalho() {
+export function Cabecalho({ isHome = false }) {
   const stylesPulseLove = {
     animatedBox: {
       color: "#333",
@@ -13,7 +13,9 @@ export function Cabecalho() {
   };
 
   return (
-    <section className="fixed top-0 z-[11] w-full bg-white">
+    <section
+      className={`${isHome ? "cabecalho-love" : ""} fixed top-0 z-[11] w-full bg-white`}
+    >
       <div className="flex w-full justify-center bg-[#FF69B4]">
         <div className="text-white">
           <p className="p-[8px] text-center text-[12px] lowercase">
