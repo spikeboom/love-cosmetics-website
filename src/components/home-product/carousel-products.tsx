@@ -9,6 +9,7 @@ export const Product = ({ data }: any) => (
       <div className="relative aspect-[1/1] w-full">
         <Image
           src={data.image}
+          loader={({ src }) => src}
           alt="Product 1"
           fill
           style={{
