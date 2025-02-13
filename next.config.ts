@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ["strapi.lovecosmeticos.xyz"],
+    domains: [
+      "strapi.lovecosmeticos.xyz",
+      "www.lovecosmetics.com.br",
+      "www.lovecosmeticos.xyz",
+    ],
   },
 };
 
