@@ -15,7 +15,8 @@ export default async function HomeComponent() {
           muted
           playsInline
         >
-          <source src="/home/top-video.webm" type="video/webm" />
+          {/* <source src="/home/top-video.webm" type="video/webm" /> */}
+          <source src="/home/top-video.mp4" type="video/mp4" />
           Seu navegador não suporta vídeos HTML5.
         </video>
 
