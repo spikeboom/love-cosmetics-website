@@ -13,6 +13,7 @@ export default async function HomeComponent() {
           autoPlay
           loop
           muted
+          playsInline
         >
           <source src="/home/top-video.webm" type="video/webm" />
           Seu navegador não suporta vídeos HTML5.
