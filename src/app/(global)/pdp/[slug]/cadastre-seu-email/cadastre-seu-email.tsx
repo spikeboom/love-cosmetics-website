@@ -18,7 +18,7 @@ export function CadastreSeuEmail() {
           placeholder="email"
           style={{ border: "1px solid #e0e0e0" }}
         />
-        <button className="flex h-fit items-center gap-1 rounded-[100px] bg-[#FF69B4] px-[16px] py-[12px] text-[14px] text-[#fff]">
+        <button className="flex h-fit items-center gap-1 rounded-[100px] bg-[#dcafad] px-[16px] py-[12px] text-[14px] text-[#fff]">
           <span>enviar</span> <FaArrowRight color="#fff" size={16} />
         </button>
       </div>

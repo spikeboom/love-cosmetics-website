@@ -5,7 +5,7 @@ import IconReembolso from "../payments/icon-reembolso";
 export function PagueCom() {
   return (
     <div className="my-[16px] flex flex-col rounded-[8px] border-[1px] border-[#ddd]">
-      <h2 className="mt-[10px] self-center font-poppins text-[14px] text-[#FF69B4]">
+      <h2 className="mt-[10px] self-center font-poppins text-[14px] text-[#dcafad]">
         Pague com
       </h2>
       <div className="flex justify-center gap-[8px]">

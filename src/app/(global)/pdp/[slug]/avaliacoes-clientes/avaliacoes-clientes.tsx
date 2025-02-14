@@ -26,7 +26,7 @@ export function AvaliacoesClientes({
   avaliacoes,
 }: AvaliacoesClientesProps) {
   const starSettings = {
-    color: "#FF69B4",
+    color: "#dcafad",
     size: 26,
   };
 
@@ -85,11 +85,11 @@ export function AvaliacoesClientes({
               <div className="mb-[24px] flex flex-col gap-[10px]">
                 <div className="flex h-fit items-center gap-[16px]">
                   <div className="flex items-center gap-[2px]">
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
@@ -107,11 +107,11 @@ export function AvaliacoesClientes({
 
                 <div className="flex h-fit items-center gap-[16px]">
                   <div className="flex items-center gap-[2px]">
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
@@ -129,11 +129,11 @@ export function AvaliacoesClientes({
 
                 <div className="flex h-fit items-center gap-[16px]">
                   <div className="flex items-center gap-[2px]">
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
@@ -151,11 +151,11 @@ export function AvaliacoesClientes({
 
                 <div className="flex h-fit items-center gap-[16px]">
                   <div className="flex items-center gap-[2px]">
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div
@@ -173,11 +173,11 @@ export function AvaliacoesClientes({
 
                 <div className="flex h-fit items-center gap-[16px]">
                   <div className="flex items-center gap-[2px]">
-                    <FaStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
-                    <FaRegStar color="#FF69B4" size={14} />
+                    <FaStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
+                    <FaRegStar color="#dcafad" size={14} />
                   </div>
                   <div className="h-[14px] w-[112px] rounded-full bg-[#e0e0e080]">
                     <div

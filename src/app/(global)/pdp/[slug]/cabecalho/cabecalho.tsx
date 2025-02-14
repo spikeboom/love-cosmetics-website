@@ -16,7 +16,7 @@ export function Cabecalho({ isHome = false }) {
     <section
       className={`${isHome ? "cabecalho-love" : ""} fixed top-0 z-[11] w-full bg-white`}
     >
-      <div className="flex w-full justify-center bg-[#FF69B4]">
+      <div className="flex w-full justify-center bg-[#dcafad]">
         <div className="text-white">
           <p className="p-[8px] text-center text-[12px] lowercase">
             Entrega exclusiva para Manaus! 🚛
