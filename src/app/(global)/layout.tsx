@@ -77,13 +77,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
       >
         <MeuContextoProvider>
-          <>
-            <Cabecalho />
+          <Cabecalho />
+          <div className="pt-[110px] font-lato text-[#333]"></div>
 
-            <div className="pt-[110px] font-lato text-[#333]"></div>
-          </>
-
-          {children}
+          <div className="mx-auto w-full max-w-[1400px]">{children}</div>
 
           <Rodape />
 

@@ -31,54 +31,66 @@ export default async function PdpPage({
     data: [produto],
   } = await fetchProdutoBySlug({ slug });
 
-  // console.log(JSON.stringify({ produto }, null, 6));
-
   return (
     <>
       <section>
         <Breadcrumbs items={produto?.breadcrumbItems} />
 
-        <main className="">
-          <ProductInfoTop
-            nome={produto?.nome}
-            unidade={produto?.unidade}
-            adesivo={produto?.adesivo}
-            nota={produto?.nota}
-            quantidadeResenhas={produto?.quantidadeResenhas}
+        <div className="block w-full gap-[50px] md:flex">
+          <CarouselImagensTop
+            imagens={produto?.carouselImagensPrincipal}
+            extraClassesForTopDiv={`hidden md:block`}
           />
 
-          <CarouselImagensTop imagens={produto?.carouselImagensPrincipal} />
-
-          <article className="px-[16px] text-[#333]">
-            <ProductDescricao
-              descricao_resumida={produto?.descricaoResumida}
-              titulo_lista={produto?.tituloLista}
-              lista_descricao={produto?.listaDescricao}
+          <main className="w-full md:w-[50%]">
+            <ProductInfoTop
+              nome={produto?.nome}
+              unidade={produto?.unidade}
+              adesivo={produto?.adesivo}
+              nota={produto?.nota}
+              quantidadeResenhas={produto?.quantidadeResenhas}
             />
 
-            <PontosDisponiveis />
+            <CarouselImagensTop
+              imagens={produto?.carouselImagensPrincipal}
+              extraClassesForTopDiv={`block md:hidden`}
+            />
 
-            <div className="my-[16px]">
-              <Tabs
-                o_que_ele_tem={produto?.o_que_ele_tem}
-                o_que_ele_e={produto?.o_que_ele_e}
-                resultados={produto?.resultados}
+            <article className="px-[16px] text-[#333]">
+              <ProductDescricao
+                descricao_resumida={produto?.descricaoResumida}
+                titulo_lista={produto?.tituloLista}
+                lista_descricao={produto?.listaDescricao}
               />
 
-              <ComoUsarEssaFormula
-                como_usar_essa_formula={produto?.como_usar_essa_formula}
-              />
+              <PontosDisponiveis />
 
-              <Duvidas duvidas={produto?.duvidas} />
-            </div>
+              <div className="my-[16px]">
+                <Tabs
+                  o_que_ele_tem={produto?.o_que_ele_tem}
+                  o_que_ele_e={produto?.o_que_ele_e}
+                  resultados={produto?.resultados}
+                />
 
-            <Adesivos />
+                <ComoUsarEssaFormula
+                  como_usar_essa_formula={produto?.como_usar_essa_formula}
+                />
 
-            <PagueCom />
-          </article>
+                <Duvidas duvidas={produto?.duvidas} />
+              </div>
 
-          <CarouselProducts />
+              <Adesivos />
 
+              <PagueCom />
+            </article>
+
+            <CarouselProducts />
+          </main>
+        </div>
+      </section>
+
+      <section>
+        <main className="">
           <AvaliacoesClientes
             nota={produto?.nota}
             quantidadeResenhas={produto?.quantidadeResenhas}
@@ -89,6 +101,7 @@ export default async function PdpPage({
           <CadastreSeuEmail />
         </main>
       </section>
+
       <footer className="mt-[15px]">
         <div className="flex flex-col items-center">
           <ListaRedesSociais />

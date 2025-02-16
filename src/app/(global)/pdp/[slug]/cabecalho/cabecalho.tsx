@@ -23,33 +23,35 @@ export function Cabecalho({ isHome = false }) {
           </p>
         </div>
       </div>
-      <div className="flex items-center justify-between border-b border-b-[#e5e7eb] px-[16px] py-[0px]">
-        <div className="flex flex-1">
-          <span className="mr-[24px] flex items-center">
-            <IconHambuger />
-          </span>
-          {/* <span className="mr-[24px] flex items-center">
+      <div className="flex justify-center border-b border-b-[#e5e7eb] px-[16px] py-[0px]">
+        <div className="flex w-full max-w-[1400px] items-center justify-between md:px-[18px]">
+          <div className="flex flex-1">
+            <span className="mr-[24px] flex items-center">
+              <IconHambuger />
+            </span>
+            {/* <span className="mr-[24px] flex items-center">
             <IconSearch />
           </span> */}
-        </div>
+          </div>
 
-        <div>
-          <a
-            href="/"
-            className="font-playfair text-[32px]"
-            style={stylesPulseLove.animatedBox}
-          >
-            LOVÉ
-          </a>
-        </div>
+          <div>
+            <a
+              href="/"
+              className="font-playfair text-[32px]"
+              style={stylesPulseLove.animatedBox}
+            >
+              LOVÉ
+            </a>
+          </div>
 
-        <div className="flex flex-1 justify-end">
-          {/* <span className="mx-[16px] flex items-center">
+          <div className="flex flex-1 justify-end">
+            {/* <span className="mx-[16px] flex items-center">
             <IconLogin />
           </span> */}
-          <span className="ml-[8px] flex items-center">
-            <IconCart />
-          </span>
+            <span className="ml-[8px] flex items-center">
+              <IconCart />
+            </span>
+          </div>
         </div>
       </div>
     </section>

@@ -1,7 +1,8 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { throttle } from "lodash";
 
 const timeTransition = 500;
 
@@ -10,8 +11,10 @@ const qtySlidesAfter = 2;
 
 export function CarouselImagensTop({
   imagens,
+  extraClassesForTopDiv = "",
 }: {
   imagens: { imagem: { formats: { medium: { url: string } } } }[];
+  extraClassesForTopDiv?: string;
 }) {
   if (!imagens) {
     return null;
@@ -64,8 +67,44 @@ export function CarouselImagensTop({
     }
   };
 
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [slideWidth, setSlideWidth] = useState(0);
+
+  useEffect(() => {
+    const updateSlideWidth = () => {
+      if (carouselRef.current) {
+        setSlideWidth(carouselRef.current.offsetWidth);
+      }
+    };
+
+    // Cria uma versão "throttled" da função que só poderá ser executada a cada 200ms (por exemplo)
+    const throttledUpdateSlideWidth = throttle(updateSlideWidth, 200);
+
+    // Atualiza a largura inicialmente
+    throttledUpdateSlideWidth();
+
+    // Adiciona o listener para redimensionamento
+    window.addEventListener("resize", throttledUpdateSlideWidth);
+
+    // Remove o listener e cancela o throttle na desmontagem do componente
+    return () => {
+      window.removeEventListener("resize", throttledUpdateSlideWidth);
+      throttledUpdateSlideWidth.cancel();
+    };
+  }, []);
+
+  const slideStyle = {
+    width: slideWidth * 0.9,
+    height: slideWidth * 0.9,
+    position: "relative" as const,
+    flexShrink: 0,
+  };
+
   return (
-    <div className="relative mx-[-16x] mt-4 h-fit w-full overflow-hidden">
+    <div
+      ref={carouselRef}
+      className={`top-[100px] mx-[-16x] mt-4 h-fit w-full overflow-hidden md:sticky md:ml-[18px] md:w-[50%] ${extraClassesForTopDiv}`}
+    >
       <button
         className="absolute left-[1em] top-[50%] z-10 flex h-[34px] w-[34px] -translate-y-2/4 items-center justify-center rounded-full bg-[#fafafa]"
         onClick={handlePrev}
@@ -88,10 +127,7 @@ export function CarouselImagensTop({
         }}
       >
         {slides.slice(-qtySlidesBefore).map((slide, index) => (
-          <div
-            key={`Slide Before ${index + 1}`}
-            className="relative h-[342px] w-[342px]"
-          >
+          <div key={`Slide Before ${index + 1}`} style={slideStyle}>
             <Image
               src={slide}
               loader={({ src }) => src}
@@ -104,10 +140,7 @@ export function CarouselImagensTop({
           </div>
         ))}
         {slides.map((slide, index) => (
-          <div
-            key={`Slide ${index + 1}`}
-            className="relative h-[342px] w-[342px]"
-          >
+          <div key={`Slide ${index + 1}`} style={slideStyle}>
             <Image
               src={slide}
               loader={({ src }) => src}
@@ -120,10 +153,7 @@ export function CarouselImagensTop({
           </div>
         ))}
         {slides.slice(0, qtySlidesAfter).map((slide, index) => (
-          <div
-            key={`Slide After ${index + 1}`}
-            className="relative h-[342px] w-[342px]"
-          >
+          <div key={`Slide After ${index + 1}`} style={slideStyle}>
             <Image
               src={slide}
               loader={({ src }) => src}
