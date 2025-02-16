@@ -5,10 +5,10 @@ export default async function HomeComponent() {
   const { data } = await fetchProdutosForHome();
 
   return (
-    <>
-      <div className="relative aspect-[378/678] w-full">
+    <div className="flex flex-col md:mt-[100px] md:flex-row md:justify-center md:px-[18px]">
+      <div className="relative aspect-[378/678] w-full md:sticky md:top-[100px] md:mb-[100px] md:h-fit md:w-[30%]">
         <video
-          className="h-full w-full object-cover brightness-[.9]"
+          className="w-full object-cover brightness-[.9]"
           controls={false}
           autoPlay
           loop
@@ -34,7 +34,7 @@ export default async function HomeComponent() {
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center justify-center gap-[60px] px-[80px] py-10">
+      <div className="flex w-full flex-col items-center justify-center gap-[60px] px-[80px] py-10 md:w-[20%] md:pl-[24px] md:pr-0 md:pt-0">
         {/* @ts-ignore */}
         {data?.map((product) => (
           <Product
@@ -51,6 +51,6 @@ export default async function HomeComponent() {
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }
