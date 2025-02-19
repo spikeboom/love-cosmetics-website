@@ -9,3 +9,12 @@
     color: #333;
   }
 }
+
+@media (max-width: 768px) {
+  .headerBottomSpace {
+    padding-top: 0;
+  }
+  .cabecalhoLove {
+    opacity: 0.9;
+  }
+}

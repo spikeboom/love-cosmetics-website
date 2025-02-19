@@ -78,7 +78,6 @@ export default function RootLayout({
       >
         <MeuContextoProvider>
           <Cabecalho />
-          <div className="pt-[110px] font-lato text-[#333]"></div>
 
           <div className="mx-auto w-full max-w-[1400px]">{children}</div>
 
