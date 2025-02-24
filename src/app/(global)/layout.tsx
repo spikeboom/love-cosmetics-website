@@ -55,7 +55,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <GoogleTagManager gtmId="GTM-T7ZMDHZF" />
+        <GoogleTagManager
+          gtmId="GTM-T7ZMDHZF"
+          gtmScriptUrl="https://gtm.lovecosmetics.com.br/gtm.js"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
