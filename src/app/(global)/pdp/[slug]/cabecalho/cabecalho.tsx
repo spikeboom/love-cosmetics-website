@@ -33,7 +33,16 @@ export function Cabecalho() {
         <div className="flex justify-center border-b border-b-[#e5e7eb] px-[16px] py-[0px]">
           <div className="flex w-full max-w-[1400px] items-center justify-between md:px-[18px]">
             <div className="flex flex-1">
-              <span className="mr-[24px] flex items-center">
+              <span
+                className="mr-[24px] flex items-center"
+                onClick={() => {
+                  window?.dataLayer?.push({
+                    event: "click_do_botao",
+                    elemento_clicado: "meu-botao",
+                    url_pagina: window.location.href,
+                  });
+                }}
+              >
                 <IconHambuger />
               </span>
               {/* <span className="mr-[24px] flex items-center">
