@@ -67,18 +67,15 @@ export async function POST(req: NextRequest) {
 
     logMessage("Body Checkout PagSeguro", bodyCheckoutPagSeguro);
 
-    const fetchResponse = await fetch(
-      "https://sandbox.api.pagseguro.com/checkouts",
-      {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${process.env.PAGSEGURO_TOKEN_DEV}`,
-          accept: "*/*",
-        },
-        body: JSON.stringify(bodyCheckoutPagSeguro),
+    const fetchResponse = await fetch("https://api.pagseguro.com/checkouts", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `Bearer ${process.env.PAGSEGURO_TOKEN_DEV}`,
+        accept: "*/*",
       },
-    );
+      body: JSON.stringify(bodyCheckoutPagSeguro),
+    });
 
     const responseData = await fetchResponse.json();
     logMessage("Resposta PagSeguro", responseData);
