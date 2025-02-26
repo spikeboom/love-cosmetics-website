@@ -5,8 +5,15 @@ import IconHambuger from "../header/icon-hamburger";
 import IconLogin from "../header/icon-login";
 import IconSearch from "../header/icon-search";
 import "./styles.css";
+import { useMeuContexto } from "@/components/context/context";
 
 export function Cabecalho() {
+  const { setSidebarMounted, qtdItemsCart } = useMeuContexto();
+
+  const handleAbrirCarrinho = () => {
+    setSidebarMounted(true);
+  };
+
   const stylesPulseLove = {
     animatedBox: {
       color: "#333",
@@ -64,8 +71,16 @@ export function Cabecalho() {
               {/* <span className="mx-[16px] flex items-center">
             <IconLogin />
           </span> */}
-              <span className="ml-[8px] flex items-center">
+              <span
+                className="relative ml-[8px] flex cursor-pointer items-center"
+                onClick={handleAbrirCarrinho}
+              >
                 <IconCart />
+                {!!qtdItemsCart && (
+                  <span className="absolute -right-2 -top-1 rounded-[100px] bg-[#333] px-[4px] text-[10px] font-semibold text-white">
+                    {qtdItemsCart}
+                  </span>
+                )}
               </span>
             </div>
           </div>

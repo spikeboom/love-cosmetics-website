@@ -62,6 +62,11 @@ export const MeuContextoProvider = ({ children }) => {
     setTotal(total);
   }, [cart]);
 
+  const qtdItemsCart = Object.values(cart).reduce(
+    (acc, product) => acc + product.quantity,
+    0,
+  );
+
   return (
     <SnackbarProvider
       maxSnack={3}
@@ -78,6 +83,7 @@ export const MeuContextoProvider = ({ children }) => {
           subtractQuantityProductToCart,
           removeProductFromCart,
           total,
+          qtdItemsCart,
         }}
       >
         {children}
