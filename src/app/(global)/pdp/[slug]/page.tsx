@@ -79,9 +79,9 @@ export default async function PdpPage({
                 <Duvidas duvidas={produto?.duvidas} />
               </div>
 
-              <Adesivos />
+              {/* <Adesivos /> */}
 
-              <PagueCom />
+              {/* <PagueCom />   */}
             </article>
 
             <CarouselProducts />
@@ -91,26 +91,26 @@ export default async function PdpPage({
 
       <section>
         <main className="">
-          <AvaliacoesClientes
+          {/* <AvaliacoesClientes
             nota={produto?.nota}
             quantidadeResenhas={produto?.quantidadeResenhas}
             detalhe_notas={produto?.detalhe_notas}
             avaliacoes={produto?.avaliacoes}
-          />
+          /> */}
 
-          <CadastreSeuEmail />
+          {/* <CadastreSeuEmail /> */}
         </main>
       </section>
 
       <footer className="mt-[15px]">
         <div className="flex flex-col items-center">
-          <ListaRedesSociais />
+          {/* <ListaRedesSociais />
 
           <MaisLinks />
 
           <ListaAtivos />
 
-          <CartoesAceitos />
+          <CartoesAceitos /> */}
         </div>
       </footer>
 

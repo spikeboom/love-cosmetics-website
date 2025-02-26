@@ -52,14 +52,14 @@ export function ProductInfoTop({
             </span>
           </div>
 
-          <span className="text-[12px] font-semibold text-[#666]">{nota}</span>
+          {/* <span className="text-[12px] font-semibold text-[#666]">{nota}</span>
 
           <a
             className="ml-2 text-[12px] font-semibold text-[#666] underline"
             href=""
           >
             {quantidadeResenhas} resenhas
-          </a>
+          </a> */}
         </span>
       </div>
     </header>
