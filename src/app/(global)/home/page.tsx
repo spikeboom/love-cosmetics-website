@@ -31,7 +31,7 @@ export default async function HomeComponent() {
               Lové Cosméticos
             </h1>
             <p className="mt-2 font-poppins text-[20px] text-white">
-              ativos amazônicos que realçam sua beleza
+              Ativos amazônicos que realçam sua beleza
             </p>
           </div>
         </div>
