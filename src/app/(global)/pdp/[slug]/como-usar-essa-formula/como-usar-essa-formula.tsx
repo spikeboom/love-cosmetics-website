@@ -8,7 +8,7 @@ export function ComoUsarEssaFormula({
   return (
     <div className="my-[16px] rounded-[8px] border-[1px] p-[20px]">
       <h2 className="text-center font-poppins text-[16px] leading-[130%]">
-        modo de uso
+        Modo de uso
       </h2>
       {como_usar_essa_formula?.map((item) => (
         <div

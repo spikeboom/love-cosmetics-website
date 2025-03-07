@@ -1,6 +1,6 @@
 export function ListaAtivos() {
   return (
-    <div className="px-[40px] py-[16px] text-center text-[12px] lowercase leading-[150%]">
+    <div className="px-[40px] py-[16px] text-center text-[12px] leading-[150%]">
       <p className="flex flex-wrap justify-center gap-1">
         <span>sobre os nossos ingredientes: </span>
         <a

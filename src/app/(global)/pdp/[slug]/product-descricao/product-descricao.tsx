@@ -28,19 +28,17 @@ export function ProductDescricao({
   return (
     <>
       <div className="my-[16px]">
-        <p className="text-[14px] lowercase leading-[150%]">
-          {descricao_resumida}
-        </p>
+        <p className="text-[14px] leading-[150%]">{descricao_resumida}</p>
       </div>
 
       <div className="my-[16px] list-none">
         <summary>
           <h2 className="mb-[12px] font-poppins text-[16px] leading-[130%]">
             {/* {titulo_lista} */}
-            quais são os seus benefícios?
+            Quais são os seus benefícios?
           </h2>
         </summary>
-        <div className="text-[14px] lowercase leading-[150%]">
+        <div className="text-[14px] leading-[150%]">
           {lista_descricao?.map((item) => (
             <li key={item?.id} className="flex items-center gap-1">
               <FiberManualRecordIcon fontSize={"small"} /> {item?.texto}

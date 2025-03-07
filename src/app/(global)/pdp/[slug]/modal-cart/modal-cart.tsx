@@ -99,7 +99,7 @@ export function ModalCart() {
                     </div>
                     <div className="w-full">
                       <div className="mb-[6px] flex items-center justify-between">
-                        <h4 className="font-poppins text-[13px] font-semibold lowercase">
+                        <h4 className="font-poppins text-[13px] font-semibold">
                           {product?.nome}
                         </h4>
                         <IoCloseCircle

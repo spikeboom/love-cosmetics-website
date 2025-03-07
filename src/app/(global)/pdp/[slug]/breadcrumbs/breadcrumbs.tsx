@@ -4,13 +4,13 @@ export function Breadcrumbs({
   items: { id: number; nome: string; link: string }[];
 }) {
   return (
-    <div className="px-[18px] pb-[4px] pt-[16px] text-[14px] lowercase text-[#828282]">
+    <div className="px-[18px] pb-[4px] pt-[16px] text-[14px] text-[#828282]">
       <section className="">
         <nav className="">
           <ol className="flex gap-2">
             <li className="">
               <a href="/" className="underline" rel="home" title="Love">
-                início
+                Início
               </a>
             </li>
 

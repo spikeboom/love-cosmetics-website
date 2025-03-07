@@ -72,16 +72,16 @@ export function Tabs({
 
   const tabTitles = [
     <button className={`px-[8px] font-poppins text-[14px]`}>
-      conheça os ativos presentes
+      Conheça os ativos presentes
     </button>,
     <button className={`px-[8px] font-poppins text-[14px]`}>
-      conheça mais sobre o produto
+      Conheça mais sobre o produto
     </button>,
     // <button className={`px-[8px] font-poppins text-[14px]`}>resultados</button>,
   ];
 
   const tabContent = [
-    <div className="lowercase">
+    <div className="">
       <div className="flex flex-wrap">
         <div className="my-[8px] flex w-full justify-center">
           <button
@@ -89,7 +89,7 @@ export function Tabs({
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
-            fechar detalhes
+            Fechar detalhes
             <IoChevronUp color="#dcafad" size={10} />
           </button>
         </div>
@@ -135,7 +135,7 @@ export function Tabs({
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={openDetailsTab1 ? { display: "none" } : {}}
           >
-            ver detalhes dos ingredientes
+            Ver detalhes dos ingredientes
             <IoChevronDown color="#dcafad" size={10} />
           </button>
           <button
@@ -143,13 +143,13 @@ export function Tabs({
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
-            fechar detalhes
+            Fechar detalhes
             <IoChevronUp color="#dcafad" size={10} />
           </button>
         </div>
       </div>
     </div>,
-    <div className="lowercase">
+    <div className="">
       {/* <h2 className="leadin-[150%] my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
         ele é
       </h2> */}
@@ -157,7 +157,7 @@ export function Tabs({
         {o_que_ele_e}
       </p>
     </div>,
-    // <div className="font-poppins lowercase">
+    // <div className="font-poppins ">
     //   <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
     //     {resultados?.texto1}
     //   </p>

@@ -29,7 +29,7 @@ export function ProductInfoTop({
   });
 
   return (
-    <header className="flex flex-col gap-2 px-[16px] lowercase">
+    <header className="flex flex-col gap-2 px-[16px]">
       <h1 className="flex items-center gap-2">
         <span className="font-poppins text-[18px] font-medium">{nome}</span>
 

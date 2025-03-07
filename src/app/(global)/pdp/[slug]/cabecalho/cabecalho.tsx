@@ -32,7 +32,7 @@ export function Cabecalho() {
       >
         <div className="flex w-full justify-center bg-[#dcafad]">
           <div className="text-white">
-            <p className="p-[8px] text-center text-[12px] lowercase">
+            <p className="p-[8px] text-center text-[12px]">
               Entrega exclusiva para Manaus! 🚛
             </p>
           </div>
