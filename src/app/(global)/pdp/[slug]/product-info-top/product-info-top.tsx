@@ -38,11 +38,11 @@ export function ProductInfoTop({
         </span>
       </h1>
 
-      {adesivo && (
+      {/* {adesivo && (
         <span className="w-fit rounded-[4px] bg-[#f0e27c] px-[8px] py-[3px] font-poppins text-[14px] text-[#333]">
           {adesivo}
         </span>
-      )}
+      )} */}
 
       <div className="font-poppins">
         <span className="flex items-center gap-1">

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
 export function ProductDescricao({
   descricao_resumida,
@@ -35,13 +36,14 @@ export function ProductDescricao({
       <div className="my-[16px] list-none">
         <summary>
           <h2 className="mb-[12px] font-poppins text-[16px] leading-[130%]">
-            {titulo_lista}
+            {/* {titulo_lista} */}
+            quais são os seus benefícios?
           </h2>
         </summary>
         <div className="text-[14px] lowercase leading-[150%]">
           {lista_descricao?.map((item) => (
             <li key={item?.id} className="flex items-center gap-1">
-              {check_list} {item?.texto}
+              <FiberManualRecordIcon fontSize={"small"} /> {item?.texto}
             </li>
           ))}
         </div>

@@ -95,11 +95,12 @@ export function CarouselProducts() {
 
   return (
     <div className="px-[16px] py-[24px] font-poppins">
-      <h2 className="mb-[4px] text-[16px]">
-        complete sua rotina e ganhe descontos
+      <h2 className="mb-[4px] text-[16px] lowercase">
+        Cuide da sua pele com fórmulas especiais
       </h2>
-      <p className="mb-[24px] text-[12px] text-[#333333BF]">
-        até 15% OFF na compra de 2 ou + fórmulas
+      <p className="mb-[24px] text-[12px] lowercase text-[#333333BF]">
+        Descubra combinações perfeitas para hidratar, nutrir e revitalizar sua
+        rotina de cuidados.
       </p>
 
       <div>

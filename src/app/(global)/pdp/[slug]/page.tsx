@@ -63,7 +63,7 @@ export default async function PdpPage({
                 lista_descricao={produto?.listaDescricao}
               />
 
-              <PontosDisponiveis />
+              {/* <PontosDisponiveis /> */}
 
               <div className="my-[16px]">
                 <Tabs

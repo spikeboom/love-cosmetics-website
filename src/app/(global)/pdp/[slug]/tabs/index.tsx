@@ -1,9 +1,55 @@
 "use client";
 
+import { styled, Typography } from "@mui/material";
+import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+  accordionSummaryClasses,
+} from "@mui/material/AccordionSummary";
+import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import { useState } from "react";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
+
+export const Accordion = styled((props: AccordionProps) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  "&:not(:last-child)": {
+    borderBottom: 0,
+  },
+  "&::before": {
+    display: "none",
+  },
+}));
+
+export const AccordionSummary = styled((props: AccordionSummaryProps) => (
+  <MuiAccordionSummary
+    expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />}
+    {...props}
+  />
+))(({ theme }) => ({
+  backgroundColor: "rgba(0, 0, 0, .03)",
+  flexDirection: "row-reverse",
+  [`& .${accordionSummaryClasses.expandIconWrapper}.${accordionSummaryClasses.expanded}`]:
+    {
+      transform: "rotate(90deg)",
+    },
+  [`& .${accordionSummaryClasses.content}`]: {
+    marginLeft: theme.spacing(1),
+  },
+  ...theme.applyStyles("dark", {
+    backgroundColor: "rgba(255, 255, 255, .05)",
+  }),
+}));
+
+export const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderTop: "1px solid rgba(0, 0, 0, .125)",
+}));
 
 export function Tabs({
   o_que_ele_tem,
@@ -25,23 +71,21 @@ export function Tabs({
   const [openDetailsTab1, setOpenDetailsTab1] = useState(false);
 
   const tabTitles = [
-    <button className={`px-[8px] py-[16px] font-poppins text-[14px]`}>
-      o que ele tem
+    <button className={`px-[8px] font-poppins text-[14px]`}>
+      conheça os ativos presentes
     </button>,
-    <button className={`px-[8px] py-[16px] font-poppins text-[14px]`}>
-      o que ele é
+    <button className={`px-[8px] font-poppins text-[14px]`}>
+      conheça mais sobre o produto
     </button>,
-    <button className={`px-[8px] py-[16px] font-poppins text-[14px]`}>
-      resultados
-    </button>,
+    // <button className={`px-[8px] font-poppins text-[14px]`}>resultados</button>,
   ];
 
   const tabContent = [
-    <div className="pt-[12px] lowercase">
+    <div className="lowercase">
       <div className="flex flex-wrap">
         <div className="my-[8px] flex w-full justify-center">
           <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#dcafad] underline"
+            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
@@ -87,7 +131,7 @@ export function Tabs({
         </div> */}
         <div className="mt-[8px] flex w-full justify-center">
           <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#dcafad] underline"
+            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={openDetailsTab1 ? { display: "none" } : {}}
           >
@@ -95,7 +139,7 @@ export function Tabs({
             <IoChevronDown color="#dcafad" size={10} />
           </button>
           <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#dcafad] underline"
+            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
@@ -105,64 +149,72 @@ export function Tabs({
         </div>
       </div>
     </div>,
-    <div className="pt-[12px] lowercase">
-      <h2 className="leadin-[150%] my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
+    <div className="lowercase">
+      {/* <h2 className="leadin-[150%] my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
         ele é
-      </h2>
+      </h2> */}
       <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
         {o_que_ele_e}
       </p>
     </div>,
-    <div className="pt-[12px] font-poppins lowercase">
-      <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
-        {resultados?.texto1}
-      </p>
-      <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
-        {resultados?.titulo1}
-      </h2>
-      <div className="mb-[16px] flex flex-wrap">
-        {resultados?.itens_resultado?.map((item) => (
-          <div className="w-1/2 px-[8px]" key={item.id}>
-            <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#dcafad]">
-              {item?.numero}
-            </h2>
-            <p className="mb-[16px] text-center text-[12px] leading-[130%]">
-              {item?.texto}
-            </p>
-          </div>
-        ))}
-      </div>
+    // <div className="font-poppins lowercase">
+    //   <p className="mb-[16px] font-poppins text-[14px] leading-[150%]">
+    //     {resultados?.texto1}
+    //   </p>
+    //   <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
+    //     {resultados?.titulo1}
+    //   </h2>
+    //   <div className="mb-[16px] flex flex-wrap">
+    //     {resultados?.itens_resultado?.map((item) => (
+    //       <div className="w-1/2 px-[8px]" key={item.id}>
+    //         <h2 className="my-[32px] text-center font-poppins text-[40px] font-semibold leading-[130%] text-[#dcafad]">
+    //           {item?.numero}
+    //         </h2>
+    //         <p className="mb-[16px] text-center text-[12px] leading-[130%]">
+    //           {item?.texto}
+    //         </p>
+    //       </div>
+    //     ))}
+    //   </div>
 
-      <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
-        {resultados?.titulo2}
-      </h2>
-      <p className="prose mb-[16px] text-[14px] leading-[150%]">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {resultados?.texto2}
-        </ReactMarkdown>
-      </p>
-    </div>,
+    //   <h2 className="my-[16px] font-poppins text-[20px] font-semibold text-[#dcafad]">
+    //     {resultados?.titulo2}
+    //   </h2>
+    //   <p className="prose mb-[16px] text-[14px] leading-[150%]">
+    //     <ReactMarkdown remarkPlugins={[remarkGfm]}>
+    //       {resultados?.texto2}
+    //     </ReactMarkdown>
+    //   </p>
+    // </div>,
   ];
 
   return (
     <>
-      <div className="flex w-full justify-between border-b-[1px] border-b-[silver]">
+      <div className="flex w-full flex-col">
         {tabTitles.map((tab, index) => (
-          <div
-            key={index}
-            onClick={() => setActiveTab(index)}
-            className={`cursor-pointer ${
-              activeTab === index
-                ? "border-b-[3px] border-b-[#dcafad] font-semibold text-[#dcafad]"
-                : "text-[#999]"
-            }`}
-          >
-            {tab}
-          </div>
+          // <div
+          //   key={index}
+          //   onClick={() => setActiveTab(index)}
+          //   className={`cursor-pointer ${
+          //     activeTab === index
+          //       ? "border-b-[3px] border-b-[#dcafad] font-semibold text-[#dcafad]"
+          //       : "text-[#999]"
+          //   }`}
+          // >
+          //   {tab}
+          // </div>
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1-content"
+              id="panel1-header"
+            >
+              <Typography component="span">{tab}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>{tabContent[index]}</AccordionDetails>
+          </Accordion>
         ))}
       </div>
-
-      {tabContent[activeTab]}
     </>
   );
 }
