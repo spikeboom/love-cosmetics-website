@@ -3,50 +3,54 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import IconSacola from "./icon-sacola";
 import "./style.css";
+import Link from "next/link";
 
-const arrayProducts = [
-  {
-    image: "/carousel-products/IMG_7996.jpg",
-    name: "hidratante facial",
-    price: "120,00",
-  },
-  {
-    image: "/carousel-products/IMG_8009.jpg",
-    name: "manteiga corporal",
-    price: "90,00",
-  },
-  {
-    image: "/carousel-products/IMG_8020.jpg",
-    name: "máscara de argila",
-    price: "160,00",
-  },
-  {
-    image: "/carousel-products/IMG_8039.jpg",
-    name: "sérum facial",
-    price: "110,00",
-  },
-  {
-    image: "/carousel-products/IMG_8053.jpg",
-    name: "kit especial lové",
-    price: "530,00",
-  },
-  {
-    image: "/carousel-products/IMG_8063.jpg",
-    name: "kit especial lové",
-    price: "780,00",
-  },
-  {
-    image: "/carousel-products/IMG_7969.jpg",
-    name: "espuma facial",
-    price: "90,00",
-  },
-];
+// const arrayProducts = [
+//   {
+//     image: "/carousel-products/IMG_7996.jpg",
+//     name: "hidratante facial",
+//     price: "120,00",
+//   },
+//   {
+//     image: "/carousel-products/IMG_8009.jpg",
+//     name: "manteiga corporal",
+//     price: "90,00",
+//   },
+//   {
+//     image: "/carousel-products/IMG_8020.jpg",
+//     name: "máscara de argila",
+//     price: "160,00",
+//   },
+//   {
+//     image: "/carousel-products/IMG_8039.jpg",
+//     name: "sérum facial",
+//     price: "110,00",
+//   },
+//   {
+//     image: "/carousel-products/IMG_8053.jpg",
+//     name: "kit especial lové",
+//     price: "530,00",
+//   },
+//   {
+//     image: "/carousel-products/IMG_8063.jpg",
+//     name: "kit especial lové",
+//     price: "780,00",
+//   },
+//   {
+//     image: "/carousel-products/IMG_7969.jpg",
+//     name: "espuma facial",
+//     price: "90,00",
+//   },
+// ];
 
 export const Product = ({ data }: any) => (
   <div>
     <div className="relative h-[168px] w-[168px]">
       <Image
-        src={data.image}
+        src={
+          process.env.NEXT_PUBLIC_STRAPI_URL +
+          data.carouselImagensPrincipal[0].imagem.formats.medium.url
+        }
         alt="Product 1"
         fill
         style={{
@@ -56,26 +60,28 @@ export const Product = ({ data }: any) => (
     </div>
     <div className="h-[114px] px-[12px] py-[8px]">
       <p className="mb-[8px] text-[14px] leading-[1.3]">
-        <span className="">{data.name}</span>
+        <span className="">{data.nome}</span>
       </p>
       <span className="text-[16px] font-semibold leading-[1] text-[#333]">
-        <span className="">R$ {data.price}</span>
+        <span className="">R$ {data.preco}</span>
       </span>
     </div>
     <div className="w-full">
-      <button className="flex items-center rounded-[100px] bg-[#dcafad] px-[32px] py-[8px]">
-        <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
-          comprar
-        </span>
-        <span className="ml-[4px]">
-          <IconSacola />
-        </span>
-      </button>
+      <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
+        <button className="flex items-center rounded-[100px] bg-[#dcafad] px-[32px] py-[8px]">
+          <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
+            comprar
+          </span>
+          <span className="ml-[4px]">
+            <IconSacola />
+          </span>
+        </button>
+      </Link>
     </div>
   </div>
 );
 
-export function CarouselProducts() {
+export function CarouselProducts({ dataForCarouselMultiple }: any) {
   const scrollableRef = useRef(null);
   const [scrollPercentage, setScrollPercentage] = useState(0);
 
@@ -110,8 +116,8 @@ export function CarouselProducts() {
           onScroll={handleScroll}
         >
           <div className="flex gap-4">
-            {arrayProducts.map((product, index) => (
-              <Product key={index} data={product} />
+            {dataForCarouselMultiple.map((product: any, index: any) => (
+              <Product key={product.id} data={product} />
             ))}
           </div>
         </div>
