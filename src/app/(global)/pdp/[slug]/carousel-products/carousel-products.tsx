@@ -48,15 +48,26 @@ export const Product = ({ data }: any) => (
     <div className="relative h-[168px] w-[168px]">
       <Image
         src={
+          // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
           process.env.NEXT_PUBLIC_STRAPI_URL +
           data.carouselImagensPrincipal[0].imagem.formats.medium.url
         }
+        loader={({ src }) => src}
         alt="Product 1"
         fill
         style={{
           objectFit: "cover",
         }}
       />
+      {/* <Image
+        src={slide}
+        loader={({ src }) => src}
+        alt={`Slide Before ${index + 1}`}
+        fill
+        style={{
+          objectFit: "cover",
+        }}
+      /> */}
     </div>
     <div className="h-[114px] px-[12px] py-[8px]">
       <p className="mb-[8px] text-[14px] leading-[1.3]">
