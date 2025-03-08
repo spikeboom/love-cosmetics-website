@@ -46,6 +46,11 @@ export const MeuContextoProvider = ({ children }) => {
     setCart(newCart);
   };
 
+  const clearCart = () => {
+    localStorage.removeItem("cart");
+    setCart({});
+  };
+
   useEffect(() => {
     const cart = localStorage.getItem("cart");
     if (cart) {
@@ -84,6 +89,7 @@ export const MeuContextoProvider = ({ children }) => {
           removeProductFromCart,
           total,
           qtdItemsCart,
+          clearCart,
         }}
       >
         {children}

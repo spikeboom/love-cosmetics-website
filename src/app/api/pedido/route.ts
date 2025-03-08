@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       reference_id: pedido.id,
       customer_modifiable: true,
       items: body.items,
-      redirect_url: getBaseURL({ STAGE: "PRODUCTION" }),
+      redirect_url: `${getBaseURL({ STAGE: "PRODUCTION" })}/confirmacao`,
       notification_urls: [
         "https://www.lovecosmetics.com.br/api/checkout_notification",
       ],
