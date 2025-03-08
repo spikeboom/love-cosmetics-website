@@ -23,17 +23,22 @@ import {
   fetchProdutosForCarouselPDP,
 } from "@/modules/produto/domain";
 import { ModalCart } from "./modal-cart/modal-cart";
+import { Metadata, ResolvingMetadata } from "next";
 
-export const generateMetadata = async ({
-  params,
-}: {
-  params: { slug: string };
-}) => {
-  const { slug } = params;
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { slug } = await params;
   return {
     title: `Lové Cosméticos - ${slug}`,
   };
-};
+}
 
 export default async function PdpPage({
   params,
