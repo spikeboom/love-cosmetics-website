@@ -2,6 +2,10 @@ import { fetchProdutosForHome } from "@/modules/produto/domain";
 import { Product } from "@/components/home-product/carousel-products";
 import { ModalCart } from "../pdp/[slug]/modal-cart/modal-cart";
 
+export const metadata = {
+  title: "Lové Cosméticos - Home",
+};
+
 export default async function HomeComponent() {
   const { data } = await fetchProdutosForHome();
 

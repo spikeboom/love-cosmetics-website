@@ -1,6 +1,10 @@
 import { ClearCart } from "@/components/clean-cart/clean-cart";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Lové Cosméticos - Confirmação",
+};
+
 export default async function ConfirmacaoPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-8">

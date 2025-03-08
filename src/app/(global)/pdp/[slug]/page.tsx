@@ -24,6 +24,17 @@ import {
 } from "@/modules/produto/domain";
 import { ModalCart } from "./modal-cart/modal-cart";
 
+export const generateMetadata = async ({
+  params,
+}: {
+  params: { slug: string };
+}) => {
+  const { slug } = params;
+  return {
+    title: `Lové Cosméticos - ${slug}`,
+  };
+};
+
 export default async function PdpPage({
   params,
 }: {
