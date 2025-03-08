@@ -43,7 +43,7 @@ export function BarraFixaComprar({ produto }: BarraFixaComprarProps) {
 
           <div className="w-full">
             <button
-              className="w-full rounded-[100px] bg-[#dcafad] px-[20px] py-[12px] text-[16px] font-semibold text-[#fff]"
+              className="w-full rounded-[100px] bg-[#C0392B] px-[20px] py-[12px] text-[16px] font-semibold text-[#fff]"
               onClick={handleComprar}
             >
               comprar

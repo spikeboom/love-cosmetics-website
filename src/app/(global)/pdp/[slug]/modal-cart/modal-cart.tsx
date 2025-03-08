@@ -68,12 +68,12 @@ export function ModalCart() {
                   />
                 </div>
 
-                <div className="mx-[16px]">
+                {/* <div className="mx-[16px]">
                   <p className="w-full pt-[8px] text-center font-poppins text-[12px]">
                     Eba! Você ganhou <strong>15% de desconto</strong>!
                   </p>
                   <div className="barra my-[8px]"></div>
-                </div>
+                </div> */}
 
                 {Object.entries(cart).map(([id, product]: any) => (
                   <div
@@ -126,10 +126,10 @@ export function ModalCart() {
                           />
                         </div>
 
-                        <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
+                        {/* <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
                           <IoMdPricetag color="#333" />
                           15% OFF
-                        </div>
+                        </div> */}
 
                         <div className="w-full">
                           <span className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through">
@@ -186,7 +186,7 @@ export function ModalCart() {
                 </div>
 
                 <div className="flex items-center justify-end gap-[8px]">
-                  <span className="text-wrap text-[13px] font-bold leading-[1] underline">
+                  <span className="text-wrap text-right text-[13px] font-bold leading-[1] underline">
                     continuar
                     <br />
                     comprando
@@ -194,7 +194,7 @@ export function ModalCart() {
 
                   <Link
                     href="/checkout"
-                    className="rounded-[3px] bg-[#fa8cff] px-[18px] py-[12px] font-bold"
+                    className="rounded-[3px] bg-[#C0392B] px-[18px] py-[12px] font-bold text-[#fff]"
                   >
                     finalizar pedido
                   </Link>

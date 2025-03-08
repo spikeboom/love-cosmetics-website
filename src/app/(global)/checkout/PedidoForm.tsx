@@ -435,7 +435,14 @@ const PedidoForm: React.FC = () => {
               {...register("destinatario")}
             />
 
-            <Button type="submit" variant="contained" color="primary">
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                backgroundColor: "#C0392B",
+                "&:hover": { backgroundColor: "#A93226" },
+              }}
+            >
               Enviar Pedido{" "}
               {loading && (
                 <CircularProgress
