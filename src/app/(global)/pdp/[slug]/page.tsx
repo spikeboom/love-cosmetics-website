@@ -10,7 +10,10 @@ import { Cabecalho } from "./cabecalho/cabecalho";
 import { Breadcrumbs } from "./breadcrumbs/breadcrumbs";
 import { ProductInfoTop } from "./product-info-top/product-info-top";
 import { ProductDescricao } from "./product-descricao/product-descricao";
-import { BarraFixaComprar } from "./botao-fixo-comprar/botao-fixo-comprar";
+import {
+  BarraFixaComprar,
+  BotaoComprar,
+} from "./botao-fixo-comprar/botao-fixo-comprar";
 import { ComoUsarEssaFormula } from "./como-usar-essa-formula/como-usar-essa-formula";
 import { Adesivos } from "./adesivos/adesivos";
 import { PagueCom } from "./pague-com/pague-com";
@@ -84,6 +87,11 @@ export default async function PdpPage({
                 lista_descricao={produto?.listaDescricao}
               />
 
+              <BotaoComprar
+                produto={produto}
+                extraClassesForTopDiv={`hidden md:block`}
+              />
+
               {/* <PontosDisponiveis /> */}
 
               <div className="my-[16px]">
@@ -137,7 +145,7 @@ export default async function PdpPage({
         </div>
       </footer>
 
-      <BarraFixaComprar produto={produto} />
+      <BarraFixaComprar produto={produto} extraClassesForTopDiv={`md:hidden`} />
 
       <ModalCart />
     </>

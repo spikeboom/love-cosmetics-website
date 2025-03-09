@@ -4,9 +4,13 @@ import { useMeuContexto } from "@/components/context/context";
 
 interface BarraFixaComprarProps {
   produto: any;
+  extraClassesForTopDiv?: string;
 }
 
-export function BarraFixaComprar({ produto }: BarraFixaComprarProps) {
+export function BarraFixaComprar({
+  produto,
+  extraClassesForTopDiv,
+}: BarraFixaComprarProps) {
   const { setSidebarMounted, addProductToCart } = useMeuContexto();
 
   const preco = produto?.preco;
@@ -18,7 +22,9 @@ export function BarraFixaComprar({ produto }: BarraFixaComprarProps) {
 
   return (
     <>
-      <div className="fixed bottom-0 z-10 w-full bg-[#fff] font-poppins">
+      <div
+        className={`fixed bottom-0 z-10 w-full bg-[#fff] font-poppins ${extraClassesForTopDiv}`}
+      >
         {/* <div className="flex justify-center bg-[#f1eaf5] py-[4px] text-center text-[12px]">
           <p>
             leve 2 ou + fórmulas e ganhe <strong>até 15% OFF ✨</strong>
@@ -50,6 +56,31 @@ export function BarraFixaComprar({ produto }: BarraFixaComprarProps) {
             </button>
           </div>
         </div>
+      </div>
+    </>
+  );
+}
+
+export function BotaoComprar({
+  produto,
+  extraClassesForTopDiv,
+}: BarraFixaComprarProps) {
+  const { setSidebarMounted, addProductToCart } = useMeuContexto();
+
+  const handleComprar = () => {
+    addProductToCart(produto);
+    setSidebarMounted(true);
+  };
+
+  return (
+    <>
+      <div className={`w-fit ${extraClassesForTopDiv}`}>
+        <button
+          className="w-full rounded-[100px] bg-[#C0392B] px-[64px] py-[12px] text-[16px] font-semibold text-[#fff]"
+          onClick={handleComprar}
+        >
+          comprar
+        </button>
       </div>
     </>
   );
