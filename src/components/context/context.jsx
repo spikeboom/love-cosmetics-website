@@ -9,6 +9,7 @@ export const MeuContextoProvider = ({ children }) => {
   const [cart, setCart] = useState({});
   const [total, setTotal] = useState(0);
   const [sidebarMounted, setSidebarMounted] = useState(false);
+  const [cupons, setCupons] = useState([]);
 
   const addProductToCart = (product) => {
     setCart((prevState) => {
@@ -48,29 +49,65 @@ export const MeuContextoProvider = ({ children }) => {
 
   const clearCart = () => {
     localStorage.removeItem("cart");
+    localStorage.removeItem("cupons");
     setCart({});
+    setCupons({});
   };
+
+  const [firstRun, setFirstRun] = useState(false);
 
   useEffect(() => {
     const cart = localStorage.getItem("cart");
     if (cart) {
       setCart(JSON.parse(cart));
     }
-  }, []);
 
-  useEffect(() => {
-    const total = Object.values(cart).reduce(
-      (acc, product) => acc + product.preco * product.quantity,
-      0,
-    );
-    localStorage.setItem("cart", JSON.stringify(cart));
-    setTotal(total);
-  }, [cart]);
+    const cupons = localStorage.getItem("cupons");
+    if (cupons) {
+      setCupons(JSON.parse(cupons));
+    }
+    setFirstRun(true);
+  }, []);
 
   const qtdItemsCart = Object.values(cart).reduce(
     (acc, product) => acc + product.quantity,
     0,
   );
+
+  const handleCupom = (cupom) => {
+    if (cupons.includes(cupom)) {
+      setCupons(cupons.filter((c) => c !== cupom));
+    } else {
+      setCupons([...cupons, cupom]);
+    }
+  };
+
+  const [descontos, setDescontos] = useState(0);
+
+  useEffect(() => {
+    if (!firstRun) return;
+
+    let total = Object.values(cart).reduce(
+      (acc, product) => acc + product.preco * product.quantity,
+      0,
+    );
+    // interation cupons para cada cupom modificar total
+    const cupomResult = cupons.reduce(
+      (acc, cupom) => {
+        return {
+          multiplicar: acc.multiplicar * cupom.multiplacar,
+          diminuir: acc.diminuir + cupom.diminuir,
+        };
+      },
+      { multiplicar: 1, diminuir: 0 },
+    );
+    const totalFinal = total * cupomResult.multiplicar - cupomResult.diminuir;
+    const totalDescontos = total - totalFinal;
+    setDescontos(totalDescontos);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("cupons", JSON.stringify(cupons));
+    setTotal(totalFinal);
+  }, [cart, cupons]);
 
   return (
     <SnackbarProvider
@@ -90,6 +127,9 @@ export const MeuContextoProvider = ({ children }) => {
           total,
           qtdItemsCart,
           clearCart,
+          cupons,
+          handleCupom,
+          descontos,
         }}
       >
         {children}

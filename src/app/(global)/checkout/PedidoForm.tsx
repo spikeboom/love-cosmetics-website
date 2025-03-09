@@ -53,6 +53,8 @@ const pedidoSchema = z.object({
 // Define o tipo do formulário a partir do schema
 export type PedidoFormData = z.infer<typeof pedidoSchema> & {
   items?: any[];
+  descontos?: number;
+  cupons?: string[];
   total_pedido?: number;
 };
 
@@ -79,7 +81,7 @@ const defaultPedidoFormData: PedidoFormData = {
 
 const PedidoForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const { cart, total } = useMeuContexto();
+  const { cart, total, descontos, cupons } = useMeuContexto();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const {
@@ -113,6 +115,8 @@ const PedidoForm: React.FC = () => {
       const result = await postPedido({
         ...data,
         items: items,
+        cupons: cupons.map((c: any) => c.codigo),
+        descontos: Math.trunc(descontos * 100),
         total_pedido: total,
       });
 
@@ -197,6 +201,7 @@ const PedidoForm: React.FC = () => {
       const completeData: PedidoFormData = {
         ...defaultPedidoFormData,
         ...data,
+        cupons: undefined,
       };
       saveToLocalStorage(completeData);
     });

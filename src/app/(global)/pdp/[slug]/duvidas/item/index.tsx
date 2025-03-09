@@ -28,11 +28,7 @@ export default function DoubtsItem({
     //   </div>
     // </div>
     <Accordion>
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls="panel1-content"
-        id="panel1-header"
-      >
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography component="span">
           <span className="font-poppins text-[14px]">{title}</span>
         </Typography>

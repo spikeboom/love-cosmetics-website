@@ -41,7 +41,7 @@ export function ProductDescricao({
         <div className="text-[14px] leading-[150%]">
           {lista_descricao?.map((item) => (
             <li key={item?.id} className="flex items-center gap-1">
-              <FiberManualRecordIcon fontSize={"small"} /> {item?.texto}
+              * {item?.texto}
             </li>
           ))}
         </div>

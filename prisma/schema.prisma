@@ -29,6 +29,8 @@ model Pedido {
   bairro                    String
   cidade                    String
   estado                    String
+  cupons                    String[]
+  descontos                 Float @default(0)
   total_pedido              Float @default(0)
   items                     Json[]
   salvar_minhas_informacoes Boolean

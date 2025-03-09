@@ -71,12 +71,12 @@ export function Tabs({
   const [openDetailsTab1, setOpenDetailsTab1] = useState(false);
 
   const tabTitles = [
-    <button className={`px-[8px] font-poppins text-[14px]`}>
+    <div className={`px-[8px] font-poppins text-[14px]`}>
       Conheça os ativos presentes
-    </button>,
-    <button className={`px-[8px] font-poppins text-[14px]`}>
+    </div>,
+    <div className={`px-[8px] font-poppins text-[14px]`}>
       Conheça mais sobre o produto
-    </button>,
+    </div>,
     // <button className={`px-[8px] font-poppins text-[14px]`}>resultados</button>,
   ];
 
@@ -84,14 +84,14 @@ export function Tabs({
     <div className="">
       <div className="flex flex-wrap">
         <div className="my-[8px] flex w-full justify-center">
-          <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
+          <div
+            className="flex cursor-pointer items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
             Fechar detalhes
             <IoChevronUp color="#dcafad" size={10} />
-          </button>
+          </div>
         </div>
 
         {o_que_ele_tem?.map((item) => (
@@ -130,22 +130,22 @@ export function Tabs({
           5-Cyclohexylpentanol
         </div> */}
         <div className="mt-[8px] flex w-full justify-center">
-          <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
+          <div
+            className="flex cursor-pointer items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={openDetailsTab1 ? { display: "none" } : {}}
           >
             Ver detalhes dos ingredientes
             <IoChevronDown color="#dcafad" size={10} />
-          </button>
-          <button
-            className="flex items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
+          </div>
+          <div
+            className="flex cursor-pointer items-center gap-1 font-poppins text-[10px] leading-[150%] text-[#333] underline"
             onClick={() => setOpenDetailsTab1(!openDetailsTab1)}
             style={!openDetailsTab1 ? { display: "none" } : {}}
           >
             Fechar detalhes
             <IoChevronUp color="#dcafad" size={10} />
-          </button>
+          </div>
         </div>
       </div>
     </div>,
@@ -203,12 +203,8 @@ export function Tabs({
           // >
           //   {tab}
           // </div>
-          <Accordion>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1-content"
-              id="panel1-header"
-            >
+          <Accordion key={index}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography component="span">{tab}</Typography>
             </AccordionSummary>
             <AccordionDetails>{tabContent[index]}</AccordionDetails>
