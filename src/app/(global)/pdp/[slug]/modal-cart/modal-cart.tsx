@@ -211,12 +211,17 @@ export function ModalCart() {
                     frete
                   </p>
 
-                  <span className="flex items-center gap-1 pr-[4px] text-[12px] font-semibold text-[#7045f5]">
+                  {/* <span className="flex items-center gap-1 pr-[4px] text-[12px] font-semibold text-[#7045f5]">
                     consultar prazo
                     <MdOutlineChevronRight size={18} />
+                  </span> */}
+
+                  <span className="flex items-center gap-1 pr-[4px] text-[12px] font-semibold text-[#7045f5]">
+                    entre 3-5 dias
+                    {/* <MdOutlineChevronRight size={18} /> */}
                   </span>
 
-                  <p className="text-[14px]">grátis</p>
+                  <p className="text-[14px]">R$ 15</p>
                 </div>
                 {cupons.length > 0 && (
                   <div className="my-[14px] flex flex-wrap items-center justify-end gap-x-[12px] gap-y-[8px]">

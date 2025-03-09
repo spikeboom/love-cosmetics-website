@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         tax_id: cleanedCPF,
       },
       ...(body.descontos ? { discount_amount: body.descontos } : {}),
+      additional_amount: 15 * 100,
       reference_id: pedido.id,
       customer_modifiable: true,
       items: body.items,
