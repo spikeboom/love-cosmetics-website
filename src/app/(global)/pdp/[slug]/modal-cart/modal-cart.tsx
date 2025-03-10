@@ -223,28 +223,7 @@ export function ModalCart() {
 
                   <p className="text-[14px]">R$ 15</p>
                 </div>
-                {cupons.length > 0 && (
-                  <div className="my-[14px] flex flex-wrap items-center justify-end gap-x-[12px] gap-y-[8px]">
-                    <div className="flex items-center gap-1 pr-[4px] text-[14px]">
-                      cupons aplicados
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {cupons.map((cupom: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-1 rounded-[3px] bg-[#f1f1f1] px-[4px] py-[2px] text-[12px] font-semibold"
-                        >
-                          <span>{cupom.codigo}</span>
-                          <IoCloseCircle
-                            size={16}
-                            className="cursor-pointer"
-                            onClick={() => handleCupom(cupom)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
                 <div className="my-[14px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
                   <p className="flex items-center gap-1 pr-[4px] text-[14px]">
                     <RiCoupon2Line />
@@ -296,6 +275,29 @@ export function ModalCart() {
                     )}
                   </div>
                 </div>
+
+                {cupons.length > 0 && (
+                  <div className="my-[14px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
+                    <div className="flex items-center gap-1 pr-[4px] text-[14px]">
+                      cupons aplicados
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {cupons.map((cupom: any, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 rounded-[3px] bg-[#f1f1f1] px-[4px] py-[2px] text-[12px] font-semibold"
+                        >
+                          <span>{cupom.codigo}</span>
+                          <IoCloseCircle
+                            size={16}
+                            className="cursor-pointer"
+                            onClick={() => handleCupom(cupom)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {descontos ? (
                   <div className="my-[14px] flex items-center justify-between font-semibold">

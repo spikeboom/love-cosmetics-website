@@ -39,7 +39,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await params;
   return {
-    title: `Lové Cosméticos - ${slug}`,
+    title: `Lové Cosméticos - ${slug?.replaceAll("-", " ")}`,
   };
 }
 
