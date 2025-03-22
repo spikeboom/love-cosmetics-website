@@ -101,7 +101,10 @@ export function ModalCart() {
     <>
       {sidebarMounted && (
         <>
-          <div className="fixed top-0 z-[998] h-full w-full bg-black opacity-50 transition-all"></div>
+          <div
+            className="fixed top-0 z-[998] h-full w-full bg-black opacity-50 transition-all"
+            style={{ left: 0, maxWidth: "100vw" }}
+          ></div>
           <div
             className="fixed top-0 z-[999] h-full w-[calc(100%-20px)] bg-white font-poppins transition-all md:max-w-[600px]"
             style={{
