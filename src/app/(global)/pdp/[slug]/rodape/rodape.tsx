@@ -12,8 +12,11 @@ export function Rodape() {
           <div className="flex flex-col items-center gap-[8px] text-center text-[12px]">
             <small className="">2025 Lovè. Todos os direitos reservados.</small>
             <small className="">
-              Rua Cônego Eugênio Leite, 767 - São Paulo/SP - CEP: 05414-012.
-              CNPJ: 32.124.385/0001-95
+              Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM
+              <br />
+              CEP: 69083-040
+              <br />
+              CNPJ: 42.609.440.0001-90
             </small>
             <small className="">
               <a className="" href="">
