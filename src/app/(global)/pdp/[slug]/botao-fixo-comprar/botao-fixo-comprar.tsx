@@ -5,6 +5,7 @@ import { useMeuContexto } from "@/components/context/context";
 interface BarraFixaComprarProps {
   produto: any;
   extraClassesForTopDiv?: string;
+  preco?: number;
 }
 
 export function BarraFixaComprar({
@@ -64,6 +65,7 @@ export function BarraFixaComprar({
 export function BotaoComprar({
   produto,
   extraClassesForTopDiv,
+  preco = 0,
 }: BarraFixaComprarProps) {
   const { setSidebarMounted, addProductToCart } = useMeuContexto();
 
@@ -74,13 +76,28 @@ export function BotaoComprar({
 
   return (
     <>
-      <div className={`w-fit ${extraClassesForTopDiv}`}>
-        <button
-          className="w-full rounded-[100px] bg-[#C0392B] px-[64px] py-[12px] text-[16px] font-semibold text-[#fff]"
-          onClick={handleComprar}
-        >
-          comprar
-        </button>
+      <div className="flex items-center gap-[24px]">
+        <p className="flex w-fit flex-col">
+          <strong className="text-[14px]">
+            R$ {preco?.toString().replace(".", ",")}
+          </strong>
+
+          <span className="text-[12px] text-[#333333BF]">
+            ou 3x R${" "}
+            {(Math.round((preco * 100) / 3) / 100)
+              ?.toString()
+              .replace(".", ",")}
+          </span>
+        </p>
+
+        <div className={`w-fit ${extraClassesForTopDiv}`}>
+          <button
+            className="w-full rounded-[100px] bg-[#C0392B] px-[64px] py-[12px] text-[16px] font-semibold text-[#fff]"
+            onClick={handleComprar}
+          >
+            comprar
+          </button>
+        </div>
       </div>
     </>
   );
