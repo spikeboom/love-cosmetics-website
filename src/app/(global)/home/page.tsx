@@ -32,10 +32,10 @@ export default async function HomeComponent() {
           {/* Conteúdo posicionado sobre o gradiente */}
           <div className="absolute bottom-[50px] w-full px-6">
             <h1 className="font-poppins text-3xl font-semibold text-white">
-              Lové Cosméticos
+              Conheça a Lové
             </h1>
             <p className="mt-2 font-poppins text-[20px] text-white">
-              Ativos amazônicos que realçam sua beleza
+              Descubra o poder da união entre Amazônia e tecnologia na sua pele
             </p>
           </div>
         </div>

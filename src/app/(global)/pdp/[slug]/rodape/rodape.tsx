@@ -10,21 +10,16 @@ export function Rodape() {
           </div>
 
           <div className="flex flex-col items-center gap-[8px] text-center text-[12px]">
-            <small className="">
-              2024 Sallve. Todos os direitos reservados.
-            </small>
+            <small className="">2025 Lovè. Todos os direitos reservados.</small>
             <small className="">
               Rua Cônego Eugênio Leite, 767 - São Paulo/SP - CEP: 05414-012.
               CNPJ: 32.124.385/0001-95
             </small>
             <small className="">
-              <a className="" href="https://www.sallve.com.br/pages/termos">
+              <a className="" href="">
                 termos de uso
               </a>
-              <a
-                className=""
-                href="https://www.sallve.com.br/pages/privacidade"
-              >
+              <a className="" href="">
                 política de privacidade
               </a>
             </small>
