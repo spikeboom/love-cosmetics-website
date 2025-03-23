@@ -94,8 +94,8 @@ export function CarouselImagensTop({
   }, []);
 
   const slideStyle = {
-    width: slideWidth * 0.9,
-    height: slideWidth * 0.9,
+    width: slideWidth * 1,
+    height: slideWidth * 1,
     position: "relative" as const,
     flexShrink: 0,
   };

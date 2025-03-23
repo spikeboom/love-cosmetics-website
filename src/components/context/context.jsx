@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider } from "notistack";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const MeuContexto = createContext();
 
@@ -10,18 +11,36 @@ export const MeuContextoProvider = ({ children }) => {
   const [total, setTotal] = useState(0);
   const [sidebarMounted, setSidebarMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
+  const [actualProduct, setActualProduct] = useState(null);
 
   const addProductToCart = (product) => {
-    setCart((prevState) => {
-      const newCart = { ...prevState };
-      if (newCart[product.id]) {
-        // newCart[product.id].quantity += 1;
-      } else {
-        newCart[product.id] = { ...product, quantity: 1 };
-      }
-      return newCart;
-    });
+    const newCart = { ...cart };
+    if (newCart[product.id]) {
+      newCart[product.id].quantity += 1;
+    } else {
+      newCart[product.id] = { ...product, quantity: 1 };
+    }
+    setCart(newCart);
   };
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [addExecuting, setAddExecuting] = useState(false);
+
+  useEffect(() => {
+    if (addExecuting || !searchParams.has("addToCart") || !actualProduct) {
+      return;
+    }
+    setAddExecuting(true);
+    const addToCart = searchParams.get("addToCart");
+    if (Number(addToCart) > 0 && actualProduct) {
+      router.push(window.location.pathname);
+      addProductToCart(actualProduct);
+      setSidebarMounted(true);
+    }
+    setAddExecuting(false);
+  }, [searchParams, actualProduct]);
 
   const addQuantityProductToCart = ({ product }) => {
     const newCart = { ...cart };
@@ -130,6 +149,7 @@ export const MeuContextoProvider = ({ children }) => {
           cupons,
           handleCupom,
           descontos,
+          setActualProduct,
         }}
       >
         {children}

@@ -45,21 +45,22 @@ import Link from "next/link";
 
 export const Product = ({ data }: any) => (
   <div>
-    <div className="relative h-[168px] w-[168px]">
-      <Image
-        src={
-          // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
-          process.env.NEXT_PUBLIC_STRAPI_URL +
-          data.carouselImagensPrincipal[0].imagem.formats.medium.url
-        }
-        loader={({ src }) => src}
-        alt="Product 1"
-        fill
-        style={{
-          objectFit: "cover",
-        }}
-      />
-      {/* <Image
+    <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
+      <div className="w-[168px]] relative h-[168px]">
+        <Image
+          src={
+            // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
+            process.env.NEXT_PUBLIC_STRAPI_URL +
+            data.carouselImagensPrincipal[0].imagem.formats.medium.url
+          }
+          loader={({ src }) => src}
+          alt="Product 1"
+          fill
+          style={{
+            objectFit: "cover",
+          }}
+        />
+        {/* <Image
         src={slide}
         loader={({ src }) => src}
         alt={`Slide Before ${index + 1}`}
@@ -68,7 +69,8 @@ export const Product = ({ data }: any) => (
           objectFit: "cover",
         }}
       /> */}
-    </div>
+      </div>
+    </Link>
     <div className="h-[114px] px-[12px] py-[8px]">
       <p className="mb-[8px] text-[14px] leading-[1.3]">
         <span className="">{data.nome}</span>
@@ -78,7 +80,11 @@ export const Product = ({ data }: any) => (
       </span>
     </div>
     <div className="w-full">
-      <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
+      <Link
+        href={`/pdp/[slug]`}
+        as={`/pdp/${data.slug}?addToCart=1`}
+        className="w-full"
+      >
         <button className="flex items-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
           <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
             comprar
@@ -92,7 +98,63 @@ export const Product = ({ data }: any) => (
   </div>
 );
 
-export function CarouselProducts({ dataForCarouselMultiple }: any) {
+export const ProductComplete = ({ data }: any) => (
+  <div>
+    <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
+      <div className="w-[168px]] relative h-[168px]">
+        <Image
+          src={
+            // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
+            process.env.NEXT_PUBLIC_STRAPI_URL +
+            data.carouselImagensPrincipal[0].imagem.formats.medium.url
+          }
+          loader={({ src }) => src}
+          alt="Product 1"
+          fill
+          style={{
+            objectFit: "cover",
+          }}
+          className="rounded-[8px]"
+        />
+        {/* <Image
+        src={slide}
+        loader={({ src }) => src}
+        alt={`Slide Before ${index + 1}`}
+        fill
+        style={{
+          objectFit: "cover",
+        }}
+      /> */}
+      </div>
+    </Link>
+    <div className="h-[114px] px-[12px] py-[8px]">
+      <p className="mb-[8px] text-[14px] leading-[1.3]">
+        <span className="">{data.nome}</span>
+      </p>
+      <span className="text-[16px] font-semibold leading-[1] text-[#333]">
+        <span className="">R$ {data.preco}</span>
+      </span>
+    </div>
+    <div className="w-full">
+      <Link
+        href={`/pdp/[slug]`}
+        as={`/pdp/${data.slug}?addToCart=1`}
+        className="w-full"
+      >
+        <button className="flex items-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
+          <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
+            comprar
+          </span>
+          <span className="ml-[4px]">
+            <IconSacola />
+          </span>
+        </button>
+      </Link>
+    </div>
+  </div>
+);
+
+export function CarouselProducts({ dataForCarouselMultiple, complete }: any) {
   const scrollableRef = useRef(null);
   const [scrollPercentage, setScrollPercentage] = useState(0);
 
@@ -127,9 +189,13 @@ export function CarouselProducts({ dataForCarouselMultiple }: any) {
           onScroll={handleScroll}
         >
           <div className="flex gap-4">
-            {dataForCarouselMultiple.map((product: any, index: any) => (
-              <Product key={product.id} data={product} />
-            ))}
+            {dataForCarouselMultiple.map((product: any, index: any) =>
+              complete ? (
+                <ProductComplete key={product.id} data={product} />
+              ) : (
+                <Product key={product.id} data={product} />
+              ),
+            )}
           </div>
         </div>
         <ul className="mt-[24px] flex w-full justify-center gap-2">

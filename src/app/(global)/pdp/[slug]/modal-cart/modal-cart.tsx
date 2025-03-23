@@ -23,7 +23,7 @@ import { fetchCupom } from "@/modules/cupom/domain";
 import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";
 
-export function ModalCart() {
+export function ModalCart({ actualProduct }: { actualProduct?: any }) {
   const {
     sidebarMounted,
     setSidebarMounted,
@@ -35,7 +35,12 @@ export function ModalCart() {
     cupons,
     handleCupom,
     descontos,
+    setActualProduct,
   } = useMeuContexto();
+
+  useEffect(() => {
+    setActualProduct(actualProduct);
+  }, []);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -324,7 +329,10 @@ export function ModalCart() {
                   </p>
                 </div>
                 <div className="flex items-center justify-end gap-[8px]">
-                  <span className="text-wrap text-right text-[13px] font-bold leading-[1] underline">
+                  <span
+                    className="cursor-pointer text-wrap text-right text-[13px] font-bold leading-[1] underline"
+                    onClick={() => setOpenCart(false)}
+                  >
                     continuar
                     <br />
                     comprando

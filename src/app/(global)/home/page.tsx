@@ -1,6 +1,7 @@
 import { fetchProdutosForHome } from "@/modules/produto/domain";
 import { Product } from "@/components/home-product/carousel-products";
 import { ModalCart } from "../pdp/[slug]/modal-cart/modal-cart";
+import { CarouselProducts } from "../pdp/[slug]/carousel-products/carousel-products";
 
 export const metadata = {
   title: "Lové Cosméticos - Home",
@@ -40,8 +41,8 @@ export default async function HomeComponent() {
           </div>
         </div>
 
-        <div className="flex w-full flex-col items-center justify-center gap-[60px] px-[80px] py-10 md:w-[20%] md:pl-[24px] md:pr-0 md:pt-0">
-          {/* @ts-ignore */}
+        {/* <div className="flex w-full flex-col items-center justify-center gap-[60px] px-[80px] py-10 md:w-[20%] md:pl-[24px] md:pr-0 md:pt-0">
+          @ts-ignore
           {data?.map((product) => (
             <Product
               key={product.id}
@@ -56,7 +57,9 @@ export default async function HomeComponent() {
               }}
             />
           ))}
-        </div>
+        </div> */}
+
+        <CarouselProducts dataForCarouselMultiple={data} complete />
       </div>
 
       <ModalCart />
