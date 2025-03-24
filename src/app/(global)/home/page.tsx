@@ -59,7 +59,11 @@ export default async function HomeComponent() {
           ))}
         </div> */}
 
-        <CarouselProducts dataForCarouselMultiple={data} complete />
+        <div className="md:w-[40%]">
+          <CarouselProducts dataForCarouselMultiple={data} complete />
+
+          <CarouselProducts dataForCarouselMultiple={data} complete />
+        </div>
       </div>
 
       <ModalCart />

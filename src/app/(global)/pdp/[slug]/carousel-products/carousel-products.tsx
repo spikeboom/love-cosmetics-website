@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import IconSacola from "./icon-sacola";
 import "./style.css";
@@ -46,7 +46,7 @@ import Link from "next/link";
 export const Product = ({ data }: any) => (
   <div>
     <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
-      <div className="w-[168px]] relative h-[168px]">
+      <div className="relative h-[168px] w-[168px]">
         <Image
           src={
             // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
@@ -101,7 +101,7 @@ export const Product = ({ data }: any) => (
 export const ProductComplete = ({ data }: any) => (
   <div>
     <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
-      <div className="w-[168px]] relative h-[168px]">
+      <div className="relative h-[220px] w-[220px]">
         <Image
           src={
             // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
@@ -127,28 +127,31 @@ export const ProductComplete = ({ data }: any) => (
       /> */}
       </div>
     </Link>
-    <div className="h-[114px] px-[12px] py-[8px]">
-      <p className="mb-[8px] text-[14px] leading-[1.3]">
+    <div className="h-[160px] px-[8px] py-[8px]">
+      <p className="mb-[8px] text-[14px] font-bold leading-[1.3]">
         <span className="">{data.nome}</span>
+      </p>
+      <p className="mb-[8px] line-clamp-5 overflow-hidden text-ellipsis text-[12px] leading-[1.3]">
+        <span className="">{data.descricaoResumida}</span>
       </p>
       <span className="text-[16px] font-semibold leading-[1] text-[#333]">
         <span className="">R$ {data.preco}</span>
       </span>
     </div>
-    <div className="w-full">
+    <div className="flex w-full justify-center">
       <Link
         href={`/pdp/[slug]`}
         as={`/pdp/${data.slug}?addToCart=1`}
-        className="w-full"
+        className="w-full px-[12px]"
       >
-        <button className="flex items-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
+        <div className="flex w-full items-center justify-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
           <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
             comprar
           </span>
           <span className="ml-[4px]">
             <IconSacola />
           </span>
-        </button>
+        </div>
       </Link>
     </div>
   </div>
@@ -172,6 +175,25 @@ export function CarouselProducts({ dataForCarouselMultiple, complete }: any) {
 
   const breaks = [base, base * 2];
 
+  const [isWideScreen, setIsWideScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreenWidth = () => {
+      setIsWideScreen(window.innerWidth >= 723);
+    };
+
+    // Verifica na montagem
+    checkScreenWidth();
+
+    // Adiciona o listener
+    window.addEventListener("resize", checkScreenWidth);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", checkScreenWidth);
+    };
+  }, []);
+
   return (
     <div className="px-[16px] py-[24px] font-poppins">
       <h2 className="mb-[4px] text-[16px]">
@@ -184,7 +206,7 @@ export function CarouselProducts({ dataForCarouselMultiple, complete }: any) {
 
       <div>
         <div
-          className="my-scrollable-element w-full overflow-scroll"
+          className={`${!isWideScreen ? "my-scrollable-element" : ""} w-full overflow-scroll overflow-y-hidden md:pb-[12px]`}
           ref={scrollableRef}
           onScroll={handleScroll}
         >
