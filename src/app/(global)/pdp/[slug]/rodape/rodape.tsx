@@ -1,11 +1,22 @@
+import Image from "next/image";
+
 export function Rodape() {
   return (
     <div className="w-full bg-[#333] py-[36px] text-[#fff]">
       <div className="px-[24px]">
         <div className="flex flex-col items-center px-[20px] pt-[36px]">
           <div className="mb-[12px]">
-            <a href="/" className="font-playfair text-[32px]">
-              LOVÉ
+            <a href="/">
+              <div className="relative h-[40px] w-[140px]">
+                <Image
+                  src={"/logo/logo_love_20250324_white.svg"}
+                  alt={`logo love`}
+                  fill
+                  style={{
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
             </a>
           </div>
 

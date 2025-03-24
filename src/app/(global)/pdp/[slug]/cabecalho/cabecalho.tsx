@@ -6,6 +6,8 @@ import IconLogin from "../header/icon-login";
 import IconSearch from "../header/icon-search";
 import "./styles.css";
 import { useMeuContexto } from "@/components/context/context";
+import Image from "next/image";
+import { Opacity } from "@mui/icons-material";
 
 export function Cabecalho() {
   const { setSidebarMounted, qtdItemsCart } = useMeuContexto();
@@ -16,7 +18,6 @@ export function Cabecalho() {
 
   const stylesPulseLove = {
     animatedBox: {
-      color: "#333",
       animation: "pulse 3s infinite",
     },
   };
@@ -58,12 +59,18 @@ export function Cabecalho() {
             </div>
 
             <div>
-              <a
-                href="/"
-                className="font-playfair text-[32px]"
-                style={stylesPulseLove.animatedBox}
-              >
-                LOVÉ
+              <a href="/">
+                <div className="relative mt-[2px] h-[40px] w-[140px]">
+                  <Image
+                    src={"/logo/logo_love_20250324_black.svg"}
+                    alt={`logo love`}
+                    fill
+                    style={{
+                      objectFit: "contain",
+                      ...stylesPulseLove.animatedBox,
+                    }}
+                  />
+                </div>
               </a>
             </div>
 
