@@ -35,12 +35,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
     cupons,
     handleCupom,
     descontos,
-    setActualProduct,
   } = useMeuContexto();
-
-  useEffect(() => {
-    setActualProduct(actualProduct);
-  }, []);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 

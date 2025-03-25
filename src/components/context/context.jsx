@@ -11,8 +11,6 @@ export const MeuContextoProvider = ({ children }) => {
   const [total, setTotal] = useState(0);
   const [sidebarMounted, setSidebarMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
-  const [actualProductToAddToCart, setActualProductToAddToCart] =
-    useState(null);
 
   const addProductToCart = (product) => {
     const newCart = { ...cart };
@@ -23,30 +21,6 @@ export const MeuContextoProvider = ({ children }) => {
     }
     setCart(newCart);
   };
-
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const [addExecuting, setAddExecuting] = useState(false);
-
-  useEffect(() => {
-    if (
-      addExecuting ||
-      !searchParams.has("addToCart") ||
-      !actualProductToAddToCart
-    ) {
-      setActualProductToAddToCart(null);
-      return;
-    }
-    setAddExecuting(true);
-    const addToCart = searchParams.get("addToCart");
-    if (Number(addToCart) > 0 && actualProductToAddToCart) {
-      router.push(window.location.pathname);
-      addProductToCart(actualProductToAddToCart);
-      setSidebarMounted(true);
-    }
-    setAddExecuting(false);
-  }, [searchParams, actualProductToAddToCart]);
 
   const addQuantityProductToCart = ({ product }) => {
     const newCart = { ...cart };
@@ -158,7 +132,6 @@ export const MeuContextoProvider = ({ children }) => {
           cupons,
           handleCupom,
           descontos,
-          setActualProduct: setActualProductToAddToCart,
         }}
       >
         {children}

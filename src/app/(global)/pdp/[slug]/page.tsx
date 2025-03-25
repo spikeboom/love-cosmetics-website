@@ -27,6 +27,7 @@ import {
 } from "@/modules/produto/domain";
 import { ModalCart } from "./modal-cart/modal-cart";
 import { Metadata, ResolvingMetadata } from "next";
+import { AddToCart } from "@/components/add-to-cart/add-to-cart";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -149,6 +150,8 @@ export default async function PdpPage({
       <BarraFixaComprar produto={produto} extraClassesForTopDiv={`md:hidden`} />
 
       <ModalCart actualProduct={produto} />
+
+      <AddToCart produto={produto} />
     </>
   );
 }

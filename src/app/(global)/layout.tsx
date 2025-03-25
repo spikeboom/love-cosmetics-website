@@ -8,7 +8,6 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { MeuContextoProvider } from "../../components/context/context";
-import Script from "next/script";
 import { Cabecalho } from "./pdp/[slug]/cabecalho/cabecalho";
 import { Rodape } from "./pdp/[slug]/rodape/rodape";
 import { GoogleTagManager } from "@next/third-parties/google";
