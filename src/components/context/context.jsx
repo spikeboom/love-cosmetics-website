@@ -93,8 +93,11 @@ export const MeuContextoProvider = ({ children }) => {
       (acc, product) => acc + product.preco * product.quantity,
       0,
     );
-    // interation cupons para cada cupom modificar total
-    const cupomResult = cupons.reduce(
+
+    // Proteção contra cupons inválidos
+    const validCupons = Array.isArray(cupons) ? cupons : [];
+
+    const cupomResult = validCupons.reduce(
       (acc, cupom) => {
         return {
           multiplicar: acc.multiplicar * cupom.multiplacar,
@@ -103,11 +106,13 @@ export const MeuContextoProvider = ({ children }) => {
       },
       { multiplicar: 1, diminuir: 0 },
     );
+
     const totalFinal = total * cupomResult.multiplicar - cupomResult.diminuir;
     const totalDescontos = total - totalFinal;
+
     setDescontos(totalDescontos);
     localStorage.setItem("cart", JSON.stringify(cart));
-    localStorage.setItem("cupons", JSON.stringify(cupons));
+    localStorage.setItem("cupons", JSON.stringify(validCupons));
     setTotal(totalFinal + 15); // 15 de frete
   }, [cart, cupons]);
 

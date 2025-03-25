@@ -11,7 +11,6 @@ import { MeuContextoProvider } from "../../components/context/context";
 import { Cabecalho } from "./pdp/[slug]/cabecalho/cabecalho";
 import { Rodape } from "./pdp/[slug]/rodape/rodape";
 import { GoogleTagManager } from "@next/third-parties/google";
-import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,9 +74,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
       >
-        <Suspense fallback={<div>Loading...</div>}>
-          <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
-        </Suspense>
+        <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
       </body>
     </html>
   );
