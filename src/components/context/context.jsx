@@ -11,7 +11,8 @@ export const MeuContextoProvider = ({ children }) => {
   const [total, setTotal] = useState(0);
   const [sidebarMounted, setSidebarMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
-  const [actualProduct, setActualProduct] = useState(null);
+  const [actualProductToAddToCart, setActualProductToAddToCart] =
+    useState(null);
 
   const addProductToCart = (product) => {
     const newCart = { ...cart };
@@ -29,18 +30,23 @@ export const MeuContextoProvider = ({ children }) => {
   const [addExecuting, setAddExecuting] = useState(false);
 
   useEffect(() => {
-    if (addExecuting || !searchParams.has("addToCart") || !actualProduct) {
+    if (
+      addExecuting ||
+      !searchParams.has("addToCart") ||
+      !actualProductToAddToCart
+    ) {
+      setActualProductToAddToCart(null);
       return;
     }
     setAddExecuting(true);
     const addToCart = searchParams.get("addToCart");
-    if (Number(addToCart) > 0 && actualProduct) {
+    if (Number(addToCart) > 0 && actualProductToAddToCart) {
       router.push(window.location.pathname);
-      addProductToCart(actualProduct);
+      addProductToCart(actualProductToAddToCart);
       setSidebarMounted(true);
     }
     setAddExecuting(false);
-  }, [searchParams, actualProduct]);
+  }, [searchParams, actualProductToAddToCart]);
 
   const addQuantityProductToCart = ({ product }) => {
     const newCart = { ...cart };
@@ -54,6 +60,9 @@ export const MeuContextoProvider = ({ children }) => {
     const newCart = { ...cart };
     if (newCart[product.id] && newCart[product.id].quantity > 1) {
       newCart[product.id].quantity -= 1;
+    } else if (newCart[product.id] && newCart[product.id].quantity === 1) {
+      removeProductFromCart({ product });
+      return;
     }
     setCart(newCart);
   };
@@ -149,7 +158,7 @@ export const MeuContextoProvider = ({ children }) => {
           cupons,
           handleCupom,
           descontos,
-          setActualProduct,
+          setActualProduct: setActualProductToAddToCart,
         }}
       >
         {children}

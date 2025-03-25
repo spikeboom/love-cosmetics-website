@@ -229,7 +229,8 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                     {/* <MdOutlineChevronRight size={18} /> */}
                   </span>
 
-                  <p className="text-[14px]">R$ 15</p>
+                  {/* <p className="text-[14px]">R$ 15</p> */}
+                  <p className="text-[14px]">R$ 0</p>
                 </div>
 
                 <div className="my-[14px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
