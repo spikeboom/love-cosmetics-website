@@ -15,8 +15,6 @@ export default async function HomeComponent() {
   const { data: dataKit } = await fetchProdutosForHome_Kit();
   const { data: dataNoKit } = await fetchProdutosForHome_NotKit();
 
-  console.log({ dataKit });
-
   return (
     <>
       <div className="flex flex-col md:flex-row md:justify-center md:px-[18px]">
