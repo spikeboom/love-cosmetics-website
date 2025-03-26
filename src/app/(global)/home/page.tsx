@@ -1,4 +1,8 @@
-import { fetchProdutosForHome } from "@/modules/produto/domain";
+import {
+  fetchProdutosForHome,
+  fetchProdutosForHome_Kit,
+  fetchProdutosForHome_NotKit,
+} from "@/modules/produto/domain";
 import { Product } from "@/components/home-product/carousel-products";
 import { ModalCart } from "../pdp/[slug]/modal-cart/modal-cart";
 import { CarouselProducts } from "../pdp/[slug]/carousel-products/carousel-products";
@@ -8,7 +12,10 @@ export const metadata = {
 };
 
 export default async function HomeComponent() {
-  const { data } = await fetchProdutosForHome();
+  const { data: dataKit } = await fetchProdutosForHome_Kit();
+  const { data: dataNoKit } = await fetchProdutosForHome_NotKit();
+
+  console.log({ dataKit });
 
   return (
     <>
@@ -60,9 +67,19 @@ export default async function HomeComponent() {
         </div> */}
 
         <div className="md:w-[40%]">
-          <CarouselProducts dataForCarouselMultiple={data} complete />
+          <CarouselProducts
+            dataForCarouselMultiple={dataNoKit}
+            complete
+            title="Cuide da sua pele com fórmulas especiais"
+            subtitle="Hidrate, nutra, proteja e renove com nossos produtos naturais e multifuncionais — sua pele merece esse carinho todos os dias."
+          />
 
-          <CarouselProducts dataForCarouselMultiple={data} complete />
+          <CarouselProducts
+            dataForCarouselMultiple={dataKit}
+            complete
+            title="Combinações que transformam sua pele"
+            subtitle="Descubra nossos kits com fórmulas pensadas para cada momento do seu cuidado — do essencial ao intensivo, tudo em perfeita harmonia."
+          />
         </div>
       </div>
 

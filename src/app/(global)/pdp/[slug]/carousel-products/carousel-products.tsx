@@ -157,7 +157,12 @@ export const ProductComplete = ({ data }: any) => (
   </div>
 );
 
-export function CarouselProducts({ dataForCarouselMultiple, complete }: any) {
+export function CarouselProducts({
+  dataForCarouselMultiple,
+  complete,
+  title,
+  subtitle,
+}: any) {
   const scrollableRef = useRef(null);
   const [scrollPercentage, setScrollPercentage] = useState(0);
 
@@ -197,11 +202,12 @@ export function CarouselProducts({ dataForCarouselMultiple, complete }: any) {
   return (
     <div className="px-[16px] py-[24px] font-poppins">
       <h2 className="mb-[4px] text-[16px]">
-        Cuide da sua pele com fórmulas especiais
+        {title || "Cuide da sua pele com fórmulas especiais"}
       </h2>
       <p className="mb-[24px] text-[12px] text-[#333333BF]">
-        Descubra combinações perfeitas para hidratar, nutrir e revitalizar sua
-        rotina de cuidados.
+        {subtitle ||
+          `Descubra combinações perfeitas para hidratar, nutrir e revitalizar sua
+        rotina de cuidados.`}
       </p>
 
       <div>
