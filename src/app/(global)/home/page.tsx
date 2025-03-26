@@ -13,7 +13,7 @@ export default async function HomeComponent() {
   return (
     <>
       <div className="flex flex-col md:flex-row md:justify-center md:px-[18px]">
-        <div className="relative aspect-[378/678] w-full md:sticky md:top-[90px] md:mb-[100px] md:h-fit md:w-[30%]">
+        <div className="relative aspect-[408/720] w-full md:sticky md:top-[90px] md:mb-[100px] md:h-fit md:w-[30%]">
           <video
             className="w-full object-cover brightness-[.9]"
             controls={false}

@@ -12,7 +12,7 @@
 
 @media (max-width: 768px) {
   .headerBottomSpace {
-    padding-top: 0;
+    padding-top: 34px;
   }
   .cabecalhoLove {
     opacity: 0.9;
