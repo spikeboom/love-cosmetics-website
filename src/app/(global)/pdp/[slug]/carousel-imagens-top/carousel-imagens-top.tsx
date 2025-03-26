@@ -103,16 +103,16 @@ export function CarouselImagensTop({
   return (
     <div
       ref={carouselRef}
-      className={`top-[100px] mx-[-16x] mt-4 h-fit w-full overflow-hidden md:sticky md:ml-[18px] md:w-[50%] ${extraClassesForTopDiv}`}
+      className={`relative mx-[-16x] mt-4 h-fit w-full overflow-hidden md:sticky md:ml-[18px] md:w-[50%] ${extraClassesForTopDiv}`}
     >
       <button
-        className="absolute left-[1em] top-[50%] z-10 flex h-[34px] w-[34px] -translate-y-2/4 items-center justify-center rounded-full bg-[#fafafa]"
+        className="absolute left-[1em] top-1/2 z-10 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-full bg-[#fafafa]"
         onClick={handlePrev}
       >
         <FaChevronLeft color="#dcafad" size={16} />
       </button>
       <button
-        className="absolute right-[1em] top-[50%] z-10 flex h-[34px] w-[34px] -translate-y-2/4 items-center justify-center rounded-full bg-[#fafafa]"
+        className="absolute right-[1em] top-1/2 z-10 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-full bg-[#fafafa]"
         onClick={handleNext}
       >
         <FaChevronRight color="#dcafad" size={16} />
