@@ -2,7 +2,6 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider } from "notistack";
-import { useRouter, useSearchParams } from "next/navigation";
 
 const MeuContexto = createContext();
 
@@ -10,6 +9,7 @@ export const MeuContextoProvider = ({ children }) => {
   const [cart, setCart] = useState({});
   const [total, setTotal] = useState(0);
   const [sidebarMounted, setSidebarMounted] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
 
   const addProductToCart = (product) => {
@@ -127,6 +127,8 @@ export const MeuContextoProvider = ({ children }) => {
           setCart,
           sidebarMounted,
           setSidebarMounted,
+          menuMounted,
+          setMenuMounted,
           addProductToCart,
           addQuantityProductToCart,
           subtractQuantityProductToCart,

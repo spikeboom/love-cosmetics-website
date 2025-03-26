@@ -10,7 +10,7 @@ import Image from "next/image";
 import { Opacity } from "@mui/icons-material";
 
 export function Cabecalho() {
-  const { setSidebarMounted, qtdItemsCart } = useMeuContexto();
+  const { setSidebarMounted, qtdItemsCart, setMenuMounted } = useMeuContexto();
 
   const handleAbrirCarrinho = () => {
     setSidebarMounted(true);
@@ -49,6 +49,7 @@ export function Cabecalho() {
                     elemento_clicado: "meu-botao",
                     url_pagina: window.location.href,
                   });
+                  setMenuMounted(true);
                 }}
               >
                 <IconHambuger />

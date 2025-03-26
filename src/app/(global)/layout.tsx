@@ -11,6 +11,7 @@ import { MeuContextoProvider } from "../../components/context/context";
 import { Cabecalho } from "./pdp/[slug]/cabecalho/cabecalho";
 import { Rodape } from "./pdp/[slug]/rodape/rodape";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { ModalMenu } from "@/components/menu/menu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,8 @@ export default function RootLayout({
       <Rodape />
 
       <div className="h-[100px] bg-[#333]"></div>
+
+      <ModalMenu />
     </>
   );
 
