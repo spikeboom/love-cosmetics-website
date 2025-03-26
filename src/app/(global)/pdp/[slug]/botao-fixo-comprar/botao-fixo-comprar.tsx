@@ -76,7 +76,7 @@ export function BotaoComprar({
 
   return (
     <>
-      <div className="flex items-center gap-[24px]">
+      <div className={`flex items-center gap-[24px] ${extraClassesForTopDiv}`}>
         <p className="flex w-fit flex-col">
           <strong className="text-[14px]">
             R$ {preco?.toString().replace(".", ",")}
@@ -90,7 +90,7 @@ export function BotaoComprar({
           </span>
         </p>
 
-        <div className={`w-fit ${extraClassesForTopDiv}`}>
+        <div className={`w-fit`}>
           <button
             className="w-full rounded-[100px] bg-[#C0392B] px-[64px] py-[12px] text-[16px] font-semibold text-[#fff]"
             onClick={handleComprar}
