@@ -1,5 +1,6 @@
 import { Divider } from "@mui/material";
 import Image from "next/image";
+import Link from "next/link";
 import {
   FaFacebook,
   FaInstagram,
@@ -7,6 +8,7 @@ import {
   FaPinterest,
   FaSpotify,
   FaTiktok,
+  FaWhatsapp,
   FaXTwitter,
   FaYoutube,
 } from "react-icons/fa6";
@@ -49,29 +51,45 @@ export function Rodape() {
         </div>
 
         <div className="mb-[32px] flex flex-wrap md:mb-0">
-          <div className="mb-6 flex w-1/4 justify-center">
+          <Link
+            href="https://www.facebook.com/share/15wd5HjTTF/?mibextid=wwXIfr"
+            target="_blank"
+            className="mb-6 flex w-1/4 justify-center"
+          >
             <FaFacebook size={32} />
-          </div>
-          <div className="mb-6 flex w-1/4 justify-center">
+          </Link>
+          <Link
+            href="https://www.instagram.com/cosmeticoslove_?igsh=MTVjejYzZ2J1MHVpbg=="
+            target="_blank"
+            className="mb-6 flex w-1/4 justify-center"
+          >
             <FaInstagram size={32} />
-          </div>
-          <div className="mb-6 flex w-1/4 justify-center">
-            <FaXTwitter size={32} />
-          </div>
-          <div className="mb-6 flex w-1/4 justify-center">
+          </Link>
+          <Link
+            href="https://wa.me/message/JPCGPYCZS7ENN1"
+            target="_blank"
+            className="mb-6 flex w-1/4 justify-center"
+          >
+            <FaWhatsapp size={32} />
+          </Link>
+          <Link
+            href="https://www.tiktok.com/@lov.cosmticos?_t=ZM-8v65G7Hjo86&_r=1"
+            target="_blank"
+            className="mb-6 flex w-1/4 justify-center"
+          >
             <FaTiktok size={32} />
+          </Link>
+          <div className="mb-6 flex w-1/4 justify-center">
+            <FaYoutube size={32} className="opacity-[0.5]" />
           </div>
           <div className="mb-6 flex w-1/4 justify-center">
-            <FaYoutube size={32} />
+            <FaSpotify size={32} className="opacity-[0.5]" />
           </div>
           <div className="mb-6 flex w-1/4 justify-center">
-            <FaPinterest size={32} />
+            <FaLinkedin size={32} className="opacity-[0.5]" />
           </div>
           <div className="mb-6 flex w-1/4 justify-center">
-            <FaSpotify size={32} />
-          </div>
-          <div className="mb-6 flex w-1/4 justify-center">
-            <FaLinkedin size={32} />
+            <FaXTwitter size={32} className="opacity-[0.5]" />
           </div>
         </div>
       </div>
