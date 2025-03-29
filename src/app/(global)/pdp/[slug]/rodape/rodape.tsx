@@ -1,3 +1,4 @@
+import { Divider } from "@mui/material";
 import Image from "next/image";
 import {
   FaFacebook,
@@ -15,7 +16,7 @@ export function Rodape() {
     <div className="flex w-full flex-col items-center">
       <div className="flex w-full flex-col items-center justify-center md:flex-row md:gap-[16px]">
         <div className="flex w-full max-w-[400px] flex-col items-center">
-          <div className="relative mb-[32px] h-[140px] w-full max-w-[400px]">
+          <div className="relative h-[140px] w-full max-w-[400px] md:mb-[32px]">
             <Image
               src={"/footer/meios-pagamento.png"}
               alt={`meios de pagamento love`}
@@ -25,6 +26,26 @@ export function Rodape() {
               }}
             />
           </div>
+        </div>
+
+        <div className="w-full md:hidden">
+          <Divider
+            variant="middle"
+            component="div"
+            style={{
+              marginTop: "16px",
+              marginBottom: "32px",
+            }}
+          />
+        </div>
+
+        <div className="my-[32px] mb-[42px] ml-[-24px] mr-[8px] hidden h-[170px] md:block">
+          <Divider
+            variant="middle"
+            component="div"
+            orientation="vertical"
+            className="h-full"
+          />
         </div>
 
         <div className="mb-[32px] flex flex-wrap md:mb-0">
