@@ -90,7 +90,7 @@ export default async function PdpPage({
 
               <BotaoComprar
                 produto={produto}
-                extraClassesForTopDiv={`hidden md:block`}
+                extraClassesForTopDiv={`hidden md:flex`}
                 preco={produto?.preco}
               />
 
