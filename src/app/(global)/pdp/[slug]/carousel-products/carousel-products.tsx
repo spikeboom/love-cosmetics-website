@@ -4,6 +4,7 @@ import Image from "next/image";
 import IconSacola from "./icon-sacola";
 import "./style.css";
 import Link from "next/link";
+import { useMeuContexto } from "@/components/context/context";
 
 // const arrayProducts = [
 //   {
@@ -43,7 +44,7 @@ import Link from "next/link";
 //   },
 // ];
 
-export const Product = ({ data }: any) => (
+export const Product = ({ data, handlerAdd }: any) => (
   <div>
     <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
       <div className="relative h-[168px] w-[168px]">
@@ -80,10 +81,11 @@ export const Product = ({ data }: any) => (
       </span>
     </div>
     <div className="w-full">
-      <Link
-        href={`/pdp/[slug]`}
-        as={`/pdp/${data.slug}?addToCart=1`}
+      <div
         className="w-full"
+        onClick={handlerAdd}
+        // href={`/pdp/[slug]`}
+        // as={`/pdp/${data.slug}?addToCart=1`}
       >
         <button className="flex items-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
           <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
@@ -93,12 +95,12 @@ export const Product = ({ data }: any) => (
             <IconSacola />
           </span>
         </button>
-      </Link>
+      </div>
     </div>
   </div>
 );
 
-export const ProductComplete = ({ data }: any) => (
+export const ProductComplete = ({ data, handlerAdd }: any) => (
   <div>
     <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
       <div className="relative h-[220px] w-[220px]">
@@ -139,10 +141,11 @@ export const ProductComplete = ({ data }: any) => (
       </span>
     </div>
     <div className="flex w-full justify-center">
-      <Link
-        href={`/pdp/[slug]`}
-        as={`/pdp/${data.slug}?addToCart=1`}
+      <div
+        // href={`/pdp/[slug]`}
+        // as={`/pdp/${data.slug}?addToCart=1`}
         className="w-full px-[12px]"
+        onClick={handlerAdd}
       >
         <div className="flex w-full items-center justify-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
           <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
@@ -152,7 +155,7 @@ export const ProductComplete = ({ data }: any) => (
             <IconSacola />
           </span>
         </div>
-      </Link>
+      </div>
     </div>
   </div>
 );
@@ -199,6 +202,13 @@ export function CarouselProducts({
     };
   }, []);
 
+  const { addProductToCart, setSidebarMounted } = useMeuContexto();
+
+  const handleComprar = (produto: any) => {
+    addProductToCart(produto);
+    setSidebarMounted(true);
+  };
+
   return (
     <div className="px-[16px] py-[24px] font-poppins">
       <h2 className="mb-[4px] text-[16px]">
@@ -219,9 +229,17 @@ export function CarouselProducts({
           <div className="flex gap-4">
             {dataForCarouselMultiple.map((product: any, index: any) =>
               complete ? (
-                <ProductComplete key={product.id} data={product} />
+                <ProductComplete
+                  key={product.id}
+                  data={product}
+                  handlerAdd={() => handleComprar(product)}
+                />
               ) : (
-                <Product key={product.id} data={product} />
+                <Product
+                  key={product.id}
+                  data={product}
+                  handlerAdd={() => handleComprar(product)}
+                />
               ),
             )}
           </div>
