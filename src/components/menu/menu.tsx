@@ -34,11 +34,11 @@ const listMenus = [
     text: "Kits",
     submenus: [
       {
-        href: "/",
+        href: "/pdp/kit-completo",
         text: "Kit Skincare",
       },
       {
-        href: "/",
+        href: "/pdp/kit-uso-diario",
         text: "Kit Full Lovè",
       },
     ],
@@ -48,6 +48,7 @@ const listMenus = [
     iconColor: "#dcafad",
     iconSize: 32,
     text: "Promoções",
+    enabled: false,
     submenus: [
       {
         href: "/",
@@ -70,15 +71,15 @@ const listMenus = [
     text: "Rotina Diária",
     submenus: [
       {
-        href: "/",
+        href: "/pdp/serum-facial",
         text: "Sérum",
       },
       {
-        href: "/",
+        href: "/pdp/hidratante-facial",
         text: "Hidratante",
       },
       {
-        href: "/",
+        href: "/pdp/espuma-facial",
         text: "Espuma",
       },
     ],
@@ -90,8 +91,8 @@ const listMenus = [
     text: "Corporal",
     submenus: [
       {
-        href: "/",
-        text: "Manteiga",
+        href: "/pdp/manteiga-corporal",
+        text: "Manteiga Corporal de Tucumã",
       },
     ],
   },
@@ -102,8 +103,8 @@ const listMenus = [
     text: "Argila",
     submenus: [
       {
-        href: "/",
-        text: "Máscara",
+        href: "/pdp/mascara-de-argila",
+        text: "Máscara de Argila Branca",
       },
     ],
   },
@@ -112,6 +113,7 @@ const listMenus = [
 const listMenusSimples = [
   {
     text: "Conheça Nossa História",
+    enabled: false,
     href: "/",
   },
 ];
@@ -149,13 +151,19 @@ export function ModalMenu() {
     setActualMenu(null);
   };
 
-  const itemMenu = ({ text, iconName, iconColor, iconSize }: any) => {
+  const itemMenu = ({
+    text,
+    iconName,
+    iconColor,
+    iconSize,
+    enabled = true,
+  }: any) => {
     const Icon = getDynamicIcon(iconName);
 
     return (
       <button
-        onClick={() => handleEnterMenu({ text })}
-        className="flex w-full items-center justify-between p-4 pr-6"
+        onClick={() => enabled && handleEnterMenu({ text })}
+        className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
         key={text}
       >
         <div className="flex items-center">
@@ -167,10 +175,10 @@ export function ModalMenu() {
     );
   };
 
-  const itemMenuSimples = ({ text, href }: any) => (
+  const itemMenuSimples = ({ text, href, enabled = true }: any) => (
     <Link
-      href={href}
-      className="flex w-full items-center justify-between p-4 pr-6"
+      href={enabled ? href : ""}
+      className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
       key={text}
     >
       <div className="flex items-center">
@@ -180,10 +188,10 @@ export function ModalMenu() {
     </Link>
   );
 
-  const itemMenuSecundario = ({ text, href }: any) => (
+  const itemMenuSecundario = ({ text, href, enabled = true }: any) => (
     <Link
-      href={href}
-      className="flex w-full items-center justify-between p-4 pr-6"
+      href={enabled ? href : ""}
+      className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
       key={text}
     >
       <span className="ml-[8px] text-[16px] font-semibold">{text}</span>
@@ -217,7 +225,11 @@ export function ModalMenu() {
       />
 
       {listMenusSimples.map((menu) =>
-        itemMenuSimples({ text: menu.text, href: menu.href }),
+        itemMenuSimples({
+          text: menu.text,
+          href: menu.href,
+          enabled: menu.enabled ?? true,
+        }),
       )}
     </div>
   );
