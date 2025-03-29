@@ -113,7 +113,8 @@ export const MeuContextoProvider = ({ children }) => {
     setDescontos(totalDescontos);
     localStorage.setItem("cart", JSON.stringify(cart));
     localStorage.setItem("cupons", JSON.stringify(validCupons));
-    setTotal(totalFinal + 15); // 15 de frete
+    const valorFrete = 0; // 15
+    setTotal(totalFinal + valorFrete);
   }, [cart, cupons]);
 
   return (
