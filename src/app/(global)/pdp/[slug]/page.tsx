@@ -56,6 +56,12 @@ export default async function PdpPage({
 
   const { data: dataForCarouselMultiple } = await fetchProdutosForCarouselPDP();
 
+  const produtosOrdenados = dataForCarouselMultiple.sort((a, b) => {
+    const aContemKit = a.nome.toLowerCase().includes("kit") ? 0 : 1;
+    const bContemKit = b.nome.toLowerCase().includes("kit") ? 0 : 1;
+    return aContemKit - bContemKit;
+  });
+
   return (
     <>
       <section>
@@ -115,9 +121,7 @@ export default async function PdpPage({
               {/* <PagueCom />   */}
             </article>
 
-            <CarouselProducts
-              dataForCarouselMultiple={dataForCarouselMultiple}
-            />
+            <CarouselProducts dataForCarouselMultiple={produtosOrdenados} />
           </main>
         </div>
       </section>
