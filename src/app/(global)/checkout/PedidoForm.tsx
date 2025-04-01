@@ -115,7 +115,7 @@ const PedidoForm: React.FC = () => {
       const result = await postPedido({
         ...data,
         items: items,
-        cupons: cupons.map((c: any) => c.codigo),
+        cupons: cupons?.map((c: any) => c.codigo),
         descontos: Math.trunc(descontos * 100),
         total_pedido: total,
       });
