@@ -23,6 +23,7 @@ import { fetchCupom } from "@/modules/cupom/domain";
 import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";
 import { freteValue } from "@/utils/frete-value";
+import { formatPrice } from "@/utils/format-price";
 
 export function ModalCart({ actualProduct }: { actualProduct?: any }) {
   const {
@@ -139,7 +140,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                     key={id}
                     className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]"
                   >
-                    <div className="mr-[12px] h-full">
+                    <a href={product.slug} className="mr-[12px] h-full">
                       <div className="relative h-[60px] w-[60px]">
                         <Image
                           src={
@@ -155,7 +156,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                           }}
                         />
                       </div>
-                    </div>
+                    </a>
                     <div className="w-full">
                       <div className="mb-[6px] flex items-center justify-between">
                         <h4 className="font-poppins text-[13px] font-semibold">
@@ -185,21 +186,23 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                           />
                         </div>
 
-                        {/* <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
-                          <IoMdPricetag color="#333" />
-                          15% OFF
-                        </div> */}
+                        {(product.tag_desconto_1 || product.tag_desconto_2) && (
+                          <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
+                            <IoMdPricetag color="#333" />
+                            {product.tag_desconto_1 ||
+                              product.tag_desconto_2}{" "}
+                            OFF
+                          </div>
+                        )}
 
                         <div className="w-full">
-                          <span className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through">
-                            R${" "}
-                            {(product?.preco * 1.15)
-                              ?.toFixed(2)
-                              .toString()
-                              .replace(".", ",")}
-                          </span>
+                          {product.preco_de && (
+                            <span className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through">
+                              R$ {formatPrice(product?.preco_de)}
+                            </span>
+                          )}
                           <span className="block text-end text-[14px] font-semibold">
-                            R$ {product?.preco?.toString().replace(".", ",")}
+                            R$ {formatPrice(product?.preco)}
                           </span>
                         </div>
                       </div>

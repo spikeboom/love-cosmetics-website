@@ -1,6 +1,7 @@
 "use client";
 
 import { useMeuContexto } from "@/components/context/context";
+import { formatPrice } from "@/utils/format-price";
 
 interface BarraFixaComprarProps {
   produto: any;
@@ -35,15 +36,23 @@ export function BarraFixaComprar({
         <div className="flex items-center gap-[20px] whitespace-nowrap px-[16px] py-[12px]">
           <div className="h-fit w-fit">
             <p className="flex w-fit flex-col">
-              <strong className="text-[14px]">
-                R$ {preco?.toString().replace(".", ",")}
-              </strong>
+              {produto.preco_de && (
+                <div className="mb-[2px] flex items-center gap-[2px]">
+                  <span className="text-[11px] font-semibold leading-[1] text-[#a5a5a5] line-through">
+                    <span className="">R$ {formatPrice(produto.preco_de)}</span>
+                  </span>
+                  {(produto.tag_desconto_1 || produto.tag_desconto_2) && (
+                    <div className="rounded-[4px] bg-[#e9cfcd] px-[4px] py-[2px] text-[10px] font-medium text-black">
+                      {produto.tag_desconto_1 || produto.tag_desconto_2}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <strong className="text-[14px]">R$ {formatPrice(preco)}</strong>
 
               <span className="text-[12px] text-[#333333BF]">
-                ou 3x R${" "}
-                {(Math.round((preco * 100) / 3) / 100)
-                  ?.toString()
-                  .replace(".", ",")}
+                ou 3x R$ {formatPrice(Math.round((preco * 100) / 3) / 100)}
               </span>
             </p>
           </div>

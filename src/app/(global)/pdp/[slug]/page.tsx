@@ -121,7 +121,10 @@ export default async function PdpPage({
               {/* <PagueCom />   */}
             </article>
 
-            <CarouselProducts dataForCarouselMultiple={produtosOrdenados} />
+            <CarouselProducts
+              complete
+              dataForCarouselMultiple={produtosOrdenados}
+            />
           </main>
         </div>
       </section>

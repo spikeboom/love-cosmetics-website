@@ -35,11 +35,11 @@ const listMenus = [
     submenus: [
       {
         href: "/pdp/kit-completo",
-        text: "Kit Skincare",
+        text: "Kit Completo",
       },
       {
         href: "/pdp/kit-uso-diario",
-        text: "Kit Full Lovè",
+        text: "Kit Uso Diário",
       },
     ],
   },
@@ -176,7 +176,7 @@ export function ModalMenu() {
   };
 
   const itemMenuSimples = ({ text, href, enabled = true }: any) => (
-    <Link
+    <a
       href={enabled ? href : ""}
       className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
       key={text}
@@ -185,17 +185,17 @@ export function ModalMenu() {
         <span className="ml-[8px] text-[16px] font-semibold">{text}</span>
       </div>
       <FaChevronRight size={12} />
-    </Link>
+    </a>
   );
 
   const itemMenuSecundario = ({ text, href, enabled = true }: any) => (
-    <Link
+    <a
       href={enabled ? href : ""}
       className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
       key={text}
     >
       <span className="ml-[8px] text-[16px] font-semibold">{text}</span>
-    </Link>
+    </a>
   );
 
   const itemMenuSecundarioVoltar = ({ text }: any) => (

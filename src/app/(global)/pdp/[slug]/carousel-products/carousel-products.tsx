@@ -5,6 +5,7 @@ import IconSacola from "./icon-sacola";
 import "./style.css";
 import Link from "next/link";
 import { useMeuContexto } from "@/components/context/context";
+import { formatPrice } from "@/utils/format-price";
 
 // const arrayProducts = [
 //   {
@@ -103,7 +104,7 @@ export const Product = ({ data, handlerAdd }: any) => (
 export const ProductComplete = ({ data, handlerAdd }: any) => (
   <div>
     <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
-      <div className="relative h-[220px] w-[220px]">
+      <div className="relative h-[230px] w-[230px]">
         <Image
           src={
             // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
@@ -118,6 +119,12 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
           }}
           className="rounded-[8px]"
         />
+
+        {(data.tag_desconto_1 || data.tag_desconto_2) && (
+          <div className="absolute right-0 top-4 bg-[#e9cfcd] py-[2px] pl-[12px] pr-[4px] font-medium text-black">
+            {data.tag_desconto_1 || data.tag_desconto_2}
+          </div>
+        )}
         {/* <Image
         src={slide}
         loader={({ src }) => src}
@@ -129,34 +136,44 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
       /> */}
       </div>
     </Link>
-    <div className="h-[160px] px-[8px] py-[8px]">
+    <div className="flex h-[190px] flex-col px-[8px] py-[8px]">
       <p className="mb-[8px] text-[14px] font-bold leading-[1.3]">
         <span className="">{data.nome}</span>
       </p>
       <p className="mb-[8px] line-clamp-5 overflow-hidden text-ellipsis text-[12px] leading-[1.3]">
         <span className="">{data.descricaoResumida}</span>
       </p>
-      <span className="text-[16px] font-semibold leading-[1] text-[#333]">
-        <span className="">R$ {data.preco}</span>
-      </span>
-    </div>
-    <div className="flex w-full justify-center">
-      <div
-        // href={`/pdp/[slug]`}
-        // as={`/pdp/${data.slug}?addToCart=1`}
-        className="w-full px-[12px]"
-        onClick={handlerAdd}
-      >
-        <div className="flex w-full items-center justify-center rounded-[100px] bg-[#C0392B] px-[32px] py-[8px]">
-          <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
-            comprar
+      <div className="flex-1" />
+      <div className="flex">
+        <div className="flex flex-1 flex-col justify-center">
+          {data.preco_de && (
+            <span className="mb-[2px] text-[13px] font-semibold leading-[1] text-[#a5a5a5] line-through">
+              <span className="">R$ {formatPrice(data.preco_de)}</span>
+            </span>
+          )}
+          <span className="text-[16px] font-semibold leading-[1] text-[#333]">
+            <span className="">R$ {formatPrice(data.preco)}</span>
           </span>
-          <span className="ml-[4px]">
-            <IconSacola />
-          </span>
+        </div>
+
+        <div
+          // href={`/pdp/[slug]`}
+          // as={`/pdp/${data.slug}?addToCart=1`}
+          className=""
+          onClick={handlerAdd}
+        >
+          <div className="flex w-fit items-center justify-center rounded-[100px] bg-[#C0392B] px-[12px] py-[8px]">
+            <span className="text-[16px] font-semibold leading-[130%] text-[#FFF]">
+              comprar
+            </span>
+            <span className="ml-[4px]">
+              <IconSacola />
+            </span>
+          </div>
         </div>
       </div>
     </div>
+    <div className="flex w-full justify-center"></div>
   </div>
 );
 
