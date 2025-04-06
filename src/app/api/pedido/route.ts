@@ -1,3 +1,4 @@
+import { freteValue } from "@/utils/frete-value";
 import { getBaseURL } from "@/utils/getBaseUrl";
 import { createLogger } from "@/utils/logMessage";
 import { PrismaClient } from "@prisma/client";
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
         tax_id: cleanedCPF,
       },
       ...(body.descontos ? { discount_amount: body.descontos } : {}),
-      // additional_amount: 15 * 100,
+      additional_amount: freteValue * 100,
       reference_id: pedido.id,
       customer_modifiable: true,
       items: body.items,

@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider } from "notistack";
+import { freteValue } from "@/utils/frete-value";
 
 const MeuContexto = createContext();
 
@@ -113,7 +114,7 @@ export const MeuContextoProvider = ({ children }) => {
     setDescontos(totalDescontos);
     localStorage.setItem("cart", JSON.stringify(cart));
     localStorage.setItem("cupons", JSON.stringify(validCupons));
-    const valorFrete = 0; // 15
+    const valorFrete = freteValue; // 15
     setTotal(totalFinal + valorFrete);
   }, [cart, cupons]);
 

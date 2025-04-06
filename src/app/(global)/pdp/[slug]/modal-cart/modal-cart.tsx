@@ -22,6 +22,7 @@ import SendIcon from "@mui/icons-material/Send";
 import { fetchCupom } from "@/modules/cupom/domain";
 import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";
+import { freteValue } from "@/utils/frete-value";
 
 export function ModalCart({ actualProduct }: { actualProduct?: any }) {
   const {
@@ -225,7 +226,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                   </span>
 
                   {/* <p className="text-[14px]">R$ 15</p> */}
-                  <p className="text-[14px]">R$ 0</p>
+                  <p className="text-[14px]">R$ {freteValue}</p>
                 </div>
 
                 <div className="my-[14px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
