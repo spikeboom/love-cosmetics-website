@@ -50,7 +50,7 @@ export function Rodape() {
           />
         </div>
 
-        <div className="mb-[32px] flex flex-wrap md:mb-0">
+        <div className="mb-[32px] flex w-full max-w-[300px] flex-wrap md:mb-0">
           <Link
             href="https://www.facebook.com/share/15wd5HjTTF/?mibextid=wwXIfr"
             target="_blank"
@@ -79,7 +79,7 @@ export function Rodape() {
           >
             <FaTiktok size={32} />
           </Link>
-          <div className="mb-6 flex w-1/4 justify-center">
+          {/* <div className="mb-6 flex w-1/4 justify-center">
             <FaYoutube size={32} className="opacity-[0.5]" />
           </div>
           <div className="mb-6 flex w-1/4 justify-center">
@@ -90,7 +90,7 @@ export function Rodape() {
           </div>
           <div className="mb-6 flex w-1/4 justify-center">
             <FaXTwitter size={32} className="opacity-[0.5]" />
-          </div>
+          </div> */}
         </div>
       </div>
 
