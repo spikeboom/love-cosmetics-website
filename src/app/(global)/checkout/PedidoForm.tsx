@@ -23,6 +23,8 @@ import { useMeuContexto } from "@/components/context/context";
 import MaskedInput from "./MaskedInput";
 import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
+import { parse, isValid } from "date-fns";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -33,9 +35,26 @@ const pedidoSchema = z.object({
   cpf: z.string().nonempty("CPF é obrigatório"),
   data_nascimento: z.preprocess(
     (arg) => {
-      if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
+      if (typeof arg === "string" && arg.length === 8) {
+        const dia = arg.slice(0, 2);
+        const mes = arg.slice(2, 4);
+        const ano = arg.slice(4, 8);
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        const parsed = parse(dataFormatada, "dd/MM/yyyy", new Date());
+
+        if (!isValid(parsed)) return undefined;
+
+        // Ajuste para meio-dia (12h) local para evitar mudança de dia no UTC
+        parsed.setHours(12, 0, 0, 0);
+
+        return parsed;
+      }
+      return undefined;
     },
-    z.date({ required_error: "Data de nascimento é obrigatória" }),
+    z.date({
+      required_error: "Data de nascimento é obrigatória",
+      invalid_type_error: "Data inválida",
+    }),
   ),
   pais: z.string().nonempty("País é obrigatório"),
   cep: z.string().nonempty("CEP é obrigatório"),
@@ -208,6 +227,35 @@ const PedidoForm: React.FC = () => {
     return () => subscription.unsubscribe();
   }, [watch]);
 
+  const buscarEnderecoPorCep = async (cep: string) => {
+    const cepLimpo = cep.replace(/\D/g, "");
+    if (cepLimpo.length !== 8) return;
+
+    setLoadingCep(true);
+    try {
+      const { data } = await axios.get(
+        `https://viacep.com.br/ws/${cepLimpo}/json/`,
+      );
+      if (data.erro) {
+        enqueueSnackbar("CEP não encontrado.", { variant: "warning" });
+        return;
+      }
+
+      setValue("endereco", data.logradouro || "");
+      setValue("bairro", data.bairro || "");
+      setValue("cidade", data.localidade || "");
+      setValue("estado", data.uf || "");
+    } catch (error) {
+      enqueueSnackbar("Erro ao buscar endereço pelo CEP.", {
+        variant: "error",
+      });
+    } finally {
+      setLoadingCep(false);
+    }
+  };
+
+  const [loadingCep, setLoadingCep] = useState(false);
+
   if (loadingFormData) {
     return <div>Carregando...</div>;
   }
@@ -312,15 +360,25 @@ const PedidoForm: React.FC = () => {
             </FormControl>
 
             {/* Demais campos (data de nascimento, país, CEP, endereço, número, etc.) */}
-            <TextField
-              fullWidth
-              label="Data de Nascimento"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              error={!!errors.data_nascimento}
-              helperText={errors.data_nascimento?.message as string}
-              {...register("data_nascimento")}
-            />
+            <FormControl fullWidth error={!!errors.data_nascimento}>
+              <FormLabel>Data de Nascimento</FormLabel>
+              <Controller
+                name="data_nascimento"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    placeholder="dd/mm/aaaa"
+                    InputProps={{
+                      inputComponent: MaskedInput as any,
+                      inputProps: { mask: "00/00/0000", name: field.name },
+                    }}
+                    error={!!errors.data_nascimento}
+                    helperText={errors.data_nascimento?.message as string}
+                  />
+                )}
+              />
+            </FormControl>
             <TextField
               fullWidth
               label="País"
@@ -329,37 +387,39 @@ const PedidoForm: React.FC = () => {
               helperText={errors.pais?.message}
               {...register("pais")}
             />
-            <FormControl fullWidth error={!!errors.cep}>
-              <FormLabel>CEP</FormLabel>
-              <Controller
-                name="cep"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    placeholder="00000-000"
-                    InputProps={{
-                      inputComponent: MaskedInput as any,
-                      inputProps: { mask: "00000-000", name: field.name },
-                    }}
-                    error={!!errors.cep}
-                    helperText={errors.cep?.message}
-                  />
-                )}
-              />
-              {errors.cep && (
-                <Typography variant="caption" color="error">
-                  {errors.cep.message}
-                </Typography>
+            <Controller
+              name="cep"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  placeholder="00000-000"
+                  InputProps={{
+                    inputComponent: MaskedInput as any,
+                    inputProps: { mask: "00000-000", name: field.name },
+                  }}
+                  onBlur={(e) => {
+                    field.onBlur(); // mantém o comportamento original
+                    buscarEnderecoPorCep(e.target.value);
+                  }}
+                  error={!!errors.cep}
+                  helperText={errors.cep?.message}
+                />
               )}
-            </FormControl>
+            />
+            {loadingCep && (
+              <Typography variant="body2" color="textSecondary">
+                Buscando endereço...
+              </Typography>
+            )}
             <TextField
               fullWidth
               label="Endereço"
               placeholder="Endereço"
               error={!!errors.endereco}
               helperText={errors.endereco?.message}
+              InputLabelProps={{ shrink: true }}
               {...register("endereco")}
             />
             <TextField
@@ -382,6 +442,7 @@ const PedidoForm: React.FC = () => {
               placeholder="Bairro"
               error={!!errors.bairro}
               helperText={errors.bairro?.message}
+              InputLabelProps={{ shrink: true }}
               {...register("bairro")}
             />
             <TextField
@@ -390,6 +451,7 @@ const PedidoForm: React.FC = () => {
               placeholder="Cidade"
               error={!!errors.cidade}
               helperText={errors.cidade?.message}
+              InputLabelProps={{ shrink: true }}
               {...register("cidade")}
             />
             <TextField
@@ -398,6 +460,7 @@ const PedidoForm: React.FC = () => {
               placeholder="Estado"
               error={!!errors.estado}
               helperText={errors.estado?.message}
+              InputLabelProps={{ shrink: true }}
               {...register("estado")}
             />
 

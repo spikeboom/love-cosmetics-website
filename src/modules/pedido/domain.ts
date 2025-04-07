@@ -20,9 +20,7 @@ export async function postPedido(data: PedidoFormData) {
     },
     body: JSON.stringify({
       ...data,
-      data_nascimento: new Date(data.data_nascimento)
-        .toISOString()
-        .split("T")[0],
+      data_nascimento: new Date(data.data_nascimento).toISOString(),
     }),
   });
 
