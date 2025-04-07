@@ -65,15 +65,13 @@ interface Pedido {
 
 function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
   const [open, setOpen] = useState(false);
+  const [openContato, setOpenContato] = useState(false); // novo estado
+
+  open ? console.log({ pedido }) : null;
 
   return (
     <>
-      {/* Linha principal do pedido com estilo zebra */}
-      <TableRow
-        sx={{
-          backgroundColor: index % 2 === 0 ? "white" : "#f5f5f5",
-        }}
-      >
+      <TableRow sx={{ backgroundColor: index % 2 === 0 ? "white" : "#f5f5f5" }}>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -129,38 +127,81 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
         </TableCell>
       </TableRow>
 
-      {/* Linha com os itens do pedido, exibida via Collapse */}
+      {/* Collapse principal - Itens do pedido + botão para dados adicionais */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
-              {pedido.items && pedido.items.length > 0 && (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Nome do Item</TableCell>
-                      <TableCell>Quantidade</TableCell>
-                      <TableCell>Valor Unitário</TableCell>
-                      <TableCell>Reference ID</TableCell>
+              <Typography variant="subtitle2" gutterBottom>
+                Itens do Pedido
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Nome do Item</TableCell>
+                    <TableCell>Quantidade</TableCell>
+                    <TableCell>Valor Unitário</TableCell>
+                    <TableCell>Reference ID</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {pedido.items.map((item, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>
+                        {(item.unit_amount / 100).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </TableCell>
+                      <TableCell>{item.reference_id}</TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {pedido.items.map((item, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell>{item.name}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>
-                          {(item.unit_amount / 100).toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })}
-                        </TableCell>
-                        <TableCell>{item.reference_id}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Botão para abrir o segundo collapse */}
+              <Button
+                variant="text"
+                size="small"
+                sx={{ mt: 2 }}
+                onClick={() => setOpenContato(!openContato)}
+              >
+                {openContato ? "Ocultar" : "Ver"} dados de contato e entrega
+              </Button>
+
+              {/* Segundo Collapse com os dados pessoais */}
+              <Collapse in={openContato} timeout="auto" unmountOnExit>
+                <Box mt={1} p={1} border="1px solid #ccc" borderRadius={1}>
+                  <Typography variant="body2">
+                    <strong>Telefone:</strong> {pedido.telefone}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>CPF:</strong> {pedido.cpf}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Data de Nascimento:</strong>{" "}
+                    {new Date(pedido.data_nascimento).toLocaleDateString(
+                      "pt-BR",
+                    )}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Endereço:</strong> {pedido.endereco},{" "}
+                    {pedido.numero}
+                    {pedido.complemento ? `, ${pedido.complemento}` : ""},{" "}
+                    {pedido.bairro} - {pedido.cidade} / {pedido.estado} -{" "}
+                    {pedido.cep}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>País:</strong> {pedido.pais}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Aceita WhatsApp:</strong>{" "}
+                    {pedido.aceito_receber_whatsapp ? "Sim" : "Não"}
+                  </Typography>
+                </Box>
+              </Collapse>
             </Box>
           </Collapse>
         </TableCell>
