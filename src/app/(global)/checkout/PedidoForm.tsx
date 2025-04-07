@@ -115,6 +115,24 @@ const PedidoForm: React.FC = () => {
     defaultValues: defaultPedidoFormData,
   });
 
+  const fieldRefs: Partial<
+    Record<keyof PedidoFormData, React.RefObject<HTMLInputElement | null>>
+  > = {
+    nome: React.useRef(null),
+    sobrenome: React.useRef(null),
+    email: React.useRef(null),
+    telefone: React.useRef(null),
+    cpf: React.useRef(null),
+    data_nascimento: React.useRef(null),
+    pais: React.useRef(null),
+    cep: React.useRef(null),
+    endereco: React.useRef(null),
+    numero: React.useRef(null),
+    bairro: React.useRef(null),
+    cidade: React.useRef(null),
+    estado: React.useRef(null),
+  };
+
   async function onSubmit(data: PedidoFormData) {
     setLoading(true);
     console.log("Dados do formulário:", data);
@@ -256,6 +274,26 @@ const PedidoForm: React.FC = () => {
 
   const [loadingCep, setLoadingCep] = useState(false);
 
+  useEffect(() => {
+    const firstErrorField = Object.keys(errors)[0] as keyof PedidoFormData;
+    const ref = fieldRefs[firstErrorField];
+
+    if (ref?.current) {
+      setTimeout(() => {
+        ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        ref.current?.focus();
+      }, 100);
+    } else {
+      // 👇 Gambiarra: scrolla para o label do campo com erro
+      const labelElement = document.getElementById(`label-${firstErrorField}`);
+      if (labelElement) {
+        setTimeout(() => {
+          labelElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+      }
+    }
+  }, [errors]);
+
   if (loadingFormData) {
     return <div>Carregando...</div>;
   }
@@ -270,6 +308,7 @@ const PedidoForm: React.FC = () => {
           <Stack spacing={2}>
             {/* Campos do formulário (nome, sobrenome, email, etc.) */}
             <TextField
+              inputRef={fieldRefs.nome}
               fullWidth
               label="Nome"
               placeholder="Seu nome"
@@ -277,7 +316,9 @@ const PedidoForm: React.FC = () => {
               helperText={errors.nome?.message}
               {...register("nome")}
             />
+
             <TextField
+              inputRef={fieldRefs.sobrenome}
               fullWidth
               label="Sobrenome"
               placeholder="Seu sobrenome"
@@ -285,7 +326,9 @@ const PedidoForm: React.FC = () => {
               helperText={errors.sobrenome?.message}
               {...register("sobrenome")}
             />
+
             <TextField
+              inputRef={fieldRefs.email}
               fullWidth
               label="Email"
               type="email"
@@ -297,7 +340,7 @@ const PedidoForm: React.FC = () => {
 
             {/* Telefone com máscara */}
             <FormControl fullWidth error={!!errors.telefone}>
-              <FormLabel>Telefone</FormLabel>
+              <FormLabel id="label-telefone">Telefone</FormLabel>
               <Controller
                 name="telefone"
                 control={control}
@@ -325,16 +368,11 @@ const PedidoForm: React.FC = () => {
                   />
                 )}
               />
-              {errors.telefone && (
-                <Typography variant="caption" color="error">
-                  {errors.telefone.message}
-                </Typography>
-              )}
             </FormControl>
 
             {/* CPF com máscara */}
             <FormControl fullWidth error={!!errors.cpf}>
-              <FormLabel>CPF</FormLabel>
+              <FormLabel id="label-cpf">CPF</FormLabel>
               <Controller
                 name="cpf"
                 control={control}
@@ -352,16 +390,13 @@ const PedidoForm: React.FC = () => {
                   />
                 )}
               />
-              {errors.cpf && (
-                <Typography variant="caption" color="error">
-                  {errors.cpf.message}
-                </Typography>
-              )}
             </FormControl>
 
             {/* Demais campos (data de nascimento, país, CEP, endereço, número, etc.) */}
             <FormControl fullWidth error={!!errors.data_nascimento}>
-              <FormLabel>Data de Nascimento</FormLabel>
+              <FormLabel id="label-data_nascimento">
+                Data de Nascimento
+              </FormLabel>
               <Controller
                 name="data_nascimento"
                 control={control}
@@ -379,7 +414,9 @@ const PedidoForm: React.FC = () => {
                 )}
               />
             </FormControl>
+
             <TextField
+              inputRef={fieldRefs.pais}
               fullWidth
               label="País"
               placeholder="País"
@@ -387,33 +424,40 @@ const PedidoForm: React.FC = () => {
               helperText={errors.pais?.message}
               {...register("pais")}
             />
-            <Controller
-              name="cep"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  placeholder="00000-000"
-                  InputProps={{
-                    inputComponent: MaskedInput as any,
-                    inputProps: { mask: "00000-000", name: field.name },
-                  }}
-                  onBlur={(e) => {
-                    field.onBlur(); // mantém o comportamento original
-                    buscarEnderecoPorCep(e.target.value);
-                  }}
-                  error={!!errors.cep}
-                  helperText={errors.cep?.message}
-                />
-              )}
-            />
+
+            <FormControl fullWidth error={!!errors.cep}>
+              <FormLabel id="label-cep">CEP</FormLabel>
+              <Controller
+                name="cep"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="00000-000"
+                    InputProps={{
+                      inputComponent: MaskedInput as any,
+                      inputProps: { mask: "00000-000", name: field.name },
+                    }}
+                    onBlur={(e) => {
+                      field.onBlur();
+                      buscarEnderecoPorCep(e.target.value);
+                    }}
+                    error={!!errors.cep}
+                    helperText={errors.cep?.message}
+                  />
+                )}
+              />
+            </FormControl>
+
             {loadingCep && (
               <Typography variant="body2" color="textSecondary">
                 Buscando endereço...
               </Typography>
             )}
+
             <TextField
+              inputRef={fieldRefs.endereco}
               fullWidth
               label="Endereço"
               placeholder="Endereço"
@@ -422,7 +466,9 @@ const PedidoForm: React.FC = () => {
               InputLabelProps={{ shrink: true }}
               {...register("endereco")}
             />
+
             <TextField
+              inputRef={fieldRefs.numero}
               fullWidth
               label="Número"
               placeholder="Número"
@@ -430,13 +476,16 @@ const PedidoForm: React.FC = () => {
               helperText={errors.numero?.message}
               {...register("numero")}
             />
+
             <TextField
               fullWidth
               label="Complemento"
               placeholder="Complemento (opcional)"
               {...register("complemento")}
             />
+
             <TextField
+              inputRef={fieldRefs.bairro}
               fullWidth
               label="Bairro"
               placeholder="Bairro"
@@ -445,7 +494,9 @@ const PedidoForm: React.FC = () => {
               InputLabelProps={{ shrink: true }}
               {...register("bairro")}
             />
+
             <TextField
+              inputRef={fieldRefs.cidade}
               fullWidth
               label="Cidade"
               placeholder="Cidade"
@@ -454,7 +505,9 @@ const PedidoForm: React.FC = () => {
               InputLabelProps={{ shrink: true }}
               {...register("cidade")}
             />
+
             <TextField
+              inputRef={fieldRefs.estado}
               fullWidth
               label="Estado"
               placeholder="Estado"
@@ -479,6 +532,7 @@ const PedidoForm: React.FC = () => {
                 />
               )}
             />
+
             <Controller
               name="aceito_receber_whatsapp"
               control={control}
@@ -494,6 +548,7 @@ const PedidoForm: React.FC = () => {
                 />
               )}
             />
+
             <TextField
               fullWidth
               label="Destinatário (opcional)"
