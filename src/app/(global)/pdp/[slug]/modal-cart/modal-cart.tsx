@@ -253,6 +253,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                     {openCupom && (
                       <Paper
                         component="form"
+                        onSubmit={(e) => e.preventDefault()}
                         sx={{
                           p: "2px 4px",
                           display: "flex",
@@ -345,7 +346,13 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                     href="/checkout"
                     className="rounded-[3px] bg-[#C0392B] px-[18px] py-[12px] font-bold text-[#fff]"
                   >
-                    finalizar pedido
+                    <span
+                      onClick={() => {
+                        setSidebarMounted(false);
+                      }}
+                    >
+                      finalizar pedido
+                    </span>
                   </Link>
                 </div>
               </div>
