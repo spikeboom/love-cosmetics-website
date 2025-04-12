@@ -121,7 +121,7 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
         />
 
         {(data.tag_desconto_1 || data.tag_desconto_2) && (
-          <div className="absolute right-0 top-4 bg-[#e9cfcd] py-[2px] pl-[12px] pr-[4px] font-medium text-black">
+          <div className="absolute right-0 top-4 bg-[#C0392B] py-[2px] pl-[12px] pr-[4px] font-medium text-white">
             {data.tag_desconto_1 || data.tag_desconto_2}
           </div>
         )}

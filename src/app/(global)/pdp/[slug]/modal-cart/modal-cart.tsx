@@ -140,7 +140,10 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                     key={id}
                     className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]"
                   >
-                    <a href={product.slug} className="mr-[12px] h-full">
+                    <a
+                      href={`/pdp/${product.slug}`}
+                      className="mr-[12px] h-full"
+                    >
                       <div className="relative h-[60px] w-[60px]">
                         <Image
                           src={
