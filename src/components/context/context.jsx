@@ -127,7 +127,7 @@ export const MeuContextoProvider = ({ children }) => {
         value: totalFinal + valorFrete,
         items: Object.values(cart).map((item) => ({
           item_id: item.id,
-          item_name: item.nome,
+          item_name: decodeURIComponent(item.nome),
           price: item.preco,
           quantity: item.quantity,
         })),
