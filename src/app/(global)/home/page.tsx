@@ -6,6 +6,7 @@ import {
 import { Product } from "@/components/home-product/carousel-products";
 import { ModalCart } from "../pdp/[slug]/modal-cart/modal-cart";
 import { CarouselProducts } from "../pdp/[slug]/carousel-products/carousel-products";
+import { FormEmailGTM } from "./form-email";
 
 export const metadata = {
   title: "Lové Cosméticos - Home",
@@ -78,6 +79,8 @@ export default async function HomeComponent() {
             title="Combinações que transformam sua pele"
             subtitle="Descubra nossos kits com fórmulas pensadas para cada momento do seu cuidado — do essencial ao intensivo, tudo em perfeita harmonia."
           />
+
+          <FormEmailGTM />
         </div>
       </div>
 
