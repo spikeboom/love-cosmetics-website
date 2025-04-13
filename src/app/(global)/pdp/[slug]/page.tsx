@@ -28,6 +28,7 @@ import {
 import { ModalCart } from "./modal-cart/modal-cart";
 import { Metadata, ResolvingMetadata } from "next";
 import { AddToCart } from "@/components/add-to-cart/add-to-cart";
+import { ViewContentEvent } from "./event-view-content/event-view-content";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -159,6 +160,8 @@ export default async function PdpPage({
       <ModalCart actualProduct={produto} />
 
       <AddToCart produto={produto} />
+
+      <ViewContentEvent produto={produto} />
     </>
   );
 }
