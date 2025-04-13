@@ -13,6 +13,28 @@ export const MeuContextoProvider = ({ children }) => {
   const [menuMounted, setMenuMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
 
+  const addProductEvent = (product) => {
+    const eventId = `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "add_to_cart",
+      ecommerce: {
+        currency: "BRL",
+        value: product.preco,
+        items: [
+          {
+            item_id: product.id,
+            item_name: decodeURIComponent(product.nome),
+            price: product.preco,
+            quantity: 1,
+          },
+        ],
+      },
+      event_id: eventId,
+    });
+  };
+
   const addProductToCart = (product) => {
     const newCart = { ...cart };
     if (newCart[product.id]) {
@@ -21,6 +43,8 @@ export const MeuContextoProvider = ({ children }) => {
       newCart[product.id] = { ...product, quantity: 1 };
     }
     setCart(newCart);
+
+    addProductEvent(product);
   };
 
   const addQuantityProductToCart = ({ product }) => {
@@ -29,6 +53,8 @@ export const MeuContextoProvider = ({ children }) => {
       newCart[product.id].quantity += 1;
     }
     setCart(newCart);
+
+    addProductEvent(product);
   };
 
   const subtractQuantityProductToCart = ({ product }) => {
@@ -116,24 +142,6 @@ export const MeuContextoProvider = ({ children }) => {
     localStorage.setItem("cupons", JSON.stringify(validCupons));
     const valorFrete = freteValue; // 15
     setTotal(totalFinal + valorFrete);
-
-    const eventId = `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "add_to_cart",
-      ecommerce: {
-        currency: "BRL",
-        value: totalFinal + valorFrete,
-        items: Object.values(cart).map((item) => ({
-          item_id: item.id,
-          item_name: decodeURIComponent(item.nome),
-          price: item.preco,
-          quantity: item.quantity,
-        })),
-      },
-      event_id: eventId,
-    });
   }, [cart, cupons]);
 
   return (
