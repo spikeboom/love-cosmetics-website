@@ -116,6 +116,24 @@ export const MeuContextoProvider = ({ children }) => {
     localStorage.setItem("cupons", JSON.stringify(validCupons));
     const valorFrete = freteValue; // 15
     setTotal(totalFinal + valorFrete);
+
+    const eventId = `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "add_to_cart",
+      ecommerce: {
+        currency: "BRL",
+        value: totalFinal + valorFrete,
+        items: Object.values(cart).map((item) => ({
+          item_id: item.id,
+          item_name: item.nome,
+          price: item.preco,
+          quantity: item.quantity,
+        })),
+      },
+      event_id: eventId,
+    });
   }, [cart, cupons]);
 
   return (
