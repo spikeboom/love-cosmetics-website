@@ -4,7 +4,6 @@ import { useEffect } from "react";
 export function ViewContentEvent({ produto }: any) {
   useEffect(() => {
     if (typeof window !== "undefined") {
-      console.log({ produto });
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: "ViewContent",
