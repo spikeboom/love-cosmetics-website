@@ -222,11 +222,27 @@ const PedidoForm: React.FC = () => {
     const savedData = localStorage.getItem("formulario_pedido");
     if (savedData) {
       const parsedData: PedidoFormData = JSON.parse(savedData);
+
+      const camposMascarados = ["telefone", "cpf", "cep", "data_nascimento"];
+
       Object.keys(parsedData).forEach((key) => {
-        setValue(
-          key as keyof PedidoFormData,
-          parsedData[key as keyof PedidoFormData],
-        );
+        const campo = key as keyof PedidoFormData;
+        let valor = parsedData[campo];
+
+        // Força string para campos com máscara
+        if (camposMascarados.includes(key)) {
+          // Se for data_nascimento, tenta converter para Date
+          if (key === "data_nascimento") {
+            valor = new Date(valor as string);
+            if (isNaN(valor.getTime())) {
+              // valor = new Date(); // fallback
+            }
+          } else {
+            valor = String(valor ?? "");
+          }
+        }
+
+        setValue(campo, valor);
       });
     }
     setLoadingFormData(false); // indica que os dados foram carregados
@@ -238,6 +254,10 @@ const PedidoForm: React.FC = () => {
       const completeData: PedidoFormData = {
         ...defaultPedidoFormData,
         ...data,
+        telefone: String(data.telefone ?? ""),
+        cpf: String(data.cpf ?? ""),
+        cep: String(data.cep ?? ""),
+        // data_nascimento: data.data_nascimento ?? new Date(), // já é Date
         cupons: undefined,
       };
       saveToLocalStorage(completeData);

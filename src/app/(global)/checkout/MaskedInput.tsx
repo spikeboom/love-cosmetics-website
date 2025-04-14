@@ -22,19 +22,20 @@ interface TextMaskCustomProps
    */
   onChange: (event: { target: { name: string; value: string } }) => void;
   name: string;
+  value?: string | number | null; // adiciona isso aqui também
 }
 
 const MaskedInput = React.forwardRef<HTMLElement, TextMaskCustomProps>(
   function MaskedInput(props, ref) {
-    const { onChange, name, mask, ...other } = props;
+    const { onChange, name, mask, value, ...other } = props;
+
     return (
       <IMaskInput
         {...other}
+        value={String(value ?? "")} // ← aqui está o truque!
         mask={mask}
-        // Define unmask como true para que o valor retornado seja sem máscara
         unmask={true}
         inputRef={ref as React.Ref<any>}
-        // No onAccept, repassa o valor *unmasked* para o onChange
         onAccept={(value, maskRef) =>
           onChange({ target: { name, value: maskRef.unmaskedValue } })
         }
