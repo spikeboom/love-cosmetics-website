@@ -66,6 +66,7 @@ interface Pedido {
 function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
   const [open, setOpen] = useState(false);
   const [openContato, setOpenContato] = useState(false); // novo estado
+  const [openPaymentMethods, setOpenPaymentMethods] = useState(false);
 
   open ? console.log({ pedido }) : null;
 
@@ -201,6 +202,72 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                     {pedido.aceito_receber_whatsapp ? "Sim" : "Não"}
                   </Typography>
                 </Box>
+              </Collapse>
+
+              <br />
+
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mt: 1 }}
+                onClick={() => setOpenPaymentMethods((prev) => !prev)}
+              >
+                {openPaymentMethods ? "Ocultar" : "Ver"} método(s) de pagamento
+              </Button>
+
+              <Collapse in={openPaymentMethods} timeout="auto" unmountOnExit>
+                {pedido.pagamentos?.map((pagamento, pIdx) => (
+                  <Box
+                    key={pIdx}
+                    sx={{
+                      mt: 1,
+                      p: 1,
+                      border: "1px dashed #aaa",
+                      borderRadius: 1,
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <Typography variant="body2" fontWeight="bold">
+                      Pagamento #{pIdx + 1}
+                    </Typography>
+                    {pagamento.info?.charges?.map(
+                      (charge: any, cIdx: number) => (
+                        <Box key={cIdx} sx={{ mt: 1 }}>
+                          <Typography variant="body2">
+                            <strong>Charge ID:</strong> {charge.id}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Valor:</strong>{" "}
+                            {(charge.amount.value / 100).toLocaleString(
+                              "pt-BR",
+                              {
+                                style: "currency",
+                                currency: charge.amount.currency,
+                              },
+                            )}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Método:</strong>{" "}
+                            {charge.payment_method?.type ?? "N/A"}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>End to End ID:</strong>{" "}
+                            {charge.payment_method?.pix?.end_to_end_id ?? "N/A"}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Nome do Titular:</strong>{" "}
+                            {charge.payment_method?.pix?.holder?.name ?? "N/A"}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>CPF do Titular:</strong>{" "}
+                            {charge.payment_method?.pix?.holder?.tax_id ??
+                              "N/A"}
+                          </Typography>
+                        </Box>
+                      ),
+                    )}
+                  </Box>
+                ))}
               </Collapse>
             </Box>
           </Collapse>
