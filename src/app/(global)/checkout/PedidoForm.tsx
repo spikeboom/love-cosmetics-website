@@ -143,6 +143,7 @@ const PedidoForm: React.FC = () => {
         reference_id: id,
         name: product.nome,
         quantity: product.quantity,
+        preco: product.preco,
         unit_amount: Math.trunc(product.preco * 100),
         image_url:
           process.env.NEXT_PUBLIC_STRAPI_URL +
