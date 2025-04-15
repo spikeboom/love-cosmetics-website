@@ -196,6 +196,22 @@ const PedidoForm: React.FC = () => {
         return;
       }
 
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "AddPaymentInfo",
+        event_id: `addpaymentinfo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ecommerce: {
+          currency: "BRL",
+          value: total,
+          items: items.map((item) => ({
+            item_id: item?.id ?? "",
+            item_name: decodeURIComponent(item?.nome ?? ""),
+            price: item?.preco ?? 0,
+            quantity: item?.quantity ?? 1,
+          })),
+        },
+      });
+
       // add snackbar redirecting to payment link
       enqueueSnackbar("Redirecionando para o pagamento...", {
         variant: "success",
