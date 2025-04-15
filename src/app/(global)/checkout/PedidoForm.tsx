@@ -205,8 +205,8 @@ const PedidoForm: React.FC = () => {
           currency: "BRL",
           value: total,
           items: items.map((item) => ({
-            item_id: item?.id ?? "",
-            item_name: decodeURIComponent(item?.nome ?? ""),
+            item_id: item?.reference_id ?? "",
+            item_name: decodeURIComponent(item?.name ?? ""),
             price: item?.preco ?? 0,
             quantity: item?.quantity ?? 1,
           })),
@@ -240,7 +240,12 @@ const PedidoForm: React.FC = () => {
     if (savedData) {
       const parsedData: PedidoFormData = JSON.parse(savedData);
 
-      const camposMascarados = ["telefone", "cpf", "cep", "data_nascimento"];
+      const camposMascarados = [
+        "telefone",
+        "cpf",
+        "cep",
+        // "data_nascimento"
+      ];
 
       Object.keys(parsedData).forEach((key) => {
         const campo = key as keyof PedidoFormData;
@@ -252,7 +257,7 @@ const PedidoForm: React.FC = () => {
           if (key === "data_nascimento") {
             valor = new Date(valor as string);
             if (isNaN(valor.getTime())) {
-              // valor = new Date(); // fallback
+              // valor = new Date();
             }
           } else {
             valor = String(valor ?? "");
