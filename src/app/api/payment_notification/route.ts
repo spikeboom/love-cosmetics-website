@@ -40,6 +40,8 @@ export async function POST(req: Request) {
       (charge: any) => charge?.status === "PAID",
     );
 
+    console.log({ isPaid });
+
     if (isPaid) {
       const gtmPayload = {
         event_name: "Purchase",
