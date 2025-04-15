@@ -28,33 +28,29 @@ export async function POST(req: Request) {
 
     logMessage("Payment Notification", novoDado);
 
-    // Gera os hashes necessários
-    const emailRaw = body?.data?.customer?.email ?? "";
+    const emailRaw = body?.customer?.email ?? "";
     const phoneRaw = [
-      body?.data?.customer?.phones?.[0]?.country ?? "",
-      body?.data?.customer?.phones?.[0]?.area ?? "",
-      body?.data?.customer?.phones?.[0]?.number ?? "",
+      body?.customer?.phones?.[0]?.country ?? "",
+      body?.customer?.phones?.[0]?.area ?? "",
+      body?.customer?.phones?.[0]?.number ?? "",
     ].join("");
 
-    const user_data = {
-      em: await sha256Hex(emailRaw),
-      ph: await sha256Hex(phoneRaw),
-    };
-
-    // Monta o payload para envio ao GTM server-side
     const gtmPayload = {
       event_name: "Purchase",
-      transaction_id: body?.data?.id ?? "unknown",
-      value: body?.data?.charges?.[0]?.amount?.value ?? 0,
-      currency: body?.data?.charges?.[0]?.amount?.currency ?? "BRL",
+      transaction_id: body?.id ?? "unknown",
+      value: body?.charges?.[0]?.amount?.value ?? 0,
+      currency: body?.charges?.[0]?.amount?.currency ?? "BRL",
       items:
-        body?.data?.items?.map((item: any) => ({
+        body?.items?.map((item: any) => ({
           item_id: item?.reference_id ?? "unknown",
           item_name: item?.name ?? "Produto",
           price: item?.unit_amount ?? 0,
           quantity: item?.quantity ?? 1,
         })) ?? [],
-      user_data,
+      user_data: {
+        em: emailRaw ? await sha256Hex(emailRaw) : undefined,
+        ph: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
+      },
     };
 
     // Envia para o endpoint GTM
