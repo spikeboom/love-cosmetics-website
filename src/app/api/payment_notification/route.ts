@@ -35,32 +35,38 @@ export async function POST(req: Request) {
       body?.customer?.phones?.[0]?.number ?? "",
     ].join("");
 
-    const gtmPayload = {
-      event_name: "Purchase",
-      transaction_id: body?.id ?? "unknown",
-      value: Number(body?.charges?.[0]?.amount?.value ?? 0) / 100,
-      currency: body?.charges?.[0]?.amount?.currency ?? "BRL",
-      items:
-        body?.items?.map((item: any) => ({
-          item_id: item?.reference_id ?? "unknown",
-          item_name: item?.name ?? "Produto",
-          price: Number(item?.unit_amount ?? 0) / 100,
-          quantity: item?.quantity ?? 1,
-        })) ?? [],
-      user_data: {
-        em: emailRaw ? await sha256Hex(emailRaw) : undefined,
-        ph: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
-      },
-    };
+    // ✅ VERIFICA SE ALGUMA COBRANÇA ESTÁ COM STATUS PAID
+    const isPaid = body?.charges?.some(
+      (charge: any) => charge?.status === "PAID",
+    );
 
-    // Envia para o endpoint GTM
-    await fetch("https://gtm.lovecosmetics.com.br/data?v=2", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(gtmPayload),
-    });
+    if (isPaid) {
+      const gtmPayload = {
+        event_name: "Purchase",
+        transaction_id: body?.id ?? "unknown",
+        value: Number(body?.charges?.[0]?.amount?.value ?? 0) / 100,
+        currency: body?.charges?.[0]?.amount?.currency ?? "BRL",
+        items:
+          body?.items?.map((item: any) => ({
+            item_id: item?.reference_id ?? "unknown",
+            item_name: item?.name ?? "Produto",
+            price: Number(item?.unit_amount ?? 0) / 100,
+            quantity: item?.quantity ?? 1,
+          })) ?? [],
+        user_data: {
+          em: emailRaw ? await sha256Hex(emailRaw) : undefined,
+          ph: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
+        },
+      };
+
+      await fetch("https://gtm.lovecosmetics.com.br/data?v=2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(gtmPayload),
+      });
+    }
 
     const responseData = {
       message: "Dados recebidos com sucesso!",
