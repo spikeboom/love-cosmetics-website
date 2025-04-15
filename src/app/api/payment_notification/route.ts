@@ -38,13 +38,13 @@ export async function POST(req: Request) {
     const gtmPayload = {
       event_name: "Purchase",
       transaction_id: body?.id ?? "unknown",
-      value: body?.charges?.[0]?.amount?.value ?? 0,
+      value: Number(body?.charges?.[0]?.amount?.value ?? 0) / 100,
       currency: body?.charges?.[0]?.amount?.currency ?? "BRL",
       items:
         body?.items?.map((item: any) => ({
           item_id: item?.reference_id ?? "unknown",
           item_name: item?.name ?? "Produto",
-          price: item?.unit_amount ?? 0,
+          price: Number(item?.unit_amount ?? 0) / 100,
           quantity: item?.quantity ?? 1,
         })) ?? [],
       user_data: {

@@ -14,8 +14,14 @@ export function PushInitiateCheckout() {
   }));
 
   useEffect(() => {
-    if (hasPushedRef.current) return;
-    if (!cart || Object.keys(cart).length === 0) return;
+    if (
+      hasPushedRef.current ||
+      !cart ||
+      Object.keys(cart).length === 0 ||
+      !total || // false se undefined, null ou 0
+      total <= 0
+    )
+      return;
 
     const eventId = `initiatecheckout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -25,7 +31,7 @@ export function PushInitiateCheckout() {
       event_id: eventId,
       ecommerce: {
         currency: "BRL",
-        value: total ?? 0,
+        value: total,
         items: cartItems.map((item) => ({
           item_id: item?.id ?? "",
           item_name: decodeURIComponent(item?.nome ?? ""),
@@ -36,7 +42,7 @@ export function PushInitiateCheckout() {
     });
 
     hasPushedRef.current = true;
-  }, [cart]);
+  }, [cart, total]);
 
   return null;
 }
