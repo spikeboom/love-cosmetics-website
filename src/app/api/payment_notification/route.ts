@@ -65,6 +65,8 @@ export async function POST(req: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-Gtm-Server-Preview":
+            "ZW52LTV8R1V1alUtN0EtckdrZUFJU0I3VXdHd3wxOTYzYzNkNmY2MWM4Mjk2NTQwYTM=",
         },
         body: JSON.stringify(gtmPayload),
       });
