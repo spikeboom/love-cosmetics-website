@@ -59,6 +59,8 @@ export async function POST(req: Request) {
           em: emailRaw ? await sha256Hex(emailRaw) : undefined,
           ph: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
         },
+        user_email: emailRaw ? await sha256Hex(emailRaw) : undefined,
+        user_phone: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
       };
 
       await fetch("https://gtm.lovecosmetics.com.br/data?v=2", {
