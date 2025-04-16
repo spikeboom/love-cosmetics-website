@@ -344,7 +344,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                   </span>
 
                   <Link
-                    href="/checkout"
+                    href="/checkout#top"
                     className="rounded-[3px] bg-[#C0392B] px-[18px] py-[12px] font-bold text-[#fff]"
                   >
                     <span

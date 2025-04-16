@@ -104,7 +104,7 @@ export const Product = ({ data, handlerAdd }: any) => (
 export const ProductComplete = ({ data, handlerAdd }: any) => (
   <div>
     <Link href={`/pdp/[slug]`} as={`/pdp/${data.slug}`} className="w-full">
-      <div className="relative h-[230px] w-[230px]">
+      <div className="relative h-[270px] w-[270px]">
         <Image
           src={
             // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
@@ -119,7 +119,6 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
           }}
           className="rounded-[8px]"
         />
-
         {(data.tag_desconto_1 || data.tag_desconto_2) && (
           <div className="absolute right-0 top-4 bg-[#C0392B] py-[2px] pl-[12px] pr-[4px] font-medium text-white">
             {data.tag_desconto_1 || data.tag_desconto_2}
@@ -136,7 +135,7 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
       /> */}
       </div>
     </Link>
-    <div className="flex h-[190px] flex-col px-[8px] py-[8px]">
+    <div className="flex h-[220px] flex-col px-[8px] py-[8px]">
       <p className="mb-[8px] text-[14px] font-bold leading-[1.3]">
         <span className="">{data.nome}</span>
       </p>
@@ -144,14 +143,22 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
         <span className="">{data.descricaoResumida}</span>
       </p>
       <div className="flex-1" />
+      {data.tag_desconto_2 && (
+        <div className="mb-2">
+          <div className="text-[12px]">Você</div>
+          <div className="w-fit bg-[#FF1E1E] p-[4px] py-0 text-[14px] font-semibold text-white">
+            {data.tag_desconto_2}
+          </div>
+        </div>
+      )}
       <div className="flex">
         <div className="flex flex-1 flex-col justify-center">
           {data.preco_de && (
-            <span className="mb-[2px] text-[13px] font-semibold leading-[1] text-[#a5a5a5] line-through">
+            <span className="mb-[2px] text-[12px] font-semibold leading-[1] text-[#a5a5a5] line-through">
               <span className="">R$ {formatPrice(data.preco_de)}</span>
             </span>
           )}
-          <span className="text-[16px] font-semibold leading-[1] text-[#333]">
+          <span className="text-[26px] font-bold leading-[1] tracking-[-0.5px] text-[#333]">
             <span className="">R$ {formatPrice(data.preco)}</span>
           </span>
         </div>

@@ -32,8 +32,16 @@ export function BarraFixaComprar({
             leve 2 ou + fórmulas e ganhe <strong>até 15% OFF ✨</strong>
           </p>
         </div> */}
+        {produto.tag_desconto_2 && (
+          <div className="mt-2 flex w-full justify-center gap-[8px]">
+            <div className="text-[12px]">Você</div>
+            <div className="w-fit bg-[#FF1E1E] p-[4px] py-0 text-[14px] font-semibold text-white">
+              {produto.tag_desconto_2}
+            </div>
+          </div>
+        )}
 
-        <div className="flex items-center gap-[20px] whitespace-nowrap px-[16px] py-[12px]">
+        <div className="flex items-center gap-[20px] whitespace-nowrap px-[16px] py-[12px] pt-[8px]">
           <div className="h-fit w-fit">
             <div className="flex w-fit flex-col">
               {produto.preco_de && (
@@ -49,7 +57,9 @@ export function BarraFixaComprar({
                 </div>
               )}
 
-              <strong className="text-[14px]">R$ {formatPrice(preco)}</strong>
+              <strong className="text-[26px] font-bold leading-[1] tracking-[-0.5px] text-[#333]">
+                R$ {formatPrice(preco)}
+              </strong>
 
               <span className="text-[12px] text-[#333333BF]">
                 ou 3x R$ {formatPrice(Math.round((preco * 100) / 3) / 100)}
@@ -85,27 +95,34 @@ export function BotaoComprar({
 
   return (
     <>
-      <div className={`flex items-center gap-[24px] ${extraClassesForTopDiv}`}>
-        <p className="flex w-fit flex-col">
-          <strong className="text-[14px]">
-            R$ {preco?.toString().replace(".", ",")}
-          </strong>
+      <div className="flex flex-col">
+        {produto.tag_desconto_2 && (
+          <div className={`mb-2 gap-2 ${extraClassesForTopDiv}`}>
+            <div className="text-[12px]">Você</div>
+            <div className="w-fit bg-[#FF1E1E] p-[4px] py-0 text-[14px] font-semibold text-white">
+              {produto.tag_desconto_2}
+            </div>
+          </div>
+        )}
 
-          <span className="text-[12px] text-[#333333BF]">
-            ou 3x R${" "}
-            {(Math.round((preco * 100) / 3) / 100)
-              ?.toString()
-              .replace(".", ",")}
-          </span>
-        </p>
+        <div
+          className={`flex items-center gap-[24px] ${extraClassesForTopDiv}`}
+        >
+          <p className="flex w-fit flex-col">
+            <strong className="text-[24px]">R$ {formatPrice(preco)}</strong>
 
-        <div className={`w-fit`}>
-          <button
-            className="w-full rounded-[100px] bg-[#C0392B] px-[64px] py-[12px] text-[16px] font-semibold text-[#fff]"
-            onClick={handleComprar}
-          >
-            comprar
-          </button>
+            <span className="text-[12px] text-[#333333BF]">
+              ou 3x R$ {formatPrice(Math.round((preco * 100) / 3) / 100)}
+            </span>
+          </p>
+          <div className={`w-fit`}>
+            <button
+              className="w-full rounded-[100px] bg-[#C0392B] px-[64px] py-[12px] text-[16px] font-semibold text-[#fff]"
+              onClick={handleComprar}
+            >
+              comprar
+            </button>
+          </div>
         </div>
       </div>
     </>

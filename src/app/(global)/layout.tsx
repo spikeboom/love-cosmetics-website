@@ -78,6 +78,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
       >
+        <div id="top"></div>
         <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
         <MyLogFrontError />
       </body>
