@@ -37,6 +37,8 @@ model Pedido {
   aceito_receber_whatsapp   Boolean
   destinatario              String?  // Campo opcional
   createdAt                 DateTime @default(now())
+  ga_session_id             String?
+  ga_session_number         String?
 }
 
 model StatusCheckout {

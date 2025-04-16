@@ -1,5 +1,6 @@
 "use client";
 import { useMeuContexto } from "@/components/context/context";
+import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
 import { useEffect, useRef } from "react";
 
 export function PushInitiateCheckout() {
@@ -23,12 +24,10 @@ export function PushInitiateCheckout() {
     )
       return;
 
-    const eventId = `initiatecheckout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "InitiateCheckout",
-      event_id: eventId,
+      event_id: `initiatecheckout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ecommerce: {
         currency: "BRL",
         value: total,
@@ -39,6 +38,7 @@ export function PushInitiateCheckout() {
           quantity: item?.quantity ?? 1,
         })),
       },
+      ...extractGaSessionData("G-SXLFK0Y830"),
     });
 
     hasPushedRef.current = true;

@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
         salvar_minhas_informacoes: body.salvar_minhas_informacoes,
         aceito_receber_whatsapp: body.aceito_receber_whatsapp,
         destinatario: body.destinatario,
+        ga_session_number: body.ga_session_number,
+        ga_session_id: body.ga_session_id,
       },
     });
 

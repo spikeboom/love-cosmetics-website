@@ -43,8 +43,25 @@ export async function POST(req: Request) {
     console.log({ isPaid });
 
     if (isPaid) {
+      const pedido = await prisma.pedido.findUnique({
+        where: {
+          id: body?.reference_id, // o mesmo que vem no log como "reference_id"
+        },
+        select: {
+          ga_session_id: true,
+          ga_session_number: true,
+        },
+      });
+
+      logMessage("GA Session Info", {
+        reference_id: body?.reference_id,
+        ga_session_id: pedido?.ga_session_id,
+        ga_session_number: pedido?.ga_session_number,
+      });
+
       const gtmPayload = {
         event_name: "Purchase",
+        event_id: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         transaction_id: body?.id ?? "unknown",
         value: Number(body?.charges?.[0]?.amount?.value ?? 0) / 100,
         currency: body?.charges?.[0]?.amount?.currency ?? "BRL",
@@ -61,6 +78,9 @@ export async function POST(req: Request) {
         },
         user_email: emailRaw ? await sha256Hex(emailRaw) : undefined,
         user_phone: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
+
+        ga_session_id: pedido?.ga_session_id,
+        ga_session_number: pedido?.ga_session_number,
       };
 
       await fetch("https://gtm.lovecosmetics.com.br/data?v=2", {

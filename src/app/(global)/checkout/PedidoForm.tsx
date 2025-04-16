@@ -26,6 +26,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { parse, isValid } from "date-fns";
 import { pushUserDataToDataLayer } from "../home/form-email";
+import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -157,6 +158,7 @@ const PedidoForm: React.FC = () => {
         cupons: cupons?.map((c: any) => c.codigo),
         descontos: Math.trunc(descontos * 100),
         total_pedido: total,
+        ...extractGaSessionData("G-SXLFK0Y830"),
       });
 
       console.log("Resposta da API:", result);
@@ -217,6 +219,7 @@ const PedidoForm: React.FC = () => {
             quantity: item?.quantity ?? 1,
           })),
         },
+        ...extractGaSessionData("G-SXLFK0Y830"),
       });
 
       // add snackbar redirecting to payment link

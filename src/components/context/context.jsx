@@ -3,6 +3,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider } from "notistack";
 import { freteValue } from "@/utils/frete-value";
+import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
 
 const MeuContexto = createContext();
 
@@ -14,11 +15,10 @@ export const MeuContextoProvider = ({ children }) => {
   const [cupons, setCupons] = useState([]);
 
   const addProductEvent = (product) => {
-    const eventId = `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "add_to_cart",
+      event_id: `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ecommerce: {
         currency: "BRL",
         value: product.preco,
@@ -31,7 +31,7 @@ export const MeuContextoProvider = ({ children }) => {
           },
         ],
       },
-      event_id: eventId,
+      ...extractGaSessionData("G-SXLFK0Y830"),
     });
   };
 
