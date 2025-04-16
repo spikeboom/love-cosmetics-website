@@ -6,13 +6,14 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     console.error(
-      "Erro do client:",
       JSON.stringify({
-        ...body,
-        receivedAt: new Date().toISOString(),
+        labe: "Erro do client:",
+        data: {
+          ...body,
+          receivedAt: new Date().toISOString(),
+        },
       }),
     );
-
     // Aqui você pode:
     // - salvar no banco
     // - enviar pra um serviço externo
