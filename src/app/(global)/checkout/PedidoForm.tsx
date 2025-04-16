@@ -25,6 +25,7 @@ import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { parse, isValid } from "date-fns";
+import { pushUserDataToDataLayer } from "../home/form-email";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -196,6 +197,11 @@ const PedidoForm: React.FC = () => {
         setLoading(false);
         return;
       }
+
+      await pushUserDataToDataLayer({
+        email: data.email,
+        phone: data.telefone,
+      });
 
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
