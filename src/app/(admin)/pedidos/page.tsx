@@ -230,6 +230,38 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                     <Typography variant="body2" fontWeight="bold">
                       Pagamento #{pIdx + 1}
                     </Typography>
+                    {(() => {
+                      const charge = pagamento?.info?.charges?.[0];
+                      const chargeStatus = charge?.status;
+
+                      let statusLabel = chargeStatus || "Desconhecido";
+                      let color: string = "text.secondary";
+
+                      if (chargeStatus === "PAID") {
+                        statusLabel = "Sucesso";
+                        color = "green";
+                      } else if (chargeStatus === "IN_ANALYSIS") {
+                        statusLabel = "Em análise";
+                        color = "orange";
+                      } else if (
+                        chargeStatus &&
+                        chargeStatus !== "PAID" &&
+                        chargeStatus !== "IN_ANALYSIS"
+                      ) {
+                        // status conhecido, mas não mapeado (ex: "FAILED", "CANCELLED")
+                        statusLabel = chargeStatus;
+                        color = "red";
+                      }
+
+                      return (
+                        <Typography
+                          variant="body2"
+                          sx={{ color, fontWeight: "bold" }}
+                        >
+                          Status do Pagamento: {statusLabel}
+                        </Typography>
+                      );
+                    })()}
                     {pagamento.info?.charges?.map(
                       (charge: any, cIdx: number) => (
                         <Box key={cIdx} sx={{ mt: 1 }}>
@@ -249,6 +281,10 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                           <Typography variant="body2">
                             <strong>Método:</strong>{" "}
                             {charge.payment_method?.type ?? "N/A"}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Parcelas:</strong>{" "}
+                            {charge.payment_method?.installments ?? "N/A"}
                           </Typography>
                           <Typography variant="body2">
                             <strong>End to End ID:</strong>{" "}
