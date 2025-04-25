@@ -139,13 +139,6 @@ export function ModalCart() {
               right: openCart ? "0" : "-100%",
             }}
           >
-            <button
-              onClick={() => {
-                console.log(cupons);
-              }}
-            >
-              AQUI LOG
-            </button>
             <div className="flex h-full flex-col justify-between">
               <div>
                 <div className="mt-[4px] flex items-center justify-between px-[16px] pb-[8px] pt-[8px]">
