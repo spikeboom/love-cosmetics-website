@@ -1,9 +1,12 @@
 "use client";
 
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { SnackbarProvider } from "notistack";
+import { SnackbarProvider, useSnackbar } from "notistack";
 import { freteValue } from "@/utils/frete-value";
 import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { fetchCupom } from "@/modules/cupom/domain";
+import { IconButton } from "@mui/material";
+import { IoCloseCircle } from "react-icons/io5";
 
 const MeuContexto = createContext();
 
@@ -13,6 +16,8 @@ export const MeuContextoProvider = ({ children }) => {
   const [sidebarMounted, setSidebarMounted] = useState(false);
   const [menuMounted, setMenuMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
+
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const addProductEvent = (product) => {
     window.dataLayer = window.dataLayer || [];
@@ -111,6 +116,71 @@ export const MeuContextoProvider = ({ children }) => {
     }
   };
 
+  // função genérica para exibir snackbars
+  const notify = (message, { variant = "default", persist = false } = {}) => {
+    return enqueueSnackbar(message, {
+      variant,
+      persist,
+      action: (key) => (
+        <button
+          onClick={() => closeSnackbar(key)}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          <IoCloseCircle size={20} />
+        </button>
+      ),
+    });
+  };
+
+  const handleAddCupom = async (codigo) => {
+    // aviso de busca
+    const loadingKey = notify("Buscando cupom...", {
+      variant: "info",
+      persist: true,
+    });
+    try {
+      const { data } = await fetchCupom({ code: codigo });
+      closeSnackbar(loadingKey);
+
+      if (!data?.[0]) {
+        notify(`Cupom “${codigo}” não encontrado!`, {
+          variant: "error",
+          persist: true,
+        });
+        return;
+      }
+
+      if (cupons.some((c) => c.codigo === data[0].codigo)) {
+        notify("Esse cupom já foi adicionado!", {
+          variant: "error",
+          persist: true,
+        });
+        return;
+      }
+
+      if (cupons.length >= 1) {
+        notify("Só é possível aplicar um cupom por vez!", {
+          variant: "error",
+          persist: true,
+        });
+        return;
+      }
+
+      handleCupom(data[0]);
+      notify(`Cupom “${data[0].codigo}” aplicado com sucesso!`, {
+        variant: "success",
+      });
+    } catch (err) {
+      closeSnackbar(loadingKey);
+      console.error(err);
+      notify("Erro ao aplicar cupom.", { variant: "error" });
+    }
+  };
+
   const [descontos, setDescontos] = useState(0);
 
   useEffect(() => {
@@ -142,36 +212,45 @@ export const MeuContextoProvider = ({ children }) => {
     localStorage.setItem("cupons", JSON.stringify(validCupons));
     const valorFrete = freteValue; // 15
     setTotal(totalFinal + valorFrete);
+
+    const matchCupom = document.cookie.match(/(?:^|; )cupom=([^;]+)/);
+    const codigoCupom = matchCupom?.[1] && decodeURIComponent(matchCupom[1]);
+
+    if (codigoCupom) {
+      handleAddCupom(codigoCupom); // aplica o cupom no contexto
+      // 3) limpa o cookie (opcional)
+      document.cookie = "cupom=; path=/; max-age=0";
+      // 3b) limpa o query-param (se usou a URL)
+      const url = new URL(window.location.href);
+      url.searchParams.delete("cupom");
+      window.history.replaceState({}, "", url.toString());
+    }
   }, [cart, cupons]);
 
   return (
-    <SnackbarProvider
-      maxSnack={3}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
+    <MeuContexto.Provider
+      value={{
+        cart,
+        setCart,
+        sidebarMounted,
+        setSidebarMounted,
+        menuMounted,
+        setMenuMounted,
+        addProductToCart,
+        addQuantityProductToCart,
+        subtractQuantityProductToCart,
+        removeProductFromCart,
+        total,
+        qtdItemsCart,
+        clearCart,
+        cupons,
+        handleCupom,
+        handleAddCupom,
+        descontos,
+      }}
     >
-      <MeuContexto.Provider
-        value={{
-          cart,
-          setCart,
-          sidebarMounted,
-          setSidebarMounted,
-          menuMounted,
-          setMenuMounted,
-          addProductToCart,
-          addQuantityProductToCart,
-          subtractQuantityProductToCart,
-          removeProductFromCart,
-          total,
-          qtdItemsCart,
-          clearCart,
-          cupons,
-          handleCupom,
-          descontos,
-        }}
-      >
-        {children}
-      </MeuContexto.Provider>
-    </SnackbarProvider>
+      {children}
+    </MeuContexto.Provider>
   );
 };
 

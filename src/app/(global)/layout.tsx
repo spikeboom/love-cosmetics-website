@@ -13,6 +13,8 @@ import { Rodape } from "./pdp/[slug]/rodape/rodape";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { ModalMenu } from "@/components/menu/menu";
 import MyLogFrontError from "@/components/log-error-front/log-error-front";
+import { SnackbarProvider } from "notistack";
+import { SnackbarProviderComponent } from "@/components/context/snack-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,7 +81,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
       >
         <div id="top"></div>
-        <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
+        <SnackbarProviderComponent>
+          <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
+        </SnackbarProviderComponent>
         <MyLogFrontError />
       </body>
     </html>
