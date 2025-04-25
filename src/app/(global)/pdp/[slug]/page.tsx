@@ -157,7 +157,7 @@ export default async function PdpPage({
 
       <BarraFixaComprar produto={produto} extraClassesForTopDiv={`md:hidden`} />
 
-      <ModalCart actualProduct={produto} />
+      <ModalCart />
 
       <AddToCart produto={produto} />
 

@@ -1,5 +1,4 @@
 import {
-  fetchProdutosForHome,
   fetchProdutosForHome_Kit,
   fetchProdutosForHome_NotKit,
 } from "@/modules/produto/domain";
@@ -13,8 +12,8 @@ export const metadata = {
 };
 
 export default async function HomeComponent() {
-  const { data: dataKit } = await fetchProdutosForHome_Kit();
-  const { data: dataNoKit } = await fetchProdutosForHome_NotKit();
+  let { data: dataKit } = await fetchProdutosForHome_Kit();
+  let { data: dataNoKit } = await fetchProdutosForHome_NotKit();
 
   return (
     <>

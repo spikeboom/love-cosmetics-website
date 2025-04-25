@@ -7,6 +7,11 @@ import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
 import { fetchCupom } from "@/modules/cupom/domain";
 import { IconButton } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
+import Cookies from "js-cookie";
+import {
+  processProdutos,
+  processProdutosRevert,
+} from "@/modules/produto/domain";
 
 const MeuContexto = createContext();
 
@@ -111,8 +116,34 @@ export const MeuContextoProvider = ({ children }) => {
   const handleCupom = (cupom) => {
     if (cupons.includes(cupom)) {
       setCupons(cupons.filter((c) => c !== cupom));
+      try {
+        document.cookie = "cupomBackend=; path=/; max-age=0"; // remove o cookie se existir
+      } catch (e) {
+        console.error("Erro ao tentar remover o cookie cupomBackend:", e);
+      }
+
+      processProdutosRevert({ data: Object.values(cart) }).then(
+        (cartResult) => {
+          cartResult = cartResult?.data?.reduce((acc, item) => {
+            acc[item.id] = item;
+            return acc;
+          }, {});
+          setCart(cartResult);
+        },
+      );
     } else {
-      setCupons([...cupons, cupom]);
+      Cookies.set("cupomBackend", cupom?.codigo, { path: "/" });
+      processProdutos({ data: Object.values(cart) }, cupom?.codigo).then(
+        (cartResult) => {
+          cartResult = cartResult?.data?.reduce((acc, item) => {
+            acc[item.id] = item;
+            return acc;
+          }, {});
+          setCart(cartResult);
+
+          setCupons([...cupons, cupom]);
+        },
+      );
     }
   };
 
@@ -156,8 +187,7 @@ export const MeuContextoProvider = ({ children }) => {
 
       if (cupons.some((c) => c.codigo === data[0].codigo)) {
         notify("Esse cupom já foi adicionado!", {
-          variant: "error",
-          persist: true,
+          variant: "success",
         });
         return;
       }
@@ -186,42 +216,67 @@ export const MeuContextoProvider = ({ children }) => {
   useEffect(() => {
     if (!firstRun) return;
 
-    let total = Object.values(cart).reduce(
-      (acc, product) => acc + product.preco * product.quantity,
+    // Calculate base totals
+    const items = Object.values(cart);
+    const baseTotal = items.reduce(
+      (sum, { preco, quantity }) => sum + preco * quantity,
+      0,
+    );
+    const baseTotalPrecoDe = items.reduce(
+      (sum, { preco_de, quantity }) => sum + preco_de * quantity,
       0,
     );
 
-    // Proteção contra cupons inválidos
+    // Ensure coupons is an array
     const validCupons = Array.isArray(cupons) ? cupons : [];
 
-    const cupomResult = validCupons.reduce(
-      (acc, cupom) => {
-        return {
-          multiplicar: acc.multiplicar * cupom.multiplacar,
-          diminuir: acc.diminuir + cupom.diminuir,
-        };
-      },
+    // Compute cumulative coupon effect
+    const couponEffect = validCupons.reduce(
+      (acc, cupom) => ({
+        multiplicar: acc.multiplicar * cupom.multiplacar,
+        diminuir: acc.diminuir + cupom.diminuir,
+      }),
       { multiplicar: 1, diminuir: 0 },
     );
 
-    const totalFinal = total * cupomResult.multiplicar - cupomResult.diminuir;
-    const totalDescontos = total - totalFinal;
+    // Final totals with coupons
+    const totalWithCupons =
+      baseTotal * couponEffect.multiplicar - couponEffect.diminuir;
+    const totalDiscount = baseTotal - totalWithCupons;
+    const totalDiscountPrecoDe = baseTotalPrecoDe - baseTotal;
 
-    setDescontos(totalDescontos);
+    // Check for backend-specific coupon flags
+    const hasCupomBackend = /(?:^|; )cupomBackend=([^;]+)/.test(
+      document.cookie,
+    );
+
+    // Apply the correct discount based on backend coupon presence
+    const descontoAplicado = hasCupomBackend
+      ? totalDiscountPrecoDe
+      : totalDiscount;
+    setDescontos(descontoAplicado);
+
+    // Persist state
     localStorage.setItem("cart", JSON.stringify(cart));
     localStorage.setItem("cupons", JSON.stringify(validCupons));
-    const valorFrete = freteValue; // 15
-    setTotal(totalFinal + valorFrete);
 
-    const matchCupom = document.cookie.match(/(?:^|; )cupom=([^;]+)/);
-    const codigoCupom = matchCupom?.[1] && decodeURIComponent(matchCupom[1]);
+    // Compute and set final total including shipping
+    const shippingFee = freteValue;
+    const finalTotal =
+      (hasCupomBackend ? baseTotal : totalWithCupons) + shippingFee;
+    setTotal(finalTotal);
 
-    if (codigoCupom) {
-      handleAddCupom(codigoCupom); // aplica o cupom no contexto
-      // 3) limpa o cookie (opcional)
+    // Handle one-time URL or cookie coupon
+    const url = new URL(window.location.href);
+    const queryCupom = url.searchParams.get("cupom");
+    const cookieMatch = document.cookie.match(/(?:^|; )cupom=([^;]+)/);
+    const cookieCupom = cookieMatch?.[1] && decodeURIComponent(cookieMatch[1]);
+
+    const pendingCupom = cookieCupom || queryCupom;
+    if (pendingCupom) {
+      handleAddCupom(pendingCupom);
+      // Clear used coupon
       document.cookie = "cupom=; path=/; max-age=0";
-      // 3b) limpa o query-param (se usou a URL)
-      const url = new URL(window.location.href);
       url.searchParams.delete("cupom");
       window.history.replaceState({}, "", url.toString());
     }

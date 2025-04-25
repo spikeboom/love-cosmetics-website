@@ -24,8 +24,15 @@ import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";
 import { freteValue } from "@/utils/frete-value";
 import { formatPrice } from "@/utils/format-price";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
-export function ModalCart({ actualProduct }: { actualProduct?: any }) {
+export function ModalCart() {
   const {
     sidebarMounted,
     setSidebarMounted,
@@ -37,6 +44,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
     cupons,
     handleCupom,
     descontos,
+    handleAddCupom,
   } = useMeuContexto();
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -44,10 +52,15 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
   const animationDuration = 700;
   const [openCart, setOpenCart] = useState(false);
 
+  const [forRefreshPage, setForRefreshPage] = useState(false);
+
   useEffect(() => {
     if (!openCart) {
       const timer = setTimeout(() => {
         setSidebarMounted(false);
+        if (forRefreshPage) {
+          window.location.reload();
+        }
       }, animationDuration);
       return () => clearTimeout(timer);
     }
@@ -63,7 +76,10 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
   const [loadingCupom, setLoadingCupom] = useState(false);
   const [openCupom, setOpenCupom] = useState(false);
 
-  const handleAddCupom = async () => {
+  const [openRemoveModal, setOpenRemoveModal] = useState(false);
+  const [couponToRemove, setCouponToRemove] = useState<any>(null);
+
+  const handleAddCupomLocal = async () => {
     if (!!cupom) {
       if (cupons.find((c: any) => c.codigo === cupom)) {
         enqueueSnackbar("Esse cupom já foi adicionado!", {
@@ -79,24 +95,32 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
         return;
       }
       setLoadingCupom(true);
-      const { data } = await fetchCupom({ code: cupom });
-      if (!data?.[0]) {
-        enqueueSnackbar(`Cupom ${cupom} não encontrado!`, {
-          variant: "error",
-          persist: true,
-          action: (key) => (
-            <IconButton onClick={() => closeSnackbar(key)} size="small">
-              <CloseIcon sx={{ color: "white" }} />
-            </IconButton>
-          ),
-        });
-        setLoadingCupom(false);
-        return;
-      }
-      handleCupom(data?.[0]);
+      handleAddCupom(cupom);
+      // const { data } = await fetchCupom({ code: cupom });
+      // if (!data?.[0]) {
+      //   enqueueSnackbar(`Cupom ${cupom} não encontrado!`, {
+      //     variant: "error",
+      //     persist: true,
+      //     action: (key) => (
+      //       <IconButton onClick={() => closeSnackbar(key)} size="small">
+      //         <CloseIcon sx={{ color: "white" }} />
+      //       </IconButton>
+      //     ),
+      //   });
+      //   setLoadingCupom(false);
+      //   return;
+      // }
+      // handleCupom(data?.[0]);
       setLoadingCupom(false);
       setOpenCupom(false);
+      setForRefreshPage(true);
     }
+  };
+
+  const removeCoupon = (cupom: any) => {
+    if (!cupom) return;
+    handleCupom(cupom);
+    setForRefreshPage(true);
   };
 
   return (
@@ -115,6 +139,13 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
               right: openCart ? "0" : "-100%",
             }}
           >
+            <button
+              onClick={() => {
+                console.log(cupons);
+              }}
+            >
+              AQUI LOG
+            </button>
             <div className="flex h-full flex-col justify-between">
               <div>
                 <div className="mt-[4px] flex items-center justify-between px-[16px] pb-[8px] pt-[8px]">
@@ -276,7 +307,7 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                         <IconButton
                           type="button"
                           aria-label="enviar cupom"
-                          onClick={handleAddCupom}
+                          onClick={handleAddCupomLocal}
                         >
                           {loadingCupom ? (
                             <CircularProgress size={24} />
@@ -304,7 +335,9 @@ export function ModalCart({ actualProduct }: { actualProduct?: any }) {
                           <IoCloseCircle
                             size={16}
                             className="cursor-pointer"
-                            onClick={() => handleCupom(cupom)}
+                            onClick={() => {
+                              removeCoupon(cupom);
+                            }}
                           />
                         </div>
                       ))}

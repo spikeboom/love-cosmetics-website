@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
     // 1) grava em cookie para todo o site
     const res = NextResponse.redirect(url);
     res.cookies.set("cupom", cupom, { path: "/" });
+    res.cookies.set("cupomBackend", cupom, { path: "/" });
 
     // 2) opcional: remove o param da URL para não reaplicar
     url.searchParams.delete("cupom");
