@@ -45,6 +45,7 @@ export function ModalCart() {
     handleCupom,
     descontos,
     handleAddCupom,
+    loadingAddItem,
   } = useMeuContexto();
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -59,7 +60,7 @@ export function ModalCart() {
       const timer = setTimeout(() => {
         setSidebarMounted(false);
         if (forRefreshPage) {
-          window.location.reload();
+          // window.location.reload();
         }
       }, animationDuration);
       return () => clearTimeout(timer);
@@ -237,6 +238,8 @@ export function ModalCart() {
                     </div>
                   </div>
                 ))}
+
+                {loadingAddItem && <div className="barra my-[8px]"></div>}
               </div>
 
               <div className="px-[12px] pb-[12px] pt-[4px]">

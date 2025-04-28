@@ -4,6 +4,12 @@ import { cookies } from "next/headers";
 import { fetchCupom } from "../cupom/domain";
 import { formatPrice } from "@/utils/format-price";
 
+export async function processProdutosNothing(rawData: any) {
+  "use server";
+
+  return rawData;
+}
+
 export async function processProdutos(rawData: any, cupom?: string) {
   "use server";
   // busca o cookie
@@ -84,7 +90,7 @@ export const fetchProdutoBySlug = async ({
     throw new Error("Failed to fetch produto by slug");
   }
 
-  return processProdutos(await response.json());
+  return processProdutosNothing(await response.json());
 };
 
 export const fetchProdutosForHome = async (): Promise<any> => {
@@ -128,7 +134,7 @@ export const fetchProdutosForHome_Kit = async (): Promise<any> => {
     throw new Error("Failed to fetch produtos for home");
   }
 
-  return processProdutos(await response.json());
+  return processProdutosNothing(await response.json());
 };
 
 export const fetchProdutosForHome_NotKit = async (): Promise<any> => {
@@ -150,7 +156,7 @@ export const fetchProdutosForHome_NotKit = async (): Promise<any> => {
     throw new Error("Failed to fetch produtos for home");
   }
 
-  return processProdutos(await response.json());
+  return processProdutosNothing(await response.json());
 };
 
 export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
@@ -172,5 +178,5 @@ export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
     throw new Error("Failed to fetch produtos for home");
   }
 
-  return processProdutos(await response.json());
+  return processProdutosNothing(await response.json());
 };

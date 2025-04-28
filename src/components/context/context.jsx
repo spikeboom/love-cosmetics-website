@@ -21,6 +21,7 @@ export const MeuContextoProvider = ({ children }) => {
   const [sidebarMounted, setSidebarMounted] = useState(false);
   const [menuMounted, setMenuMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
+  const [loadingAddItem, setLoadingAddItem] = useState(false);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -46,15 +47,28 @@ export const MeuContextoProvider = ({ children }) => {
   };
 
   const addProductToCart = (product) => {
+    setLoadingAddItem(true);
+
     const newCart = { ...cart };
     if (newCart[product.id]) {
       newCart[product.id].quantity += 1;
     } else {
       newCart[product.id] = { ...product, quantity: 1 };
     }
-    setCart(newCart);
 
-    addProductEvent(product);
+    processProdutos({ data: Object.values(newCart) }, cupons?.[0]?.codigo).then(
+      (cartResult) => {
+        cartResult = cartResult?.data?.reduce((acc, item) => {
+          acc[item.id] = item;
+          return acc;
+        }, {});
+        setCart(cartResult);
+
+        addProductEvent(product);
+
+        setLoadingAddItem(false);
+      },
+    );
   };
 
   const addQuantityProductToCart = ({ product }) => {
@@ -302,6 +316,7 @@ export const MeuContextoProvider = ({ children }) => {
         handleCupom,
         handleAddCupom,
         descontos,
+        loadingAddItem,
       }}
     >
       {children}
