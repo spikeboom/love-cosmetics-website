@@ -8,10 +8,7 @@ import { fetchCupom } from "@/modules/cupom/domain";
 import { IconButton } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
 import Cookies from "js-cookie";
-import {
-  processProdutos,
-  processProdutosRevert,
-} from "@/modules/produto/domain";
+import { processProdutos } from "@/modules/produto/domain";
 
 const MeuContexto = createContext();
 
@@ -127,6 +124,20 @@ export const MeuContextoProvider = ({ children }) => {
     0,
   );
 
+  function processProdutosRevert(rawData) {
+    rawData = Object.values(rawData.data);
+
+    const processedToReturn = rawData?.map((p) => {
+      return {
+        ...p,
+        ...p?.backup,
+        backup: {},
+      };
+    });
+
+    return { data: processedToReturn };
+  }
+
   const handleCupom = (cupom) => {
     if (cupons.includes(cupom)) {
       setCupons(cupons.filter((c) => c !== cupom));
@@ -136,15 +147,13 @@ export const MeuContextoProvider = ({ children }) => {
         console.error("Erro ao tentar remover o cookie cupomBackend:", e);
       }
 
-      processProdutosRevert({ data: Object.values(cart) }).then(
-        (cartResult) => {
-          cartResult = cartResult?.data?.reduce((acc, item) => {
-            acc[item.id] = item;
-            return acc;
-          }, {});
-          setCart(cartResult);
-        },
-      );
+      let cartResult = processProdutosRevert({ data: cart });
+
+      cartResult = cartResult?.data?.reduce((acc, item) => {
+        acc[item.id] = item;
+        return acc;
+      }, {});
+      setCart(cartResult);
     } else {
       Cookies.set("cupomBackend", cupom?.codigo, { path: "/" });
       processProdutos({ data: Object.values(cart) }, cupom?.codigo).then(

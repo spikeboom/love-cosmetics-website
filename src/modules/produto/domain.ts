@@ -45,7 +45,7 @@ export async function processProdutos(rawData: any, cupom?: string) {
               tag_desconto_2: `ECONOMIZA R$ ${formatPrice(preco_de - preco_multiplicado)}`,
             }
           : {}),
-        backup: dataLog,
+        backup: dataLog?.backup || dataLog,
       };
     }) || [];
 
