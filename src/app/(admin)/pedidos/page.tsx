@@ -57,6 +57,7 @@ interface Pedido {
   destinatario?: string | null;
   createdAt: string;
   pagamentos?: Pagamento[] | null;
+  cupons: any[];
 }
 
 // export const metadata = {
@@ -161,6 +162,17 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                   ))}
                 </TableBody>
               </Table>
+
+              {pedido.cupons && pedido.cupons.length > 0 && (
+                <Box mt={2}>
+                  <Typography variant="subtitle2">Cupons Aplicados</Typography>
+                  {pedido.cupons.map((cupom, idx) => (
+                    <Typography key={idx} variant="body2">
+                      • {cupom}
+                    </Typography>
+                  ))}
+                </Box>
+              )}
 
               {/* Botão para abrir o segundo collapse */}
               <Button
