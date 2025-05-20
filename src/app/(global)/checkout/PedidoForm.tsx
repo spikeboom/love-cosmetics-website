@@ -16,6 +16,7 @@ import {
   Typography,
   CircularProgress,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { postPedido } from "@/modules/pedido/domain";
@@ -27,6 +28,7 @@ import axios from "axios";
 import { parse, isValid } from "date-fns";
 import { pushUserDataToDataLayer } from "../home/form-email";
 import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { FiSearch } from "react-icons/fi";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -86,19 +88,19 @@ const defaultPedidoFormData: PedidoFormData = {
   email: "",
   telefone: "",
   cpf: "",
-  data_nascimento: new Date(),
-  pais: "",
+  data_nascimento: undefined,
+  pais: "Brasil",
   cep: "",
   endereco: "",
   numero: "",
   complemento: "",
   bairro: "",
-  cidade: "",
-  estado: "",
+  cidade: "Manaus",
+  estado: "Amazonas",
   salvar_minhas_informacoes: false,
   aceito_receber_whatsapp: false,
   destinatario: "",
-};
+} as unknown as PedidoFormData;
 
 const PedidoForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -298,7 +300,13 @@ const PedidoForm: React.FC = () => {
 
   const buscarEnderecoPorCep = async (cep: string) => {
     const cepLimpo = cep.replace(/\D/g, "");
-    if (cepLimpo.length !== 8) return;
+    if (cepLimpo.length !== 8) {
+      enqueueSnackbar("CEP inválido. Digite os 8 números.", {
+        variant: "warning",
+      });
+      setValue("cep", ""); // limpa o campo
+      return;
+    }
 
     setLoadingCep(true);
     try {
@@ -307,6 +315,19 @@ const PedidoForm: React.FC = () => {
       );
       if (data.erro) {
         enqueueSnackbar("CEP não encontrado.", { variant: "warning" });
+        setValue("cep", ""); // limpa o campo se não encontrado
+        return;
+      }
+
+      if (data.localidade.toLowerCase() !== "manaus") {
+        enqueueSnackbar("Só aceitamos pedidos para a cidade de Manaus.", {
+          variant: "error",
+        });
+        setValue("cep", ""); // limpa o campo se não for Manaus
+        setValue("cidade", "");
+        setValue("estado", "");
+        setValue("endereco", "");
+        setValue("bairro", "");
         return;
       }
 
@@ -318,6 +339,7 @@ const PedidoForm: React.FC = () => {
       enqueueSnackbar("Erro ao buscar endereço pelo CEP.", {
         variant: "error",
       });
+      setValue("cep", ""); // limpa se houver erro na requisição
     } finally {
       setLoadingCep(false);
     }
@@ -355,7 +377,18 @@ const PedidoForm: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Formulário de Pedido
         </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              e.target instanceof HTMLInputElement &&
+              e.target.type !== "textarea"
+            ) {
+              e.preventDefault();
+            }
+          }}
+        >
           <Stack spacing={2}>
             {/* Campos do formulário (nome, sobrenome, email, etc.) */}
             <TextField
@@ -466,7 +499,7 @@ const PedidoForm: React.FC = () => {
               />
             </FormControl>
 
-            <TextField
+            {/* <TextField
               inputRef={fieldRefs.pais}
               fullWidth
               label="País"
@@ -474,7 +507,7 @@ const PedidoForm: React.FC = () => {
               error={!!errors.pais}
               helperText={errors.pais?.message}
               {...register("pais")}
-            />
+            /> */}
 
             <FormControl fullWidth error={!!errors.cep}>
               <FormLabel id="label-cep">CEP</FormLabel>
@@ -489,6 +522,29 @@ const PedidoForm: React.FC = () => {
                     InputProps={{
                       inputComponent: MaskedInput as any,
                       inputProps: { mask: "00000-000", name: field.name },
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => {
+                              const rawCep = field.value;
+                              if (rawCep) buscarEnderecoPorCep(rawCep);
+                            }}
+                            edge="end"
+                            size="small"
+                          >
+                            <FiSearch />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const value = (e.target as HTMLInputElement).value;
+                        if (value) {
+                          buscarEnderecoPorCep(value);
+                        }
+                      }
                     }}
                     onBlur={(e) => {
                       field.onBlur();
@@ -546,7 +602,7 @@ const PedidoForm: React.FC = () => {
               {...register("bairro")}
             />
 
-            <TextField
+            {/* <TextField
               inputRef={fieldRefs.cidade}
               fullWidth
               label="Cidade"
@@ -566,9 +622,9 @@ const PedidoForm: React.FC = () => {
               helperText={errors.estado?.message}
               InputLabelProps={{ shrink: true }}
               {...register("estado")}
-            />
+            /> */}
 
-            <Controller
+            {/* <Controller
               name="salvar_minhas_informacoes"
               control={control}
               render={({ field }) => (
@@ -582,7 +638,7 @@ const PedidoForm: React.FC = () => {
                   label="Salvar minhas informações"
                 />
               )}
-            />
+            /> */}
 
             <Controller
               name="aceito_receber_whatsapp"
