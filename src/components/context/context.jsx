@@ -43,6 +43,20 @@ export const MeuContextoProvider = ({ children }) => {
     });
   };
 
+  const processProdutosComOuSemCupom = (data, cupom) => {
+    const produtosNoCarrinho = Object.keys(cart);
+
+    const novosProdutos = data.data.filter(
+      (item) => !produtosNoCarrinho.includes(item.id.toString()),
+    );
+
+    const enviarComCupom = novosProdutos.length > 0;
+
+    return enviarComCupom
+      ? processProdutos(data, cupom)
+      : processProdutos(data, "sem-cupom");
+  };
+
   const addProductToCart = (product) => {
     setLoadingAddItem(true);
 
@@ -53,19 +67,20 @@ export const MeuContextoProvider = ({ children }) => {
       newCart[product.id] = { ...product, quantity: 1 };
     }
 
-    processProdutos({ data: Object.values(newCart) }, cupons?.[0]?.codigo).then(
-      (cartResult) => {
-        cartResult = cartResult?.data?.reduce((acc, item) => {
-          acc[item.id] = item;
-          return acc;
-        }, {});
-        setCart(cartResult);
+    processProdutosComOuSemCupom(
+      { data: Object.values(newCart) },
+      cupons?.[0]?.codigo,
+    ).then((cartResult) => {
+      cartResult = cartResult?.data?.reduce((acc, item) => {
+        acc[item.id] = item;
+        return acc;
+      }, {});
+      setCart(cartResult);
 
-        addProductEvent(product);
+      addProductEvent(product);
 
-        setLoadingAddItem(false);
-      },
-    );
+      setLoadingAddItem(false);
+    });
   };
 
   const addQuantityProductToCart = ({ product }) => {
@@ -131,7 +146,7 @@ export const MeuContextoProvider = ({ children }) => {
       return {
         ...p,
         ...p?.backup,
-        backup: {},
+        backup: p?.backup,
       };
     });
 

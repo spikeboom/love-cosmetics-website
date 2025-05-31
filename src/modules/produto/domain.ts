@@ -21,7 +21,7 @@ export async function processProdutos(rawData: any, cupom?: string) {
     ? (await fetchCupom({ code: meuCookie }))?.data || null
     : null;
 
-  if (!dataCookie) {
+  if (!dataCookie || cupom === "sem-cupom") {
     return rawData;
   }
 
@@ -30,7 +30,7 @@ export async function processProdutos(rawData: any, cupom?: string) {
       const { ...dataLog } = p || {};
 
       const multiplicar = dataCookie?.[0]?.multiplacar || 1;
-      const preco_de = dataLog?.preco || 0;
+      const preco_de = dataLog?.preco_de || dataLog?.preco || 0;
       const preco_multiplicado = dataLog?.preco * multiplicar || 0;
 
       return {

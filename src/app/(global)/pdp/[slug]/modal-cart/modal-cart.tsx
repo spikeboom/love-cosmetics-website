@@ -218,9 +218,19 @@ export function ModalCart() {
                         {(product.tag_desconto_1 || product.tag_desconto_2) && (
                           <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
                             <IoMdPricetag color="#333" />
-                            {product.tag_desconto_1 ||
-                              product.tag_desconto_2}{" "}
-                            OFF
+                            {(() => {
+                              const tag =
+                                product.tag_desconto_1 ||
+                                product.tag_desconto_2;
+                              const match = tag.match(/(\d+([.,]\d+)?)/); // extrai número com ponto ou vírgula
+                              if (!match) return tag + " OFF";
+                              const valor = parseFloat(
+                                match[0].replace(",", "."),
+                              );
+                              const total = valor * (product?.quantity || 1);
+                              const formatted = formatPrice(total); // ou total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                              return tag.replace(match[0], formatted) + " OFF";
+                            })()}
                           </div>
                         )}
 
@@ -241,6 +251,12 @@ export function ModalCart() {
 
                 {loadingAddItem && <div className="barra my-[8px]"></div>}
               </div>
+
+              {Object.keys(cart).length === 0 && !loadingAddItem && (
+                <div className="mx-[16px] mb-[16px] mt-[24px] text-center text-[14px] font-medium text-[#888]">
+                  Seu carrinho está vazio.
+                </div>
+              )}
 
               <div className="px-[12px] pb-[12px] pt-[4px]">
                 <div className="my-[14px] flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[8px]">
@@ -297,7 +313,7 @@ export function ModalCart() {
                           onChange={(
                             event: React.ChangeEvent<HTMLInputElement>,
                           ) => {
-                            setCupom(event.target.value);
+                            setCupom(event.target.value.toUpperCase());
                           }}
                         />
                         <IconButton
@@ -372,18 +388,28 @@ export function ModalCart() {
                     comprando
                   </span>
 
-                  <Link
-                    href="/checkout#top"
-                    className="rounded-[3px] bg-[#C0392B] px-[18px] py-[12px] font-bold text-[#fff]"
-                  >
-                    <span
-                      onClick={() => {
-                        setSidebarMounted(false);
-                      }}
+                  {Object.keys(cart).length === 0 ? (
+                    <button
+                      className="cursor-not-allowed rounded-[3px] bg-[#ccc] px-[18px] py-[12px] font-bold text-[#fff]"
+                      disabled
+                      title="Adicione itens ao carrinho para finalizar o pedido"
                     >
                       finalizar pedido
-                    </span>
-                  </Link>
+                    </button>
+                  ) : (
+                    <Link
+                      href="/checkout#top"
+                      className="rounded-[3px] bg-[#C0392B] px-[18px] py-[12px] font-bold text-[#fff]"
+                    >
+                      <span
+                        onClick={() => {
+                          setSidebarMounted(false);
+                        }}
+                      >
+                        finalizar pedido
+                      </span>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
