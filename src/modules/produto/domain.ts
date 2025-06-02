@@ -180,3 +180,25 @@ export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
 
   return processProdutosNothing(await response.json());
 };
+
+export const fetchProdutosSugeridosCarrinho = async (): Promise<any> => {
+  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes&filters[nome][$containsi]=-showInCart`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
+    },
+    cache: "no-store", // Ajuste conforme necessário: "no-store" para evitar cache em SSR
+  });
+
+  if (!response.ok) {
+    // logue o por que do erro
+    console.error("Failed to fetch produtos sugeridos", response);
+    throw new Error("Failed to fetch produtos sugeridos");
+  }
+
+  return processProdutosNothing(await response.json());
+};

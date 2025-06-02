@@ -31,6 +31,7 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import { fetchProdutosSugeridosCarrinho } from "@/modules/produto/domain";
 
 export function ModalCart() {
   const {
@@ -46,7 +47,11 @@ export function ModalCart() {
     descontos,
     handleAddCupom,
     loadingAddItem,
+    addProductToCart,
   } = useMeuContexto();
+
+  const [suggestedProductsRaw, setSuggestedProductsRaw] = useState<any[]>([]);
+  const [loadingSuggested, setLoadingSuggested] = useState(false);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -124,6 +129,54 @@ export function ModalCart() {
     setForRefreshPage(true);
   };
 
+  useEffect(() => {
+    async function fetchSuggested() {
+      setLoadingSuggested(true);
+      try {
+        const res = await fetchProdutosSugeridosCarrinho();
+        setSuggestedProductsRaw(res.data || []);
+      } catch (err) {
+        console.error("Erro ao buscar produtos sugeridos:", err);
+        setSuggestedProductsRaw([]);
+      }
+      setLoadingSuggested(false);
+    }
+
+    fetchSuggested();
+  }, []);
+
+  // 2. Filtrar produtos sugeridos: remover os que já estão no carrinho
+  //    e transformar o nome para remover o trecho entre { } e aplicar trim
+  const suggestedProducts = suggestedProductsRaw
+    .filter((item) => {
+      // Não exibir se o ID do produto já existir no cart
+      return !cart[item.id];
+    })
+    .map((item) => {
+      const attrs = item;
+      // Extrair a URL da imagem pequena (mantendo mesma lógica dos itens do carrinho)
+      // Supondo que a API retorne algo em attrs.imagem.formats.thumbnail.url
+      const imageUrl = attrs.carouselImagensPrincipal?.[0]?.imagem?.formats
+        ?.thumbnail?.url
+        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+            attrs.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url
+          }`
+        : "";
+
+      // 4. Ajustar nome: remover tudo entre chaves {}, aplicar trim
+      //    Exemplo: "Caixa {-hide-showInCart}" => "Caixa"
+      const nomeOriginal: string = attrs.nome;
+      const nomeAjustado = nomeOriginal.replace(/\{.*?\}/g, "").trim();
+
+      return {
+        id: item.id,
+        nome: nomeAjustado,
+        preco: attrs.preco,
+        imageUrl,
+        carouselImagensPrincipal: attrs.carouselImagensPrincipal,
+      };
+    });
+
   return (
     <>
       {sidebarMounted && (
@@ -167,7 +220,7 @@ export function ModalCart() {
                     className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]"
                   >
                     <a
-                      href={`/pdp/${product.slug}`}
+                      href={product.slug ? `/pdp/${product.slug}` : undefined}
                       className="mr-[12px] h-full"
                     >
                       <div className="relative h-[60px] w-[60px]">
@@ -256,6 +309,68 @@ export function ModalCart() {
                 <div className="mx-[16px] mb-[16px] mt-[24px] text-center text-[14px] font-medium text-[#888]">
                   Seu carrinho está vazio.
                 </div>
+              )}
+
+              {/* === Se houver produtos sugeridos após o filtro, exibir seção === */}
+              {suggestedProducts.length > 0 && (
+                <>
+                  <div className="flex-1" />
+                  <div className="border-b border-t p-4">
+                    <h3 className="text-md mb-2 font-medium">
+                      Você também pode gostar:
+                    </h3>
+
+                    {loadingSuggested ? (
+                      <p className="text-sm text-gray-500">
+                        Carregando sugestões...
+                      </p>
+                    ) : (
+                      <ul className="space-y-3">
+                        {suggestedProducts.map((item) => (
+                          <li
+                            key={item.id}
+                            className="flex items-center justify-between"
+                          >
+                            {/* 3. Imagem pequena */}
+                            <div className="relative mr-2 h-[60px] w-[60px] flex-shrink-0">
+                              <Image
+                                src={item.imageUrl}
+                                loader={({ src }) => src}
+                                alt={item.nome}
+                                fill
+                                style={{ objectFit: "cover" }}
+                              />
+                            </div>
+                            <p className="flex-1 text-sm">{item.nome}</p>
+                            <div className="flex flex-col items-center gap-1">
+                              {" "}
+                              <div className="w-[60px] text-right">
+                                <span className="block text-[12px] font-semibold">
+                                  R$ {formatPrice(item.preco)}
+                                </span>
+                              </div>
+                              <button
+                                className="ml-4 rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600"
+                                onClick={() =>
+                                  addProductToCart({
+                                    ...item,
+                                    id: item.id,
+                                    nome: item.nome,
+                                    preco: item.preco,
+                                    preco_de: null,
+                                    slug: null,
+                                  })
+                                }
+                              >
+                                Adicionar
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </>
               )}
 
               <div className="px-[12px] pb-[12px] pt-[4px]">
