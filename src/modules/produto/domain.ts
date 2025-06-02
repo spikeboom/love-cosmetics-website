@@ -29,6 +29,13 @@ export async function processProdutos(rawData: any, cupom?: string) {
     rawData?.data?.map((p: any) => {
       const { ...dataLog } = p || {};
 
+      if (p?.cupom_applied === dataCookie?.[0]?.multiplacar) {
+        // se o cupom já foi aplicado, não faz nada
+        return {
+          ...dataLog,
+        };
+      }
+
       const multiplicar = dataCookie?.[0]?.multiplacar || 1;
       const preco_de = dataLog?.preco_de || dataLog?.preco || 0;
       const preco_multiplicado = dataLog?.preco * multiplicar || 0;
@@ -37,6 +44,7 @@ export async function processProdutos(rawData: any, cupom?: string) {
         ...dataLog,
         // se quiser aplicar desconto:
         // tag_desconto_1_modified
+        cupom_applied: dataCookie?.[0]?.multiplacar || null,
         preco_de: preco_de || 0,
         preco: preco_multiplicado || 0,
         tag_desconto_1: `-R$ ${formatPrice(preco_de - preco_multiplicado)}`,
@@ -45,7 +53,10 @@ export async function processProdutos(rawData: any, cupom?: string) {
               tag_desconto_2: `ECONOMIZA R$ ${formatPrice(preco_de - preco_multiplicado)}`,
             }
           : {}),
-        backup: dataLog?.backup || dataLog,
+        backup: {
+          ...(dataLog?.backup || dataLog),
+          cupom_applied: null, // remove cupom_applied do backup
+        },
       };
     }) || [];
 
