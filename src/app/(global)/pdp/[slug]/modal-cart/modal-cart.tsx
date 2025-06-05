@@ -177,6 +177,8 @@ export function ModalCart() {
       };
     });
 
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
   return (
     <>
       {sidebarMounted && (
@@ -194,7 +196,7 @@ export function ModalCart() {
             }}
           >
             <div className="flex h-full flex-col justify-between">
-              <div>
+              <div className="flex h-full flex-col">
                 <div className="mt-[4px] flex items-center justify-between px-[16px] pb-[8px] pt-[8px]">
                   <div className="flex items-center gap-3">
                     <LuShoppingCart size={16} />
@@ -214,93 +216,103 @@ export function ModalCart() {
                   <div className="barra my-[8px]"></div>
                 </div> */}
 
-                {Object.entries(cart).map(([id, product]: any) => (
-                  <div
-                    key={id}
-                    className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]"
-                  >
-                    <a
-                      href={product.slug ? `/pdp/${product.slug}` : undefined}
-                      className="mr-[12px] h-full"
-                    >
-                      <div className="relative h-[60px] w-[60px]">
-                        <Image
-                          src={
-                            process.env.NEXT_PUBLIC_STRAPI_URL +
-                            product?.carouselImagensPrincipal?.[0]?.imagem
-                              ?.formats?.thumbnail?.url
+                <div className="relative h-full overflow-y-auto">
+                  <div className="absolute bottom-0 left-0 right-0 top-0 w-full">
+                    {Object.entries(cart).map(([id, product]: any) => (
+                      <div
+                        key={id}
+                        className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]"
+                      >
+                        <a
+                          href={
+                            product.slug ? `/pdp/${product.slug}` : undefined
                           }
-                          loader={({ src }) => src}
-                          alt={`Image x`}
-                          fill
-                          style={{
-                            objectFit: "cover",
-                          }}
-                        />
-                      </div>
-                    </a>
-                    <div className="w-full">
-                      <div className="mb-[6px] flex items-center justify-between">
-                        <h4 className="font-poppins text-[13px] font-semibold">
-                          {product?.nome}
-                        </h4>
-                        <IoCloseCircle
-                          color="#d0d0d0"
-                          size={16}
-                          className="cursor-pointer"
-                          onClick={() => removeProductFromCart({ product })}
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-[8px]">
-                        <div className="flex items-center gap-[4px] rounded-[3px] border-[1px] border-[#c4c4c4] p-[5px] font-poppins text-[14px] font-bold">
-                          <FaMinus
-                            onClick={() =>
-                              subtractQuantityProductToCart({ product })
-                            }
-                          />
-                          <span>{product?.quantity}</span>
-                          <FaPlus
-                            className="cursor-pointer"
-                            onClick={() =>
-                              addQuantityProductToCart({ product })
-                            }
-                          />
-                        </div>
-
-                        {(product.tag_desconto_1 || product.tag_desconto_2) && (
-                          <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
-                            <IoMdPricetag color="#333" />
-                            {(() => {
-                              const tag =
-                                product.tag_desconto_1 ||
-                                product.tag_desconto_2;
-                              const match = tag.match(/(\d+([.,]\d+)?)/); // extrai número com ponto ou vírgula
-                              if (!match) return tag + " OFF";
-                              const valor = parseFloat(
-                                match[0].replace(",", "."),
-                              );
-                              const total = valor * (product?.quantity || 1);
-                              const formatted = formatPrice(total); // ou total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                              return tag.replace(match[0], formatted) + " OFF";
-                            })()}
+                          className="mr-[12px] h-full"
+                        >
+                          <div className="relative h-[60px] w-[60px]">
+                            <Image
+                              src={
+                                process.env.NEXT_PUBLIC_STRAPI_URL +
+                                product?.carouselImagensPrincipal?.[0]?.imagem
+                                  ?.formats?.thumbnail?.url
+                              }
+                              loader={({ src }) => src}
+                              alt={`Image x`}
+                              fill
+                              style={{
+                                objectFit: "cover",
+                              }}
+                            />
                           </div>
-                        )}
-
+                        </a>
                         <div className="w-full">
-                          {product.preco_de && (
-                            <span className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through">
-                              R$ {formatPrice(product?.preco_de)}
-                            </span>
-                          )}
-                          <span className="block text-end text-[14px] font-semibold">
-                            R$ {formatPrice(product?.preco)}
-                          </span>
+                          <div className="mb-[6px] flex items-center justify-between">
+                            <h4 className="font-poppins text-[13px] font-semibold">
+                              {product?.nome}
+                            </h4>
+                            <IoCloseCircle
+                              color="#d0d0d0"
+                              size={16}
+                              className="cursor-pointer"
+                              onClick={() => removeProductFromCart({ product })}
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-[8px]">
+                            <div className="flex items-center gap-[4px] rounded-[3px] border-[1px] border-[#c4c4c4] p-[5px] font-poppins text-[14px] font-bold">
+                              <FaMinus
+                                onClick={() =>
+                                  subtractQuantityProductToCart({ product })
+                                }
+                              />
+                              <span>{product?.quantity}</span>
+                              <FaPlus
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  addQuantityProductToCart({ product })
+                                }
+                              />
+                            </div>
+
+                            {(product.tag_desconto_1 ||
+                              product.tag_desconto_2) && (
+                              <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
+                                <IoMdPricetag color="#333" />
+                                {(() => {
+                                  const tag =
+                                    product.tag_desconto_1 ||
+                                    product.tag_desconto_2;
+                                  const match = tag.match(/(\d+([.,]\d+)?)/); // extrai número com ponto ou vírgula
+                                  if (!match) return tag + " OFF";
+                                  const valor = parseFloat(
+                                    match[0].replace(",", "."),
+                                  );
+                                  const total =
+                                    valor * (product?.quantity || 1);
+                                  const formatted = formatPrice(total); // ou total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                  return (
+                                    tag.replace(match[0], formatted) + " OFF"
+                                  );
+                                })()}
+                              </div>
+                            )}
+
+                            <div className="w-full">
+                              {product.preco_de && (
+                                <span className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through">
+                                  R$ {formatPrice(product?.preco_de)}
+                                </span>
+                              )}
+                              <span className="block text-end text-[14px] font-semibold">
+                                R$ {formatPrice(product?.preco)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </div>
 
                 {loadingAddItem && <div className="barra my-[8px]"></div>}
               </div>
@@ -315,59 +327,99 @@ export function ModalCart() {
               {suggestedProducts.length > 0 && (
                 <>
                   <div className="flex-1" />
-                  <div className="border-b border-t p-4">
-                    <h3 className="text-md mb-2 font-medium">
+                  <div className="border-b border-t">
+                    <h3 className="text-md p-4 pb-0 font-medium">
                       Você também pode gostar:
                     </h3>
 
                     {loadingSuggested ? (
-                      <p className="text-sm text-gray-500">
+                      <p className="p-4 pb-0 text-sm text-gray-500">
                         Carregando sugestões...
                       </p>
                     ) : (
-                      <ul className="space-y-3">
-                        {suggestedProducts.map((item) => (
-                          <li
-                            key={item.id}
-                            className="flex items-center justify-between"
+                      <div className="relative my-2 mb-3">
+                        {/* Botão “esquerda” absoluto */}
+                        <button
+                          className="absolute left-0 top-1/2 z-10 h-[35px] w-[35px] -translate-y-1/2 rounded-full bg-[#EFAE75] p-2 text-[#5A3E2B] hover:text-black disabled:bg-[#F5D1B1] disabled:text-[#A86E45]"
+                          onClick={() =>
+                            setCarouselIndex((i) => Math.max(i - 1, 0))
+                          }
+                          disabled={carouselIndex === 0}
+                        >
+                          &lt;
+                        </button>
+
+                        {/* Janela do carrossel */}
+                        <div className="mx-5 overflow-hidden">
+                          <div
+                            className="flex transition-transform duration-300"
+                            style={{
+                              transform: `translateX(-${carouselIndex * 100}%)`,
+                            }}
                           >
-                            {/* 3. Imagem pequena */}
-                            <div className="relative mr-2 h-[60px] w-[60px] flex-shrink-0">
-                              <Image
-                                src={item.imageUrl}
-                                loader={({ src }) => src}
-                                alt={item.nome}
-                                fill
-                                style={{ objectFit: "cover" }}
-                              />
-                            </div>
-                            <p className="flex-1 text-sm">{item.nome}</p>
-                            <div className="flex flex-col items-center gap-1">
-                              {" "}
-                              <div className="w-[60px] text-right">
-                                <span className="block text-[12px] font-semibold">
-                                  R$ {formatPrice(item.preco)}
-                                </span>
-                              </div>
-                              <button
-                                className="ml-4 rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600"
-                                onClick={() =>
-                                  addProductToCart({
-                                    ...item,
-                                    id: item.id,
-                                    nome: item.nome,
-                                    preco: item.preco,
-                                    preco_de: null,
-                                    slug: null,
-                                  })
-                                }
+                            {suggestedProducts.map((item) => (
+                              <div
+                                key={item.id}
+                                className="w-full flex-shrink-0 px-2"
                               >
-                                Adicionar
-                              </button>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+                                {/* Card do item com layout igual ao original (row, não empilhado) */}
+                                <div className="flex items-center justify-between rounded border p-2">
+                                  <div className="relative h-[60px] w-[60px]">
+                                    <Image
+                                      src={item.imageUrl}
+                                      loader={({ src }) => src}
+                                      alt={item.nome}
+                                      fill
+                                      style={{ objectFit: "cover" }}
+                                    />
+                                  </div>
+                                  <p className="flex-1 pl-4 pr-2 text-sm">
+                                    {item.nome}
+                                  </p>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="px-4 text-sm font-semibold">
+                                      R$ {formatPrice(item.preco)}
+                                    </span>
+                                    <button
+                                      className="rounded bg-red-500 px-3 py-1 text-xs text-white hover:bg-red-600"
+                                      onClick={() => {
+                                        setCarouselIndex((prev) =>
+                                          prev === 0 ? prev : prev - 1,
+                                        );
+                                        addProductToCart({
+                                          ...item,
+                                          id: item.id,
+                                          nome: item.nome,
+                                          preco: item.preco,
+                                          preco_de: null,
+                                          slug: null,
+                                        });
+                                      }}
+                                    >
+                                      Adicionar
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Botão “direita” absoluto */}
+                        <button
+                          className="absolute right-0 top-1/2 z-10 h-[35px] w-[35px] -translate-y-1/2 rounded-full bg-[#EFAE75] p-2 text-[#5A3E2B] hover:text-black disabled:bg-[#F5D1B1] disabled:text-[#A86E45]"
+                          onClick={() =>
+                            setCarouselIndex((i) =>
+                              Math.min(i + 1, suggestedProducts.length - 1),
+                            )
+                          }
+                          disabled={
+                            carouselIndex >= suggestedProducts.length - 1
+                          }
+                        >
+                          &gt;
+                        </button>
+                      </div>
                     )}
                   </div>
                 </>
