@@ -1,34 +1,34 @@
-import { Tabs } from "./tabs";
-import { Duvidas } from "./duvidas/duvidas";
-import { CarouselProducts } from "./carousel-products/carousel-products";
-import { ListaAtivos } from "./lista-ativos/lista-ativos";
-import { MaisLinks } from "./mais-links/mais-links";
-import { Rodape } from "./rodape/rodape";
-import { AvaliacoesClientes } from "./avaliacoes-clientes/avaliacoes-clientes";
-import { CarouselImagensTop } from "./carousel-imagens-top/carousel-imagens-top";
-import { Cabecalho } from "./cabecalho/cabecalho";
-import { Breadcrumbs } from "./breadcrumbs/breadcrumbs";
-import { ProductInfoTop } from "./product-info-top/product-info-top";
-import { ProductDescricao } from "./product-descricao/product-descricao";
+import { Tabs } from "@/components/pdp/Tabs";
+import { Duvidas } from "@/components/pdp/Duvidas/duvidas";
+import { CarouselProducts } from "@/components/pdp/CarouselProducts/carousel-products";
+import { ListaAtivos } from "@/components/pdp/ListaAtivos/lista-ativos";
+import { MaisLinks } from "@/components/pdp/MaisLinks/mais-links";
+import { Rodape } from "@/components/pdp/Rodape/rodape";
+import { AvaliacoesClientes } from "@/components/pdp/AvaliacoesClientes/avaliacoes-clientes";
+import { CarouselImagensTop } from "@/components/pdp/CarouselImagensTop/carousel-imagens-top";
+import { Cabecalho } from "@/components/pdp/Cabecalho/cabecalho";
+import { Breadcrumbs } from "@/components/pdp/Breadcrumbs/breadcrumbs";
+import { ProductInfoTop } from "@/components/pdp/ProductInfoTop/product-info-top";
+import { ProductDescricao } from "@/components/pdp/ProductDescricao/product-descricao";
 import {
   BarraFixaComprar,
   BotaoComprar,
-} from "./botao-fixo-comprar/botao-fixo-comprar";
-import { ComoUsarEssaFormula } from "./como-usar-essa-formula/como-usar-essa-formula";
-import { Adesivos } from "./adesivos/adesivos";
-import { PagueCom } from "./pague-com/pague-com";
-import { PontosDisponiveis } from "./pontos-disponiveis/pontos-disponiveis";
-import { ListaRedesSociais } from "./lista-redes-sociais/lista-resdes-sociais";
-import { CartoesAceitos } from "./cartoes-aceitos/cartoes-aceitos";
-import { CadastreSeuEmail } from "./cadastre-seu-email/cadastre-seu-email";
+} from "@/components/pdp/BotaoFixoComprar/botao-fixo-comprar";
+import { ComoUsarEssaFormula } from "@/components/pdp/ComoUsarEssaFormula/como-usar-essa-formula";
+import { Adesivos } from "@/components/pdp/Adesivos/adesivos";
+import { PagueCom } from "@/components/pdp/PagueCom/pague-com";
+import { PontosDisponiveis } from "@/components/pdp/PontosDisponiveis/pontos-disponiveis";
+import { ListaRedesSociais } from "@/components/pdp/ListaRedesSociais/lista-resdes-sociais";
+import { CartoesAceitos } from "@/components/pdp/CartoesAceitos/cartoes-aceitos";
+import { CadastreSeuEmail } from "@/components/pdp/CadastreSeuEmail/cadastre-seu-email";
 import {
   fetchProdutoBySlug,
   fetchProdutosForCarouselPDP,
 } from "@/modules/produto/domain";
-import { ModalCart } from "./modal-cart/modal-cart";
+import { ModalCart } from "@/components/pdp/ModalCart/modal-cart";
 import { Metadata, ResolvingMetadata } from "next";
 import { AddToCart } from "@/components/add-to-cart/add-to-cart";
-import { ViewContentEvent } from "./event-view-content/event-view-content";
+import { ViewContentEvent } from "@/components/pdp/EventViewContent/event-view-content";
 
 type Props = {
   params: Promise<{ slug: string }>;

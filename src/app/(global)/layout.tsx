@@ -8,8 +8,8 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { MeuContextoProvider } from "../../components/context/context";
-import { Cabecalho } from "./pdp/[slug]/cabecalho/cabecalho";
-import { Rodape } from "./pdp/[slug]/rodape/rodape";
+import { Cabecalho } from "@/components/pdp/Cabecalho/cabecalho";
+import { Rodape } from "@/components/pdp/Rodape/rodape";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { ModalMenu } from "@/components/menu/menu";
 import MyLogFrontError from "@/components/log-error-front/log-error-front";

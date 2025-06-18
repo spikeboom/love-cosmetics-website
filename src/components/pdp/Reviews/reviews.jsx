@@ -1,6 +1,6 @@
 "use client";
 
-import Review from "./review/review";
+import Review from "./Review/review";
 
 const reviewsArray = [
   {
@@ -9,8 +9,8 @@ const reviewsArray = [
     nota: 3.5,
     comentario: (
       <>
-        Comprei achando que ia ser prático, um preço caro por negócio durar 5 “
-        vezes” literalmente usei 5 vezes, um absurdo completo
+        Comprei achando que ia ser prático, um preço caro por negócio durar 5 "
+        vezes" literalmente usei 5 vezes, um absurdo completo
       </>
     ),
     questions: {

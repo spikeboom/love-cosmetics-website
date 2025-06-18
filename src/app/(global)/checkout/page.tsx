@@ -1,6 +1,6 @@
 import React from "react";
 import PedidoForm from "./PedidoForm";
-import { ModalCart } from "../pdp/[slug]/modal-cart/modal-cart";
+import { ModalCart } from "@/components/pdp/ModalCart/modal-cart";
 import { PushInitiateCheckout } from "./PushInitiateCheckout";
 
 export const metadata = {

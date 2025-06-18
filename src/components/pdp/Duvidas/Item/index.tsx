@@ -1,8 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { IoChevronDown, IoChevronUp } from "react-icons/io5";
-import { Accordion, AccordionDetails, AccordionSummary } from "../../tabs";
+import { Accordion, AccordionDetails, AccordionSummary } from "../../Tabs";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Typography } from "@mui/material";
 

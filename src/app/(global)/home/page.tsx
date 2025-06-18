@@ -3,8 +3,8 @@ import {
   fetchProdutosForHome_NotKit,
 } from "@/modules/produto/domain";
 import { Product } from "@/components/home-product/carousel-products";
-import { ModalCart } from "../pdp/[slug]/modal-cart/modal-cart";
-import { CarouselProducts } from "../pdp/[slug]/carousel-products/carousel-products";
+import { ModalCart } from "@/components/pdp/ModalCart/modal-cart";
+import { CarouselProducts } from "@/components/pdp/CarouselProducts/carousel-products";
 import { FormEmailGTM } from "./form-email";
 
 export const metadata = {
