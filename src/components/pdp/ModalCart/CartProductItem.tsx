@@ -16,7 +16,10 @@ export function CartProductItem({
   removeProduct: () => void;
 }) {
   return (
-    <div className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]">
+    <div
+      data-testid="cart-product-item"
+      className="mx-[12px] mb-[6px] mt-[16px] flex items-center border-b-[1px] border-b-[#efefef] pb-[8px]"
+    >
       <a
         href={product.slug ? `/pdp/${product.slug}` : undefined}
         className="mr-[12px] h-full"
@@ -41,6 +44,7 @@ export function CartProductItem({
             {product?.nome}
           </h4>
           <IoCloseCircle
+            data-testid="remove-product-button"
             color="#d0d0d0"
             size={16}
             className="cursor-pointer"
@@ -49,9 +53,18 @@ export function CartProductItem({
         </div>
         <div className="flex items-center gap-[8px]">
           <div className="flex items-center gap-[4px] rounded-[3px] border-[1px] border-[#c4c4c4] p-[5px] font-poppins text-[14px] font-bold">
-            <FaMinus onClick={subtractQuantity} />
-            <span>{product?.quantity}</span>
-            <FaPlus className="cursor-pointer" onClick={addQuantity} />
+            <FaMinus
+              data-testid="decrement-button"
+              onClick={subtractQuantity}
+            />
+            <span data-testid="cart-product-item-quantity">
+              {product?.quantity}
+            </span>
+            <FaPlus
+              data-testid="increment-button"
+              className="cursor-pointer"
+              onClick={addQuantity}
+            />
           </div>
           {(product.tag_desconto_1 || product.tag_desconto_2) && (
             <div className="flex h-fit items-center gap-1 whitespace-nowrap rounded-[3px] bg-[#eee9ff] px-[4px] text-[11px] font-medium text-[#333333bf]">
@@ -69,11 +82,17 @@ export function CartProductItem({
           )}
           <div className="w-full">
             {product.preco_de && (
-              <span className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through">
+              <span
+                data-testid="cart-product-item-unit-price"
+                className="block text-end text-[12px] font-bold text-[#a5a5a5] line-through"
+              >
                 R$ {formatPrice(product?.preco_de)}
               </span>
             )}
-            <span className="block text-end text-[14px] font-semibold">
+            <span
+              data-testid="cart-product-item-unit-price-discounted"
+              className="block text-end text-[14px] font-semibold"
+            >
               R$ {formatPrice(product?.preco)}
             </span>
           </div>

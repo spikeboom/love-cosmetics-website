@@ -83,6 +83,7 @@ export function ModalCart() {
               transitionDuration: `${animationDuration}ms`,
               right: openCart ? "0" : "-100%",
             }}
+            data-testid="cart-modal"
           >
             <div className="flex h-full flex-col justify-between">
               <div className="flex h-full flex-col">

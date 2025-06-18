@@ -5,6 +5,7 @@ import { CircularProgress, IconButton, InputBase, Paper } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import Link from "next/link";
 import { IoCloseCircle } from "react-icons/io5";
+import { formatPrice } from "@/utils/format-price";
 
 export function CartSummary({
   freteValue,
@@ -41,6 +42,7 @@ export function CartSummary({
         </p>
         <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px]">
           <span
+            data-testid="coupon-toggle-button"
             className="flex cursor-pointer items-center gap-1 text-[12px] font-semibold text-[#7045f5]"
             onClick={() => setOpenCupom(!openCupom)}
           >
@@ -66,8 +68,12 @@ export function CartSummary({
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setCupom(event.target.value.toUpperCase());
                 }}
+                inputProps={{
+                  "data-testid": "coupon-input",
+                }}
               />
               <IconButton
+                data-testid="apply-coupon-button"
                 type="button"
                 aria-label="enviar cupom"
                 onClick={handleAddCupomLocal}
@@ -93,8 +99,9 @@ export function CartSummary({
                 key={index}
                 className="flex items-center gap-1 rounded-[3px] bg-[#f1f1f1] px-[4px] py-[2px] text-[12px] font-semibold"
               >
-                <span>{cupom.codigo}</span>
+                <span data-testid="coupon-item">{cupom.codigo}</span>
                 <IoCloseCircle
+                  data-testid="remove-coupon-button"
                   size={16}
                   className="cursor-pointer"
                   onClick={() => {
@@ -118,9 +125,7 @@ export function CartSummary({
       ) : null}
       <div className="my-[14px] flex items-center justify-between font-semibold">
         <p className="flex items-center gap-1 pr-[4px] text-[14px]">total</p>
-        <p className="flex items-center gap-1 text-[14px]">
-          R$ {total?.toFixed(2).toString().replace(".", ",")}
-        </p>
+        <span data-testid="cart-summary-total-price">{formatPrice(total)}</span>
       </div>
       <div className="flex items-center justify-end gap-[8px]">
         <span

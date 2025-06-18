@@ -8,7 +8,12 @@ export function CartHeader({ onClose }: { onClose: () => void }) {
         <LuShoppingCart size={16} />
         <h2 className="font-poppins text-[14px]">seu carrinho</h2>
       </div>
-      <IoClose size={16} className="cursor-pointer" onClick={onClose} />
+      <IoClose
+        data-testid="close-cart-button"
+        size={16}
+        className="cursor-pointer"
+        onClick={onClose}
+      />
     </div>
   );
 }

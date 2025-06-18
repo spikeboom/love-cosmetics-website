@@ -83,6 +83,7 @@ export const Product = ({ data, handlerAdd }: any) => (
     </div>
     <div className="w-full">
       <div
+        aria-label="Carrossel - Comprar"
         className="w-full"
         onClick={handlerAdd}
         // href={`/pdp/[slug]`}
@@ -166,6 +167,7 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
         <div
           // href={`/pdp/[slug]`}
           // as={`/pdp/${data.slug}?addToCart=1`}
+          aria-label="Carrossel - Comprar"
           className=""
           onClick={handlerAdd}
         >
