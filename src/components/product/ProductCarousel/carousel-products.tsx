@@ -4,7 +4,7 @@ import Image from "next/image";
 import IconSacola from "./icon-sacola";
 import "./style.css";
 import Link from "next/link";
-import { useMeuContexto } from "@/components/context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import { formatPrice } from "@/utils/format-price";
 
 // const arrayProducts = [

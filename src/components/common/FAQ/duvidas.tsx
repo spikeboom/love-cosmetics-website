@@ -1,6 +1,6 @@
 "use client";
 
-import DoubtsItem from "./Item";
+import DoubtsItem from "@/components/common/FAQ/Item";
 
 interface Duvida {
   id: number;

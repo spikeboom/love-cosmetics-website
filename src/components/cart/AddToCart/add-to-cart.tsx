@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { useMeuContexto } from "../context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export function AddToCart({ produto }: any) {

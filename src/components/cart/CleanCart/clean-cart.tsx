@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { useMeuContexto } from "../context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 
 export function ClearCart() {
   const { clearCart } = useMeuContexto();

@@ -1,7 +1,11 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { Accordion, AccordionDetails, AccordionSummary } from "../../Tabs";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+} from "@/components/ui/Tabs";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Typography } from "@mui/material";
 

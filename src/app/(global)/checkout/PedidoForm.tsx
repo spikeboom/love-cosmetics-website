@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { postPedido } from "@/modules/pedido/domain";
-import { useMeuContexto } from "@/components/context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import MaskedInput from "./MaskedInput";
 import { useSnackbar } from "notistack";
 import CloseIcon from "@mui/icons-material/Close";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMeuContexto } from "@/components/context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import { formatPrice } from "@/utils/format-price";
 
 interface BarraFixaComprarProps {

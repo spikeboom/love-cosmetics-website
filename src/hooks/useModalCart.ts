@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { fetchProdutosSugeridosCarrinho } from "@/modules/produto/domain";
-import { useMeuContexto } from "@/components/context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import { useSnackbar } from "notistack";
 import { freteValue } from "@/utils/frete-value";
 import { formatPrice } from "@/utils/format-price";

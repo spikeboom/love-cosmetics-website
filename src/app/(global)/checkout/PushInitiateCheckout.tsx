@@ -1,5 +1,5 @@
 "use client";
-import { useMeuContexto } from "@/components/context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
 import { useEffect, useRef } from "react";
 

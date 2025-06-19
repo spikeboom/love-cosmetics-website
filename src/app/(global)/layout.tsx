@@ -7,14 +7,14 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
-import { MeuContextoProvider } from "../../components/context/context";
-import { Cabecalho } from "@/components/pdp/Cabecalho/cabecalho";
-import { Rodape } from "@/components/pdp/Rodape/rodape";
+import { MeuContextoProvider } from "@/components/common/Context/context";
+import { Cabecalho } from "@/components/layout/Header/cabecalho";
+import { Rodape } from "@/components/layout/Footer/rodape";
 import { GoogleTagManager } from "@next/third-parties/google";
-import { ModalMenu } from "@/components/menu/menu";
-import MyLogFrontError from "@/components/log-error-front/log-error-front";
+import { ModalMenu } from "@/components/layout/Menu/menu";
+import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
 import { SnackbarProvider } from "notistack";
-import { SnackbarProviderComponent } from "@/components/context/snack-provider";
+import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

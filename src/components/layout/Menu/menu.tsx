@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMeuContexto } from "../context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { Divider } from "@mui/material";

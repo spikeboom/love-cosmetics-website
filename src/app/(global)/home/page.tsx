@@ -2,9 +2,9 @@ import {
   fetchProdutosForHome_Kit,
   fetchProdutosForHome_NotKit,
 } from "@/modules/produto/domain";
-import { Product } from "@/components/home-product/carousel-products";
-import { ModalCart } from "@/components/pdp/ModalCart/modal-cart";
-import { CarouselProducts } from "@/components/pdp/CarouselProducts/carousel-products";
+import { Product } from "@/components/common/HomeProduct/carousel-products";
+import { ModalCart } from "@/components/cart/ModalCart/modal-cart";
+import { CarouselProducts } from "@/components/product/ProductCarousel/carousel-products";
 import { FormEmailGTM } from "./form-email";
 
 export const metadata = {

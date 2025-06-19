@@ -1,11 +1,11 @@
 "use client";
 import { usePathname } from "next/navigation";
-import IconCart from "../header/icon-cart";
-import IconHambuger from "../header/icon-hamburger";
-import IconLogin from "../header/icon-login";
-import IconSearch from "../header/icon-search";
+import IconCart from "@/components/layout/HeaderIcons/icon-cart";
+import IconHamburger from "@/components/layout/HeaderIcons/icon-hamburger";
+import IconLogin from "@/components/layout/HeaderIcons/icon-login";
+import IconSearch from "@/components/layout/HeaderIcons/icon-search";
 import "./styles.css";
-import { useMeuContexto } from "@/components/context/context";
+import { useMeuContexto } from "@/components/common/Context/context";
 import Image from "next/image";
 import { Opacity } from "@mui/icons-material";
 
@@ -52,7 +52,7 @@ export function Cabecalho() {
                   setMenuMounted(true);
                 }}
               >
-                <IconHambuger />
+                <IconHamburger />
               </span>
               {/* <span className="mr-[24px] flex items-center">
             <IconSearch />
