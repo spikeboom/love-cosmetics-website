@@ -13,16 +13,30 @@ export function CarouselImagensTop({
   imagens,
   extraClassesForTopDiv = "",
 }: {
-  imagens: { imagem: { formats: { medium: { url: string } } } }[];
+  imagens: {
+    imagem: {
+      formats: { medium: { url: string }; thumbnail?: { url: string } };
+    };
+  }[];
   extraClassesForTopDiv?: string;
 }) {
-  if (!imagens) {
+  if (!imagens || imagens.length === 0) {
     return null;
   }
 
-  const slides = imagens.map(
+  // Garantir que sempre tenhamos pelo menos 3 imagens
+  let processedImagens = [...imagens];
+  if (processedImagens.length < 3) {
+    const lastImage = processedImagens[processedImagens.length - 1];
+    const imagesToAdd = 3 - processedImagens.length;
+    for (let i = 0; i < imagesToAdd; i++) {
+      processedImagens.push(lastImage);
+    }
+  }
+
+  const slides = processedImagens.map(
     (item) =>
-      `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
+      `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item?.imagem?.formats?.medium?.url || item?.imagem?.formats?.thumbnail?.url}`,
   );
 
   const totalSlides = slides.length + qtySlidesBefore + qtySlidesAfter;

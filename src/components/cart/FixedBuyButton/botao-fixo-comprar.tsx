@@ -32,7 +32,7 @@ export function BarraFixaComprar({
             leve 2 ou + fórmulas e ganhe <strong>até 15% OFF ✨</strong>
           </p>
         </div> */}
-        {produto.tag_desconto_2 && (
+        {produto?.tag_desconto_2 && (
           <div className="mt-2 flex w-full justify-center gap-[8px]">
             <div className="text-[12px]">Você</div>
             <div className="w-fit bg-[#FF1E1E] p-[4px] py-0 text-[14px] font-semibold text-white">
@@ -44,14 +44,16 @@ export function BarraFixaComprar({
         <div className="flex items-center gap-[20px] whitespace-nowrap px-[16px] py-[12px] pt-[8px]">
           <div className="h-fit w-fit">
             <div className="flex w-fit flex-col">
-              {produto.preco_de && (
+              {produto?.preco_de && (
                 <div className="mb-[2px] flex items-center gap-[2px]">
                   <span className="text-[11px] font-semibold leading-[1] text-[#a5a5a5] line-through">
-                    <span className="">R$ {formatPrice(produto.preco_de)}</span>
+                    <span className="">
+                      R$ {formatPrice(produto?.preco_de)}
+                    </span>
                   </span>
-                  {(produto.tag_desconto_1 || produto.tag_desconto_2) && (
+                  {(produto?.tag_desconto_1 || produto?.tag_desconto_2) && (
                     <div className="rounded-[4px] bg-[#C0392B] px-[4px] py-[2px] text-[10px] font-medium text-white">
-                      {produto.tag_desconto_1 || produto.tag_desconto_2}
+                      {produto?.tag_desconto_1 || produto?.tag_desconto_2}
                     </div>
                   )}
                 </div>
@@ -96,7 +98,7 @@ export function BotaoComprar({
   return (
     <>
       <div className="flex flex-col">
-        {produto.tag_desconto_2 && (
+        {produto?.tag_desconto_2 && (
           <div className={`mb-2 gap-2 ${extraClassesForTopDiv}`}>
             <div className="text-[12px]">Você</div>
             <div className="w-fit bg-[#FF1E1E] p-[4px] py-0 text-[14px] font-semibold text-white">

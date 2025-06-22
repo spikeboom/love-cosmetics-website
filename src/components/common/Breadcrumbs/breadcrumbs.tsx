@@ -14,7 +14,7 @@ export function Breadcrumbs({
               </a>
             </li>
 
-            {items.map((item) => (
+            {items?.map((item) => (
               <div key={item.id} className="flex gap-2">
                 <li className="">/</li>
 
