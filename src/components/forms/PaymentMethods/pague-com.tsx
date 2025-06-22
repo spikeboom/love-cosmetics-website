@@ -1,6 +1,6 @@
-import IconCredCard from "../payments/icon-credcard";
-import IconPix from "../payments/icon-pix";
-import IconReembolso from "../payments/icon-reembolso";
+import IconCredCard from "../PaymentIcons/icon-credcard";
+import IconPix from "../PaymentIcons/icon-pix";
+import IconReembolso from "../PaymentIcons/icon-reembolso";
 
 export function PagueCom() {
   return (
