@@ -149,6 +149,8 @@ export function useModalCart() {
         preco: attrs.preco,
         imageUrl,
         carouselImagensPrincipal: attrs.carouselImagensPrincipal,
+        backgroundFlags: attrs.backgroundFlags,
+        slug: attrs.slug,
       };
     });
 

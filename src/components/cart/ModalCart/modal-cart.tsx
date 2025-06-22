@@ -109,6 +109,7 @@ export function ModalCart() {
                     setCarouselIndex={setCarouselIndex}
                     addProductToCart={addProductToCart}
                     formatPrice={formatPrice}
+                    setOpenCart={() => setOpenCart(false)}
                   />
                 </>
               )}
