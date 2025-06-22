@@ -53,7 +53,9 @@ export const Product = ({ data, handlerAdd }: any) => (
           src={
             // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
             process.env.NEXT_PUBLIC_STRAPI_URL +
-            data.carouselImagensPrincipal[0].imagem.formats.medium.url
+              data?.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium
+                ?.url ||
+            data?.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url
           }
           loader={({ src }) => src}
           alt="Product 1"
@@ -110,7 +112,9 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
           src={
             // `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}${item.imagem.formats.medium.url}`,
             process.env.NEXT_PUBLIC_STRAPI_URL +
-            data.carouselImagensPrincipal[0].imagem.formats.medium.url
+              data?.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium
+                ?.url ||
+            data?.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url
           }
           loader={({ src }) => src}
           alt="Product 1"

@@ -1,8 +1,22 @@
 "use server";
 
 import { cookies } from "next/headers";
+import qs from "qs";
 import { fetchCupom } from "../cupom/domain";
 import { formatPrice } from "@/utils/format-price";
+
+// Common populate items used across all product queries
+const COMMON_POPULATE_ITEMS = [
+  "breadcrumbItems",
+  "carouselImagensPrincipal.imagem",
+  "listaDescricao",
+  "o_que_ele_tem",
+  "como_usar_essa_formula",
+  "duvidas",
+  "resultados.itens_resultado",
+  "detalhe_notas",
+  "avaliacoes",
+];
 
 export async function processProdutosNothing(rawData: any) {
   "use server";
@@ -86,7 +100,19 @@ export const fetchProdutoBySlug = async ({
   slug: string;
 }): Promise<any> => {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&filters[slug][$eq]=${slug}&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes`;
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters: {
+        slug: { $eq: slug },
+      },
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -104,31 +130,25 @@ export const fetchProdutoBySlug = async ({
   return processProdutosNothing(await response.json());
 };
 
-export const fetchProdutosForHome = async (): Promise<any> => {
-  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes`;
-
-  const response = await fetch(endpoint, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
-    },
-    cache: "no-store", // Ajuste conforme necessário: "no-store" para evitar cache em SSR
-  });
-
-  if (!response.ok) {
-    // logue o por que do erro
-    console.error("Failed to fetch produtos for home", response);
-    throw new Error("Failed to fetch produtos for home");
-  }
-
-  return response.json();
-};
-
 export const fetchProdutosForHome_Kit = async (): Promise<any> => {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes&filters[nome][$containsi]=Kit&filters[nome][$notContainsi]=-hide`;
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters: {
+        nome: { $containsi: "Kit" },
+        $or: [
+          { backgroundFlags: { $notContainsi: "hide" } },
+          { backgroundFlags: { $null: true } },
+        ],
+      },
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -150,7 +170,27 @@ export const fetchProdutosForHome_Kit = async (): Promise<any> => {
 
 export const fetchProdutosForHome_NotKit = async (): Promise<any> => {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes&filters[$and][0][nome][$notContainsi]=Kit&filters[$and][1][nome][$notContainsi]=-hide`;
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters: {
+        $and: [
+          { nome: { $notContainsi: "Kit" } },
+          {
+            $or: [
+              { backgroundFlags: { $notContainsi: "hide" } },
+              { backgroundFlags: { $null: true } },
+            ],
+          },
+        ],
+      },
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -172,7 +212,22 @@ export const fetchProdutosForHome_NotKit = async (): Promise<any> => {
 
 export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes&filters[nome][$notContainsi]=-hide`;
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters: {
+        $or: [
+          { backgroundFlags: { $notContainsi: "hide" } },
+          { backgroundFlags: { $null: true } },
+        ],
+      },
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
@@ -194,7 +249,19 @@ export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
 
 export const fetchProdutosSugeridosCarrinho = async (): Promise<any> => {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const endpoint = `${baseURL}/api/produtos?sort=updatedAt:desc&populate[0]=breadcrumbItems&populate[1]=carouselImagensPrincipal.imagem&populate[2]=listaDescricao&populate[3]=o_que_ele_tem&populate[4]=como_usar_essa_formula&populate[5]=duvidas&populate[6]=resultados.itens_resultado&populate[7]=detalhe_notas&populate[8]=avaliacoes&filters[nome][$containsi]=-showInCart`;
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters: {
+        backgroundFlags: { $containsi: "-showInCart" },
+      },
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
 
   const response = await fetch(endpoint, {
     method: "GET",
