@@ -51,15 +51,15 @@ function AddToCartButton({
 // Componente para o conteúdo clicável do produto
 function ClickableProductContent({
   item,
-  setOpenCart,
+  onCloseCart,
 }: {
   item: any;
-  setOpenCart: () => void;
+  onCloseCart: () => void;
 }) {
   const router = useRouter();
 
   const handleClick = () => {
-    setOpenCart();
+    onCloseCart();
     router.push(`/pdp/${item.slug}`);
   };
 
@@ -90,13 +90,13 @@ function ProductItem({
   setCarouselIndex,
   addProductToCart,
   formatPrice,
-  setOpenCart,
+  onCloseCart,
 }: {
   item: any;
   setCarouselIndex: (fn: (i: number) => number) => void;
   addProductToCart: (item: any) => void;
   formatPrice: (n: number) => string;
-  setOpenCart: () => void;
+  onCloseCart: () => void;
 }) {
   const isClickable = item.backgroundFlags?.includes("clickable");
 
@@ -104,7 +104,7 @@ function ProductItem({
     <div className="w-full flex-shrink-0 px-2">
       <div className="flex items-center justify-between rounded border p-2">
         {isClickable ? (
-          <ClickableProductContent item={item} setOpenCart={setOpenCart} />
+          <ClickableProductContent item={item} onCloseCart={onCloseCart} />
         ) : (
           <NonClickableProductContent item={item} />
         )}
@@ -159,14 +159,14 @@ export function SuggestedProductsCarousel({
   setCarouselIndex,
   addProductToCart,
   formatPrice,
-  setOpenCart,
+  onCloseCart,
 }: {
   suggestedProducts: any[];
   carouselIndex: number;
   setCarouselIndex: (fn: (i: number) => number) => void;
   addProductToCart: (item: any) => void;
   formatPrice: (n: number) => string;
-  setOpenCart: () => void;
+  onCloseCart: () => void;
 }) {
   return (
     <div className="border-b border-t">
@@ -189,7 +189,7 @@ export function SuggestedProductsCarousel({
                 setCarouselIndex={setCarouselIndex}
                 addProductToCart={addProductToCart}
                 formatPrice={formatPrice}
-                setOpenCart={setOpenCart}
+                onCloseCart={onCloseCart}
               />
             ))}
           </div>
