@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Componente para a imagem do produto
 function ProductImage({ imageUrl, alt }: { imageUrl: string; alt: string }) {
@@ -56,15 +56,21 @@ function ClickableProductContent({
   item: any;
   setOpenCart: () => void;
 }) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    setOpenCart();
+    router.push(`/pdp/${item.slug}`);
+  };
+
   return (
-    <Link
-      href={`/pdp/${item.slug}`}
-      className="flex flex-1 items-center"
-      onClick={() => setOpenCart()}
+    <button
+      className="flex flex-1 items-center text-left"
+      onClick={handleClick}
     >
       <ProductImage imageUrl={item.imageUrl} alt={item.nome} />
       <p className="flex-1 pl-4 pr-2 text-sm">{item.nome}</p>
-    </Link>
+    </button>
   );
 }
 
