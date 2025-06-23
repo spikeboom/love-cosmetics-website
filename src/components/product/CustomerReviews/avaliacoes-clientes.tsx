@@ -4,7 +4,7 @@ import {
   FaRegStarHalfStroke,
   FaStar,
 } from "react-icons/fa6";
-import Reviews from "../reviews/reviews";
+import Reviews from "../Reviews/reviews";
 
 interface AvaliacoesClientesProps {
   nota: number;
