@@ -1,7 +1,7 @@
-import IconFragance from "../badges/icon-fragance";
-import IconRabbit from "../badges/icon-rabbit";
-import IconRecicle from "../badges/icon-recicle";
-import IconVegan from "../badges/icon-vegan";
+import IconFragance from "../../ui/Badges/icon-fragance";
+import IconRabbit from "../../ui/Badges/icon-rabbit";
+import IconRecicle from "../../ui/Badges/icon-recicle";
+import IconVegan from "../../ui/Badges/icon-vegan";
 
 export function Adesivos() {
   return (
