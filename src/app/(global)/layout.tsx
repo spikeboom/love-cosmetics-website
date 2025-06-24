@@ -15,6 +15,7 @@ import { ModalMenu } from "@/components/layout/Menu/menu";
 import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
 import { SnackbarProvider } from "notistack";
 import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
+import { FloatingWhatsApp } from "@/components/common/FloatingWhatsApp/FloatingWhatsApp";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +67,8 @@ export default function RootLayout({
       <div className="h-[100px] bg-[#333]"></div>
 
       <ModalMenu />
+
+      <FloatingWhatsApp />
     </>
   );
 
