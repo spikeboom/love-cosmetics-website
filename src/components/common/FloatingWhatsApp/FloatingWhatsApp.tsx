@@ -10,7 +10,7 @@ export function FloatingWhatsApp() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 ml-1">
+    <div className="z-99 fixed bottom-1 right-6 z-[1000] ml-1">
       {/* Botão principal */}
       <button
         onClick={handleWhatsAppClick}
