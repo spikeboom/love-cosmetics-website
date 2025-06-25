@@ -216,7 +216,7 @@ export const MeuContextoProvider = ({ children }) => {
       closeSnackbar(loadingKey);
 
       if (!data?.[0]) {
-        notify(`Cupom “${codigo}” não encontrado!`, {
+        notify(`Cupom "${codigo}" não encontrado!`, {
           variant: "error",
           persist: true,
         });
@@ -238,8 +238,23 @@ export const MeuContextoProvider = ({ children }) => {
         return;
       }
 
+      // Tracking do evento de aplicar cupom
+      if (typeof window !== "undefined") {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "apply_coupon",
+          event_id: `apply_coupon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          cupom_codigo: data[0].codigo,
+          cupom_nome: data[0].nome || data[0].codigo,
+          cupom_titulo: data[0].titulo || data[0].codigo,
+          elemento_clicado: "apply_coupon_button",
+          url_pagina: window.location.href,
+          ...extractGaSessionData("G-SXLFK0Y830"),
+        });
+      }
+
       handleCupom(data[0]);
-      notify(`Cupom “${data[0].codigo}” aplicado com sucesso!`, {
+      notify(`Cupom "${data[0].codigo}" aplicado com sucesso!`, {
         variant: "success",
       });
     } catch (err) {

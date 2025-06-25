@@ -5,6 +5,7 @@ import { useSnackbar } from "notistack";
 import { freteValue } from "@/utils/frete-value";
 import { formatPrice } from "@/utils/format-price";
 import React from "react";
+import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
 
 // Tipos para produtos do carrinho e sugeridos
 export interface CartProduct {
@@ -112,6 +113,22 @@ export function useModalCart() {
 
   const removeCoupon = (cupom: any) => {
     if (!cupom) return;
+
+    // Tracking do evento de remoção de cupom
+    if (typeof window !== "undefined") {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "remove_coupon",
+        event_id: `remove_coupon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        cupom_codigo: cupom.codigo,
+        cupom_nome: cupom.nome || cupom.codigo,
+        cupom_titulo: cupom.titulo || cupom.codigo,
+        elemento_clicado: "remove_coupon_button",
+        url_pagina: window.location.href,
+        ...extractGaSessionData("G-SXLFK0Y830"),
+      });
+    }
+
     handleCupom(cupom);
     setForRefreshPage(true);
   };
