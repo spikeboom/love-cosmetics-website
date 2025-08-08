@@ -1,10 +1,8 @@
 import { freteValue } from "@/utils/frete-value";
 import { getBaseURL } from "@/utils/getBaseUrl";
 import { createLogger } from "@/utils/logMessage";
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const logMessage = createLogger();

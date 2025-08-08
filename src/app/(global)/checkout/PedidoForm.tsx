@@ -60,7 +60,7 @@ const pedidoSchema = z.object({
       invalid_type_error: "Data inválida",
     }),
   ),
-  pais: z.string().nonempty("País é obrigatório"),
+  pais: z.string().default("Brasil"),
   cep: z.string().nonempty("CEP é obrigatório"),
   endereco: z.string().nonempty("Endereço é obrigatório"),
   numero: z.string().nonempty("Número é obrigatório"),
@@ -116,7 +116,10 @@ const PedidoForm: React.FC = () => {
     formState: { errors },
   } = useForm<PedidoFormData>({
     resolver: zodResolver(pedidoSchema),
-    defaultValues: defaultPedidoFormData,
+    defaultValues: {
+      ...defaultPedidoFormData,
+      pais: "Brasil", // Garantir que país sempre tenha valor padrão
+    },
   });
 
   const fieldRefs: Partial<
@@ -139,7 +142,6 @@ const PedidoForm: React.FC = () => {
 
   async function onSubmit(data: PedidoFormData) {
     setLoading(true);
-    console.log("Dados do formulário:", data);
     closeSnackbar();
 
     try {

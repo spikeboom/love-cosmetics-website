@@ -1,8 +1,6 @@
 import { createLogger } from "@/utils/logMessage";
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // Função auxiliar para gerar SHA-256 e retornar como hex
 async function sha256Hex(text: string): Promise<string> {
