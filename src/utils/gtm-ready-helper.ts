@@ -66,11 +66,11 @@ export async function waitForGTMReady(
     }
   }
   
-  // Fallback final: session_id temporário
-  const fallbackId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Fallback final: session_id como timestamp (formato padrão GA4)
+  const sessionStartTimestamp = Math.floor(Date.now() / 1000).toString();
   
   return {
-    ga_session_id: fallbackId,
+    ga_session_id: sessionStartTimestamp,
     ga_session_number: "1"
   };
 }
