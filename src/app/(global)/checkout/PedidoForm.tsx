@@ -27,7 +27,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { parse, isValid } from "date-fns";
 import { pushUserDataToDataLayer } from "../home/form-email";
-import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { FiSearch } from "react-icons/fi";
 
 // Definição do schema com zod
@@ -154,13 +154,15 @@ const PedidoForm: React.FC = () => {
           product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url,
       }));
 
+      const gaDataForAPI = await waitForGTMReady();
+      
       const result = await postPedido({
         ...data,
         items: items,
         cupons: cupons?.map((c: any) => c.codigo),
         descontos: Math.trunc(descontos * 100),
         total_pedido: total,
-        ...extractGaSessionData("G-SXLFK0Y830"),
+        ...gaDataForAPI,
       });
 
       console.log("Resposta da API:", result);
@@ -207,6 +209,8 @@ const PedidoForm: React.FC = () => {
         phone: data.telefone,
       });
 
+      const gaData = await waitForGTMReady();
+      
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: "AddPaymentInfo",
@@ -221,7 +225,7 @@ const PedidoForm: React.FC = () => {
             quantity: item?.quantity ?? 1,
           })),
         },
-        ...extractGaSessionData("G-SXLFK0Y830"),
+        ...gaData,
       });
 
       // add snackbar redirecting to payment link

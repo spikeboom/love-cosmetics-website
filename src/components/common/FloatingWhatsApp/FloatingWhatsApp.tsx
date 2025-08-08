@@ -1,18 +1,20 @@
 "use client";
 import { FaWhatsapp } from "react-icons/fa6";
-import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 
 export function FloatingWhatsApp() {
-  const handleWhatsAppClick = () => {
+  const handleWhatsAppClick = async () => {
     // Tracking do evento de clique no WhatsApp
     if (typeof window !== "undefined") {
+      const gaData = await waitForGTMReady();
+      
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: "whatsapp_click",
         event_id: `whatsapp_click_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         elemento_clicado: "floating_whatsapp_button",
         url_pagina: window.location.href,
-        ...extractGaSessionData("G-SXLFK0Y830"),
+        ...gaData,
       });
     }
 

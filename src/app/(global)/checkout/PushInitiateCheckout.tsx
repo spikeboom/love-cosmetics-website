@@ -1,6 +1,6 @@
 "use client";
 import { useMeuContexto } from "@/components/common/Context/context";
-import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { useEffect, useRef } from "react";
 
 export function PushInitiateCheckout() {
@@ -15,33 +15,39 @@ export function PushInitiateCheckout() {
   }));
 
   useEffect(() => {
-    if (
-      hasPushedRef.current ||
-      !cart ||
-      Object.keys(cart).length === 0 ||
-      !total || // false se undefined, null ou 0
-      total <= 0
-    )
-      return;
+    const pushEvent = async () => {
+      if (
+        hasPushedRef.current ||
+        !cart ||
+        Object.keys(cart).length === 0 ||
+        !total || // false se undefined, null ou 0
+        total <= 0
+      )
+        return;
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "InitiateCheckout",
-      event_id: `initiatecheckout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ecommerce: {
-        currency: "BRL",
-        value: total,
-        items: cartItems.map((item) => ({
-          item_id: item?.id ?? "",
-          item_name: decodeURIComponent(item?.nome ?? ""),
-          price: item?.preco ?? 0,
-          quantity: item?.quantity ?? 1,
-        })),
-      },
-      ...extractGaSessionData("G-SXLFK0Y830"),
-    });
+      const gaData = await waitForGTMReady();
+      
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "InitiateCheckout",
+        event_id: `initiatecheckout_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ecommerce: {
+          currency: "BRL",
+          value: total,
+          items: cartItems.map((item) => ({
+            item_id: item?.id ?? "",
+            item_name: decodeURIComponent(item?.nome ?? ""),
+            price: item?.preco ?? 0,
+            quantity: item?.quantity ?? 1,
+          })),
+        },
+        ...gaData,
+      });
 
-    hasPushedRef.current = true;
+      hasPushedRef.current = true;
+    };
+    
+    pushEvent();
   }, [cart, total]);
 
   return null;

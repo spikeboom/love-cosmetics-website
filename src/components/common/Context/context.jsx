@@ -3,7 +3,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider, useSnackbar } from "notistack";
 import { freteValue } from "@/utils/frete-value";
-import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { fetchCupom } from "@/modules/cupom/domain";
 import { IconButton } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
@@ -22,7 +22,9 @@ export const MeuContextoProvider = ({ children }) => {
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const addProductEvent = (product) => {
+  const addProductEvent = async (product) => {
+    const gaData = await waitForGTMReady();
+    
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "add_to_cart",
@@ -39,7 +41,7 @@ export const MeuContextoProvider = ({ children }) => {
           },
         ],
       },
-      ...extractGaSessionData("G-SXLFK0Y830"),
+      ...gaData,
     });
   };
 
@@ -240,6 +242,8 @@ export const MeuContextoProvider = ({ children }) => {
 
       // Tracking do evento de aplicar cupom
       if (typeof window !== "undefined") {
+        const gaData = await waitForGTMReady();
+        
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: "apply_coupon",
@@ -249,7 +253,7 @@ export const MeuContextoProvider = ({ children }) => {
           cupom_titulo: data[0].titulo || data[0].codigo,
           elemento_clicado: "apply_coupon_button",
           url_pagina: window.location.href,
-          ...extractGaSessionData("G-SXLFK0Y830"),
+          ...gaData,
         });
       }
 
