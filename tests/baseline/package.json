@@ -1,0 +1,30 @@
+{
+  "name": "cart-baseline-testing",
+  "version": "1.0.0",
+  "description": "Sistema completo de captura de baseline para carrinho e cupons",
+  "type": "module",
+  "scripts": {
+    "capture": "node run-baseline.js",
+    "capture:post": "node run-post-refactor.js",
+    "capture:ui": "node baseline-capture.js",
+    "capture:ui:post": "POST_REFACTOR=true node baseline-capture.js",
+    "capture:api": "node api-capture.js",
+    "capture:api:post": "POST_REFACTOR=true node api-capture.js",
+    "compare": "node baseline-comparator.js",
+    "install-deps": "npm install playwright && npx playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.54.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "baseline",
+    "testing",
+    "e2e",
+    "cart",
+    "coupon",
+    "refactoring"
+  ]
+}

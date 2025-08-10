@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-10T00:07:20.581Z",
+  "scenarios": {},
+  "localStorage": {},
+  "cookies": {},
+  "analytics": [],
+  "errors": [
+    {
+      "scenario": "complete_baseline",
+      "error": "page.goto: Target page, context or browser has been closed\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/home\", waiting until \"load\"\u001b[22m\n",
+      "stack": "page.goto: Target page, context or browser has been closed\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/home\", waiting until \"load\"\u001b[22m\n\n    at BaselineCapture.init (C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\tests\\baseline\\baseline-capture.js:60:21)\n    at async BaselineCapture.runCompleteBaseline (C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\tests\\baseline\\baseline-capture.js:864:7)",
+      "timestamp": "2025-08-10T00:07:22.397Z"
+    }
+  ]
+}
