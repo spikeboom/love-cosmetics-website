@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-10T01:10:36.637Z",
+  "timestamp": "2025-08-10T01:49:43.324Z",
   "summary": {
     "critical": 2,
     "warnings": 0,
@@ -13,40 +13,39 @@
         "errors": [
           {
             "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
-            "timestamp": "2025-08-10T01:05:23.275Z"
+            "timestamp": "2025-08-10T01:46:34.557Z"
           },
           {
             "scenario": "checkout_data",
             "message": "[Erro fatal em fetch] {type: fetch-network-error, url: /api/log-client-error, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at MyLogFrontError.…3000/_next/static/chunks/src_10a3db._.js:1808:29)}",
-            "timestamp": "2025-08-10T01:05:58.045Z"
+            "timestamp": "2025-08-10T01:47:18.854Z"
           },
           {
             "scenario": "checkout_data",
-            "message": "[Erro fatal em fetch] {type: fetch-network-error, url: https://gtm.lovecosmetics.com.br/g/collect?v=2&tid…kout&_tu=BA&en=user_engagement&_et=1746&tfd=38227, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at MyLogFrontError.…3~105135708~105135710~105231383~105231385:873:417}",
-            "timestamp": "2025-08-10T01:05:58.045Z"
+            "message": "[Erro fatal em fetch] {type: fetch-network-error, url: , message: Failed to fetch, stack: TypeError: Failed to fetch\n    at MyLogFrontError.…de_modules_next_dist_client_523921._.js:16688:23)}",
+            "timestamp": "2025-08-10T01:47:18.854Z"
           },
           {
             "scenario": "checkout_data",
             "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
-            "timestamp": "2025-08-10T01:05:58.052Z"
+            "timestamp": "2025-08-10T01:47:18.862Z"
           },
           {
-            "scenario": "apply_coupon_INVALIDCOUPON",
-            "error": "Could not find coupon input",
-            "timestamp": "2025-08-10T01:06:10.177Z"
+            "scenario": "invalid_coupon_attempt",
+            "message": "[Erro fatal em fetch] {type: fetch-network-error, url: https://gtm.lovecosmetics.com.br/g/collect?v=2&tid…Home&_tu=BA&en=user_engagement&_et=3079&tfd=13327, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at MyLogFrontError.…8~105103161~105103163~105135708~105135710:873:417}",
+            "timestamp": "2025-08-10T01:47:30.207Z"
           },
           {
-            "scenario": "complete_baseline",
-            "error": "page.reload: Target page, context or browser has been closed",
-            "stack": "page.reload: Target page, context or browser has been closed\n    at BaselineCapture.runCompleteBaseline (C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\tests\\baseline\\baseline-capture.js:1014:23)\n    at async runPostRefactorCaptures (C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\tests\\baseline\\run-post-refactor.js:32:5)",
-            "timestamp": "2025-08-10T01:06:10.186Z"
+            "scenario": "after_page_refresh",
+            "message": "[Erro fatal em fetch] {type: fetch-network-error, url: https://gtm.lovecosmetics.com.br/g/collect?v=2&tid…0Home&_tu=BA&en=user_engagement&_et=1636&tfd=3961, message: Failed to fetch, stack: TypeError: Failed to fetch\n    at MyLogFrontError.…8~105103161~105103163~105135708~105135710:873:417}",
+            "timestamp": "2025-08-10T01:47:33.193Z"
           }
         ]
       },
       {
-        "type": "MISSING_CHECKOUT_REQUEST",
-        "message": "No checkout request captured in post-refactor",
-        "pre": "Captured",
+        "type": "MISSING_POST_DATA",
+        "message": "No POST data in checkout request",
+        "pre": "Has data",
         "post": "Missing"
       }
     ],
