@@ -22,7 +22,7 @@
 ### Fase 3: Componentes (2-3 dias)
 - [ ] Refatorar CartItem com nova estrutura
 - [ ] Atualizar CouponInput
-- [ ] Migrar ModalCart
+- [ ] Refatorar ModalCart
 - [ ] Atualizar PedidoForm
 - [ ] Testes de integração
 
