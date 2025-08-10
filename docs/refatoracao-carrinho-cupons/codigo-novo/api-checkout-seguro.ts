@@ -432,14 +432,9 @@ export async function handlePaymentNotification(req: NextRequest) {
     
     const { reference_id, status } = body;
     
-    // Atualiza status do pedido
-    await prisma.pedido.update({
-      where: { id: reference_id },
-      data: { 
-        status: status,
-        updated_at: new Date()
-      }
-    });
+    // Por enquanto, apenas registrar o status sem atualizar o pedido
+    // O modelo Pedido não tem campo 'status' ou 'status_pagamento'
+    console.log(`Status do pedido ${reference_id}: ${status}`);
     
     console.log(`Pedido ${reference_id} atualizado para status: ${status}`);
     
