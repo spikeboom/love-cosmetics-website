@@ -1,146 +1,104 @@
-# 📋 Plano de Migração
+# 📋 Plano de Substituição - Reset Completo
 
 ## 🎯 Estratégia
 
-Migração incremental com feature flags para minimizar riscos e permitir rollback rápido.
+**Substituição completa** do sistema - apagar todos os dados antigos e implementar apenas o novo sistema. Abordagem direta sem coexistência ou compatibilidade.
 
-## 📅 Fases da Migração
+## 📅 Fases da Substituição
 
 ### Fase 1: Preparação (1-2 dias)
 - [ ] Criar branch `refactor/cart-coupon-system`
-- [ ] Configurar feature flag `USE_NEW_CART_SYSTEM`
-- [ ] Criar testes para sistema atual
-- [ ] Documentar comportamento atual
-- [ ] Backup de dados de produção
+- [ ] Criar testes para novo sistema
+- [ ] Implementar limpeza automática de dados antigos
+- [ ] Comunicar usuários sobre reset de carrinho
 
-### Fase 2: Implementação Base (3-4 dias)
+### Fase 2: Implementação (3-4 dias)
 - [ ] Criar novo Context unificado
 - [ ] Implementar estrutura de dados simplificada
 - [ ] Criar novos hooks (useCart, useCoupon)
 - [ ] Implementar nova API de validação
-- [ ] Testes unitários do novo sistema
+- [ ] Implementar função de limpeza automática
 
-### Fase 3: Migração de Componentes (2-3 dias)
+### Fase 3: Componentes (2-3 dias)
 - [ ] Refatorar CartItem com nova estrutura
 - [ ] Atualizar CouponInput
 - [ ] Migrar ModalCart
 - [ ] Atualizar PedidoForm
 - [ ] Testes de integração
 
-### Fase 4: Backend Seguro (2-3 dias)
+### Fase 4: Backend (2-3 dias)
 - [ ] Implementar nova API de checkout
 - [ ] Validações server-side completas
 - [ ] Remover dependência de cookies
 - [ ] Testes de segurança
-- [ ] Testes de carga
 
-### Fase 5: Testes e Ajustes (2-3 dias)
+### Fase 5: Testes Finais (1-2 dias)
 - [ ] Testes E2E completos
-- [ ] Testes com usuários internos
-- [ ] Ajustes de performance
-- [ ] Correção de bugs
+- [ ] Testes de performance
+- [ ] Validar limpeza de dados antigos
 - [ ] Documentação final
 
-### Fase 6: Deploy Gradual (3-5 dias)
-- [ ] Deploy para 5% dos usuários
-- [ ] Monitorar métricas
-- [ ] Deploy para 25% dos usuários
-- [ ] Deploy para 50% dos usuários
-- [ ] Deploy para 100% dos usuários
+### Fase 6: Deploy (1 dia)
+- [ ] Deploy completo para 100% dos usuários
+- [ ] Monitorar erros e performance
+- [ ] Validar limpeza automática funcionando
 
-### Fase 7: Limpeza (1-2 dias)
-- [ ] Remover código antigo
-- [ ] Remover feature flags
+### Fase 7: Limpeza (1 dia)
+- [ ] Remover código antigo completamente
 - [ ] Atualizar documentação
 - [ ] Arquivar código legado
 
-## 🔄 Estratégia de Feature Flag
+## 🧹 Limpeza Automática do Sistema Antigo
 
-```typescript
-// config/features.ts
-export const features = {
-  USE_NEW_CART_SYSTEM: process.env.NEXT_PUBLIC_NEW_CART === 'true'
-};
-
-// hooks/useCart.ts
-export function useCart() {
-  if (features.USE_NEW_CART_SYSTEM) {
-    return useNewCart();
-  }
-  return useLegacyCart();
-}
-```
-
-## 📊 Migração de Dados
-
-### localStorage
 ```javascript
-// utils/migrate-storage.ts
-export function migrateLocalStorage() {
-  const oldCart = localStorage.getItem('cart');
-  const oldCoupons = localStorage.getItem('cupons');
-  
-  if (oldCart || oldCoupons) {
-    const migrated = {
-      cart: migrateCartStructure(JSON.parse(oldCart || '{}')),
-      coupon: migrateCouponStructure(JSON.parse(oldCoupons || '[]'))
-    };
-    
-    localStorage.setItem('cart_v2', JSON.stringify(migrated.cart));
-    localStorage.setItem('coupon_v2', JSON.stringify(migrated.coupon));
-    
-    // Marca como migrado
-    localStorage.setItem('cart_migrated', 'true');
-  }
-}
-
-function migrateCartStructure(oldCart) {
-  const newCart = {};
-  
-  Object.entries(oldCart).forEach(([id, product]) => {
-    newCart[id] = {
-      id: product.id,
-      name: product.nome,
-      originalPrice: product.backup?.preco || product.preco_de || product.preco,
-      currentPrice: product.preco,
-      quantity: product.quantity
-    };
-  });
-  
-  return newCart;
-}
-
-function migrateCouponStructure(oldCoupons) {
-  if (!Array.isArray(oldCoupons) || oldCoupons.length === 0) {
-    return null;
-  }
-  
-  const coupon = oldCoupons[0]; // Sistema antigo só suporta 1
-  return {
-    code: coupon.codigo,
-    type: coupon.diminuir > 0 ? 'fixed' : 'percentage',
-    value: coupon.diminuir || ((1 - coupon.multiplacar) * 100)
-  };
-}
-```
-
-### Cookies para Context
-```javascript
-// utils/migrate-cookies.ts
-export function migrateCookies() {
-  // Lê cookies antigos
-  const cupomBackend = getCookie('cupomBackend');
-  const cupom = getCookie('cupom');
-  
-  if (cupomBackend || cupom) {
-    const code = cupomBackend || cupom;
-    
-    // Valida e aplica no novo sistema
-    applyCoupon(code);
+// utils/cleanup-old-system.ts
+export function cleanupOldSystem() {
+  try {
+    // Remove localStorage antigo
+    localStorage.removeItem('cart');
+    localStorage.removeItem('cupons');
     
     // Remove cookies antigos
-    deleteCookie('cupomBackend');
-    deleteCookie('cupom');
+    document.cookie = 'cupomBackend=; path=/; max-age=0';
+    document.cookie = 'cupom=; path=/; max-age=0';
+    
+    // Marca como limpo para não executar novamente
+    localStorage.setItem('system_reset_v2', 'true');
+    
+    console.log('Sistema antigo limpo com sucesso');
+  } catch (error) {
+    console.error('Erro ao limpar sistema antigo:', error);
+  }
+}
+
+// hooks/useCartInit.ts
+export function useCartInit() {
+  useEffect(() => {
+    const isResetDone = localStorage.getItem('system_reset_v2');
+    
+    if (!isResetDone) {
+      cleanupOldSystem();
+    }
+  }, []);
+}
+```
+
+## 📢 Comunicação com Usuários
+
+```javascript
+// utils/user-notification.ts
+export function showResetNotification() {
+  const hasShown = localStorage.getItem('reset_notification_shown');
+  
+  if (!hasShown) {
+    // Toast ou modal informando sobre o reset
+    toast.info(
+      'Atualizamos nosso sistema de carrinho! ' +
+      'Seu carrinho foi limpo para garantir a melhor experiência.',
+      { duration: 5000 }
+    );
+    
+    localStorage.setItem('reset_notification_shown', 'true');
   }
 }
 ```
@@ -149,50 +107,64 @@ export function migrateCookies() {
 
 ### Testes Automatizados
 ```typescript
-// tests/migration.spec.ts
-describe('Migração do Sistema de Carrinho', () => {
-  it('deve migrar carrinho do formato antigo', () => {
-    // Setup: carrinho antigo
-    const oldCart = {
-      '1': {
-        id: '1',
-        nome: 'Produto',
-        preco: 80,
-        preco_de: 100,
-        backup: { preco: 100 },
-        quantity: 2
-      }
-    };
-    
-    // Executa migração
-    const newCart = migrateCart(oldCart);
-    
-    // Verifica
-    expect(newCart['1']).toEqual({
-      id: '1',
-      name: 'Produto',
-      originalPrice: 100,
-      currentPrice: 80,
-      quantity: 2
-    });
+// tests/cleanup.spec.ts
+describe('Limpeza do Sistema Antigo', () => {
+  beforeEach(() => {
+    // Setup dados antigos
+    localStorage.setItem('cart', JSON.stringify({ '1': { id: '1' } }));
+    localStorage.setItem('cupons', JSON.stringify([{ codigo: 'TEST' }]));
+    document.cookie = 'cupomBackend=TESTE';
+    document.cookie = 'cupom=TESTE';
   });
   
-  it('deve manter funcionalidade de cupom', () => {
+  it('deve limpar todos os dados antigos', () => {
+    cleanupOldSystem();
+    
+    // Verifica limpeza
+    expect(localStorage.getItem('cart')).toBeNull();
+    expect(localStorage.getItem('cupons')).toBeNull();
+    expect(document.cookie).not.toContain('cupomBackend');
+    expect(document.cookie).not.toContain('cupom');
+    expect(localStorage.getItem('system_reset_v2')).toBe('true');
+  });
+  
+  it('deve executar limpeza apenas uma vez', () => {
+    localStorage.setItem('system_reset_v2', 'true');
+    const spy = jest.spyOn(console, 'log');
+    
+    cleanupOldSystem();
+    
+    // Não deve executar novamente
+    expect(spy).not.toHaveBeenCalledWith('✅ Sistema antigo limpo com sucesso');
+  });
+});
+
+// tests/new-cart.spec.ts
+describe('Novo Sistema de Carrinho', () => {
+  it('deve iniciar com carrinho vazio', () => {
+    // Testa estado inicial
+  });
+  
+  it('deve aplicar cupom corretamente', () => {
     // Testa aplicação de cupom
-    // Testa remoção de cupom
+  });
+  
+  it('deve persistir dados no localStorage', () => {
     // Testa persistência
   });
 });
 ```
 
 ### Testes Manuais
-- [ ] Adicionar produtos ao carrinho
+- [ ] Verificar limpeza automática ao carregar página
+- [ ] Adicionar produtos ao carrinho (novo sistema)
 - [ ] Aplicar cupom via URL
 - [ ] Aplicar cupom via input
 - [ ] Remover cupom
 - [ ] Finalizar compra
 - [ ] Navegar entre páginas
 - [ ] Fechar e reabrir navegador
+- [ ] Verificar notificação de reset para usuários
 
 ## 📈 Métricas de Sucesso
 
@@ -200,40 +172,44 @@ describe('Migração do Sistema de Carrinho', () => {
 - Tempo de carregamento do carrinho < 100ms
 - Tempo de aplicação de cupom < 500ms
 - Redução de 50% no uso de memória
+- Limpeza automática executada em < 50ms
 
 ### Qualidade
 - 0 erros críticos em produção
 - Cobertura de testes > 80%
+- 100% dos dados antigos limpos corretamente
 - Redução de 70% em bugs reportados
 
 ### Negócio
-- Taxa de conversão mantida ou melhorada
-- Taxa de abandono de carrinho reduzida
-- Satisfação do usuário mantida
+- Taxa de conversão estável após período de adaptação (1-2 semanas)
+- Redução de bugs relacionados a conflitos de dados
+- Melhor experiência de usuário no longo prazo
 
-## 🚨 Plano de Rollback
+### UX
+- Notificação clara sobre reset do sistema
+- Facilidade para usuários recriarem carrinhos
+- Cupons funcionando perfeitamente no novo sistema
 
-### Triggers para Rollback
-- Taxa de erro > 1%
-- Queda na conversão > 5%
-- Bugs críticos em produção
-- Performance degradada > 20%
+## 🚨 Plano de Contingência
+
+### Cenários Críticos
+- Taxa de erro > 2%
+- Queda na conversão > 10% por mais de 3 dias
+- Bugs que impedem compras
+- Falha na limpeza automática causando conflitos
 
 ### Processo de Rollback
-1. Desabilitar feature flag imediatamente
+1. Reverter deploy imediatamente
 2. Notificar equipe via Slack
-3. Reverter deploy se necessário
-4. Investigar causa raiz
-5. Corrigir e re-testar
+3. Investigar logs de erro
+4. Corrigir problemas identificados
+5. Re-testar em ambiente de staging
+6. Re-deploy após correção
 
 ```bash
-# Rollback rápido via feature flag
-curl -X POST https://api.features.com/toggle \
-  -d "feature=USE_NEW_CART_SYSTEM&enabled=false"
-
 # Rollback via deploy
-git revert --no-commit HEAD~3..HEAD
-git commit -m "Rollback: Sistema de carrinho"
+git revert --no-commit HEAD~1
+git commit -m "Rollback: Reset do sistema de carrinho"
 git push origin main
 ```
 
@@ -241,35 +217,44 @@ git push origin main
 
 ### Desenvolvimento
 - [ ] Código revisado por 2+ desenvolvedores
-- [ ] Testes passando (unit, integration, e2e)
+- [ ] Testes de limpeza automática passando
+- [ ] Testes do novo sistema passando (unit, integration, e2e)
 - [ ] Sem warnings no console
 - [ ] Performance validada
-- [ ] Documentação atualizada
+- [ ] Função de limpeza testada extensivamente
 
 ### Segurança
 - [ ] Validações server-side implementadas
 - [ ] Sem exposição de dados sensíveis
+- [ ] Limpeza segura de cookies e localStorage
 - [ ] Rate limiting configurado
 - [ ] Logs de auditoria funcionando
 
+### UX/Comunicação
+- [ ] Notificação de reset implementada
+- [ ] Mensagem clara e amigável
+- [ ] FAQ atualizado sobre mudanças
+- [ ] Equipe de suporte informada sobre reset
+
 ### Infraestrutura
-- [ ] Feature flags configuradas
 - [ ] Monitoramento configurado
-- [ ] Alertas configurados
-- [ ] Backup de dados realizado
+- [ ] Alertas para falhas de limpeza
+- [ ] Logs para acompanhar limpeza automática
 - [ ] Plano de rollback testado
 
 ### Negócio
-- [ ] Stakeholders informados
-- [ ] Equipe de suporte treinada
-- [ ] Comunicação preparada
+- [ ] Stakeholders informados sobre reset
+- [ ] Expectativa de período de adaptação comunicada
 - [ ] Métricas baseline capturadas
+- [ ] Plano de comunicação executado
 
 ## 🎉 Critérios de Sucesso Final
 
-A migração será considerada completa quando:
-1. 100% dos usuários no novo sistema
-2. Zero bugs críticos por 7 dias
-3. Métricas de negócio estáveis ou melhoradas
-4. Código antigo removido
-5. Documentação completa e atualizada
+A substituição será considerada completa quando:
+1. 100% dos usuários usando novo sistema com dados limpos
+2. Limpeza automática funcionando em 100% dos casos
+3. Zero bugs críticos por 7 dias
+4. Taxa de conversão estabilizada após período de adaptação
+5. Código antigo removido completamente
+6. Zero conflitos de dados entre sistemas
+7. Documentação completa e atualizada

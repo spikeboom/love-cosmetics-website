@@ -65,9 +65,9 @@ document.cookie = "cupom=; max-age=0";
 
 **Depois:**
 ```javascript
-// Apenas Context e localStorage
+// Apenas Context e localStorage versionado
 setCoupon(couponData);
-localStorage.setItem('coupon', JSON.stringify(couponData));
+localStorage.setItem('coupon_v2', JSON.stringify(couponData));
 ```
 
 ### 2. Estrutura de Produto Simplificada
@@ -187,16 +187,16 @@ useEffect(() => {
 | Risco | Mitigação |
 |-------|-----------|
 | Quebrar funcionalidade existente | Testes abrangentes antes de deploy |
-| Perder dados de usuários | Migração cuidadosa do localStorage |
+| Usuários perderem carrinhos salvos | Notificação clara + reset automático |
 | Problemas de cache | Versionamento de API |
-| Resistência à mudança | Deploy gradual com feature flag |
+| Resistência à mudança | Comunicação transparente sobre benefícios |
 
 ## 📋 Próximos Passos
 
-1. Revisar e aprovar proposta
+1. Revisar e aprovar proposta de reset completo
 2. Criar branch de refatoração
-3. Implementar mudanças incrementalmente
-4. Testar extensivamente
-5. Deploy com feature flag
-6. Monitorar métricas
-7. Remover código antigo
+3. Implementar novo sistema completo
+4. Testar extensivamente (limpeza + funcionalidades)
+5. Deploy direto com reset automático
+6. Monitorar métricas e ajustar
+7. Arquivar código antigo

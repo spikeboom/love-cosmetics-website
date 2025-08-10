@@ -78,7 +78,7 @@ const applyCoupon = async (code: string) => {
   const updatedItems = applyDiscountToItems(items, coupon);
   setItems(updatedItems);
   
-  // 4. Persiste no localStorage
+  // 4. Persiste no localStorage (sistema versionado v2)
   localStorage.setItem('coupon_v2', JSON.stringify(coupon));
   
   // 5. Tracking analytics
@@ -89,7 +89,7 @@ const applyCoupon = async (code: string) => {
 ### 2. Estrutura de Dados Simplificada
 
 ```typescript
-// Produto no carrinho
+// Produto no carrinho (salvo como cart_v2)
 {
   id: "123",
   name: "Batom Vermelho",
@@ -98,7 +98,7 @@ const applyCoupon = async (code: string) => {
   quantity: 2
 }
 
-// Cupom
+// Cupom (salvo como coupon_v2)
 {
   code: "DESCONTO20",
   type: "percentage",
@@ -191,14 +191,15 @@ export async function POST(req) {
 
 ## ⚠️ Pontos de Atenção
 
-### Durante a Migração
+### Durante Implementação
 1. Testar extensivamente o cálculo de descontos
-2. Garantir que localStorage migre corretamente
+2. Garantir que limpeza automática funciona corretamente
 3. Validar que PagSeguro recebe valores corretos
-4. Monitorar métricas de conversão
+4. Testar notificação de reset para usuários
 
 ### Após Deploy
 1. Monitorar logs de erro
-2. Acompanhar taxa de abandono
+2. Acompanhar taxa de abandono (esperar aumento temporário)
 3. Verificar relatórios de vendas
-4. Coletar feedback dos usuários
+4. Coletar feedback dos usuários sobre reset
+5. Monitorar se limpeza está funcionando em 100% dos casos

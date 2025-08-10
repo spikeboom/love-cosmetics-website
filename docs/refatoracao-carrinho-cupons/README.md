@@ -10,7 +10,7 @@ Refatorar o sistema de carrinho e cupons para torná-lo mais simples, mantível 
 3. **[proposta-refatoracao.md](./proposta-refatoracao.md)** - Nova arquitetura proposta
 4. **[fluxos/](./fluxos/)** - Diagramas e fluxos detalhados
 5. **[codigo-novo/](./codigo-novo/)** - Implementação proposta
-6. **[migracao.md](./migracao.md)** - Plano de migração
+6. **[migracao.md](./migracao.md)** - Plano de substituição
 7. **[seguranca.md](./seguranca.md)** - Considerações de segurança
 
 ## 🔑 Princípios da Refatoração
@@ -30,16 +30,19 @@ Refatorar o sistema de carrinho e cupons para torná-lo mais simples, mantível 
 - Sistema de backup/restore complexo
 - ~400+ linhas de código confuso
 
-### Proposta
-- 1 fonte de verdade (Context + localStorage)
+### Proposta - Reset Completo
+- **Limpeza total** de dados antigos (cookies, localStorage)
+- 1 fonte de verdade (Context + localStorage novo)
 - 0 cookies (usa parâmetros explícitos)
 - Validação única server-side
 - Estrutura simples de preços (original/current)
 - ~200 linhas de código limpo
+- **Deploy direto** sem migração gradual
 
 ## 🚀 Quick Start
 
-Para entender a refatoração, leia os documentos nesta ordem:
+Para entender a refatoração com reset completo, leia os documentos nesta ordem:
 1. [Estado Atual](./estado-atual.md)
-2. [Problemas](./problemas-identificados.md)
+2. [Problemas](./problemas-identificados.md)  
 3. [Proposta](./proposta-refatoracao.md)
+4. [Substituição Completa](./migracao.md) - **Estratégia de reset total**
