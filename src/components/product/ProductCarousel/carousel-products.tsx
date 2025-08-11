@@ -166,13 +166,16 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
           <span className="text-[26px] font-bold leading-[1] tracking-[-0.5px] text-[#333]">
             <span className="">R$ {formatPrice(data.preco)}</span>
           </span>
+          <span className="text-[14px] text-[#666]">
+            ou 3x R$ {formatPrice(Math.round((data.preco * 100) / 4) / 100)}
+          </span>
         </div>
 
         <div
           // href={`/pdp/[slug]`}
           // as={`/pdp/${data.slug}?addToCart=1`}
           aria-label="Carrossel - Comprar"
-          className=""
+          className="flex items-center"
           onClick={handlerAdd}
         >
           <div className="flex w-fit items-center justify-center rounded-[100px] bg-[#C0392B] px-[12px] py-[8px]">

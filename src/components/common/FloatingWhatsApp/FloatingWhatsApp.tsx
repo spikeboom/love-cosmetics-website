@@ -7,7 +7,7 @@ export function FloatingWhatsApp() {
     // Tracking do evento de clique no WhatsApp
     if (typeof window !== "undefined") {
       const gaData = await waitForGTMReady();
-      
+
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: "whatsapp_click",
@@ -25,7 +25,7 @@ export function FloatingWhatsApp() {
   };
 
   return (
-    <div className="z-99 fixed bottom-20 right-6 z-[1000] ml-1">
+    <div className="z-99 fixed bottom-[140px] right-6 z-[1000] ml-1">
       {/* Botão principal */}
       <button
         onClick={handleWhatsAppClick}
