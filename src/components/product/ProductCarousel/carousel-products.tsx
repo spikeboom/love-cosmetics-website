@@ -167,7 +167,7 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
             <span className="">R$ {formatPrice(data.preco)}</span>
           </span>
           <span className="text-[14px] text-[#666]">
-            ou 3x R$ {formatPrice(Math.round((data.preco * 100) / 4) / 100)}
+            ou 3x R$ {formatPrice(Math.round((data.preco * 100) / 3) / 100)}
           </span>
         </div>
 
