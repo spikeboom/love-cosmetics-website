@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useUI } from "@/core/ui/UIContext";
 
-export function useModalState(setSidebarMounted: any) {
+export function useModalState() {
+  const { sidebarMounted, setSidebarMounted } = useUI();
   const animationDuration = 700;
   const [openCart, setOpenCart] = useState(false);
   const [forRefreshPage, setForRefreshPage] = useState(false);
@@ -18,6 +20,8 @@ export function useModalState(setSidebarMounted: any) {
   }, [openCart, animationDuration, setSidebarMounted, forRefreshPage]);
 
   return {
+    sidebarMounted,
+    setSidebarMounted,
     animationDuration,
     openCart,
     setOpenCart,

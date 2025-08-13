@@ -1,4 +1,4 @@
-import React from "react";
+import { createElement } from "react";
 import { IoCloseCircle } from "react-icons/io5";
 
 // MOVIDO do context.jsx linhas 126-143
@@ -8,18 +8,15 @@ export const createNotify = (enqueueSnackbar: any, closeSnackbar: any) => {
     return enqueueSnackbar(message, {
       variant,
       persist,
-      action: (key: any) => (
-        <button
-          onClick={() => closeSnackbar(key)}
-          style={{
+      action: (key: any) => 
+        createElement("button", {
+          onClick: () => closeSnackbar(key),
+          style: {
             background: "transparent",
             border: "none",
             cursor: "pointer",
-          }}
-        >
-          <IoCloseCircle size={20} />
-        </button>
-      ),
+          }
+        }, createElement(IoCloseCircle, { size: 20 })),
     });
   };
 };

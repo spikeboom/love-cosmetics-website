@@ -2,8 +2,6 @@ import { useMeuContexto } from "@/components/common/Context/context";
 
 export function useCartCore() {
   const {
-    sidebarMounted,
-    setSidebarMounted,
     cart,
     addQuantityProductToCart,
     subtractQuantityProductToCart,
@@ -18,8 +16,6 @@ export function useCartCore() {
   } = useMeuContexto();
   
   return {
-    sidebarMounted,
-    setSidebarMounted,
     cart,
     addQuantityProductToCart,
     subtractQuantityProductToCart,

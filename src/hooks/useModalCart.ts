@@ -31,23 +31,23 @@ export interface SuggestedProduct {
 export function useModalCart() {
   const coreData = useCartCore();
   const suggestedData = useSuggestedProducts(coreData.cart);
-  const modalData = useModalState(coreData.setSidebarMounted);
+  const modalData = useModalState();
   const couponData = useCouponLocal(coreData.cupons, coreData.handleAddCupom, coreData.handleCupom);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (coreData.sidebarMounted) {
+    if (modalData.sidebarMounted) {
       modalData.setOpenCart(true);
     }
-  }, [coreData.sidebarMounted, modalData.animationDuration]);
+  }, [modalData.sidebarMounted, modalData.animationDuration]);
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   return {
     // Contexto
-    sidebarMounted: coreData.sidebarMounted,
-    setSidebarMounted: coreData.setSidebarMounted,
+    sidebarMounted: modalData.sidebarMounted,
+    setSidebarMounted: modalData.setSidebarMounted,
     cart: coreData.cart,
     addQuantityProductToCart: coreData.addQuantityProductToCart,
     subtractQuantityProductToCart: coreData.subtractQuantityProductToCart,

@@ -13,22 +13,20 @@ import { handleCupom as handleCupomUtil, handleAddCupom as handleAddCupomUtil } 
 import { calculateCartTotals } from "@/utils/cart-calculations";
 import { addProductEvent } from "@/core/tracking/product-tracking";
 import { processProdutosComOuSemCupom, processProdutosRevert } from "@/core/processing/product-processing";
-import { createNotify } from "@/core/notifications/notification-system";
+import { StorageService } from "@/core/storage/storage-service";
+import { CartCalculations } from "@/core/utils/cart-calculations";
+import { useNotifications } from "@/core/notifications/NotificationContext";
 
 const MeuContexto = createContext();
 
 export const MeuContextoProvider = ({ children }) => {
   const [cart, setCart] = useState({});
   const [total, setTotal] = useState(0);
-  const [sidebarMounted, setSidebarMounted] = useState(false);
-  const [menuMounted, setMenuMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
   const [loadingAddItem, setLoadingAddItem] = useState(false);
 
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  
-  // notify agora é criado usando a factory function
-  const notify = createNotify(enqueueSnackbar, closeSnackbar);
+  // Usar sistema de notificações consolidado
+  const { notify } = useNotifications();
 
 
   const addProductToCart = (product) => {
@@ -54,22 +52,15 @@ export const MeuContextoProvider = ({ children }) => {
   const [firstRun, setFirstRun] = useState(false);
 
   useEffect(() => {
-    const cart = localStorage.getItem("cart");
-    if (cart) {
-      setCart(JSON.parse(cart));
-    }
-
-    const cupons = localStorage.getItem("cupons");
-    if (cupons) {
-      setCupons(JSON.parse(cupons));
-    }
+    // Usar StorageService para carregar dados
+    const initialData = StorageService.initializeFromStorage();
+    setCart(initialData.cart);
+    setCupons(initialData.cupons);
     setFirstRun(true);
   }, []);
 
-  const qtdItemsCart = Object.values(cart).reduce(
-    (acc, product) => acc + product.quantity,
-    0,
-  );
+  // Usar função extraída para cálculos
+  const qtdItemsCart = CartCalculations.getItemCount(cart);
 
 
   const handleCupom = (cupom) => {
@@ -92,10 +83,6 @@ export const MeuContextoProvider = ({ children }) => {
       value={{
         cart,
         setCart,
-        sidebarMounted,
-        setSidebarMounted,
-        menuMounted,
-        setMenuMounted,
         addProductToCart,
         addQuantityProductToCart,
         subtractQuantityProductToCart,
