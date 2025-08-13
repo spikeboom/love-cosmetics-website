@@ -25,7 +25,7 @@ export async function processProdutosNothing(rawData: any) {
 
 export async function processProdutos(rawData: any, cupom?: string) {
   "use server";
-  
+
   if (!cupom || cupom === "sem-cupom") {
     return rawData;
   }
@@ -49,8 +49,10 @@ export async function processProdutos(rawData: any, cupom?: string) {
       }
 
       const multiplicar = dataCookie?.[0]?.multiplacar || 1;
+      const diminuir = dataCookie?.[0]?.diminuir || 0;
       const preco_de = dataLog?.preco_de || dataLog?.preco || 0;
-      const preco_multiplicado = dataLog?.preco * multiplicar || 0;
+      const preco_modificado = dataLog?.preco * multiplicar - diminuir || 0;
+      const preco_desconto = preco_de - preco_modificado;
 
       return {
         ...dataLog,
@@ -58,11 +60,11 @@ export async function processProdutos(rawData: any, cupom?: string) {
         // tag_desconto_1_modified
         cupom_applied: dataCookie?.[0]?.multiplacar || null,
         preco_de: preco_de || 0,
-        preco: preco_multiplicado || 0,
-        tag_desconto_1: `-R$ ${formatPrice(preco_de - preco_multiplicado)}`,
+        preco: preco_modificado || 0,
+        tag_desconto_1: `${preco_desconto >= 0 ? "-" : "+"}R$ ${formatPrice(Math.abs(preco_desconto))}`,
         ...(dataLog?.tag_desconto_2
           ? {
-              tag_desconto_2: `ECONOMIZA R$ ${formatPrice(preco_de - preco_multiplicado)}`,
+              tag_desconto_2: `ECONOMIZA ${preco_desconto >= 0 ? "-" : "+"}R$ ${formatPrice(Math.abs(preco_desconto))}`,
             }
           : {}),
         backup: {
