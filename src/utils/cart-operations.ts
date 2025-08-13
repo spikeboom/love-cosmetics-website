@@ -1,4 +1,4 @@
-import { processProdutosComOuSemCupom } from "./cart-calculations";
+import { processProdutosComOuSemCupom } from "@/core/processing/product-processing";
 
 export const addProductToCart = (product: any, cart: any, setCart: any, setLoadingAddItem: any, cupons: any, addProductEvent: any) => {
   setLoadingAddItem(true);

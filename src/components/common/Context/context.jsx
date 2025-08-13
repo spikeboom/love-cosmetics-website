@@ -2,8 +2,6 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider, useSnackbar } from "notistack";
-import { IconButton } from "@mui/material";
-import { IoCloseCircle } from "react-icons/io5";
 import { 
   addProductToCart as addProductToCartUtil,
   addQuantityProductToCart as addQuantityProductToCartUtil,
@@ -13,7 +11,9 @@ import {
 } from "@/utils/cart-operations";
 import { handleCupom as handleCupomUtil, handleAddCupom as handleAddCupomUtil } from "@/utils/coupon-operations";
 import { calculateCartTotals } from "@/utils/cart-calculations";
-import { waitForGTMReady } from "@/utils/gtm-ready-helper";
+import { addProductEvent } from "@/core/tracking/product-tracking";
+import { processProdutosComOuSemCupom, processProdutosRevert } from "@/core/processing/product-processing";
+import { createNotify } from "@/core/notifications/notification-system";
 
 const MeuContexto = createContext();
 
@@ -26,43 +26,10 @@ export const MeuContextoProvider = ({ children }) => {
   const [loadingAddItem, setLoadingAddItem] = useState(false);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  
+  // notify agora é criado usando a factory function
+  const notify = createNotify(enqueueSnackbar, closeSnackbar);
 
-  const addProductEvent = async (product) => {
-    const gaData = await waitForGTMReady();
-
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "add_to_cart",
-      event_id: `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ecommerce: {
-        currency: "BRL",
-        value: product.preco,
-        items: [
-          {
-            item_id: product.id,
-            item_name: decodeURIComponent(product.nome),
-            price: product.preco,
-            quantity: 1,
-          },
-        ],
-      },
-      ...gaData,
-    });
-  };
-
-  const processProdutosComOuSemCupom = (data, cupom) => {
-    const produtosNoCarrinho = Object.keys(cart);
-
-    const novosProdutos = data.data.filter(
-      (item) => !produtosNoCarrinho.includes(item.id.toString()),
-    );
-
-    const enviarComCupom = novosProdutos.length > 0;
-
-    return enviarComCupom
-      ? processProdutos(data, cupom)
-      : processProdutos(data, "sem-cupom");
-  };
 
   const addProductToCart = (product) => {
     addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons, addProductEvent);
@@ -104,43 +71,11 @@ export const MeuContextoProvider = ({ children }) => {
     0,
   );
 
-  function processProdutosRevert(rawData) {
-    rawData = Object.values(rawData.data);
-
-    const processedToReturn = rawData?.map((p) => {
-      return {
-        ...p,
-        ...p?.backup,
-        backup: p?.backup,
-      };
-    });
-
-    return { data: processedToReturn };
-  }
 
   const handleCupom = (cupom) => {
     handleCupomUtil(cupom, cupons, setCupons, cart, setCart);
   };
 
-  // função genérica para exibir snackbars
-  const notify = (message, { variant = "default", persist = false } = {}) => {
-    return enqueueSnackbar(message, {
-      variant,
-      persist,
-      action: (key) => (
-        <button
-          onClick={() => closeSnackbar(key)}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          <IoCloseCircle size={20} />
-        </button>
-      ),
-    });
-  };
 
   const handleAddCupom = async (codigo) => {
     await handleAddCupomUtil(codigo, cupons, notify, closeSnackbar, handleCupom);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSnackbar } from "notistack";
 import React from "react";
-import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { removeCouponTracking } from "@/core/tracking/product-tracking";
 
 export function useCouponLocal(cupons: any, handleAddCupom: any, handleCupom: any) {
   const [cupom, setCupom] = useState("");
@@ -46,20 +46,8 @@ export function useCouponLocal(cupons: any, handleAddCupom: any, handleCupom: an
   const removeCoupon = (cupom: any) => {
     if (!cupom) return;
 
-    // Tracking do evento de remoção de cupom
-    if (typeof window !== "undefined") {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "remove_coupon",
-        event_id: `remove_coupon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        cupom_codigo: cupom.codigo,
-        cupom_nome: cupom.nome || cupom.codigo,
-        cupom_titulo: cupom.titulo || cupom.codigo,
-        elemento_clicado: "remove_coupon_button",
-        url_pagina: window.location.href,
-        ...extractGaSessionData("G-SXLFK0Y830"),
-      });
-    }
+    // Usar função de tracking movida para core/tracking
+    removeCouponTracking(cupom);
 
     handleCupom(cupom);
   };

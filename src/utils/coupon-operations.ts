@@ -1,7 +1,7 @@
 import { fetchCupom } from "@/modules/cupom/domain";
 import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { processProdutos } from "@/modules/produto/domain";
-import { processProdutosRevert } from "./cart-calculations";
+import { processProdutosRevert } from "@/core/processing/product-processing";
 
 export const handleCupom = (cupom: any, cupons: any, setCupons: any, cart: any, setCart: any) => {
   if (cupons.includes(cupom)) {
