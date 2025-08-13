@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
-import { fetchProdutosSugeridosCarrinho } from "@/modules/produto/domain";
-import { useMeuContexto } from "@/components/common/Context/context";
-import { useSnackbar } from "notistack";
+import { useState, useEffect } from "react";
 import { freteValue } from "@/utils/frete-value";
 import { formatPrice } from "@/utils/format-price";
-import React from "react";
-import { extractGaSessionData } from "@/utils/get-ga-cookie-info";
+import { useCartCore } from "./useModalCart/core";
+import { useSuggestedProducts } from "./useModalCart/suggested-products";
+import { useModalState } from "./useModalCart/modal-state";
+import { useCouponLocal } from "./useModalCart/coupon-local";
+import { useSnackbar } from "notistack";
 
 // Tipos para produtos do carrinho e sugeridos
 export interface CartProduct {
@@ -29,188 +29,59 @@ export interface SuggestedProduct {
 }
 
 export function useModalCart() {
-  const {
-    sidebarMounted,
-    setSidebarMounted,
-    cart,
-    addQuantityProductToCart,
-    subtractQuantityProductToCart,
-    removeProductFromCart,
-    total,
-    cupons,
-    handleCupom,
-    descontos,
-    handleAddCupom,
-    loadingAddItem,
-    addProductToCart,
-  } = useMeuContexto();
-
-  const [suggestedProductsRaw, setSuggestedProductsRaw] = useState<any[]>([]);
-  const [loadingSuggested, setLoadingSuggested] = useState(false);
+  const coreData = useCartCore();
+  const suggestedData = useSuggestedProducts(coreData.cart);
+  const modalData = useModalState(coreData.setSidebarMounted);
+  const couponData = useCouponLocal(coreData.cupons, coreData.handleAddCupom, coreData.handleCupom);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const animationDuration = 700;
-  const [openCart, setOpenCart] = useState(false);
-  const [forRefreshPage, setForRefreshPage] = useState(false);
-
   useEffect(() => {
-    if (!openCart) {
-      const timer = setTimeout(() => {
-        setSidebarMounted(false);
-        if (forRefreshPage) {
-          // window.location.reload();
-        }
-      }, animationDuration);
-      return () => clearTimeout(timer);
+    if (coreData.sidebarMounted) {
+      modalData.setOpenCart(true);
     }
-  }, [openCart, animationDuration]);
-
-  useEffect(() => {
-    if (sidebarMounted) {
-      setOpenCart(true);
-    }
-  }, [sidebarMounted, animationDuration]);
-
-  const [cupom, setCupom] = useState("");
-  const [loadingCupom, setLoadingCupom] = useState(false);
-  const [openCupom, setOpenCupom] = useState(false);
-
-  const [openRemoveModal, setOpenRemoveModal] = useState(false);
-  const [couponToRemove, setCouponToRemove] = useState<any>(null);
-
-  const handleAddCupomLocal = async () => {
-    if (!!cupom) {
-      if (cupons.find((c: any) => c.codigo === cupom)) {
-        enqueueSnackbar("Esse cupom já foi adicionado!", {
-          variant: "error",
-          persist: true,
-          action: (key) =>
-            React.createElement(
-              "button",
-              {
-                onClick: () => closeSnackbar(key),
-                "aria-label": "Fechar snackbar",
-                style: {
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                },
-              },
-              "✕",
-            ),
-        });
-        setOpenCupom(false);
-        return;
-      }
-      setLoadingCupom(true);
-      handleAddCupom(cupom);
-      setLoadingCupom(false);
-      setOpenCupom(false);
-      setForRefreshPage(true);
-    }
-  };
-
-  const removeCoupon = (cupom: any) => {
-    if (!cupom) return;
-
-    // Tracking do evento de remoção de cupom
-    if (typeof window !== "undefined") {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "remove_coupon",
-        event_id: `remove_coupon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        cupom_codigo: cupom.codigo,
-        cupom_nome: cupom.nome || cupom.codigo,
-        cupom_titulo: cupom.titulo || cupom.codigo,
-        elemento_clicado: "remove_coupon_button",
-        url_pagina: window.location.href,
-        ...extractGaSessionData("G-SXLFK0Y830"),
-      });
-    }
-
-    handleCupom(cupom);
-    setForRefreshPage(true);
-  };
-
-  useEffect(() => {
-    async function fetchSuggested() {
-      setLoadingSuggested(true);
-      try {
-        const res = await fetchProdutosSugeridosCarrinho();
-        setSuggestedProductsRaw(res.data || []);
-      } catch (err) {
-        setSuggestedProductsRaw([]);
-      }
-      setLoadingSuggested(false);
-    }
-    fetchSuggested();
-  }, []);
-
-  // Filtrar produtos sugeridos: remover os que já estão no carrinho e ajustar nome
-  const suggestedProducts: SuggestedProduct[] = suggestedProductsRaw
-    .filter((item) => {
-      return !cart[item.id];
-    })
-    .map((item) => {
-      const attrs = item;
-      const imageUrl = attrs.carouselImagensPrincipal?.[0]?.imagem?.formats
-        ?.thumbnail?.url
-        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${attrs.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url}`
-        : "";
-      const nomeOriginal: string = attrs.nome;
-      const nomeAjustado = nomeOriginal.replace(/\{.*?\}/g, "").trim();
-      return {
-        id: item.id,
-        nome: nomeAjustado,
-        preco: attrs.preco,
-        imageUrl,
-        carouselImagensPrincipal: attrs.carouselImagensPrincipal,
-        backgroundFlags: attrs.backgroundFlags,
-        slug: attrs.slug,
-      };
-    });
+  }, [coreData.sidebarMounted, modalData.animationDuration]);
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   return {
     // Contexto
-    sidebarMounted,
-    setSidebarMounted,
-    cart,
-    addQuantityProductToCart,
-    subtractQuantityProductToCart,
-    removeProductFromCart,
-    total,
-    cupons,
-    handleCupom,
-    descontos,
-    handleAddCupom,
-    loadingAddItem,
-    addProductToCart,
+    sidebarMounted: coreData.sidebarMounted,
+    setSidebarMounted: coreData.setSidebarMounted,
+    cart: coreData.cart,
+    addQuantityProductToCart: coreData.addQuantityProductToCart,
+    subtractQuantityProductToCart: coreData.subtractQuantityProductToCart,
+    removeProductFromCart: coreData.removeProductFromCart,
+    total: coreData.total,
+    cupons: coreData.cupons,
+    handleCupom: coreData.handleCupom,
+    descontos: coreData.descontos,
+    handleAddCupom: coreData.handleAddCupom,
+    loadingAddItem: coreData.loadingAddItem,
+    addProductToCart: coreData.addProductToCart,
     // Estado local
-    suggestedProductsRaw,
-    setSuggestedProductsRaw,
-    loadingSuggested,
-    setLoadingSuggested,
-    openCart,
-    setOpenCart,
-    animationDuration,
-    forRefreshPage,
-    setForRefreshPage,
-    cupom,
-    setCupom,
-    loadingCupom,
-    setLoadingCupom,
-    openCupom,
-    setOpenCupom,
-    openRemoveModal,
-    setOpenRemoveModal,
-    couponToRemove,
-    setCouponToRemove,
-    handleAddCupomLocal,
-    removeCoupon,
-    suggestedProducts,
+    suggestedProductsRaw: suggestedData.suggestedProductsRaw,
+    setSuggestedProductsRaw: suggestedData.setSuggestedProductsRaw,
+    loadingSuggested: suggestedData.loadingSuggested,
+    setLoadingSuggested: suggestedData.setLoadingSuggested,
+    openCart: modalData.openCart,
+    setOpenCart: modalData.setOpenCart,
+    animationDuration: modalData.animationDuration,
+    forRefreshPage: modalData.forRefreshPage,
+    setForRefreshPage: modalData.setForRefreshPage,
+    cupom: couponData.cupom,
+    setCupom: couponData.setCupom,
+    loadingCupom: couponData.loadingCupom,
+    setLoadingCupom: couponData.setLoadingCupom,
+    openCupom: couponData.openCupom,
+    setOpenCupom: couponData.setOpenCupom,
+    openRemoveModal: couponData.openRemoveModal,
+    setOpenRemoveModal: couponData.setOpenRemoveModal,
+    couponToRemove: couponData.couponToRemove,
+    setCouponToRemove: couponData.setCouponToRemove,
+    handleAddCupomLocal: couponData.handleAddCupomLocal,
+    removeCoupon: couponData.removeCoupon,
+    suggestedProducts: suggestedData.suggestedProducts,
     carouselIndex,
     setCarouselIndex,
     enqueueSnackbar,

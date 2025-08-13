@@ -2,12 +2,18 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider, useSnackbar } from "notistack";
-import { freteValue } from "@/utils/frete-value";
-import { waitForGTMReady } from "@/utils/gtm-ready-helper";
-import { fetchCupom } from "@/modules/cupom/domain";
 import { IconButton } from "@mui/material";
 import { IoCloseCircle } from "react-icons/io5";
-import { processProdutos } from "@/modules/produto/domain";
+import { 
+  addProductToCart as addProductToCartUtil,
+  addQuantityProductToCart as addQuantityProductToCartUtil,
+  subtractQuantityProductToCart as subtractQuantityProductToCartUtil,
+  removeProductFromCart as removeProductFromCartUtil,
+  clearCart as clearCartUtil
+} from "@/utils/cart-operations";
+import { handleCupom as handleCupomUtil, handleAddCupom as handleAddCupomUtil } from "@/utils/coupon-operations";
+import { calculateCartTotals } from "@/utils/cart-calculations";
+import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 
 const MeuContexto = createContext();
 
@@ -59,65 +65,23 @@ export const MeuContextoProvider = ({ children }) => {
   };
 
   const addProductToCart = (product) => {
-    setLoadingAddItem(true);
-
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      newCart[product.id].quantity += 1;
-    } else {
-      newCart[product.id] = { ...product, quantity: 1 };
-    }
-
-    processProdutosComOuSemCupom(
-      { data: Object.values(newCart) },
-      cupons?.[0]?.codigo,
-    ).then((cartResult) => {
-      cartResult = cartResult?.data?.reduce((acc, item) => {
-        acc[item.id] = item;
-        return acc;
-      }, {});
-      setCart(cartResult);
-
-      addProductEvent(product);
-
-      setLoadingAddItem(false);
-    });
+    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons, addProductEvent);
   };
 
   const addQuantityProductToCart = ({ product }) => {
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      newCart[product.id].quantity += 1;
-    }
-    setCart(newCart);
-
-    addProductEvent(product);
+    addQuantityProductToCartUtil({ product }, cart, setCart, addProductEvent);
   };
 
   const subtractQuantityProductToCart = ({ product }) => {
-    const newCart = { ...cart };
-    if (newCart[product.id] && newCart[product.id].quantity > 1) {
-      newCart[product.id].quantity -= 1;
-    } else if (newCart[product.id] && newCart[product.id].quantity === 1) {
-      removeProductFromCart({ product });
-      return;
-    }
-    setCart(newCart);
+    subtractQuantityProductToCartUtil({ product }, cart, setCart, removeProductFromCart);
   };
 
   const removeProductFromCart = ({ product }) => {
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      delete newCart[product.id];
-    }
-    setCart(newCart);
+    removeProductFromCartUtil({ product }, cart, setCart);
   };
 
   const clearCart = () => {
-    localStorage.removeItem("cart");
-    localStorage.removeItem("cupons");
-    setCart({});
-    setCupons({});
+    clearCartUtil(setCart, setCupons);
   };
 
   const [firstRun, setFirstRun] = useState(false);
@@ -155,29 +119,7 @@ export const MeuContextoProvider = ({ children }) => {
   }
 
   const handleCupom = (cupom) => {
-    if (cupons.includes(cupom)) {
-      setCupons(cupons.filter((c) => c !== cupom));
-
-      let cartResult = processProdutosRevert({ data: cart });
-
-      cartResult = cartResult?.data?.reduce((acc, item) => {
-        acc[item.id] = item;
-        return acc;
-      }, {});
-      setCart(cartResult);
-    } else {
-      processProdutos({ data: Object.values(cart) }, cupom?.codigo).then(
-        (cartResult) => {
-          cartResult = cartResult?.data?.reduce((acc, item) => {
-            acc[item.id] = item;
-            return acc;
-          }, {});
-          setCart(cartResult);
-
-          setCupons([...cupons, cupom]);
-        },
-      );
-    }
+    handleCupomUtil(cupom, cupons, setCupons, cart, setCart);
   };
 
   // função genérica para exibir snackbars
@@ -201,127 +143,13 @@ export const MeuContextoProvider = ({ children }) => {
   };
 
   const handleAddCupom = async (codigo) => {
-    // aviso de busca
-    const loadingKey = notify("Buscando cupom...", {
-      variant: "info",
-      persist: true,
-    });
-    try {
-      const { data } = await fetchCupom({ code: codigo });
-      closeSnackbar(loadingKey);
-
-      if (!data?.[0]) {
-        notify(`Cupom "${codigo}" não encontrado!`, {
-          variant: "error",
-          persist: true,
-        });
-        return;
-      }
-
-      if (cupons.some((c) => c.codigo === data[0].codigo)) {
-        notify("Esse cupom já foi adicionado!", {
-          variant: "success",
-        });
-        return;
-      }
-
-      if (cupons.length >= 1) {
-        notify("Só é possível aplicar um cupom por vez!", {
-          variant: "error",
-          persist: true,
-        });
-        return;
-      }
-
-      // Tracking do evento de aplicar cupom
-      if (typeof window !== "undefined") {
-        const gaData = await waitForGTMReady();
-
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: "apply_coupon",
-          event_id: `apply_coupon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          cupom_codigo: data[0].codigo,
-          cupom_nome: data[0].nome || data[0].codigo,
-          cupom_titulo: data[0].titulo || data[0].codigo,
-          elemento_clicado: "apply_coupon_button",
-          url_pagina: window.location.href,
-          ...gaData,
-        });
-      }
-
-      handleCupom(data[0]);
-      notify(`Cupom "${data[0].codigo}" aplicado com sucesso!`, {
-        variant: "success",
-      });
-    } catch (err) {
-      closeSnackbar(loadingKey);
-      console.error(err);
-      notify("Erro ao aplicar cupom.", { variant: "error" });
-    }
+    await handleAddCupomUtil(codigo, cupons, notify, closeSnackbar, handleCupom);
   };
 
   const [descontos, setDescontos] = useState(0);
 
   useEffect(() => {
-    if (!firstRun) return;
-
-    // Calculate base totals
-    const items = Object.values(cart);
-    const baseTotal = items.reduce(
-      (sum, { preco, quantity }) => sum + preco * quantity,
-      0,
-    );
-    const baseTotalPrecoDe = items.reduce(
-      (sum, { preco_de, quantity }) => sum + preco_de * quantity,
-      0,
-    );
-
-    // Ensure coupons is an array
-    const validCupons = Array.isArray(cupons) ? cupons : [];
-
-    // Compute cumulative coupon effect
-    const couponEffect = validCupons.reduce(
-      (acc, cupom) => ({
-        multiplicar: acc.multiplicar * cupom.multiplacar,
-        diminuir: acc.diminuir + cupom.diminuir,
-      }),
-      { multiplicar: 1, diminuir: 0 },
-    );
-
-    // Final totals with coupons
-    const totalWithCupons =
-      baseTotal * couponEffect.multiplicar - couponEffect.diminuir;
-    const totalDiscount = baseTotal - totalWithCupons;
-    const totalDiscountPrecoDe = baseTotalPrecoDe - baseTotal;
-
-    // Apply the discount
-    const descontoAplicado = totalDiscount;
-    setDescontos(descontoAplicado);
-
-    // Persist state
-    localStorage.setItem("cart", JSON.stringify(cart));
-    localStorage.setItem("cupons", JSON.stringify(validCupons));
-
-    // Compute and set final total including shipping
-    const shippingFee = freteValue;
-    const finalTotal = totalWithCupons + shippingFee;
-    setTotal(finalTotal);
-
-    // Handle one-time URL coupon
-    const url = new URL(window.location.href);
-    const queryCupom = url.searchParams.get("cupom");
-
-    const loadQueryCupom = async () => {
-      await handleAddCupom(queryCupom);
-      // Clear used coupon from URL
-      url.searchParams.delete("cupom");
-      window.history.replaceState({}, "", url.toString());
-    };
-
-    if (queryCupom) {
-      loadQueryCupom();
-    }
+    calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom);
   }, [cart, cupons]);
 
   return (
