@@ -51,13 +51,17 @@ export function CartProductItem({
             onClick={removeProduct}
           />
         </div>
-        <div className="flex items-center gap-[8px]">
+        <div className="flex select-none items-center gap-[8px]">
           <div className="flex items-center gap-[4px] rounded-[3px] border-[1px] border-[#c4c4c4] p-[5px] font-poppins text-[14px] font-bold">
             <FaMinus
               data-testid="decrement-button"
+              className="cursor-pointer"
               onClick={subtractQuantity}
             />
-            <span data-testid="cart-product-item-quantity">
+            <span
+              data-testid="cart-product-item-quantity"
+              className="select-none"
+            >
               {product?.quantity}
             </span>
             <FaPlus

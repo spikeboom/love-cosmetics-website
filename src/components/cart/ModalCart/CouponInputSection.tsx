@@ -29,7 +29,10 @@ export function CouponInputSection({
         {openCupom && (
           <Paper
             component="form"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddCupomLocal();
+            }}
             sx={{
               p: "2px 4px",
               display: "flex",
@@ -44,6 +47,12 @@ export function CouponInputSection({
               value={cupom}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setCupom(event.target.value.toUpperCase());
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  handleAddCupomLocal();
+                }
               }}
               inputProps={{
                 "data-testid": "coupon-input",

@@ -84,9 +84,11 @@ export async function processProdutosRevert(rawData: any) {
     rawData?.data?.map((p: any) => {
       const { ...dataLog } = p || {};
 
+      const { quantity: backupQuantity, ...backupWithoutQuantity } = dataLog?.backup || {};
+      
       return {
         ...dataLog,
-        ...dataLog?.backup,
+        ...backupWithoutQuantity,
         backup: {},
       };
     }) || [];

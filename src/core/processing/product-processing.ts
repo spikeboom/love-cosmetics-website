@@ -21,9 +21,11 @@ export function processProdutosRevert(rawData: any) {
   rawData = Object.values(rawData.data);
 
   const processedToReturn = rawData?.map((p: any) => {
+    const { quantity: backupQuantity, ...backupWithoutQuantity } = p?.backup || {};
+    
     return {
       ...p,
-      ...p?.backup,
+      ...backupWithoutQuantity,
       backup: p?.backup,
     };
   });
