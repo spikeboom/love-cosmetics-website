@@ -5,6 +5,7 @@ import IconSacola from "./icon-sacola";
 import "./style.css";
 import Link from "next/link";
 import { useMeuContexto } from "@/components/common/Context/context";
+import { useUI } from "@/core/ui/UIContext";
 import { formatPrice } from "@/utils/format-price";
 
 // const arrayProducts = [
@@ -235,7 +236,8 @@ export function CarouselProducts({
     };
   }, []);
 
-  const { addProductToCart, setSidebarMounted } = useMeuContexto();
+  const { addProductToCart } = useMeuContexto();
+  const { setSidebarMounted } = useUI();
 
   const handleComprar = (produto: any) => {
     addProductToCart(produto);

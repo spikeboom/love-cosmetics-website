@@ -26,7 +26,7 @@ export const MeuContextoProvider = ({ children }) => {
   const [loadingAddItem, setLoadingAddItem] = useState(false);
 
   // Usar sistema de notificações consolidado
-  const { notify } = useNotifications();
+  const { notify, closeSnackbar } = useNotifications();
 
 
   const addProductToCart = (product) => {

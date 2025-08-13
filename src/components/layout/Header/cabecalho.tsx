@@ -6,11 +6,13 @@ import IconLogin from "@/components/layout/HeaderIcons/icon-login";
 import IconSearch from "@/components/layout/HeaderIcons/icon-search";
 import "./styles.css";
 import { useMeuContexto } from "@/components/common/Context/context";
+import { useUI } from "@/core/ui/UIContext";
 import Image from "next/image";
 import { Opacity } from "@mui/icons-material";
 
 export function Cabecalho() {
-  const { setSidebarMounted, qtdItemsCart, setMenuMounted } = useMeuContexto();
+  const { qtdItemsCart } = useMeuContexto();
+  const { setSidebarMounted, setMenuMounted } = useUI();
 
   const handleAbrirCarrinho = () => {
     setSidebarMounted(true);

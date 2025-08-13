@@ -16,6 +16,8 @@ import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
 import { SnackbarProvider } from "notistack";
 import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
 import { FloatingWhatsApp } from "@/components/common/FloatingWhatsApp/FloatingWhatsApp";
+import { UIContextProvider } from "@/core/ui/UIContext";
+import { NotificationProvider } from "@/core/notifications/NotificationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,7 +87,11 @@ export default function RootLayout({
       >
         <div id="top"></div>
         <SnackbarProviderComponent>
-          <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
+          <NotificationProvider>
+            <UIContextProvider>
+              <MeuContextoProvider>{insideChildren}</MeuContextoProvider>
+            </UIContextProvider>
+          </NotificationProvider>
         </SnackbarProviderComponent>
         <MyLogFrontError />
       </body>

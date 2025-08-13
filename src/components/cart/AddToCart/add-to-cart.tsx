@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useMeuContexto } from "@/components/common/Context/context";
+import { useUI } from "@/core/ui/UIContext";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export function AddToCart({ produto }: any) {
-  const { addProductToCart, setSidebarMounted } = useMeuContexto();
+  const { addProductToCart } = useMeuContexto();
+  const { setSidebarMounted } = useUI();
 
   const searchParams = useSearchParams();
   const router = useRouter();

@@ -1,17 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { IoClose, IoCloseCircle } from "react-icons/io5";
-import { LuShoppingCart, LuTruck } from "react-icons/lu";
 import "./style.css";
-import Image from "next/image";
-import { FaMinus, FaPlus } from "react-icons/fa6";
-import { IoMdPricetag } from "react-icons/io";
-import { MdOutlineChevronRight } from "react-icons/md";
-import { RiCoupon2Line } from "react-icons/ri";
-import Link from "next/link";
-import { CircularProgress, IconButton, InputBase, Paper } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
 import { useModalCart } from "@/hooks/useModalCart";
 import { CartHeader } from "./CartHeader";
 import { CartProductList } from "./CartProductList";

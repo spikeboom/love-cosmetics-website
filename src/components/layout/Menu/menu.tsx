@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useUI } from "@/core/ui/UIContext";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { Divider } from "@mui/material";
@@ -119,7 +119,7 @@ const listMenusSimples = [
 ];
 
 export function ModalMenu() {
-  const { menuMounted, setMenuMounted } = useMeuContexto();
+  const { menuMounted, setMenuMounted } = useUI();
 
   const animationDuration = 700;
   const [openMenu, setOpenMenu] = useState(false);
