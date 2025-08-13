@@ -87,7 +87,7 @@ export const Product = ({ data, handlerAdd }: any) => (
     <div className="w-full">
       <div
         aria-label="Carrossel - Comprar"
-        className="w-full"
+        className="w-full cursor-pointer"
         onClick={handlerAdd}
         // href={`/pdp/[slug]`}
         // as={`/pdp/${data.slug}?addToCart=1`}
@@ -176,7 +176,7 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
           // href={`/pdp/[slug]`}
           // as={`/pdp/${data.slug}?addToCart=1`}
           aria-label="Carrossel - Comprar"
-          className="flex items-center"
+          className="flex items-center cursor-pointer"
           onClick={handlerAdd}
         >
           <div className="flex w-fit items-center justify-center rounded-[100px] bg-[#C0392B] px-[12px] py-[8px]">
