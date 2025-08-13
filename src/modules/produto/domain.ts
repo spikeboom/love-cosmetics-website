@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import qs from "qs";
 import { fetchCupom } from "../cupom/domain";
 import { formatPrice } from "@/utils/format-price";
@@ -26,16 +25,15 @@ export async function processProdutosNothing(rawData: any) {
 
 export async function processProdutos(rawData: any, cupom?: string) {
   "use server";
-  // busca o cookie
-  const cookieStore = cookies();
-  const meuCookie = cupom || (await cookieStore).get("cupomBackend")?.value;
+  
+  if (!cupom || cupom === "sem-cupom") {
+    return rawData;
+  }
 
   // faz fetch do cupom se existir
-  const dataCookie = meuCookie
-    ? (await fetchCupom({ code: meuCookie }))?.data || null
-    : null;
+  const dataCookie = (await fetchCupom({ code: cupom }))?.data || null;
 
-  if (!dataCookie || cupom === "sem-cupom") {
+  if (!dataCookie) {
     return rawData;
   }
 
