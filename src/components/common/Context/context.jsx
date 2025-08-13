@@ -23,7 +23,7 @@ export const MeuContextoProvider = ({ children }) => {
 
   const addProductEvent = async (product) => {
     const gaData = await waitForGTMReady();
-    
+
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "add_to_cart",
@@ -236,7 +236,7 @@ export const MeuContextoProvider = ({ children }) => {
       // Tracking do evento de aplicar cupom
       if (typeof window !== "undefined") {
         const gaData = await waitForGTMReady();
-        
+
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: "apply_coupon",
@@ -295,7 +295,6 @@ export const MeuContextoProvider = ({ children }) => {
     const totalDiscount = baseTotal - totalWithCupons;
     const totalDiscountPrecoDe = baseTotalPrecoDe - baseTotal;
 
-
     // Apply the discount
     const descontoAplicado = totalDiscount;
     setDescontos(descontoAplicado);
@@ -313,11 +312,15 @@ export const MeuContextoProvider = ({ children }) => {
     const url = new URL(window.location.href);
     const queryCupom = url.searchParams.get("cupom");
 
-    if (queryCupom) {
-      handleAddCupom(queryCupom);
+    const loadQueryCupom = async () => {
+      await handleAddCupom(queryCupom);
       // Clear used coupon from URL
       url.searchParams.delete("cupom");
       window.history.replaceState({}, "", url.toString());
+    };
+
+    if (queryCupom) {
+      loadQueryCupom();
     }
   }, [cart, cupons]);
 
