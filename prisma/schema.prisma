@@ -39,6 +39,9 @@ model Pedido {
   createdAt                 DateTime @default(now())
   ga_session_id             String?
   ga_session_number         String?
+  
+  // Relação opcional com cliente
+  pedidoCliente             PedidoCliente?
 }
 
 model StatusCheckout {
@@ -50,5 +53,97 @@ model StatusCheckout {
 model StatusPagamento {
   id   Int    @id @default(autoincrement())
   info Json
+}
+
+// ============================================
+// SISTEMA DE AUTENTICAÇÃO DE CLIENTES
+// ============================================
+
+model Cliente {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  nome            String
+  sobrenome       String
+  cpf             String?   @unique
+  telefone        String?
+  passwordHash    String
+  
+  // Dados salvos do checkout
+  cep             String?
+  endereco        String?
+  numero          String?
+  complemento     String?
+  bairro          String?
+  cidade          String?
+  estado          String?
+  
+  // Preferências
+  receberWhatsapp Boolean   @default(false)
+  receberEmail    Boolean   @default(true)
+  
+  // Relacionamentos
+  pedidos         PedidoCliente[]
+  sessoes         SessaoCliente[]
+  cuponsUsados    CupomUsado[]
+  
+  // Controle
+  emailVerificado Boolean   @default(false)
+  ativo           Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([email])
+  @@index([cpf])
+}
+
+model SessaoCliente {
+  id           String    @id @default(uuid())
+  token        String    @unique
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+  
+  @@index([token])
+  @@index([clienteId])
+  @@index([expiresAt])
+}
+
+model PedidoCliente {
+  id           String    @id @default(uuid())
+  pedidoId     String    @unique
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id])
+  pedido       Pedido    @relation(fields: [pedidoId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@index([clienteId])
+}
+
+model CupomUsado {
+  id           String    @id @default(uuid())
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id])
+  cupom        String
+  valorDesconto Float
+  pedidoId     String?
+  usadoEm      DateTime  @default(now())
+
+  @@index([clienteId])
+  @@index([cupom])
+}
+
+model TokenRecuperacao {
+  id           String    @id @default(uuid())
+  clienteId    String
+  token        String    @unique
+  expiresAt    DateTime
+  usado        Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@index([token])
+  @@index([clienteId])
 }
 
