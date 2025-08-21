@@ -132,14 +132,18 @@ export async function verifySession(token: string): Promise<ClienteSession | nul
 
 // Obter sessão atual dos cookies
 export async function getCurrentSession(): Promise<ClienteSession | null> {
+  
   const cookieStore = await cookies();
+  
   const token = cookieStore.get(COOKIE_NAME)?.value;
   
   if (!token) {
     return null;
   }
   
-  return verifySession(token);
+  const session = await verifySession(token);
+  
+  return session;
 }
 
 // Destruir sessão

@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação
     const session = await getCurrentSession();
+    
     if (!session) {
       return NextResponse.json(
         { error: 'Não autorizado' },
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Buscar pedidos do cliente
+    
     const pedidos = await prisma.pedidoCliente.findMany({
       where: {
         clienteId: session.id
@@ -33,6 +35,7 @@ export async function GET(request: NextRequest) {
       skip: offset,
       take: limit
     });
+    
 
     // Contar total de pedidos
     const totalPedidos = await prisma.pedidoCliente.count({
@@ -40,6 +43,7 @@ export async function GET(request: NextRequest) {
         clienteId: session.id
       }
     });
+    
 
     // Buscar informações de pagamento para cada pedido
     const pedidosFormatados = await Promise.all(

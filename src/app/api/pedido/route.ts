@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
 
     // Verificar se há cliente logado
     const clienteSession = await getCurrentSession();
-    logMessage("Cliente Session", clienteSession);
 
     // Cria o registro do pedido no banco
     const pedido = await prisma.pedido.create({
@@ -43,37 +42,42 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    logMessage("Pedido Criado", pedido);
     
     // Variável para armazenar cliente (logado ou recém criado)
     let clienteParaVincular = clienteSession?.id || null;
     let contaCriada = false;
 
-    // Se cliente está logado, vincular pedido
+    // SEMPRE vincular pedido se cliente estiver logado (independente de salvar_minhas_informacoes)
     if (clienteSession) {
-      await prisma.pedidoCliente.create({
-        data: {
-          pedidoId: pedido.id,
-          clienteId: clienteSession.id,
-        },
-      });
-      logMessage("Pedido vinculado ao cliente logado", clienteSession.id);
       
-      // Atualizar dados do cliente se necessário
-      await prisma.cliente.update({
-        where: { id: clienteSession.id },
-        data: {
-          cep: body.cep,
-          endereco: body.endereco,
-          numero: body.numero,
-          complemento: body.complemento,
-          bairro: body.bairro,
-          cidade: body.cidade,
-          estado: body.estado,
-          telefone: body.telefone,
-          receberWhatsapp: body.aceito_receber_whatsapp,
-        },
-      });
+      try {
+        const vinculacao = await prisma.pedidoCliente.create({
+          data: {
+            pedidoId: pedido.id,
+            clienteId: clienteSession.id,
+          },
+        });
+        
+        clienteParaVincular = clienteSession.id;
+        
+        // Atualizar dados do cliente se necessário
+        await prisma.cliente.update({
+          where: { id: clienteSession.id },
+          data: {
+            cep: body.cep,
+            endereco: body.endereco,
+            numero: body.numero,
+            complemento: body.complemento,
+            bairro: body.bairro,
+            cidade: body.cidade,
+            estado: body.estado,
+            telefone: body.telefone,
+            receberWhatsapp: body.aceito_receber_whatsapp,
+          },
+        });
+        
+      } catch (error) {
+      }
     } 
     // Se não há cliente logado mas usuário quer criar conta
     else if (body.salvar_minhas_informacoes) {
@@ -83,6 +87,7 @@ export async function POST(req: NextRequest) {
           where: { email: body.email },
         });
 
+        
         if (!clienteExistente) {
           // Gerar senha temporária (será enviada por email)
           const senhaTemporaria = Math.random().toString(36).slice(-12);
@@ -109,13 +114,15 @@ export async function POST(req: NextRequest) {
             },
           });
           
+          
           // Vincular pedido ao novo cliente
-          await prisma.pedidoCliente.create({
+          const vinculacaoNovoCliente = await prisma.pedidoCliente.create({
             data: {
               pedidoId: pedido.id,
               clienteId: novoCliente.id,
             },
           });
+          
 
           // Criar sessão automática para o novo cliente
           const userAgent = req.headers.get('user-agent') || undefined;
@@ -140,13 +147,25 @@ export async function POST(req: NextRequest) {
             senhaTemporaria: senhaTemporaria, // TODO: Enviar por email
           });
         } else {
-          logMessage("Cliente já existe com este email", body.email);
+          // Mesmo se cliente existe, tenta vincular o pedido se não estiver logado
+          
+          try {
+            const vinculacaoExistente = await prisma.pedidoCliente.create({
+              data: {
+                pedidoId: pedido.id,
+                clienteId: clienteExistente.id,
+              },
+            });
+            clienteParaVincular = clienteExistente.id;
+          } catch (error) {
+          }
         }
       } catch (error) {
-        logMessage("Erro ao criar conta", error);
         // Continua sem criar conta, apenas processa o pedido
       }
+    } else {
     }
+    
 
     logMessage("Base URL", getBaseURL({ STAGE: "PRODUCTION" }));
 

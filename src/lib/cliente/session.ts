@@ -230,10 +230,12 @@ export async function vincularPedidoCliente(
   pedidoId: string,
   clienteId: string
 ): Promise<void> {
-  await prisma.pedidoCliente.create({
+  
+  const resultado = await prisma.pedidoCliente.create({
     data: {
       pedidoId,
       clienteId
     }
   });
+  
 }
