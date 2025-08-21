@@ -25,7 +25,6 @@ import {
   fetchProdutoBySlug,
   fetchProdutosForCarouselPDP,
 } from "@/modules/produto/domain";
-import { ModalCart } from "@/components/cart/ModalCart/modal-cart";
 import { Metadata, ResolvingMetadata } from "next";
 import { AddToCart } from "@/components/cart/AddToCart/add-to-cart";
 import { ViewContentEvent } from "@/components/common/EventViewContent/event-view-content";
@@ -156,8 +155,6 @@ export default async function PdpPage({
       </footer>
 
       <BarraFixaComprar produto={produto} extraClassesForTopDiv={`md:hidden`} />
-
-      <ModalCart />
 
       <AddToCart produto={produto} />
 

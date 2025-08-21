@@ -1,6 +1,5 @@
 import React from "react";
 import PedidoForm from "./PedidoForm";
-import { ModalCart } from "@/components/cart/ModalCart/modal-cart";
 import { PushInitiateCheckout } from "./PushInitiateCheckout";
 
 export const metadata = {
@@ -11,7 +10,6 @@ const CheckoutPage = () => {
   return (
     <>
       <PedidoForm />
-      <ModalCart />
       <PushInitiateCheckout />
     </>
   );

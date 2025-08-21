@@ -4,7 +4,7 @@ import { ModalMenu } from "@/components/layout/Menu/menu";
 import { FloatingWhatsApp } from "@/components/common/FloatingWhatsApp/FloatingWhatsApp";
 import { ModalCart } from "@/components/cart/ModalCart/modal-cart";
 
-export default function GlobalLayout({
+export default function ClienteLogadoLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -13,14 +13,14 @@ export default function GlobalLayout({
     <>
       <Cabecalho />
 
-      <div className="mx-auto w-full max-w-[1400px]">{children}</div>
+      <div className="">{children}</div>
 
       <Rodape />
 
       <div className="h-[100px] bg-[#333]"></div>
 
       <ModalMenu />
-      
+
       <ModalCart />
 
       <FloatingWhatsApp />

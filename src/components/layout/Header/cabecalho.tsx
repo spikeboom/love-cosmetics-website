@@ -44,7 +44,7 @@ export function Cabecalho() {
           <div className="flex w-full max-w-[1400px] items-center justify-between md:px-[18px]">
             <div className="flex flex-1">
               <span
-                className="mr-[24px] flex items-center"
+                className="mr-[24px] flex cursor-pointer items-center"
                 onClick={() => {
                   window?.dataLayer?.push({
                     event: "click_do_botao",

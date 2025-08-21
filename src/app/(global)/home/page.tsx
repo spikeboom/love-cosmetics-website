@@ -3,7 +3,6 @@ import {
   fetchProdutosForHome_NotKit,
 } from "@/modules/produto/domain";
 import { Product } from "@/components/common/HomeProduct/carousel-products";
-import { ModalCart } from "@/components/cart/ModalCart/modal-cart";
 import { CarouselProducts } from "@/components/product/ProductCarousel/carousel-products";
 import { FormEmailGTM } from "./form-email";
 
@@ -82,8 +81,6 @@ export default async function HomeComponent() {
           <FormEmailGTM />
         </div>
       </div>
-
-      <ModalCart />
     </>
   );
 }
