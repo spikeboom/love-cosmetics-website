@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useSnackbar } from "notistack";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Schema de validação para login rápido
 const quickLoginSchema = z.object({
@@ -48,6 +49,7 @@ const QuickLoginModal: React.FC<QuickLoginModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const { checkAuth } = useAuth();
 
   const {
     register,
@@ -76,6 +78,9 @@ const QuickLoginModal: React.FC<QuickLoginModalProps> = ({
       const result = await response.json();
 
       if (response.ok && result.success) {
+        // Atualizar o AuthContext global
+        await checkAuth();
+        
         enqueueSnackbar("Login realizado com sucesso!", {
           variant: "success",
         });

@@ -147,18 +147,14 @@ export async function POST(req: NextRequest) {
             senhaTemporaria: senhaTemporaria, // TODO: Enviar por email
           });
         } else {
-          // Mesmo se cliente existe, tenta vincular o pedido se não estiver logado
+          // Email já existe - não permitir vinculação automática por segurança
+          // Remover o pedido criado e retornar erro
+          await prisma.pedido.delete({ where: { id: pedido.id } });
           
-          try {
-            const vinculacaoExistente = await prisma.pedidoCliente.create({
-              data: {
-                pedidoId: pedido.id,
-                clienteId: clienteExistente.id,
-              },
-            });
-            clienteParaVincular = clienteExistente.id;
-          } catch (error) {
-          }
+          return NextResponse.json({
+            error: 'Este email já possui uma conta. Faça login para continuar a compra ou use outro email.',
+            code: 'EMAIL_ALREADY_EXISTS'
+          }, { status: 409 });
         }
       } catch (error) {
         // Continua sem criar conta, apenas processa o pedido

@@ -32,6 +32,7 @@ import { pushUserDataToDataLayer } from "../home/form-email";
 import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { FiSearch } from "react-icons/fi";
 import QuickLoginModal from "./QuickLoginModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -133,6 +134,7 @@ const PedidoForm: React.FC = () => {
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const { cart, total, descontos, cupons } = useMeuContexto();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { checkAuth } = useAuth();
 
   const {
     register,
@@ -198,6 +200,21 @@ const PedidoForm: React.FC = () => {
 
       // Caso a API retorne erro, exibe as mensagens específicas usando notistack
       if (result.error) {
+        // Tratamento específico para email já existente
+        if (result.code === 'EMAIL_ALREADY_EXISTS') {
+          enqueueSnackbar(result.error, {
+            variant: "error",
+            persist: true,
+            action: (key) => (
+              <IconButton onClick={() => closeSnackbar(key)} size="small">
+                <CloseIcon sx={{ color: "white" }} />
+              </IconButton>
+            ),
+          });
+          setLoading(false);
+          return;
+        }
+
         const errorMessages = result.details?.error_messages;
         if (Array.isArray(errorMessages)) {
           errorMessages.forEach((err: any) => {
@@ -467,6 +484,9 @@ const PedidoForm: React.FC = () => {
         method: 'POST',
       });
       if (response.ok) {
+        // Atualizar o AuthContext global
+        await checkAuth();
+        
         setClienteLogado(null);
         // Limpar campos preenchidos automaticamente (exceto localStorage)
         setValue('nome', '');
