@@ -13,6 +13,7 @@ import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
 import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
 import { UIContextProvider } from "@/core/ui/UIContext";
 import { NotificationProvider } from "@/core/notifications/NotificationContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,7 +69,9 @@ export default function RootLayout({
         <SnackbarProviderComponent>
           <NotificationProvider>
             <UIContextProvider>
-              <MeuContextoProvider>{children}</MeuContextoProvider>
+              <AuthProvider>
+                <MeuContextoProvider>{children}</MeuContextoProvider>
+              </AuthProvider>
             </UIContextProvider>
           </NotificationProvider>
         </SnackbarProviderComponent>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUI } from "@/core/ui/UIContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { Divider } from "@mui/material";
@@ -11,6 +12,7 @@ import * as LuIcons from "react-icons/lu";
 import * as FiIcons from "react-icons/fi";
 import * as GiIcons from "react-icons/gi";
 import * as WiIcons from "react-icons/wi";
+import * as FaIcons from "react-icons/fa";
 
 const iconLibraries = {
   ai: AiIcons,
@@ -18,6 +20,7 @@ const iconLibraries = {
   fi: FiIcons,
   gi: GiIcons,
   wi: WiIcons,
+  fa: FaIcons,
 };
 
 function getDynamicIcon(iconName: string) {
@@ -120,6 +123,7 @@ const listMenusSimples = [
 
 export function ModalMenu() {
   const { menuMounted, setMenuMounted } = useUI();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const animationDuration = 700;
   const [openMenu, setOpenMenu] = useState(false);
@@ -175,18 +179,39 @@ export function ModalMenu() {
     );
   };
 
-  const itemMenuSimples = ({ text, href, enabled = true }: any) => (
-    <a
-      href={enabled ? href : ""}
-      className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
-      key={text}
-    >
-      <div className="flex items-center">
-        <span className="ml-[8px] text-[16px] font-semibold">{text}</span>
-      </div>
-      <FaChevronRight size={12} />
-    </a>
-  );
+  const itemMenuSimples = ({ text, href, enabled = true, icon, onClick }: any) => {
+    const Icon = icon ? getDynamicIcon(icon) : null;
+    
+    if (onClick) {
+      return (
+        <button
+          onClick={onClick}
+          className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
+          key={text}
+        >
+          <div className="flex items-center">
+            {Icon && <Icon size={20} className="text-[#dcafad]" />}
+            <span className="ml-[8px] text-[16px] font-semibold">{text}</span>
+          </div>
+          <FaChevronRight size={12} />
+        </button>
+      );
+    }
+    
+    return (
+      <a
+        href={enabled ? href : ""}
+        className={`${!enabled ? "opacity-[0.5]" : ""} flex w-full items-center justify-between p-4 pr-6`}
+        key={text}
+      >
+        <div className="flex items-center">
+          {Icon && <Icon size={20} className="text-[#dcafad]" />}
+          <span className="ml-[8px] text-[16px] font-semibold">{text}</span>
+        </div>
+        <FaChevronRight size={12} />
+      </a>
+    );
+  };
 
   const itemMenuSecundario = ({ text, href, enabled = true }: any) => (
     <a
@@ -211,8 +236,51 @@ export function ModalMenu() {
 
   const [menuSecundarioOpen, setMenuSecundarioOpen] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setOpenMenu(false);
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  };
+
   const menuPrincipal = (
     <div className="w-full pt-[30px]">
+      {isAuthenticated && (
+        <>
+          <div className="px-4 py-3 mb-2 bg-gray-50">
+            <p className="text-sm font-semibold text-gray-900">
+              Olá, {user?.nome}!
+            </p>
+            <p className="text-xs text-gray-500">{user?.email}</p>
+          </div>
+          
+          {itemMenuSimples({
+            text: "Minha Conta",
+            href: "/minha-conta",
+            icon: "FaUserCircle",
+            enabled: true,
+          })}
+          
+          {itemMenuSimples({
+            text: "Meus Pedidos",
+            href: "/minha-conta/pedidos",
+            icon: "FaShoppingBag",
+            enabled: true,
+          })}
+          
+          <Divider
+            variant="middle"
+            component="div"
+            style={{
+              marginTop: "16px",
+              marginBottom: "16px",
+            }}
+          />
+        </>
+      )}
+      
       {listMenus.map((menu) => itemMenu({ ...menu }))}
 
       <Divider
@@ -230,6 +298,40 @@ export function ModalMenu() {
           href: menu.href,
           enabled: menu.enabled ?? true,
         }),
+      )}
+      
+      <Divider
+        variant="middle"
+        component="div"
+        style={{
+          marginTop: "16px",
+          marginBottom: "16px",
+        }}
+      />
+      
+      {isAuthenticated ? (
+        itemMenuSimples({
+          text: "Sair",
+          icon: "FaSignOutAlt",
+          onClick: handleLogout,
+          enabled: true,
+        })
+      ) : (
+        <>
+          {itemMenuSimples({
+            text: "Entrar",
+            href: "/conta/entrar",
+            icon: "FaSignInAlt",
+            enabled: true,
+          })}
+          
+          {itemMenuSimples({
+            text: "Criar Conta",
+            href: "/conta/cadastrar",
+            icon: "FaUserPlus",
+            enabled: true,
+          })}
+        </>
       )}
     </div>
   );
