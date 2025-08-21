@@ -24,7 +24,7 @@ import { useSnackbar } from "notistack";
 // Schema de validação para login rápido
 const quickLoginSchema = z.object({
   email: z.string().email("Email inválido"),
-  senha: z.string().min(1, "Senha é obrigatória"),
+  password: z.string().min(1, "Senha é obrigatória"),
 });
 
 type QuickLoginData = z.infer<typeof quickLoginSchema>;
@@ -182,10 +182,10 @@ const QuickLoginModal: React.FC<QuickLoginModalProps> = ({
               label="Senha"
               type="password"
               placeholder="Sua senha"
-              error={!!errors.senha}
-              helperText={errors.senha?.message}
+              error={!!errors.password}
+              helperText={errors.password?.message}
               disabled={loading}
-              {...register("senha")}
+              {...register("password")}
             />
 
             {/* Link para recuperar senha */}
