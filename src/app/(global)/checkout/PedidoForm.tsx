@@ -17,6 +17,8 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  Alert,
+  Link,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { postPedido } from "@/modules/pedido/domain";
@@ -29,6 +31,7 @@ import { parse, isValid } from "date-fns";
 import { pushUserDataToDataLayer } from "../home/form-email";
 import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { FiSearch } from "react-icons/fi";
+import QuickLoginModal from "./QuickLoginModal";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -102,8 +105,32 @@ const defaultPedidoFormData: PedidoFormData = {
   destinatario: "",
 } as unknown as PedidoFormData;
 
+// Interface para dados do cliente logado
+interface ClienteLogado {
+  id: string;
+  email: string;
+  nome: string;
+  sobrenome: string;
+  cpf?: string;
+  telefone?: string;
+  endereco?: {
+    cep?: string;
+    endereco?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
+  };
+  receberWhatsapp?: boolean;
+}
+
 const PedidoForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [loadingClienteCheck, setLoadingClienteCheck] = useState(true);
+  const [clienteLogado, setClienteLogado] = useState<ClienteLogado | null>(null);
+  const [showQuickLogin, setShowQuickLogin] = useState(false);
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
   const { cart, total, descontos, cupons } = useMeuContexto();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -230,6 +257,18 @@ const PedidoForm: React.FC = () => {
         ...gaData,
       });
 
+      // Mensagens de feedback sobre criação de conta
+      if (result?.contaCriada) {
+        enqueueSnackbar("Conta criada com sucesso! Você já está logado.", {
+          variant: "success",
+          persist: true,
+        });
+      } else if (result?.clienteVinculado) {
+        enqueueSnackbar("Pedido vinculado à sua conta!", {
+          variant: "success",
+        });
+      }
+
       // add snackbar redirecting to payment link
       enqueueSnackbar("Redirecionando para o pagamento...", {
         variant: "success",
@@ -353,6 +392,54 @@ const PedidoForm: React.FC = () => {
 
   const [loadingCep, setLoadingCep] = useState(false);
 
+  // Função para verificar se cliente está logado
+  const verificarClienteLogado = async () => {
+    try {
+      const response = await fetch('/api/cliente/auth/verificar');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.authenticated && data.cliente) {
+          setClienteLogado(data.cliente);
+          // Pré-preencher formulário com dados do cliente
+          preencherFormularioComDadosCliente(data.cliente);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar cliente:', error);
+    } finally {
+      setLoadingClienteCheck(false);
+    }
+  };
+
+  // Função para pré-preencher formulário com dados do cliente
+  const preencherFormularioComDadosCliente = (cliente: ClienteLogado) => {
+    setValue('nome', cliente.nome || '');
+    setValue('sobrenome', cliente.sobrenome || '');
+    setValue('email', cliente.email || '');
+    
+    if (cliente.cpf) setValue('cpf', cliente.cpf);
+    if (cliente.telefone) setValue('telefone', cliente.telefone);
+    
+    if (cliente.endereco) {
+      if (cliente.endereco.cep) setValue('cep', cliente.endereco.cep);
+      if (cliente.endereco.endereco) setValue('endereco', cliente.endereco.endereco);
+      if (cliente.endereco.numero) setValue('numero', cliente.endereco.numero);
+      if (cliente.endereco.complemento) setValue('complemento', cliente.endereco.complemento);
+      if (cliente.endereco.bairro) setValue('bairro', cliente.endereco.bairro);
+      if (cliente.endereco.cidade) setValue('cidade', cliente.endereco.cidade);
+      if (cliente.endereco.estado) setValue('estado', cliente.endereco.estado);
+    }
+    
+    if (cliente.receberWhatsapp !== undefined) {
+      setValue('aceito_receber_whatsapp', cliente.receberWhatsapp);
+    }
+  };
+
+  // Verificar cliente logado ao carregar componente
+  useEffect(() => {
+    verificarClienteLogado();
+  }, []);
+
   useEffect(() => {
     const firstErrorField = Object.keys(errors)[0] as keyof PedidoFormData;
     const ref = fieldRefs[firstErrorField];
@@ -373,7 +460,38 @@ const PedidoForm: React.FC = () => {
     }
   }, [errors]);
 
-  if (loadingFormData) {
+  // Função para fazer logout
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/cliente/auth/sair', {
+        method: 'POST',
+      });
+      if (response.ok) {
+        setClienteLogado(null);
+        // Limpar campos preenchidos automaticamente (exceto localStorage)
+        setValue('nome', '');
+        setValue('sobrenome', '');
+        setValue('email', '');
+        setValue('cpf', '');
+        setValue('telefone', '');
+        setValue('cep', '');
+        setValue('endereco', '');
+        setValue('numero', '');
+        setValue('complemento', '');
+        setValue('bairro', '');
+        setValue('cidade', 'Manaus');
+        setValue('estado', 'Amazonas');
+        setValue('aceito_receber_whatsapp', false);
+        
+        enqueueSnackbar('Logout realizado com sucesso', { variant: 'success' });
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      enqueueSnackbar('Erro ao fazer logout', { variant: 'error' });
+    }
+  };
+
+  if (loadingFormData || loadingClienteCheck) {
     return <div>Carregando...</div>;
   }
 
@@ -383,6 +501,50 @@ const PedidoForm: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Formulário de Pedido
         </Typography>
+        
+        {/* Status do Cliente - Logado ou Não Logado */}
+        {clienteLogado ? (
+          <Alert 
+            severity="success" 
+            sx={{ mb: 3 }}
+            action={
+              <Button 
+                color="inherit" 
+                size="small" 
+                onClick={handleLogout}
+                sx={{ textDecoration: 'underline' }}
+              >
+                Sair
+              </Button>
+            }
+          >
+            <Typography variant="body2">
+              Olá, <strong>{clienteLogado.nome} {clienteLogado.sobrenome}</strong>! 
+              Seus dados foram preenchidos automaticamente.
+            </Typography>
+          </Alert>
+        ) : (
+          <Alert 
+            severity="info" 
+            sx={{ mb: 3 }}
+            action={
+              <Button 
+                color="inherit" 
+                size="small" 
+                onClick={() => setShowQuickLogin(true)}
+                sx={{ textDecoration: 'underline' }}
+              >
+                Entrar
+              </Button>
+            }
+          >
+            <Typography variant="body2">
+              Já é cliente? <Link component="button" onClick={() => setShowQuickLogin(true)}>
+                Faça login para preencher automaticamente
+              </Link>
+            </Typography>
+          </Alert>
+        )}
         <form
           onSubmit={handleSubmit(onSubmit)}
           onKeyDown={(e) => {
@@ -671,6 +833,34 @@ const PedidoForm: React.FC = () => {
               {...register("destinatario")}
             />
 
+            {/* Opção de criar conta - apenas para clientes não logados */}
+            {!clienteLogado && (
+              <Controller
+                name="salvar_minhas_informacoes"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => {
+                          field.onChange(e.target.checked);
+                          setShowCreateAccount(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Criar conta com estes dados para facilitar futuras compras"
+                    sx={{ 
+                      bgcolor: 'rgba(25, 118, 210, 0.08)',
+                      p: 2,
+                      borderRadius: 1,
+                      border: '1px solid rgba(25, 118, 210, 0.2)'
+                    }}
+                  />
+                )}
+              />
+            )}
+
             <Button
               type="submit"
               variant="contained"
@@ -689,6 +879,13 @@ const PedidoForm: React.FC = () => {
             </Button>
           </Stack>
         </form>
+
+        {/* Modal de Login Rápido */}
+        <QuickLoginModal
+          open={showQuickLogin}
+          onClose={() => setShowQuickLogin(false)}
+          onLoginSuccess={verificarClienteLogado}
+        />
       </Box>
     </ThemeProvider>
   );

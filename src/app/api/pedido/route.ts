@@ -3,11 +3,16 @@ import { getBaseURL } from "@/utils/getBaseUrl";
 import { createLogger } from "@/utils/logMessage";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentSession, hashPassword, createSession, setSessionCookie } from "@/lib/cliente/auth";
 
 export async function POST(req: NextRequest) {
   const logMessage = createLogger();
   try {
     const body = await req.json();
+
+    // Verificar se há cliente logado
+    const clienteSession = await getCurrentSession();
+    logMessage("Cliente Session", clienteSession);
 
     // Cria o registro do pedido no banco
     const pedido = await prisma.pedido.create({
@@ -39,6 +44,110 @@ export async function POST(req: NextRequest) {
     });
 
     logMessage("Pedido Criado", pedido);
+    
+    // Variável para armazenar cliente (logado ou recém criado)
+    let clienteParaVincular = clienteSession?.id || null;
+    let contaCriada = false;
+
+    // Se cliente está logado, vincular pedido
+    if (clienteSession) {
+      await prisma.pedidoCliente.create({
+        data: {
+          pedidoId: pedido.id,
+          clienteId: clienteSession.id,
+        },
+      });
+      logMessage("Pedido vinculado ao cliente logado", clienteSession.id);
+      
+      // Atualizar dados do cliente se necessário
+      await prisma.cliente.update({
+        where: { id: clienteSession.id },
+        data: {
+          cep: body.cep,
+          endereco: body.endereco,
+          numero: body.numero,
+          complemento: body.complemento,
+          bairro: body.bairro,
+          cidade: body.cidade,
+          estado: body.estado,
+          telefone: body.telefone,
+          receberWhatsapp: body.aceito_receber_whatsapp,
+        },
+      });
+    } 
+    // Se não há cliente logado mas usuário quer criar conta
+    else if (body.salvar_minhas_informacoes) {
+      try {
+        // Verificar se já existe cliente com este email
+        const clienteExistente = await prisma.cliente.findUnique({
+          where: { email: body.email },
+        });
+
+        if (!clienteExistente) {
+          // Gerar senha temporária (será enviada por email)
+          const senhaTemporaria = Math.random().toString(36).slice(-12);
+          const senhaHash = await hashPassword(senhaTemporaria);
+
+          // Criar nova conta
+          const novoCliente = await prisma.cliente.create({
+            data: {
+              email: body.email,
+              nome: body.nome,
+              sobrenome: body.sobrenome,
+              cpf: body.cpf,
+              telefone: body.telefone,
+              passwordHash: senhaHash,
+              cep: body.cep,
+              endereco: body.endereco,
+              numero: body.numero,
+              complemento: body.complemento,
+              bairro: body.bairro,
+              cidade: body.cidade,
+              estado: body.estado,
+              receberWhatsapp: body.aceito_receber_whatsapp,
+              receberEmail: true,
+            },
+          });
+          
+          // Vincular pedido ao novo cliente
+          await prisma.pedidoCliente.create({
+            data: {
+              pedidoId: pedido.id,
+              clienteId: novoCliente.id,
+            },
+          });
+
+          // Criar sessão automática para o novo cliente
+          const userAgent = req.headers.get('user-agent') || undefined;
+          const forwarded = req.headers.get('x-forwarded-for');
+          const ipAddress = forwarded ? forwarded.split(',')[0] : req.ip;
+          
+          const token = await createSession(
+            novoCliente.id,
+            novoCliente.email,
+            userAgent,
+            ipAddress
+          );
+          
+          await setSessionCookie(token);
+          
+          clienteParaVincular = novoCliente.id;
+          contaCriada = true;
+          
+          logMessage("Nova conta criada e pedido vinculado", {
+            clienteId: novoCliente.id,
+            email: novoCliente.email,
+            senhaTemporaria: senhaTemporaria, // TODO: Enviar por email
+          });
+        } else {
+          logMessage("Cliente já existe com este email", body.email);
+        }
+      } catch (error) {
+        logMessage("Erro ao criar conta", error);
+        // Continua sem criar conta, apenas processa o pedido
+      }
+    }
+
     logMessage("Base URL", getBaseURL({ STAGE: "PRODUCTION" }));
 
     // Remove quaisquer caracteres não numéricos de telefone e CPF
@@ -101,6 +210,9 @@ export async function POST(req: NextRequest) {
         id: pedido.id,
         // @ts-ignore
         link: responseData.links.find((link) => link.rel === "PAY")?.href,
+        // Informações adicionais sobre conta criada
+        contaCriada: contaCriada,
+        clienteVinculado: !!clienteParaVincular,
       },
       { status: 201 },
     );

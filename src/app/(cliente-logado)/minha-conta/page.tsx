@@ -1,4 +1,4 @@
-import { getCurrentSessionEdge } from '@/lib/cliente/auth-edge';
+import { getCurrentSession } from '@/lib/cliente/auth';
 import { getClientePedidos } from '@/lib/cliente/session';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default async function MinhaContaPage() {
   // Verificar sessão
-  const session = await getCurrentSessionEdge();
+  const session = await getCurrentSession();
   
   if (!session) {
     redirect('/conta/entrar');
