@@ -172,15 +172,7 @@ export async function GET(request: NextRequest) {
     
     // Buscar token
     const tokenRecord = await prisma.tokenRecuperacao.findUnique({
-      where: { token },
-      include: {
-        cliente: {
-          select: {
-            email: true,
-            nome: true
-          }
-        }
-      }
+      where: { token }
     });
     
     // Verificar validade
@@ -188,17 +180,33 @@ export async function GET(request: NextRequest) {
                   !tokenRecord.usado && 
                   tokenRecord.expiresAt > new Date();
     
-    if (!valid) {
+    if (!valid || !tokenRecord) {
       return NextResponse.json({
         valid: false,
         error: 'Token inválido ou expirado'
       });
     }
+
+    // Buscar dados do cliente
+    const cliente = await prisma.cliente.findUnique({
+      where: { id: tokenRecord.clienteId },
+      select: {
+        email: true,
+        nome: true
+      }
+    });
+
+    if (!cliente) {
+      return NextResponse.json({
+        valid: false,
+        error: 'Cliente não encontrado'
+      });
+    }
     
     return NextResponse.json({
       valid: true,
-      email: tokenRecord.cliente.email,
-      nome: tokenRecord.cliente.nome
+      email: cliente.email,
+      nome: cliente.nome
     });
     
   } catch (error) {

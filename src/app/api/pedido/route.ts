@@ -127,7 +127,8 @@ export async function POST(req: NextRequest) {
           // Criar sessão automática para o novo cliente
           const userAgent = req.headers.get('user-agent') || undefined;
           const forwarded = req.headers.get('x-forwarded-for');
-          const ipAddress = forwarded ? forwarded.split(',')[0] : req.ip;
+          const realIp = req.headers.get('x-real-ip');
+          const ipAddress = forwarded ? forwarded.split(',')[0] : realIp || undefined;
           
           const token = await createSession(
             novoCliente.id,

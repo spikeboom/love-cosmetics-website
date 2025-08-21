@@ -69,7 +69,8 @@ export async function GET(request: NextRequest) {
         
         if (pagamentos && pagamentos.length > 0) {
           const ultimoPagamento = pagamentos[0];
-          const charge = ultimoPagamento?.info?.charges?.[0];
+          const paymentInfo = ultimoPagamento?.info as any;
+          const charge = paymentInfo?.charges?.[0];
           
           if (charge?.status === 'PAID') {
             status = 'Pago';
