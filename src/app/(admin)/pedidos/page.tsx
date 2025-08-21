@@ -16,6 +16,8 @@ import {
   Paper,
   Collapse,
   IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -329,6 +331,7 @@ export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filterMode, setFilterMode] = useState<'hideTests' | 'showOnlyTests'>('hideTests');
   // Controle de paginação (exemplo simples)
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -338,7 +341,7 @@ export default function PedidosPage() {
       setLoading(true);
       try {
         const response = await fetch(
-          `/api/pedidos?page=${page}&pageSize=${pageSize}`,
+          `/api/pedidos?page=${page}&pageSize=${pageSize}&filterMode=${filterMode}`,
         );
         if (!response.ok) {
           throw new Error("Erro ao buscar os pedidos.");
@@ -354,7 +357,7 @@ export default function PedidosPage() {
     };
 
     fetchPedidos();
-  }, [page]);
+  }, [page, filterMode]);
 
   if (loading) {
     return (
@@ -391,6 +394,30 @@ export default function PedidosPage() {
       <Typography variant="h4" gutterBottom>
         Lista de Pedidos
       </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="body1">
+          Total de pedidos: {pedidos.length}
+          {filterMode === 'hideTests' && ' (sem testes)'}
+          {filterMode === 'showOnlyTests' && ' (apenas testes)'}
+        </Typography>
+        <ToggleButtonGroup
+          value={filterMode}
+          exclusive
+          onChange={(e, newMode) => {
+            if (newMode !== null) {
+              setFilterMode(newMode);
+            }
+          }}
+          size="small"
+        >
+          <ToggleButton value="hideTests">
+            Ocultar Testes
+          </ToggleButton>
+          <ToggleButton value="showOnlyTests">
+            Mostrar Apenas Testes
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
