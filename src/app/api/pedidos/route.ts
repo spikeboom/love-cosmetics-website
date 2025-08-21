@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
+    const filterMode = searchParams.get("filterMode") || "hideTests";
 
     // Caso queira receber o JSON no corpo da requisição:
     // const { page = 1, pageSize = 10 } = await req.json();
@@ -14,7 +15,22 @@ export async function GET(req: NextRequest) {
     const offset = (page - 1) * pageSize;
 
     // Consulta raw que retorna os pedidos com os pagamentos agregados em um array
-    const pedidosComPagamentos = await prisma.$queryRaw`
+    let whereClause = '';
+    if (filterMode === 'hideTests') {
+      whereClause = `WHERE NOT (
+        LOWER(p.email) LIKE '%teste%' OR 
+        LOWER(p.email) LIKE '%spikeboom%' OR 
+        LOWER(p.email) LIKE '%robertocruzneto%'
+      )`;
+    } else if (filterMode === 'showOnlyTests') {
+      whereClause = `WHERE (
+        LOWER(p.email) LIKE '%teste%' OR 
+        LOWER(p.email) LIKE '%spikeboom%' OR 
+        LOWER(p.email) LIKE '%robertocruzneto%'
+      )`;
+    }
+
+    const pedidosComPagamentos = await prisma.$queryRawUnsafe(`
       SELECT
         p.*,
         (
@@ -41,9 +57,10 @@ export async function GET(req: NextRequest) {
           WHERE sp.info->>'reference_id' = p.id
         ) AS pagamentos
       FROM "Pedido" p
+      ${whereClause}
       ORDER BY p."createdAt" DESC
       LIMIT ${pageSize} OFFSET ${offset}
-    `;
+    `);
 
     return NextResponse.json(pedidosComPagamentos);
   } catch (error) {
