@@ -82,15 +82,48 @@ export async function createCliente(data: {
   passwordHash: string;
   cpf?: string;
   telefone?: string;
+  data_nascimento?: string;
   receberWhatsapp?: boolean;
   receberEmail?: boolean;
+  // Campos de endereço
+  cep?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
 }): Promise<Cliente> {
+  // Processar data de nascimento se fornecida (formato DD/MM/AAAA para YYYY-MM-DD)
+  let dataNascimento = null;
+  if (data.data_nascimento) {
+    const [dia, mes, ano] = data.data_nascimento.split('/');
+    if (dia && mes && ano) {
+      dataNascimento = new Date(`${ano}-${mes}-${dia}`);
+      // Ajustar para meio-dia UTC para evitar problemas de timezone
+      dataNascimento.setUTCHours(12, 0, 0, 0);
+    }
+  }
+
   return prisma.cliente.create({
     data: {
-      ...data,
       email: data.email.toLowerCase(),
+      nome: data.nome,
+      sobrenome: data.sobrenome,
+      passwordHash: data.passwordHash,
       cpf: data.cpf ? data.cpf.replace(/\D/g, '') : null,
       telefone: data.telefone ? data.telefone.replace(/\D/g, '') : null,
+      dataNascimento,
+      receberWhatsapp: data.receberWhatsapp,
+      receberEmail: data.receberEmail,
+      // Dados de endereço
+      cep: data.cep ? data.cep.replace(/\D/g, '') : null,
+      endereco: data.endereco,
+      numero: data.numero,
+      complemento: data.complemento,
+      bairro: data.bairro,
+      cidade: data.cidade,
+      estado: data.estado?.toUpperCase(),
     }
   });
 }

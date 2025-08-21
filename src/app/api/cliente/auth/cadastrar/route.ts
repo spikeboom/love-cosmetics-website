@@ -45,8 +45,17 @@ export async function POST(request: NextRequest) {
       passwordHash,
       cpf: validatedData.cpf,
       telefone: validatedData.telefone,
+      data_nascimento: validatedData.data_nascimento,
       receberWhatsapp: validatedData.receberWhatsapp,
       receberEmail: validatedData.receberEmail,
+      // Dados de endereço (opcionais)
+      cep: validatedData.cep,
+      endereco: validatedData.endereco,
+      numero: validatedData.numero,
+      complemento: validatedData.complemento,
+      bairro: validatedData.bairro,
+      cidade: validatedData.cidade,
+      estado: validatedData.estado,
     });
     
     // Criar sessão

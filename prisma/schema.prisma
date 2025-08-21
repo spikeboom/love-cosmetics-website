@@ -66,6 +66,7 @@ model Cliente {
   sobrenome       String
   cpf             String?   @unique
   telefone        String?
+  dataNascimento  DateTime?
   passwordHash    String
   
   // Dados salvos do checkout

@@ -75,17 +75,82 @@ export const cadastroClienteSchema = z.object({
   
   telefone: telefoneSchema.optional().nullable(),
   
+  data_nascimento: z.string()
+    .optional()
+    .nullable()
+    .refine((val) => {
+      if (!val) return true; // Campo opcional
+      // Aceita formato DD/MM/AAAA
+      const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+      if (!regex.test(val)) return false;
+      
+      const [, dia, mes, ano] = val.match(regex) || [];
+      const date = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+      
+      // Verifica se é uma data válida
+      if (date.getDate() !== parseInt(dia) || 
+          date.getMonth() !== parseInt(mes) - 1 || 
+          date.getFullYear() !== parseInt(ano)) {
+        return false;
+      }
+      
+      // Verifica se não é uma data futura
+      if (date > new Date()) return false;
+      
+      // Verifica idade mínima (opcional - 13 anos)
+      const hoje = new Date();
+      const idade = hoje.getFullYear() - date.getFullYear();
+      if (idade < 13) return false;
+      
+      return true;
+    }, 'Data de nascimento inválida'),
+  
   receberWhatsapp: z.boolean().default(false),
   receberEmail: z.boolean().default(true),
   
   // Campos opcionais de endereço (podem ser preenchidos depois)
-  cep: z.string().optional().nullable(),
-  endereco: z.string().optional().nullable(),
-  numero: z.string().optional().nullable(),
-  complemento: z.string().optional().nullable(),
-  bairro: z.string().optional().nullable(),
-  cidade: z.string().optional().nullable(),
-  estado: z.string().length(2).optional().nullable(),
+  cep: z.string()
+    .optional()
+    .nullable()
+    .refine((val) => {
+      if (!val) return true;
+      const cleanCEP = val.replace(/\D/g, '');
+      return cleanCEP.length === 8;
+    }, 'CEP deve ter 8 dígitos'),
+    
+  endereco: z.string()
+    .min(3, 'Endereço muito curto')
+    .max(100, 'Endereço muito longo')
+    .optional()
+    .nullable(),
+    
+  numero: z.string()
+    .max(10, 'Número muito longo')
+    .optional()
+    .nullable(),
+    
+  complemento: z.string()
+    .max(50, 'Complemento muito longo')
+    .optional()
+    .nullable(),
+    
+  bairro: z.string()
+    .min(2, 'Bairro muito curto')
+    .max(50, 'Bairro muito longo')
+    .optional()
+    .nullable(),
+    
+  cidade: z.string()
+    .min(2, 'Cidade muito curta')
+    .max(50, 'Cidade muito longa')
+    .optional()
+    .nullable(),
+    
+  estado: z.string()
+    .length(2, 'Estado deve ter 2 letras')
+    .toUpperCase()
+    .optional()
+    .nullable(),
 }).refine(data => data.password === data.passwordConfirm, {
   message: 'As senhas não coincidem',
   path: ['passwordConfirm']
