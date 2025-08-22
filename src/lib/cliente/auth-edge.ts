@@ -1,14 +1,16 @@
-import { jwtVerify } from 'jose';
+"use server";
+import { jwtVerify } from "jose";
 
 // Configurações de segurança
-const JWT_SECRET = process.env.JWT_SECRET_CLIENTE || 'dev-secret-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET_CLIENTE || "dev-secret-change-in-production";
 const secret = new TextEncoder().encode(JWT_SECRET);
 
 // Tipos
 export interface ClientePayload {
   clienteId: string;
   email: string;
-  type: 'cliente';
+  type: "cliente";
 }
 
 export interface ClienteSession {
@@ -19,7 +21,9 @@ export interface ClienteSession {
 }
 
 // Verificar apenas o JWT (compatível com edge runtime - sem consulta ao banco)
-export async function verifyJWTOnly(token: string): Promise<ClientePayload | null> {
+export async function verifyJWTOnly(
+  token: string,
+): Promise<ClientePayload | null> {
   try {
     // Verificar JWT usando jose (compatível com edge)
     const { payload } = await jwtVerify(token, secret);
@@ -29,4 +33,3 @@ export async function verifyJWTOnly(token: string): Promise<ClientePayload | nul
     return null;
   }
 }
-

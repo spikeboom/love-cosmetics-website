@@ -1,3 +1,4 @@
+'use server';
 import { redirect } from 'next/navigation';
 import { getCurrentSession } from '@/lib/cliente/auth';
 

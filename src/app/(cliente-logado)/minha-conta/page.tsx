@@ -1,3 +1,4 @@
+'use server';
 import { getCurrentSession } from '@/lib/cliente/auth';
 import { getClientePedidos } from '@/lib/cliente/session';
 import { prisma } from '@/lib/prisma';

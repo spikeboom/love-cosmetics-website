@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
                 'unknown';
     
     const rateLimitKey = `${ip}:${validatedData.email}`;
-    const rateLimit = checkRateLimit(rateLimitKey);
+    const rateLimit = await checkRateLimit(rateLimitKey);
     
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Resetar rate limit após login bem-sucedido
-    resetRateLimit(rateLimitKey);
+    await resetRateLimit(rateLimitKey);
     
     // Criar sessão
     const userAgent = request.headers.get('user-agent') || undefined;
