@@ -9,23 +9,9 @@ export async function POST(req: NextRequest) {
   const logMessage = createLogger();
   try {
     const body = await req.json();
-    
-    // LOG INICIAL PARA DEBUG
-    logMessage("[LOG-LOVE] INÍCIO - Recebendo pedido", {
-      email: body.email,
-      nome: body.nome,
-      salvar_minhas_informacoes: body.salvar_minhas_informacoes,
-      timestamp: new Date().toISOString(),
-    });
 
     // Verificar se há cliente logado
     const clienteSession = await getCurrentSession();
-    
-    logMessage("[LOG-LOVE] Status de sessão do cliente", {
-      clienteLogado: !!clienteSession,
-      clienteId: clienteSession?.id || null,
-      clienteEmail: clienteSession?.email || null,
-    });
 
     // Cria o registro do pedido no banco
     const pedido = await prisma.pedido.create({
@@ -63,12 +49,6 @@ export async function POST(req: NextRequest) {
 
     // SEMPRE vincular pedido se cliente estiver logado (independente de salvar_minhas_informacoes)
     if (clienteSession) {
-      logMessage("[LOG-LOVE] Cliente logado detectado", {
-        clienteId: clienteSession.id,
-        email: clienteSession.email,
-        pedidoId: pedido.id,
-        salvarMinhasInformacoes: body.salvar_minhas_informacoes,
-      });
       
       try {
         const vinculacao = await prisma.pedidoCliente.create({
@@ -76,12 +56,6 @@ export async function POST(req: NextRequest) {
             pedidoId: pedido.id,
             clienteId: clienteSession.id,
           },
-        });
-        
-        logMessage("[LOG-LOVE] Pedido vinculado ao cliente logado com sucesso", {
-          vinculacaoId: vinculacao.id,
-          clienteId: clienteSession.id,
-          pedidoId: pedido.id,
         });
         
         clienteParaVincular = clienteSession.id;
@@ -107,31 +81,14 @@ export async function POST(req: NextRequest) {
     } 
     // Se não há cliente logado mas usuário quer criar conta
     else if (body.salvar_minhas_informacoes) {
-      logMessage("[LOG-LOVE] Usuário não logado marcou 'salvar minhas informações'", {
-        email: body.email,
-        nome: body.nome,
-        sobrenome: body.sobrenome,
-        cpf: body.cpf,
-      });
-      
       try {
         // Verificar se já existe cliente com este email
         const clienteExistente = await prisma.cliente.findUnique({
           where: { email: body.email },
         });
-        
-        logMessage("[LOG-LOVE] Verificação de email existente", {
-          email: body.email,
-          emailJaExiste: !!clienteExistente,
-          clienteId: clienteExistente?.id || null,
-        });
 
         
         if (!clienteExistente) {
-          logMessage("[LOG-LOVE] Email não existe, criando nova conta", {
-            email: body.email,
-          });
-          
           // Gerar senha temporária (será enviada por email)
           const senhaTemporaria = Math.random().toString(36).slice(-12);
           const senhaHash = await hashPassword(senhaTemporaria);
@@ -185,28 +142,15 @@ export async function POST(req: NextRequest) {
           clienteParaVincular = novoCliente.id;
           contaCriada = true;
           
-          logMessage("[LOG-LOVE] Nova conta criada com sucesso e pedido vinculado", {
+          logMessage("Nova conta criada e pedido vinculado", {
             clienteId: novoCliente.id,
             email: novoCliente.email,
-            pedidoId: pedido.id,
             senhaTemporaria: senhaTemporaria, // TODO: Enviar por email
           });
         } else {
           // Email já existe - não permitir vinculação automática por segurança
-          logMessage("[LOG-LOVE] ATENÇÃO: Email já existe! Usuário não logado tentou salvar informações", {
-            email: body.email,
-            clienteExistenteId: clienteExistente.id,
-            pedidoId: pedido.id,
-            action: "BLOQUEANDO_CRIACAO_CONTA",
-          });
-          
           // Remover o pedido criado e retornar erro
           await prisma.pedido.delete({ where: { id: pedido.id } });
-          
-          logMessage("[LOG-LOVE] Pedido removido por segurança - email já existe", {
-            pedidoId: pedido.id,
-            email: body.email,
-          });
           
           return NextResponse.json({
             error: 'Este email já possui uma conta. Faça login para continuar a compra ou use outro email.',
@@ -215,16 +159,8 @@ export async function POST(req: NextRequest) {
         }
       } catch (error) {
         // Continua sem criar conta, apenas processa o pedido
-        logMessage("[LOG-LOVE] Erro ao processar 'salvar minhas informações'", {
-          email: body.email,
-          error: error,
-        });
       }
     } else {
-      logMessage("[LOG-LOVE] Usuário não logado e NÃO marcou 'salvar minhas informações'", {
-        email: body.email,
-        pedidoId: pedido.id,
-      });
     }
     
 
