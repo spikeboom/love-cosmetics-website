@@ -5,7 +5,7 @@ import { getBaseURL } from "@/utils/getBaseUrl";
 import { cookies } from "next/headers";
 
 export async function postPedido(data: PedidoFormData) {
-  console.log({ getBaseURL2: getBaseURL() });
+  console.log({ getBaseURL: getBaseURL() });
   console.log(
     JSON.stringify(
       { message: "Fetch para pedido", url: `${getBaseURL()}/api/pedido`, data },
@@ -17,13 +17,12 @@ export async function postPedido(data: PedidoFormData) {
   // Obter cookies para passar na requisição
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
-  
 
   const response = await fetch(`${getBaseURL()}/api/pedido`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Cookie": cookieHeader,
+      Cookie: cookieHeader,
     },
     body: JSON.stringify({
       ...data,
