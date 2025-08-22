@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -34,10 +34,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: 'GET',
         credentials: 'include',
       });
-
+      
       if (response.ok) {
         const data = await response.json();
-        setUser(data.cliente);
+        
+        if (data.authenticated && data.cliente) {
+          setUser({
+            id: data.cliente.id,
+            email: data.cliente.email,
+            nome: data.cliente.nome,
+            sobrenome: data.cliente.sobrenome,
+          });
+        } else {
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
@@ -53,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, redirectTo: string = '/') => {
     try {
       const response = await fetch('/api/cliente/auth/entrar', {
         method: 'POST',
@@ -67,9 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (response.ok) {
-        setUser(data.cliente);
+        setUser({
+          id: data.cliente.id,
+          email: data.cliente.email,
+          nome: data.cliente.nome,
+          sobrenome: data.cliente.sobrenome,
+        });
         enqueueSnackbar('Login realizado com sucesso!', { variant: 'success' });
-        router.push('/');
+        router.push(redirectTo);
       } else {
         throw new Error(data.error || 'Erro ao fazer login');
       }

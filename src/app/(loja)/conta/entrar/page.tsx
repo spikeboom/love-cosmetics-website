@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginClienteSchema, type LoginClienteInput } from '@/lib/cliente/validation';
+import { useAuth } from '@/contexts/AuthContext';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [redirect, setRedirect] = useState('/minha-conta');
   
   useEffect(() => {
@@ -35,31 +37,14 @@ function LoginForm() {
     setErrorMessage('');
 
     try {
-      const response = await fetch('/api/cliente/auth/entrar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        // Login bem-sucedido
-        router.push(redirect);
-        router.refresh();
-      } else {
-        // Erro no login
-        setErrorMessage(result.error || 'Erro ao fazer login');
-        
-        // Se houver tentativas restantes, mostrar
-        if (result.remainingAttempts !== undefined && result.remainingAttempts < 3) {
-          setErrorMessage(prev => 
-            `${prev} (${result.remainingAttempts} tentativas restantes)`
-          );
-        }
-      }
-    } catch (error) {
-      setErrorMessage('Erro de conexão. Tente novamente.');
+      // Use the login function from AuthContext with redirect
+      await login(data.email, data.password, redirect);
+      // The login function in AuthContext already handles navigation
+      // So we don't need to manually push to redirect
+    } catch (error: any) {
+      // The login function in AuthContext already shows a snackbar, 
+      // but we'll also show the error in the form
+      setErrorMessage(error.message || 'Erro ao fazer login');
     } finally {
       setIsLoading(false);
     }

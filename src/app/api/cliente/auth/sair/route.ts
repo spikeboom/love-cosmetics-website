@@ -34,7 +34,5 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET para logout via link
-export async function GET(request: NextRequest) {
-  return POST(request);
-}
+// Removido método GET para evitar logout acidental via navegação
+// Logout deve ser feito apenas via POST

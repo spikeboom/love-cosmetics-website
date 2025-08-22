@@ -3,6 +3,7 @@ import { getClientePedidos } from '@/lib/cliente/session';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { LogoutButton } from './LogoutButton';
 
 export default async function MinhaContaPage() {
   // Verificar sessão
@@ -129,12 +130,7 @@ export default async function MinhaContaPage() {
               >
                 Segurança
               </Link>
-              <Link
-                href="/api/cliente/auth/sair"
-                className="block px-6 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
-              >
-                Sair
-              </Link>
+              <LogoutButton />
             </nav>
           </div>
 
