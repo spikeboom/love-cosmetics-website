@@ -9,9 +9,23 @@ export async function POST(req: NextRequest) {
   const logMessage = createLogger();
   try {
     const body = await req.json();
+    
+    // LOG INICIAL PARA DEBUG
+    logMessage("[LOG-LOVE] INÍCIO - Recebendo pedido", {
+      email: body.email,
+      nome: body.nome,
+      salvar_minhas_informacoes: body.salvar_minhas_informacoes,
+      timestamp: new Date().toISOString(),
+    });
 
     // Verificar se há cliente logado
     const clienteSession = await getCurrentSession();
+    
+    logMessage("[LOG-LOVE] Status de sessão do cliente", {
+      clienteLogado: !!clienteSession,
+      clienteId: clienteSession?.id || null,
+      clienteEmail: clienteSession?.email || null,
+    });
 
     // Cria o registro do pedido no banco
     const pedido = await prisma.pedido.create({
