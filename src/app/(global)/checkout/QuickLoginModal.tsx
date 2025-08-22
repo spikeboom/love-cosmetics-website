@@ -21,6 +21,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useSnackbar } from "notistack";
 import { useAuth } from "@/contexts/AuthContext";
+import { createCloseAction } from "@/utils/snackbar-helpers";
 
 // Schema de validação para login rápido
 const quickLoginSchema = z.object({
@@ -83,6 +84,7 @@ const QuickLoginModal: React.FC<QuickLoginModalProps> = ({
         
         enqueueSnackbar("Login realizado com sucesso!", {
           variant: "success",
+          action: createCloseAction
         });
         reset();
         onClose();

@@ -2,6 +2,7 @@ import { fetchCupom } from "@/modules/cupom/domain";
 import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { processProdutos } from "@/modules/produto/domain";
 import { processProdutosRevert } from "@/core/processing/product-processing";
+import { createCloseAction } from "@/utils/snackbar-helpers";
 
 export const handleCupom = (cupom: any, cupons: any, setCupons: any, cart: any, setCart: any) => {
   if (cupons.includes(cupom)) {
@@ -50,6 +51,7 @@ export const handleAddCupom = async (codigo: any, cupons: any, notify: any, clos
     if (cupons.some((c: any) => c.codigo === data[0].codigo)) {
       notify("Esse cupom já foi adicionado!", {
         variant: "success",
+        action: createCloseAction
       });
       return;
     }
@@ -82,6 +84,7 @@ export const handleAddCupom = async (codigo: any, cupons: any, notify: any, clos
     handleCupomFn(data[0]);
     notify(`Cupom "${data[0].codigo}" aplicado com sucesso!`, {
       variant: "success",
+      action: createCloseAction
     });
   } catch (err) {
     closeSnackbar(loadingKey);

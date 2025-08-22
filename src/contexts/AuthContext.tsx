@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
+import { createCloseAction } from '@/utils/snackbar-helpers';
 
 interface User {
   id: string;
@@ -83,7 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           nome: data.cliente.nome,
           sobrenome: data.cliente.sobrenome,
         });
-        enqueueSnackbar('Login realizado com sucesso!', { variant: 'success' });
+        enqueueSnackbar('Login realizado com sucesso!', { 
+          variant: 'success',
+          action: createCloseAction
+        });
         router.push(redirectTo);
       } else {
         throw new Error(data.error || 'Erro ao fazer login');
@@ -103,7 +107,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         setUser(null);
-        enqueueSnackbar('Logout realizado com sucesso!', { variant: 'success' });
+        enqueueSnackbar('Logout realizado com sucesso!', { 
+          variant: 'success',
+          action: createCloseAction
+        });
         router.push('/');
       } else {
         throw new Error('Erro ao fazer logout');

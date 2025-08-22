@@ -33,6 +33,7 @@ import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 import { FiSearch } from "react-icons/fi";
 import QuickLoginModal from "./QuickLoginModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { createCloseAction } from "@/utils/snackbar-helpers";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -279,16 +280,19 @@ const PedidoForm: React.FC = () => {
         enqueueSnackbar("Conta criada com sucesso! Você já está logado.", {
           variant: "success",
           persist: true,
+          action: createCloseAction
         });
       } else if (result?.clienteVinculado) {
         enqueueSnackbar("Pedido vinculado à sua conta!", {
           variant: "success",
+          action: createCloseAction
         });
       }
 
       // add snackbar redirecting to payment link
       enqueueSnackbar("Redirecionando para o pagamento...", {
         variant: "success",
+        action: createCloseAction
       });
 
       // Se tudo ocorrer bem, redireciona para o link de pagamento
@@ -503,7 +507,10 @@ const PedidoForm: React.FC = () => {
         setValue('estado', 'Amazonas');
         setValue('aceito_receber_whatsapp', false);
         
-        enqueueSnackbar('Logout realizado com sucesso', { variant: 'success' });
+        enqueueSnackbar('Logout realizado com sucesso', { 
+          variant: 'success',
+          action: createCloseAction
+        });
       }
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
