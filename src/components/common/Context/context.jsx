@@ -16,6 +16,7 @@ import { processProdutosComOuSemCupom, processProdutosRevert } from "@/core/proc
 import { StorageService } from "@/core/storage/storage-service";
 import { CartCalculations } from "@/core/utils/cart-calculations";
 import { useNotifications } from "@/core/notifications/NotificationContext";
+import { useFreight } from "@/hooks/useFreight";
 
 const MeuContexto = createContext();
 
@@ -27,6 +28,9 @@ export const MeuContextoProvider = ({ children }) => {
 
   // Usar sistema de notificações consolidado
   const { notify, closeSnackbar } = useNotifications();
+  
+  // Hook de frete dinâmico
+  const freight = useFreight();
 
 
   const addProductToCart = (product) => {
@@ -75,8 +79,8 @@ export const MeuContextoProvider = ({ children }) => {
   const [descontos, setDescontos] = useState(0);
 
   useEffect(() => {
-    calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom);
-  }, [cart, cupons]);
+    calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom, freight.freightValue);
+  }, [cart, cupons, freight.freightValue]);
 
   return (
     <MeuContexto.Provider
@@ -95,6 +99,7 @@ export const MeuContextoProvider = ({ children }) => {
         handleAddCupom,
         descontos,
         loadingAddItem,
+        freight,
       }}
     >
       {children}

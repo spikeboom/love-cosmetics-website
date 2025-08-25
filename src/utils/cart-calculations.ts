@@ -1,6 +1,4 @@
-import { freteValue } from "@/utils/frete-value";
-
-export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, setTotal: any, firstRun: any, handleAddCupom: any) => {
+export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, setTotal: any, firstRun: any, handleAddCupom: any, freightValue: number = 15) => {
   if (!firstRun) return;
 
   // Calculate base totals
@@ -41,7 +39,7 @@ export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, s
   localStorage.setItem("cupons", JSON.stringify(validCupons));
 
   // Compute and set final total including shipping
-  const shippingFee = freteValue;
+  const shippingFee = freightValue;
   const finalTotal = totalWithCupons + shippingFee;
   setTotal(finalTotal);
 

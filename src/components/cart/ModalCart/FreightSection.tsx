@@ -1,9 +1,10 @@
 import { LuTruck } from "react-icons/lu";
 import { CepInput } from "./CepInput";
-import { useFreight } from "@/hooks/useFreight";
 import { formatPrice } from "@/utils/format-price";
+import { useMeuContexto } from "@/components/common/Context/context";
 
 export function FreightSection() {
+  const { freight } = useMeuContexto();
   const {
     cep,
     setCep,
@@ -14,7 +15,7 @@ export function FreightSection() {
     calculateFreight,
     clearError,
     hasCalculated,
-  } = useFreight();
+  } = freight;
 
   const handleCalculate = () => {
     if (cep) {
