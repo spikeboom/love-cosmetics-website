@@ -34,6 +34,7 @@ import { FiSearch } from "react-icons/fi";
 import QuickLoginModal from "./QuickLoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { createCloseAction } from "@/utils/snackbar-helpers";
+import { useFreight } from "@/hooks/useFreight";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -84,6 +85,7 @@ export type PedidoFormData = z.infer<typeof pedidoSchema> & {
   descontos?: number;
   cupons?: string[];
   total_pedido?: number;
+  frete_calculado?: number;
 };
 
 // Dados iniciais do formulário
@@ -136,6 +138,7 @@ const PedidoForm: React.FC = () => {
   const { cart, total, descontos, cupons } = useMeuContexto();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { checkAuth } = useAuth();
+  const { freightValue } = useFreight();
 
   const {
     register,
@@ -194,6 +197,7 @@ const PedidoForm: React.FC = () => {
         cupons: cupons?.map((c: any) => c.codigo),
         descontos: Math.trunc(descontos * 100),
         total_pedido: total,
+        frete_calculado: freightValue,
         ...gaDataForAPI,
       });
 

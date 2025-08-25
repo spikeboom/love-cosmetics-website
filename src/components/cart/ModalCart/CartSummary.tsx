@@ -5,7 +5,6 @@ import { TotalsSection } from "./TotalsSection";
 import { CheckoutActions } from "./CheckoutActions";
 
 export function CartSummary({
-  freteValue,
   openCupom,
   setOpenCupom,
   cupom,
@@ -22,7 +21,7 @@ export function CartSummary({
 }: any) {
   return (
     <div className="px-[12px] pb-[12px] pt-[4px]">
-      <FreightSection freteValue={freteValue} />
+      <FreightSection />
       <CouponInputSection 
         openCupom={openCupom}
         setOpenCupom={setOpenCupom}

@@ -32,6 +32,7 @@ model Pedido {
   cupons                    String[]
   descontos                 Float @default(0)
   total_pedido              Float @default(0)
+  frete_calculado           Float @default(15)
   items                     Json[]
   salvar_minhas_informacoes Boolean
   aceito_receber_whatsapp   Boolean

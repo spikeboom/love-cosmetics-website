@@ -104,7 +104,6 @@ export function ModalCart() {
                 </>
               )}
               <CartSummary
-                freteValue={freteValue}
                 openCupom={openCupom}
                 setOpenCupom={setOpenCupom}
                 cupom={cupom}
