@@ -65,6 +65,7 @@ interface Pedido {
   cidade: string;
   estado: string;
   total_pedido: number;
+  frete_calculado: number;
   items: Item[];
   salvar_minhas_informacoes: boolean;
   aceito_receber_whatsapp: boolean;
@@ -172,6 +173,21 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
           </Typography>
         </TableCell>
         <TableCell>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              fontWeight: 500,
+              color: '#0369a1',
+              fontSize: '0.85rem'
+            }}
+          >
+            {pedido.frete_calculado.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </Typography>
+        </TableCell>
+        <TableCell>
           <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.8rem' }}>
             {new Date(pedido.createdAt).toLocaleString("pt-BR", {
               day: "2-digit",
@@ -215,7 +231,7 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 2, backgroundColor: '#f8fafc', borderRadius: 2, p: 2 }}>
               
@@ -368,6 +384,14 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                               <br />
                               CEP: {pedido.cep} - {pedido.pais}
                             </Typography>
+                            <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e2e8f0' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#0369a1' }}>
+                                Valor do Frete: {pedido.frete_calculado.toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })}
+                              </Typography>
+                            </Box>
                           </Box>
                         </Box>
                       </Grid>
@@ -637,6 +661,7 @@ export default function PedidosPage() {
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Sobrenome</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Email</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Total</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Frete</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Data</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Status</TableCell>
               </TableRow>

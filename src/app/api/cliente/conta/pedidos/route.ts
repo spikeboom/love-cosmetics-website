@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
         return {
           id: pedido.id,
           total: pedido.total_pedido,
+          frete: pedido.frete_calculado,
           status,
           statusColor,
           items: pedido.items || [],

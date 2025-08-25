@@ -27,6 +27,7 @@ interface Endereco {
 interface Pedido {
   id: string;
   total: number;
+  frete: number;
   status: string;
   statusColor: string;
   items: PedidoItem[];
@@ -224,6 +225,9 @@ export default function PedidosPage() {
                               {formatPrice(pedido.total)}
                             </p>
                             <p className="text-sm text-gray-500">
+                              Frete: {formatPrice(pedido.frete)}
+                            </p>
+                            <p className="text-sm text-gray-500">
                               {pedido.items.length} {pedido.items.length === 1 ? 'item' : 'itens'}
                             </p>
                           </div>
@@ -303,6 +307,11 @@ export default function PedidosPage() {
                               <br />
                               CEP: {pedido.endereco.cep}
                             </address>
+                            <div className="mt-2 pt-2 border-t border-gray-200">
+                              <p className="text-sm font-medium text-gray-900">
+                                Valor do Frete: <span className="text-green-600">{formatPrice(pedido.frete)}</span>
+                              </p>
+                            </div>
                           </div>
                         </div>
 
