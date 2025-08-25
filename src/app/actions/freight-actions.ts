@@ -44,7 +44,7 @@ const cache = new Map<
   string,
   { data: FreightCalculationSuccess; timestamp: number }
 >();
-const cacheTimeout = 0; // 1000 * 60 * 30; // 30 minutos
+const cacheTimeout = 1000 * 60 * 30; // 30 minutos
 
 const apiUrl =
   process.env.NEXT_PUBLIC_CALL_ENTREGAS_API_URL ||
