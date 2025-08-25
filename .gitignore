@@ -48,3 +48,5 @@ node_modules/
 /playwright/.cache/
 
 /tmp_importante
+/plano_auth
+/docs

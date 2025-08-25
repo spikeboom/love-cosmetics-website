@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { getCustomerEmails, getCustomerEmailsProtected } from '@/app/actions/get-customer-emails'
-import ServerComponentEmails from '@/components/ServerComponentEmails'
-import ServerComponentEmailsProtected from '@/components/ServerComponentEmailsProtected'
-import ClientFormEmails from '@/components/ClientFormEmails'
-import ClientFormEmailsProtected from '@/components/ClientFormEmailsProtected'
-import ClientPrismaError from '@/components/ClientPrismaError'
-import ClientActionPrismaError from '@/components/ClientActionPrismaError'
+import { getCustomerEmails, getCustomerEmailsProtected } from '@/experiments/fetch-data-methods/actions/get-customer-emails'
+import ServerComponentEmails from '@/experiments/fetch-data-methods/components/ServerComponentEmails'
+import ServerComponentEmailsProtected from '@/experiments/fetch-data-methods/components/ServerComponentEmailsProtected'
+import ClientFormEmails from '@/experiments/fetch-data-methods/components/ClientFormEmails'
+import ClientFormEmailsProtected from '@/experiments/fetch-data-methods/components/ClientFormEmailsProtected'
+import ClientPrismaError from '@/experiments/fetch-data-methods/components/ClientPrismaError'
+import ClientActionPrismaError from '@/experiments/fetch-data-methods/components/ClientActionPrismaError'
 
 interface CustomerData {
   email: string
@@ -35,7 +35,7 @@ export default function CustomerEmailsPage() {
     setMethod('Client Component → API Route Pública')
     setShowServerComponent(null)
     try {
-      const response = await fetch('/api/customers/emails-public')
+      const response = await fetch('/api/experiments/fetch-data/emails-public')
       const data = await response.json()
       setResults(data)
     } catch (error) {
@@ -51,7 +51,7 @@ export default function CustomerEmailsPage() {
     setMethod('Client Component → API Route Protegida')
     setShowServerComponent(null)
     try {
-      const response = await fetch('/api/customers/emails-protected')
+      const response = await fetch('/api/experiments/fetch-data/emails-protected')
       const data = await response.json()
       setResults(data)
     } catch (error) {
@@ -147,13 +147,13 @@ export default function CustomerEmailsPage() {
         <h2 className="font-semibold mb-2">Server Components Verdadeiros:</h2>
         <div className="flex gap-4">
           <a 
-            href="/admin/customer-emails/server-component"
+            href="/experiments/fetch-data/customer-emails/server-component"
             className="text-blue-600 hover:underline"
           >
             → Server Component (async/await direto)
           </a>
           <a 
-            href="/admin/customer-emails/server-component-protected"
+            href="/experiments/fetch-data/customer-emails/server-component-protected"
             className="text-blue-600 hover:underline"
           >
             → Server Component Protegido (async/await + auth)

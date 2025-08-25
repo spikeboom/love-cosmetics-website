@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { clientActionWithPrisma } from '@/app/actions/client-prisma-error'
+import { clientActionWithPrisma } from '@/experiments/fetch-data-methods/actions/client-prisma-error'
 
 export default function ClientActionPrismaError() {
   const [result, setResult] = useState<any>(null)

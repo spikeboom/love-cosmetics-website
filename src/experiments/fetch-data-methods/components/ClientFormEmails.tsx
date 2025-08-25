@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { getCustomerEmails } from '@/app/actions/get-customer-emails'
+import { getCustomerEmails } from '@/experiments/fetch-data-methods/actions/get-customer-emails'
 
 interface CustomerData {
   email: string
