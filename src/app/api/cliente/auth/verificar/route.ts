@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
         sobrenome: true,
         cpf: true,
         telefone: true,
+        dataNascimento: true,
         emailVerificado: true,
         cep: true,
         endereco: true,

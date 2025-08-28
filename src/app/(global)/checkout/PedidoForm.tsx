@@ -117,6 +117,7 @@ interface ClienteLogado {
   sobrenome: string;
   cpf?: string;
   telefone?: string;
+  dataNascimento?: string;
   endereco?: {
     cep?: string;
     endereco?: string;
@@ -437,13 +438,26 @@ const PedidoForm: React.FC = () => {
   };
 
   // Função para pré-preencher formulário com dados do cliente
-  const preencherFormularioComDadosCliente = (cliente: ClienteLogado) => {
+  const preencherFormularioComDadosCliente = (cliente: any) => {
     setValue('nome', cliente.nome || '');
     setValue('sobrenome', cliente.sobrenome || '');
     setValue('email', cliente.email || '');
     
     if (cliente.cpf) setValue('cpf', cliente.cpf);
     if (cliente.telefone) setValue('telefone', cliente.telefone);
+    
+    // Tratar data de nascimento
+    if (cliente.dataNascimento) {
+      // Converter string ISO para formato DD/MM/AAAA
+      const data = new Date(cliente.dataNascimento);
+      if (!isNaN(data.getTime())) {
+        const dia = String(data.getDate()).padStart(2, '0');
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const ano = data.getFullYear();
+        const dataFormatada = `${dia}${mes}${ano}`;
+        setValue('data_nascimento', dataFormatada as any);
+      }
+    }
     
     if (cliente.endereco) {
       if (cliente.endereco.cep) setValue('cep', cliente.endereco.cep);
