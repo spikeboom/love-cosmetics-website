@@ -42,7 +42,7 @@ jobs:
             EOF
           fi
 
-      # 4. Executa o docker-compose no servidor com o build argument apropriado
+      # 4. Executa o docker-compose no servidor com o build argument apropriado.
       - name: Start docker-compose
         run: |
           if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
