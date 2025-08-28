@@ -13,7 +13,7 @@ export default function GlobalLayout({
     <>
       <Cabecalho />
 
-      <div className="mx-auto w-full max-w-[1400px]">{children}</div>
+      {children}
 
       <Rodape />
 
