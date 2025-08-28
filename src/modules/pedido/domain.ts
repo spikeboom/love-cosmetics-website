@@ -1,6 +1,6 @@
 "use server";
 
-import { PedidoFormData } from "@/app/(global)/checkout/PedidoForm";
+import { PedidoFormData } from "@/app/(global)/(main)/checkout/PedidoForm";
 import { getBaseURL } from "@/utils/getBaseUrl";
 import { cookies } from "next/headers";
 
