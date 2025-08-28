@@ -3,55 +3,62 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - master # Deploy para produção
-      - develop # Deploy para desenvolvimento
+      - master # produção
+      - develop # desenvolvimento
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checa o código do repositório
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Configura acesso SSH ao servidor
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add server to known_hosts
-        run: |
-          ssh-keyscan -H 147.93.9.224 >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H 147.93.9.224 >> ~/.ssh/known_hosts
 
-      # 3. Sincroniza código com o servidor
       - name: Deploy code to server
+        env:
+          REF: ${{ github.ref }}
         run: |
-          if [ "${GITHUB_REF}" = "refs/heads/develop" ]; then
-            ssh root@147.93.9.224 << 'EOF'
-              cd /root/wordpress/next_project || exit 1
-              git fetch origin || exit 1
-              git reset --hard origin/develop || exit 1
-            EOF
+          if [ "$REF" = "refs/heads/develop" ]; then
+            BRANCH="develop"
           else
-            ssh root@147.93.9.224 << 'EOF'
-              cd /root/wordpress/next_project || exit 1
-              git fetch origin || exit 1
-              git reset --hard origin/master || exit 1
-            EOF
+            BRANCH="master"
           fi
 
-      # 4. Executa o docker-compose no servidor com o build argument apropriado.
+          ssh root@147.93.9.224 "set -euo pipefail; \
+            cd /root/wordpress/next_project && \
+            git fetch origin && \
+            git reset --hard origin/$BRANCH"
+
       - name: Start docker-compose
+        env:
+          REF: ${{ github.ref }}
         run: |
-          if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+          if [ "$REF" = "refs/heads/master" ]; then
             echo "Deploying to PRODUCTION with .env.master"
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && echo 'Using .env.master' && docker-compose build --build-arg ENV_FILE=.env.master love-cosmetics && docker-compose up -d love-cosmetics"
-          elif [ "${GITHUB_REF}" = "refs/heads/develop" ]; then
+            ssh root@147.93.9.224 "set -euo pipefail; \
+              cd /root/wordpress/next_project && \
+              echo 'Using .env.master' && \
+              docker-compose build --build-arg ENV_FILE=.env.master love-cosmetics && \
+              docker-compose up -d love-cosmetics"
+          elif [ "$REF" = "refs/heads/develop" ]; then
             echo "Deploying to DEVELOPMENT with .env.dev"
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && echo 'Using .env.dev' && docker-compose build --build-arg ENV_FILE=.env.dev love-cosmetics-dev && docker-compose up -d love-cosmetics-dev webserver"
+            ssh root@147.93.9.224 "set -euo pipefail; \
+              cd /root/wordpress/next_project && \
+              echo 'Using .env.dev' && \
+              docker-compose build --build-arg ENV_FILE=.env.dev love-cosmetics-dev && \
+              docker-compose up -d love-cosmetics-dev webserver"
           else
-            echo "Deploying with .env"
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && echo 'Using .env' && docker-compose up -d --build love-cosmetics"
+            echo "Deploying with .env (default)"
+            ssh root@147.93.9.224 "set -euo pipefail; \
+              cd /root/wordpress/next_project && \
+              echo 'Using .env' && \
+              docker-compose up -d --build love-cosmetics"
           fi
