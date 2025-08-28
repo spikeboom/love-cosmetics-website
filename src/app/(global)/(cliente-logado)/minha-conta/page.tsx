@@ -34,6 +34,18 @@ export default async function MinhaContaPage() {
     }
   });
 
+  // Buscar endereço principal ou primeiro endereço
+  const enderecoPrincipal = await prisma.enderecoCliente.findFirst({
+    where: {
+      clienteId: session.id,
+      ativo: true
+    },
+    orderBy: [
+      { principal: 'desc' },
+      { createdAt: 'desc' }
+    ]
+  });
+
   if (!cliente) {
     redirect('/conta/entrar');
   }
@@ -185,22 +197,42 @@ export default async function MinhaContaPage() {
             {/* Endereço principal */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-900">Endereço Principal</h2>
+                <h2 className="text-lg font-medium text-gray-900">
+                  {enderecoPrincipal?.principal ? 'Endereço Principal' : 'Endereço de Entrega'}
+                </h2>
                 <Link
                   href="/minha-conta/enderecos"
                   className="text-sm text-pink-600 hover:text-pink-500"
                 >
-                  Editar
+                  {enderecoPrincipal ? 'Gerenciar' : 'Adicionar'}
                 </Link>
               </div>
               
-              {cliente.cep ? (
-                <address className="text-sm text-gray-600 not-italic">
-                  {cliente.endereco}, {cliente.numero}<br />
-                  {cliente.bairro}<br />
-                  {cliente.cidade} - {cliente.estado}<br />
-                  CEP: {cliente.cep}
-                </address>
+              {enderecoPrincipal ? (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-gray-900">
+                      {enderecoPrincipal.apelido}
+                    </span>
+                    {enderecoPrincipal.principal && (
+                      <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                        Principal
+                      </span>
+                    )}
+                  </div>
+                  <address className="text-sm text-gray-600 not-italic">
+                    {enderecoPrincipal.logradouro}, {enderecoPrincipal.numero}
+                    {enderecoPrincipal.complemento && ` - ${enderecoPrincipal.complemento}`}<br />
+                    {enderecoPrincipal.bairro}<br />
+                    {enderecoPrincipal.cidade} - {enderecoPrincipal.estado}<br />
+                    CEP: {enderecoPrincipal.cep}
+                  </address>
+                  {enderecoPrincipal.nomeDestinatario && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      Destinatário: {enderecoPrincipal.nomeDestinatario}
+                    </p>
+                  )}
+                </div>
               ) : (
                 <p className="text-sm text-gray-500">
                   Nenhum endereço cadastrado.{' '}

@@ -35,6 +35,7 @@ import QuickLoginModal from "./QuickLoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { createCloseAction } from "@/utils/snackbar-helpers";
 import { useFreight } from "@/hooks/useFreight";
+import EnderecoSelector from "./EnderecoSelector";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -427,7 +428,7 @@ const PedidoForm: React.FC = () => {
         if (data.authenticated && data.cliente) {
           setClienteLogado(data.cliente);
           // Pré-preencher formulário com dados do cliente
-          preencherFormularioComDadosCliente(data.cliente);
+          await preencherFormularioComDadosCliente(data.cliente);
         }
       }
     } catch (error) {
@@ -438,7 +439,7 @@ const PedidoForm: React.FC = () => {
   };
 
   // Função para pré-preencher formulário com dados do cliente
-  const preencherFormularioComDadosCliente = (cliente: any) => {
+  const preencherFormularioComDadosCliente = async (cliente: any) => {
     setValue('nome', cliente.nome || '');
     setValue('sobrenome', cliente.sobrenome || '');
     setValue('email', cliente.email || '');
@@ -459,14 +460,45 @@ const PedidoForm: React.FC = () => {
       }
     }
     
-    if (cliente.endereco) {
-      if (cliente.endereco.cep) setValue('cep', cliente.endereco.cep);
-      if (cliente.endereco.endereco) setValue('endereco', cliente.endereco.endereco);
-      if (cliente.endereco.numero) setValue('numero', cliente.endereco.numero);
-      if (cliente.endereco.complemento) setValue('complemento', cliente.endereco.complemento);
-      if (cliente.endereco.bairro) setValue('bairro', cliente.endereco.bairro);
-      if (cliente.endereco.cidade) setValue('cidade', cliente.endereco.cidade);
-      if (cliente.endereco.estado) setValue('estado', cliente.endereco.estado);
+    // Buscar endereço principal dos novos endereços cadastrados
+    try {
+      const response = await fetch('/api/cliente/enderecos/checkout');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.enderecoPrincipal) {
+          // Usar endereço principal dos endereços cadastrados
+          const endereco = data.enderecoPrincipal;
+          setValue('cep', endereco.cep);
+          setValue('endereco', endereco.endereco);
+          setValue('numero', endereco.numero);
+          setValue('complemento', endereco.complemento || '');
+          setValue('bairro', endereco.bairro);
+          setValue('cidade', endereco.cidade);
+          setValue('estado', endereco.estado);
+          setValue('destinatario', endereco.destinatario || '');
+        } else if (cliente.endereco) {
+          // Fallback para endereço legado no cliente
+          if (cliente.endereco.cep) setValue('cep', cliente.endereco.cep);
+          if (cliente.endereco.endereco) setValue('endereco', cliente.endereco.endereco);
+          if (cliente.endereco.numero) setValue('numero', cliente.endereco.numero);
+          if (cliente.endereco.complemento) setValue('complemento', cliente.endereco.complemento);
+          if (cliente.endereco.bairro) setValue('bairro', cliente.endereco.bairro);
+          if (cliente.endereco.cidade) setValue('cidade', cliente.endereco.cidade);
+          if (cliente.endereco.estado) setValue('estado', cliente.endereco.estado);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar endereço principal:', error);
+      // Fallback para endereço legado do cliente
+      if (cliente.endereco) {
+        if (cliente.endereco.cep) setValue('cep', cliente.endereco.cep);
+        if (cliente.endereco.endereco) setValue('endereco', cliente.endereco.endereco);
+        if (cliente.endereco.numero) setValue('numero', cliente.endereco.numero);
+        if (cliente.endereco.complemento) setValue('complemento', cliente.endereco.complemento);
+        if (cliente.endereco.bairro) setValue('bairro', cliente.endereco.bairro);
+        if (cliente.endereco.cidade) setValue('cidade', cliente.endereco.cidade);
+        if (cliente.endereco.estado) setValue('estado', cliente.endereco.estado);
+      }
     }
     
     if (cliente.receberWhatsapp !== undefined) {
@@ -498,6 +530,31 @@ const PedidoForm: React.FC = () => {
       }
     }
   }, [errors]);
+
+  // Função para quando um endereço é selecionado no seletor
+  const handleEnderecoSelecionado = (endereco: any) => {
+    if (endereco) {
+      // Preencher campos com dados do endereço selecionado
+      setValue('cep', endereco.cep);
+      setValue('endereco', endereco.endereco);
+      setValue('numero', endereco.numero);
+      setValue('complemento', endereco.complemento || '');
+      setValue('bairro', endereco.bairro);
+      setValue('cidade', endereco.cidade);
+      setValue('estado', endereco.estado);
+      setValue('destinatario', endereco.destinatario || '');
+    } else {
+      // Limpar campos para permitir inserção manual
+      setValue('cep', '');
+      setValue('endereco', '');
+      setValue('numero', '');
+      setValue('complemento', '');
+      setValue('bairro', '');
+      setValue('cidade', 'Manaus');
+      setValue('estado', 'Amazonas');
+      setValue('destinatario', '');
+    }
+  };
 
   // Função para fazer logout
   const handleLogout = async () => {
@@ -721,6 +778,25 @@ const PedidoForm: React.FC = () => {
               helperText={errors.pais?.message}
               {...register("pais")}
             /> */}
+
+            {/* Seletor de Endereços para Cliente Logado */}
+            {clienteLogado && (
+              <Box>
+                <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 1 }}>
+                  Endereço de Entrega
+                </Typography>
+                <EnderecoSelector 
+                  clienteLogado={!!clienteLogado}
+                  onEnderecoSelected={handleEnderecoSelecionado}
+                />
+              </Box>
+            )}
+
+            {!clienteLogado && (
+              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                Endereço de Entrega
+              </Typography>
+            )}
 
             <FormControl fullWidth error={!!errors.cep}>
               <FormLabel id="label-cep">CEP</FormLabel>

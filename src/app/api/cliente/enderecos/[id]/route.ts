@@ -21,7 +21,7 @@ const enderecoUpdateSchema = z.object({
 // GET - Buscar endereço específico
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cliente = await verificarAutenticacao(request);
@@ -32,9 +32,10 @@ export async function GET(
       );
     }
 
+    const { id } = await params;
     const endereco = await prisma.enderecoCliente.findFirst({
       where: {
-        id: params.id,
+        id,
         clienteId: cliente.id,
         ativo: true
       }
@@ -60,7 +61,7 @@ export async function GET(
 // PUT - Atualizar endereço
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cliente = await verificarAutenticacao(request);
@@ -71,10 +72,12 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
+    
     // Verificar se o endereço pertence ao cliente
     const enderecoExistente = await prisma.enderecoCliente.findFirst({
       where: {
-        id: params.id,
+        id,
         clienteId: cliente.id,
         ativo: true
       }
@@ -96,7 +99,7 @@ export async function PUT(
         where: {
           clienteId: cliente.id,
           principal: true,
-          id: { not: params.id }
+          id: { not: id }
         },
         data: {
           principal: false
@@ -105,7 +108,7 @@ export async function PUT(
     }
 
     const endereco = await prisma.enderecoCliente.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData
     });
 
@@ -129,7 +132,7 @@ export async function PUT(
 // DELETE - Remover endereço (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cliente = await verificarAutenticacao(request);
@@ -140,10 +143,12 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
+
     // Verificar se o endereço pertence ao cliente
     const endereco = await prisma.enderecoCliente.findFirst({
       where: {
-        id: params.id,
+        id,
         clienteId: cliente.id,
         ativo: true
       }
@@ -158,7 +163,7 @@ export async function DELETE(
 
     // Soft delete - apenas marcar como inativo
     await prisma.enderecoCliente.update({
-      where: { id: params.id },
+      where: { id },
       data: { ativo: false }
     });
 
@@ -168,7 +173,7 @@ export async function DELETE(
         where: {
           clienteId: cliente.id,
           ativo: true,
-          id: { not: params.id }
+          id: { not: id }
         },
         orderBy: { createdAt: 'desc' }
       });
