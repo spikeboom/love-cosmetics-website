@@ -29,9 +29,17 @@ jobs:
       - name: Deploy code to server
         run: |
           if [ "${GITHUB_REF}" = "refs/heads/develop" ]; then
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && git pull origin develop"
+            ssh root@147.93.9.224 << 'EOF'
+              cd /root/wordpress/next_project || exit 1
+              git fetch origin || exit 1
+              git reset --hard origin/develop || exit 1
+            EOF
           else
-            ssh root@147.93.9.224 "cd /root/wordpress/next_project && git pull origin master"
+            ssh root@147.93.9.224 << 'EOF'
+              cd /root/wordpress/next_project || exit 1
+              git fetch origin || exit 1
+              git reset --hard origin/master || exit 1
+            EOF
           fi
 
       # 4. Executa o docker-compose no servidor com o build argument apropriado

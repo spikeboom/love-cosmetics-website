@@ -116,8 +116,8 @@ const listMenus = [
 const listMenusSimples = [
   {
     text: "Conheça Nossa História",
-    enabled: false,
-    href: "/",
+    enabled: true,
+    href: "/nossa-historia",
   },
 ];
 
