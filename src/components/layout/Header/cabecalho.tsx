@@ -20,6 +20,7 @@ export function Cabecalho() {
   const { user, isAuthenticated, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleAbrirCarrinho = () => {
     setSidebarMounted(true);
@@ -32,6 +33,22 @@ export function Cabecalho() {
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     }
+  };
+
+  const handleMouseEnter = () => {
+    // Cancela o timeout de fechamento se existir
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setShowUserMenu(true);
+  };
+
+  const handleMouseLeave = () => {
+    // Adiciona delay de 300ms antes de fechar
+    closeTimeoutRef.current = setTimeout(() => {
+      setShowUserMenu(false);
+    }, 300);
   };
 
   useEffect(() => {
@@ -47,6 +64,10 @@ export function Cabecalho() {
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      // Limpa o timeout ao desmontar o componente
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
     };
   }, [showUserMenu]);
 
@@ -111,7 +132,12 @@ export function Cabecalho() {
 
             <div className="flex flex-1 items-center justify-end gap-4">
               {isAuthenticated ? (
-                <div className="relative" ref={dropdownRef}>
+                <div 
+                  className="relative" 
+                  ref={dropdownRef}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-gray-100 transition-colors"
@@ -124,7 +150,11 @@ export function Cabecalho() {
                   </button>
                   
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div 
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      onMouseEnter={handleMouseEnter}
+                      onMouseLeave={handleMouseLeave}
+                    >
                       <div className="px-4 py-3 border-b border-gray-200">
                         <p className="text-sm font-semibold text-gray-900">
                           {user?.nome} {user?.sobrenome}

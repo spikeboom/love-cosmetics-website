@@ -9,9 +9,11 @@ import { cadastroClienteSchema, type CadastroClienteInput, validators } from '@/
 import { IMaskInput } from 'react-imask';
 import { useState as useStateReact } from 'react';
 import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CadastroPage() {
   const router = useRouter();
+  const { checkAuth } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
@@ -68,6 +70,8 @@ export default function CadastroPage() {
 
       if (response.ok && result.success) {
         // Cadastro bem-sucedido - já faz login automático
+        // Aguardar a atualização do contexto de autenticação
+        await checkAuth();
         router.push('/minha-conta');
         router.refresh();
       } else {
