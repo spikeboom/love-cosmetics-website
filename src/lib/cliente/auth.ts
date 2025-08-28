@@ -3,6 +3,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 
 // Configurações de segurança
 const JWT_SECRET =
@@ -203,4 +204,18 @@ export async function cleanupExpiredSessions(): Promise<number> {
   });
 
   return result.count;
+}
+
+// Verificar autenticação em API routes
+export async function verificarAutenticacao(
+  request: NextRequest,
+): Promise<ClienteSession | null> {
+  // Tentar obter token do cookie
+  const token = request.cookies.get(COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  return await verifySession(token);
 }

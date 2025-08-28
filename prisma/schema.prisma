@@ -87,6 +87,7 @@ model Cliente {
   pedidos         PedidoCliente[]
   sessoes         SessaoCliente[]
   cuponsUsados    CupomUsado[]
+  enderecos       EnderecoCliente[]
   
   // Controle
   emailVerificado Boolean   @default(false)
@@ -147,5 +148,37 @@ model TokenRecuperacao {
 
   @@index([token])
   @@index([clienteId])
+}
+
+model EnderecoCliente {
+  id           String    @id @default(uuid())
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  
+  // Identificação do endereço
+  apelido      String    // Ex: "Casa", "Trabalho", "Casa dos Pais"
+  principal    Boolean   @default(false)
+  
+  // Dados do endereço
+  cep          String
+  logradouro   String
+  numero       String
+  complemento  String?
+  bairro       String
+  cidade       String
+  estado       String
+  pais         String    @default("Brasil")
+  
+  // Dados do destinatário
+  nomeDestinatario String?
+  telefone     String?
+  
+  // Controle
+  ativo        Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([clienteId])
+  @@index([principal])
 }
 
