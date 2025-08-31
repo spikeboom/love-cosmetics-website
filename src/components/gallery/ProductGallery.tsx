@@ -43,11 +43,21 @@ type GalleryData = Record<string, CategoryData>;
 
 interface ProductGalleryProps {
   onProductClick?: (product: Product & { category: string; key: string }) => void;
+  selectedCategory?: Categoria;
+  selectedSubcategory?: Subcategoria;
 }
 
-const ProductGallery: React.FC<ProductGalleryProps> = ({ onProductClick }) => {
-  const [selectedCategory, setSelectedCategory] = useState<Categoria | undefined>(undefined);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategoria | undefined>(undefined);
+const ProductGallery: React.FC<ProductGalleryProps> = ({ 
+  onProductClick,
+  selectedCategory: propSelectedCategory,
+  selectedSubcategory: propSelectedSubcategory 
+}) => {
+  const [localSelectedCategory, setLocalSelectedCategory] = useState<Categoria | undefined>(undefined);
+  const [localSelectedSubcategory, setLocalSelectedSubcategory] = useState<Subcategoria | undefined>(undefined);
+  
+  // Use props if provided, otherwise use local state
+  const selectedCategory = propSelectedCategory !== undefined ? propSelectedCategory : localSelectedCategory;
+  const selectedSubcategory = propSelectedSubcategory !== undefined ? propSelectedSubcategory : localSelectedSubcategory;
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortBy, setSortBy] = useState<'name' | 'date'>('date');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -123,8 +133,13 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ onProductClick }) => {
   }, [data]);
 
   const handleCategoryChange = (categoria?: Categoria, subcategoria?: Subcategoria) => {
-    setSelectedCategory(categoria);
-    setSelectedSubcategory(subcategoria);
+    // Only update local state if no props are provided
+    if (propSelectedCategory === undefined) {
+      setLocalSelectedCategory(categoria);
+    }
+    if (propSelectedSubcategory === undefined) {
+      setLocalSelectedSubcategory(subcategoria);
+    }
   };
 
   const handleProductClick = (product: Product & { category: string; key: string }) => {
@@ -145,19 +160,21 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ onProductClick }) => {
         </div>
 
         {/* Navigation Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Category Navigation Sidebar */}
-          <div className="lg:col-span-1">
-            <CategoryNavigation
-              onCategoryChange={handleCategoryChange}
-              selectedCategory={selectedCategory}
-              selectedSubcategory={selectedSubcategory}
-              productCounts={categoryStats}
-            />
-          </div>
+        <div className={`grid ${propSelectedCategory !== undefined || propSelectedSubcategory !== undefined ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-4'} gap-6`}>
+          {/* Category Navigation Sidebar - Only show if no external category control */}
+          {propSelectedCategory === undefined && propSelectedSubcategory === undefined && (
+            <div className="lg:col-span-1">
+              <CategoryNavigation
+                onCategoryChange={handleCategoryChange}
+                selectedCategory={selectedCategory}
+                selectedSubcategory={selectedSubcategory}
+                productCounts={categoryStats}
+              />
+            </div>
+          )}
 
           {/* Main Content Area */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className={`${propSelectedCategory !== undefined || propSelectedSubcategory !== undefined ? 'col-span-1' : 'lg:col-span-3'} space-y-6`}>
             {/* Breadcrumb */}
             <CategoryBreadcrumb
               selectedCategory={selectedCategory}

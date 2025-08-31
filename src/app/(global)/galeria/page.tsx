@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ProductGallery from '@/components/gallery/ProductGallery';
 import ProductModal from '@/components/gallery/ProductModal';
 import GalleryNavigation from '@/components/gallery/GalleryNavigation';
+import GallerySubHeader from '@/components/gallery/GallerySubHeader';
 import GalleryStats from '@/components/gallery/GalleryStats';
+import { type Categoria, type Subcategoria, mapCategoryName } from '@/data/categorias';
+import galleryData from '@/data/upload_urls_cache.json';
 
 interface ProductImage {
   filename: string;
@@ -33,10 +36,36 @@ interface Product {
   key?: string;
 }
 
+interface CategoryData {
+  processedProducts: Record<string, Product>;
+}
+
+type GalleryData = Record<string, CategoryData>;
 
 export default function GaleriaPage() {
   const [selectedProduct, setSelectedProduct] = useState<(Product & { category: string; key: string }) | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Categoria | undefined>();
+  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategoria | undefined>();
+
+  const data = galleryData as GalleryData;
+
+  // Calculate product counts for categories and subcategories
+  const productCounts = useMemo(() => {
+    const counts: { [key: string]: number } = {};
+    
+    Object.entries(data).forEach(([category, categoryData]) => {
+      const productCount = Object.keys(categoryData.processedProducts || {}).length;
+      counts[category] = productCount;
+    });
+    
+    return counts;
+  }, [data]);
+
+  // Calculate total products
+  const totalProducts = useMemo(() => {
+    return Object.values(productCounts).reduce((acc, count) => acc + count, 0);
+  }, [productCounts]);
 
   const handleProductClick = (product: Product & { category: string; key: string }) => {
     setSelectedProduct(product);
@@ -48,9 +77,21 @@ export default function GaleriaPage() {
     setSelectedProduct(null);
   };
 
+  const handleCategoryChange = (categoria?: Categoria, subcategoria?: Subcategoria) => {
+    setSelectedCategory(categoria);
+    setSelectedSubcategory(subcategoria);
+  };
+
   return (
     <>
       <GalleryNavigation />
+      <GallerySubHeader 
+        onCategoryChange={handleCategoryChange}
+        selectedCategory={selectedCategory}
+        selectedSubcategory={selectedSubcategory}
+        productCounts={productCounts}
+        totalProducts={totalProducts}
+      />
       {/* Product Modal */}
       <ProductModal
         product={selectedProduct}
@@ -62,6 +103,8 @@ export default function GaleriaPage() {
           {/* <GalleryStats /> */}
           <ProductGallery 
             onProductClick={handleProductClick}
+            selectedCategory={selectedCategory}
+            selectedSubcategory={selectedSubcategory}
           />
         </div>
       </main>
