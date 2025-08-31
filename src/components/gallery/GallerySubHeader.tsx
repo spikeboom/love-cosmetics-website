@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { categorias, type Categoria, type Subcategoria } from '@/data/categorias';
-import { ChevronDown, Menu } from 'lucide-react';
+import { ChevronDown, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface GallerySubHeaderProps {
@@ -23,8 +23,11 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const handleMouseEnter = (categorySlug: string) => {
@@ -93,6 +96,30 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
     return productCounts[mappedKey] || 0;
   };
 
+  // Função para verificar se pode fazer scroll
+  const checkScrollability = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth);
+    }
+  };
+
+  // Funções de scroll
+  const scrollLeft = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -136,11 +163,65 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
     };
   }, [activeDropdown]);
 
+  // Effect para verificar scroll inicial e adicionar listeners
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      // Verificar inicialmente
+      checkScrollability();
+      
+      // Adicionar listener de scroll
+      const handleScroll = () => {
+        checkScrollability();
+      };
+      
+      container.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', checkScrollability);
+
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', checkScrollability);
+      };
+    }
+  }, [showAllCategories]); // Re-executar quando mostrar/ocultar categorias
+
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[90px] z-20 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex items-center py-3 gap-4 min-w-max" ref={dropdownRef}>
+        {/* Seta esquerda - apenas desktop */}
+        {canScrollLeft && (
+          <button
+            onClick={scrollLeft}
+            className="hidden lg:flex absolute left-2 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-full items-center justify-center shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Scroll para esquerda"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </button>
+        )}
+
+        {/* Seta direita - apenas desktop */}
+        {canScrollRight && (
+          <button
+            onClick={scrollRight}
+            className="hidden lg:flex absolute right-2 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-full items-center justify-center shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Scroll para direita"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </button>
+        )}
+
+        {/* Gradiente esquerdo - apenas desktop */}
+        {canScrollLeft && (
+          <div className="hidden lg:block absolute left-10 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-gray-800 to-transparent z-[5] pointer-events-none"></div>
+        )}
+
+        {/* Gradiente direito - apenas desktop */}
+        {canScrollRight && (
+          <div className="hidden lg:block absolute right-10 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-gray-800 to-transparent z-[5] pointer-events-none"></div>
+        )}
+
+        <div className="overflow-x-hidden scrollbar-hide" ref={scrollContainerRef}>
+          <div className="flex items-center py-3 gap-1 min-w-max px-2 lg:px-12" ref={dropdownRef}>
             <style jsx>{`
               .scrollbar-hide {
                 -ms-overflow-style: none;
@@ -151,7 +232,7 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
               }
             `}</style>
           {/* Todos os produtos */}
-          <button
+          {/* <button
             onClick={() => handleCategorySelect()}
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
               !selectedCategory
@@ -166,7 +247,7 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
                 {totalProducts}
               </span>
             )}
-          </button>
+          </button> */}
 
           {/* Categorias visíveis */}
           {(showAllCategories ? categorias : categorias.slice(0, 4)).map((categoria) => {
@@ -188,9 +269,6 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
                   }`}
                 >
                   <span className="truncate max-w-[80px] sm:max-w-none">{categoria.nome}</span>
-                  <ChevronDown 
-                    className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform flex-shrink-0 ${isActive ? 'rotate-180' : ''}`} 
-                  />
                 </button>
 
                 {/* Espaço reservado - dropdown será renderizado fora */}
