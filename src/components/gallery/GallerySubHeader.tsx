@@ -22,8 +22,10 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
 }) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const handleMouseEnter = (categorySlug: string) => {
     // Cancela o timeout de fechamento se existir
@@ -31,6 +33,18 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
       clearTimeout(dropdownTimeoutRef.current);
       dropdownTimeoutRef.current = null;
     }
+    
+    // Calcular posição do dropdown
+    const button = buttonRefs.current[categorySlug];
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: Math.max(288, rect.width) // min 288px (w-72)
+      });
+    }
+    
     setActiveDropdown(categorySlug);
   };
 
@@ -38,16 +52,33 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
     // Adiciona delay de 300ms antes de fechar
     dropdownTimeoutRef.current = setTimeout(() => {
       setActiveDropdown(null);
+      setDropdownPosition(null);
     }, 300);
   };
 
   const handleClick = (categorySlug: string) => {
-    setActiveDropdown(activeDropdown === categorySlug ? null : categorySlug);
+    if (activeDropdown === categorySlug) {
+      setActiveDropdown(null);
+      setDropdownPosition(null);
+    } else {
+      // Calcular posição do dropdown
+      const button = buttonRefs.current[categorySlug];
+      if (button) {
+        const rect = button.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 4,
+          left: rect.left + window.scrollX,
+          width: Math.max(288, rect.width)
+        });
+      }
+      setActiveDropdown(categorySlug);
+    }
   };
 
   const handleCategorySelect = (categoria?: Categoria, subcategoria?: Subcategoria) => {
     onCategoryChange?.(categoria, subcategoria);
     setActiveDropdown(null);
+    setDropdownPosition(null);
   };
 
   const getCategoryProductCount = (categoria: Categoria): number => {
@@ -66,15 +97,39 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setActiveDropdown(null);
+        setDropdownPosition(null);
+      }
+    };
+
+    const handleScroll = () => {
+      if (activeDropdown && buttonRefs.current[activeDropdown]) {
+        const button = buttonRefs.current[activeDropdown];
+        const rect = button.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY + 4,
+          left: rect.left + window.scrollX,
+          width: Math.max(288, rect.width)
+        });
+      }
+    };
+
+    const handleResize = () => {
+      if (activeDropdown) {
+        setActiveDropdown(null);
+        setDropdownPosition(null);
       }
     };
 
     if (activeDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', handleResize);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
       if (dropdownTimeoutRef.current) {
         clearTimeout(dropdownTimeoutRef.current);
       }
@@ -82,18 +137,19 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
   }, [activeDropdown]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[90px] z-10 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center overflow-x-auto py-3 gap-4 scrollbar-hide" ref={dropdownRef}>
-          <style jsx>{`
-            .scrollbar-hide {
-              -ms-overflow-style: none;
-              scrollbar-width: none;
-            }
-            .scrollbar-hide::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[90px] z-20 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex items-center py-3 gap-4 min-w-max" ref={dropdownRef}>
+            <style jsx>{`
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
           {/* Todos os produtos */}
           <button
             onClick={() => handleCategorySelect()}
@@ -121,6 +177,7 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
             return (
               <div key={categoria.slug} className="relative flex-shrink-0">
                 <button
+                  ref={(el) => (buttonRefs.current[categoria.slug] = el)}
                   onClick={() => handleClick(categoria.slug)}
                   onMouseEnter={() => handleMouseEnter(categoria.slug)}
                   onMouseLeave={handleMouseLeave}
@@ -134,81 +191,9 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
                   <ChevronDown 
                     className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform flex-shrink-0 ${isActive ? 'rotate-180' : ''}`} 
                   />
-                  {categoryProductCount > 0 && (
-                    <span className="hidden sm:inline text-xs bg-white/20 px-1.5 py-0.5 rounded-full ml-1">
-                      {categoryProductCount}
-                    </span>
-                  )}
                 </button>
 
-                {/* Dropdown de subcategorias */}
-                {isActive && (
-                  <div 
-                    className="absolute top-full left-0 mt-1 w-64 sm:w-72 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-80 overflow-y-auto"
-                    onMouseEnter={() => handleMouseEnter(categoria.slug)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <div className="p-3">
-                      {/* Header da categoria */}
-                      <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 mb-2">
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{categoria.nome}</h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{categoryProductCount} produtos</p>
-                      </div>
-                      
-                      {/* Opção para toda a categoria */}
-                      <button
-                        onClick={() => handleCategorySelect(categoria)}
-                        className="w-full text-left px-3 py-2.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-[#dcafad]/10 hover:text-[#dcafad] transition-colors border border-transparent hover:border-[#dcafad]/20"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">Ver todos</span>
-                          <span className="text-xs bg-[#dcafad]/10 text-[#dcafad] px-2 py-0.5 rounded-full">
-                            {categoryProductCount}
-                          </span>
-                        </div>
-                      </button>
-
-                      {categoria.subcategorias.length > 0 && (
-                        <>
-                          <div className="mt-3 space-y-1">
-                            <p className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Subcategorias</p>
-                            {categoria.subcategorias.map((subcategoria) => {
-                              const subProductCount = getSubcategoryProductCount(categoria, subcategoria);
-                              const isSubSelected = 
-                                selectedCategory?.slug === categoria.slug && 
-                                selectedSubcategory?.slug === subcategoria.slug;
-
-                              return (
-                                <button
-                                  key={subcategoria.slug}
-                                  onClick={() => handleCategorySelect(categoria, subcategoria)}
-                                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                                    isSubSelected
-                                      ? 'bg-[#dcafad] text-white font-medium shadow-sm'
-                                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <span className="truncate">{subcategoria.nome}</span>
-                                    {subProductCount > 0 && (
-                                      <span className={`text-xs px-2 py-0.5 rounded-full ml-2 flex-shrink-0 ${
-                                        isSubSelected 
-                                          ? 'bg-white/20 text-white' 
-                                          : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                                      }`}>
-                                        {subProductCount}
-                                      </span>
-                                    )}
-                                  </div>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* Espaço reservado - dropdown será renderizado fora */}
               </div>
             );
           })}
@@ -236,8 +221,95 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
               Menos
             </button>
           )}
+          </div>
         </div>
       </div>
+
+      {/* Dropdown renderizado fora do overflow */}
+      {activeDropdown && dropdownPosition && (
+        <div
+          className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[100] max-h-80"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`
+          }}
+          onMouseEnter={() => {
+            if (dropdownTimeoutRef.current) {
+              clearTimeout(dropdownTimeoutRef.current);
+              dropdownTimeoutRef.current = null;
+            }
+          }}
+          onMouseLeave={handleMouseLeave}
+        >
+          {(() => {
+            const categoria = categorias.find(cat => cat.slug === activeDropdown);
+            if (!categoria) return null;
+            
+            const categoryProductCount = getCategoryProductCount(categoria);
+            
+            return (
+              <div className="p-3">
+                {/* Header da categoria */}
+                <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700 mb-2">
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{categoria.nome}</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{categoryProductCount} produtos</p>
+                </div>
+                
+                {/* Opção para toda a categoria */}
+                <button
+                  onClick={() => handleCategorySelect(categoria)}
+                  className="w-full text-left px-3 py-2.5 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-[#dcafad]/10 hover:text-[#dcafad] transition-colors border border-transparent hover:border-[#dcafad]/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Ver todos</span>
+                    <span className="text-xs bg-[#dcafad]/10 text-[#dcafad] px-2 py-0.5 rounded-full">
+                      {categoryProductCount}
+                    </span>
+                  </div>
+                </button>
+
+                {categoria.subcategorias.length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    <p className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Subcategorias</p>
+                    {categoria.subcategorias.map((subcategoria) => {
+                      const subProductCount = getSubcategoryProductCount(categoria, subcategoria);
+                      const isSubSelected = 
+                        selectedCategory?.slug === categoria.slug && 
+                        selectedSubcategory?.slug === subcategoria.slug;
+
+                      return (
+                        <button
+                          key={subcategoria.slug}
+                          onClick={() => handleCategorySelect(categoria, subcategoria)}
+                          className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                            isSubSelected
+                              ? 'bg-[#dcafad] text-white font-medium shadow-sm'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="truncate">{subcategoria.nome}</span>
+                            {subProductCount > 0 && (
+                              <span className={`text-xs px-2 py-0.5 rounded-full ml-2 flex-shrink-0 ${
+                                isSubSelected 
+                                  ? 'bg-white/20 text-white' 
+                                  : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                              }`}>
+                                {subProductCount}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 };
