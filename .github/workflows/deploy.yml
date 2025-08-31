@@ -47,6 +47,7 @@ jobs:
               cd /root/wordpress/next_project && \
               echo 'Using .env.master' && \
               docker-compose build --build-arg ENV_FILE=.env.master love-cosmetics && \
+              docker builder prune -f && \
               docker-compose up -d love-cosmetics"
           elif [ "$REF" = "refs/heads/develop" ]; then
             echo "Deploying to DEVELOPMENT with .env.dev"
@@ -54,11 +55,13 @@ jobs:
               cd /root/wordpress/next_project && \
               echo 'Using .env.dev' && \
               docker-compose build --build-arg ENV_FILE=.env.dev love-cosmetics-dev && \
+              docker builder prune -f && \
               docker-compose up -d love-cosmetics-dev webserver"
           else
             echo "Deploying with .env (default)"
             ssh root@147.93.9.224 "set -euo pipefail; \
               cd /root/wordpress/next_project && \
               echo 'Using .env' && \
-              docker-compose up -d --build love-cosmetics"
+              docker-compose up -d --build love-cosmetics && \
+              docker builder prune -f"
           fi

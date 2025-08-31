@@ -5,7 +5,12 @@
       "Bash(npx tsc:*)",
       "Bash(cat:*)",
       "Bash(git add:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
+      "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
+      "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
+      "Bash(copy:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []
