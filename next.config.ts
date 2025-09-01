@@ -6,10 +6,24 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: [
-      "strapi.lovecosmeticos.xyz",
-      "www.lovecosmetics.com.br",
-      "www.lovecosmeticos.xyz",
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'strapi.lovecosmeticos.xyz',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.lovecosmetics.com.br',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.lovecosmeticos.xyz',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
+      },
     ],
   },
 };

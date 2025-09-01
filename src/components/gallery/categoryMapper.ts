@@ -90,9 +90,11 @@ export const categorias: Categoria[] = [
   }
 ];
 
-// Função utilitária para mapear nomes das categorias do cache para a estrutura organizada
-export const mapCategoryName = (cacheCategoryName: string): { categoria: Categoria; subcategoria: Subcategoria } | null => {
-  if (!cacheCategoryName || typeof cacheCategoryName !== 'string') return null;
+export function mapCategoryName(cacheCategoryName: string): { categoria: Categoria; subcategoria: Subcategoria } | null {
+  if (!cacheCategoryName || typeof cacheCategoryName !== 'string') {
+    return null;
+  }
+  
   const mapping: { [key: string]: { categoriaSlug: string; subcategoriaSlug: string } } = {
     "Maquiagem Rosto": { categoriaSlug: "maquiagem", subcategoriaSlug: "rosto" },
     "Maquiagem Olhos": { categoriaSlug: "maquiagem", subcategoriaSlug: "olhos" },
@@ -134,15 +136,19 @@ export const mapCategoryName = (cacheCategoryName: string): { categoria: Categor
   };
 
   const mapped = mapping[cacheCategoryName];
-  if (!mapped) return null;
+  if (!mapped) {
+    return null;
+  }
 
   const categoria = categorias.find(cat => cat.slug === mapped.categoriaSlug);
-  if (!categoria) return null;
+  if (!categoria) {
+    return null;
+  }
 
   const subcategoria = categoria.subcategorias.find(sub => sub.slug === mapped.subcategoriaSlug);
-  if (!subcategoria) return null;
+  if (!subcategoria) {
+    return null;
+  }
 
   return { categoria, subcategoria };
-};
-
-export default categorias;
+}

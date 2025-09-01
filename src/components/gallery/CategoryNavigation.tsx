@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { categorias, type Categoria, type Subcategoria, mapCategoryName } from '@/data/categorias';
+import { categorias, type Categoria, type Subcategoria } from './categoryMapper';
 
 interface CategoryNavigationProps {
   onCategoryChange: (categoria?: Categoria, subcategoria?: Subcategoria) => void;

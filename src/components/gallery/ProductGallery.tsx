@@ -6,7 +6,7 @@ import galleryData from '@/data/upload_urls_cache.json';
 import CategoryNavigation from './CategoryNavigation';
 import CategoryBreadcrumb from './CategoryBreadcrumb';
 import { strapiConfig } from '@/utils/strapi-config';
-import { type Categoria, type Subcategoria, mapCategoryName } from '@/data/categorias';
+import { type Categoria, type Subcategoria, mapCategoryName } from './categoryMapper';
 
 interface ProductImage {
   filename: string;

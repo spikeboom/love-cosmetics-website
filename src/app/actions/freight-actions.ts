@@ -103,8 +103,6 @@ export async function calculateFreight(
 
     const result: FreightCalculationResponse = await response.json();
 
-    console.log({ result });
-
     // Se sucesso, adicionar ao cache
     if ("Sucesso" in result) {
       cache.set(cleanCep, { data: result, timestamp: Date.now() });

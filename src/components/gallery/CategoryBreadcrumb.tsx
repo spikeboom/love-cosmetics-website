@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { type Categoria, type Subcategoria } from '@/data/categorias';
+import { type Categoria, type Subcategoria } from './categoryMapper';
 
 interface CategoryBreadcrumbProps {
   selectedCategory?: Categoria;

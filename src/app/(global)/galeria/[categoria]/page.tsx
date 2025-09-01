@@ -2,7 +2,7 @@ import React from 'react';
 import ProductGallery from '@/components/gallery/ProductGallery';
 import GalleryNavigation from '@/components/gallery/GalleryNavigation';
 import GalleryStats from '@/components/gallery/GalleryStats';
-import { categorias } from '@/data/categorias';
+import { categorias } from '@/components/gallery/categoryMapper';
 import { notFound } from 'next/navigation';
 
 interface PageProps {

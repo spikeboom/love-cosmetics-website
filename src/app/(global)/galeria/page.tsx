@@ -6,7 +6,7 @@ import ProductModal from '@/components/gallery/ProductModal';
 import GalleryNavigation from '@/components/gallery/GalleryNavigation';
 import GallerySubHeader from '@/components/gallery/GallerySubHeader';
 import GalleryStats from '@/components/gallery/GalleryStats';
-import { type Categoria, type Subcategoria, mapCategoryName } from '@/data/categorias';
+import { type Categoria, type Subcategoria } from '@/components/gallery/categoryMapper';
 import galleryData from '@/data/upload_urls_cache.json';
 
 interface ProductImage {

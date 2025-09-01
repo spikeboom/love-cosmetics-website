@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import galleryData from '@/data/upload_urls_cache.json';
-import { categorias, mapCategoryName } from '@/data/categorias';
+import { categorias } from './categoryMapper';
 
 interface CategoryData {
   processedProducts: Record<string, any>;
@@ -14,6 +14,17 @@ const GalleryStats: React.FC = () => {
   const data = galleryData as GalleryData;
   
   const stats = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return {
+        totalCategories: 0,
+        totalSubcategories: 0,
+        totalProducts: 0,
+        totalImages: 0,
+        hierarchicalStats: [],
+        topSubcategories: []
+      };
+    }
+    
     let totalProducts = 0;
     let totalImages = 0;
     

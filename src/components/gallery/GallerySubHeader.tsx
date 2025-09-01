@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { categorias, type Categoria, type Subcategoria } from '@/data/categorias';
+import { categorias, type Categoria, type Subcategoria } from './categoryMapper';
 import { ChevronDown, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
