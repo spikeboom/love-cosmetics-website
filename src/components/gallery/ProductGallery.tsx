@@ -249,6 +249,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       className="object-contain rounded-t-lg"
+                      loader={({ src }) => src}
                     />
                     {product.images.length > 1 && (
                       <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
@@ -288,6 +289,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
                             fill
                             sizes="48px"
                             className="object-contain rounded border"
+                            loader={({ src }) => src}
                           />
                         </div>
                       ))}

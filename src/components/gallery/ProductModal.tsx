@@ -94,6 +94,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
                 fill
                 sizes="(max-width: 768px) 100vw, 66vw"
                 className="object-contain"
+                loader={({ src }) => src}
               />
               
               {/* Navigation Arrows */}
@@ -143,6 +144,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
                     fill
                     sizes="80px"
                     className="object-contain"
+                    loader={({ src }) => src}
                   />
                 </button>
               ))}
