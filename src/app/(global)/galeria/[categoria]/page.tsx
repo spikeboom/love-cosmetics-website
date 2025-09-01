@@ -6,9 +6,9 @@ import { categorias } from '@/data/categorias';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     categoria: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const categoria = categorias.find(cat => cat.slug === params.categoria);
+  const resolvedParams = await params;
+  const categoria = categorias.find(cat => cat.slug === resolvedParams.categoria);
   
   if (!categoria) {
     return {
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default function CategoriaPage({ params }: PageProps) {
-  const categoria = categorias.find(cat => cat.slug === params.categoria);
+export default async function CategoriaPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const categoria = categorias.find(cat => cat.slug === resolvedParams.categoria);
   
   if (!categoria) {
     notFound();

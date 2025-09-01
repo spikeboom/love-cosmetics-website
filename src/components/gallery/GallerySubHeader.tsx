@@ -258,7 +258,7 @@ const GallerySubHeader: React.FC<GallerySubHeaderProps> = ({
             return (
               <div key={categoria.slug} className="relative flex-shrink-0">
                 <button
-                  ref={(el) => (buttonRefs.current[categoria.slug] = el)}
+                  ref={(el) => { buttonRefs.current[categoria.slug] = el; }}
                   onClick={() => handleClick(categoria.slug)}
                   onMouseEnter={() => handleMouseEnter(categoria.slug)}
                   onMouseLeave={handleMouseLeave}

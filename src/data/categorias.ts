@@ -92,6 +92,7 @@ export const categorias: Categoria[] = [
 
 // Função utilitária para mapear nomes das categorias do cache para a estrutura organizada
 export const mapCategoryName = (cacheCategoryName: string): { categoria: Categoria; subcategoria: Subcategoria } | null => {
+  if (!cacheCategoryName || typeof cacheCategoryName !== 'string') return null;
   const mapping: { [key: string]: { categoriaSlug: string; subcategoriaSlug: string } } = {
     "Maquiagem Rosto": { categoriaSlug: "maquiagem", subcategoriaSlug: "rosto" },
     "Maquiagem Olhos": { categoriaSlug: "maquiagem", subcategoriaSlug: "olhos" },

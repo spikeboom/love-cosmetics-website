@@ -10,7 +10,8 @@
       "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
       "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
       "Bash(copy:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

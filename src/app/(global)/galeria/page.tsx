@@ -43,6 +43,16 @@ interface CategoryData {
 type GalleryData = Record<string, CategoryData>;
 
 export default function GaleriaPage() {
+  // Ensure client-side only during SSR/build
+  if (typeof window === 'undefined') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   const [selectedProduct, setSelectedProduct] = useState<(Product & { category: string; key: string }) | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Categoria | undefined>();

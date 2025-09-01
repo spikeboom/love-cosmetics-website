@@ -6,10 +6,10 @@ import { categorias } from '@/data/categorias';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     categoria: string;
     subcategoria: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -28,8 +28,9 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const categoria = categorias.find(cat => cat.slug === params.categoria);
-  const subcategoria = categoria?.subcategorias.find(sub => sub.slug === params.subcategoria);
+  const resolvedParams = await params;
+  const categoria = categorias.find(cat => cat.slug === resolvedParams.categoria);
+  const subcategoria = categoria?.subcategorias.find(sub => sub.slug === resolvedParams.subcategoria);
   
   if (!categoria || !subcategoria) {
     return {
@@ -43,9 +44,10 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default function SubcategoriaPage({ params }: PageProps) {
-  const categoria = categorias.find(cat => cat.slug === params.categoria);
-  const subcategoria = categoria?.subcategorias.find(sub => sub.slug === params.subcategoria);
+export default async function SubcategoriaPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const categoria = categorias.find(cat => cat.slug === resolvedParams.categoria);
+  const subcategoria = categoria?.subcategorias.find(sub => sub.slug === resolvedParams.subcategoria);
   
   if (!categoria || !subcategoria) {
     notFound();
