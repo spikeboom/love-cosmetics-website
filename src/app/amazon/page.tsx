@@ -113,9 +113,9 @@ export default function ProtetorSolarPage() {
                 </div>
                 
                 {/* Main Image Container */}
-                <div className="flex-1 relative">
-                  <div className="aspect-square bg-white p-4 flex items-center justify-center">
-                    <div className="w-full h-full max-w-md max-h-md bg-gray-50 rounded flex items-center justify-center relative">
+                <div className="flex-1 relative group">
+                  <div className="aspect-square bg-white p-4 flex items-center justify-center relative overflow-hidden">
+                    <div className="w-full h-full max-w-md max-h-md bg-gray-50 rounded flex items-center justify-center relative cursor-zoom-in hover:scale-105 transition-transform">
                       <div className="text-gray-400 text-center">
                         <div className="w-48 h-48 mx-auto bg-gray-100 rounded mb-2 flex items-center justify-center">
                           <span className="text-4xl text-gray-300">📦</span>
@@ -124,16 +124,34 @@ export default function ProtetorSolarPage() {
                       </div>
                       
                       {/* Zoom indicator */}
-                      <div className="absolute top-2 right-2 bg-white shadow-md rounded px-2 py-1 text-xs text-gray-600 flex items-center">
+                      <div className="absolute top-2 right-2 bg-white shadow-md rounded px-2 py-1 text-xs text-gray-600 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="mr-1">🔍</span>
-                        Passar o mouse para aplicar zoom
+                        Clique para ampliar
                       </div>
                     </div>
+                    
+                    {/* Navigation Arrows */}
+                    <button className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50">
+                      <span className="text-gray-600">‹</span>
+                    </button>
+                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white shadow-lg rounded-full w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-50">
+                      <span className="text-gray-600">›</span>
+                    </button>
+                  </div>
+                  
+                  {/* Image Counter */}
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs">
+                    1 / 8
                   </div>
                   
                   {/* Share button */}
                   <button className="absolute top-4 right-4 bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-50">
                     <span className="text-gray-600">📤</span>
+                  </button>
+                  
+                  {/* Fullscreen button */}
+                  <button className="absolute top-4 left-4 bg-white shadow-md rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-gray-600 text-xs">⛶</span>
                   </button>
                 </div>
               </div>
@@ -171,6 +189,16 @@ export default function ProtetorSolarPage() {
               <p className="text-blue-600 hover:underline cursor-pointer text-sm">
                 Visite a loja L'Oréal Paris
               </p>
+              
+              {/* Social Indicators */}
+              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span>23 pessoas estão vendo este item agora</span>
+                </div>
+                <span className="text-gray-400">|</span>
+                <span>Comprado 156 vezes esta semana</span>
+              </div>
             </div>
 
             {/* Rating */}
@@ -189,16 +217,57 @@ export default function ProtetorSolarPage() {
 
             {/* Badges */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="bg-gray-900 text-white text-xs px-2 py-1 rounded">
-                Escolha da Amazon
+              <div className="relative group">
+                <span className="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-full font-semibold flex items-center gap-1">
+                  <span className="text-orange-400">★</span>
+                  Escolha da Amazon
+                </span>
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs p-2 rounded shadow-lg w-48 z-10">
+                  <div className="text-center">
+                    <p className="font-semibold mb-1">Amazon's Choice</p>
+                    <p>Produtos bem avaliados com bom preço e disponíveis para envio imediato.</p>
+                  </div>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                </div>
+              </div>
+              
+              <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded font-medium">
+                #1 Bestseller em Protetores Solares
               </span>
+              
               <span className="text-gray-700 text-sm font-semibold">
                 Mais de 50 compras no mês passado
+              </span>
+              
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                Produto sustentável
               </span>
             </div>
 
             {/* Price */}
-            <div className="space-y-2">
+            <div className="space-y-3">
+              {/* Limited Time Deal */}
+              <div className="bg-red-600 text-white p-3 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold">⚡ OFERTA RELÂMPAGO</span>
+                  <div className="flex items-center gap-1 text-sm">
+                    <span>Termina em:</span>
+                    <div className="flex gap-1 font-mono">
+                      <span className="bg-black px-1 rounded">05</span>
+                      <span>:</span>
+                      <span className="bg-black px-1 rounded">23</span>
+                      <span>:</span>
+                      <span className="bg-black px-1 rounded">47</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="bg-white text-red-600 px-2 py-1 rounded font-bold text-sm">-17%</div>
+                  <span className="text-lg font-bold">Economize R$ 8,59</span>
+                </div>
+              </div>
+              
               <div className="flex items-center gap-3">
                 <span className="text-lg text-red-700 font-normal bg-red-100 px-2 py-1 rounded">-17%</span>
                 <div className="flex items-baseline gap-2">
@@ -210,9 +279,10 @@ export default function ProtetorSolarPage() {
                 <span className="text-sm text-gray-600">De:</span>
                 <span className="text-sm text-gray-600 line-through">R$ 48,90</span>
               </div>
+            </div>
               
               {/* Detailed Delivery Info */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-blue-600 font-bold text-sm">prime</span>
                   <span className="text-sm text-green-700 font-semibold">
@@ -222,22 +292,104 @@ export default function ProtetorSolarPage() {
                 <div className="text-xs text-gray-600">
                   Se pedir dentro de <span className="text-green-700 font-medium">19 hrs 42 mins</span>
                 </div>
-                <div className="text-xs text-gray-600">
-                  Enviar para <span className="font-medium">Roberto</span> - <span className="font-medium">Manaus 69077747</span>
+                
+                {/* CEP Calculator */}
+                <div className="bg-gray-50 p-3 rounded border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-600">Enviar para <span className="font-medium">Roberto</span></span>
+                    <button className="text-blue-600 hover:underline text-xs">Alterar</button>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <input 
+                        type="text" 
+                        placeholder="Digite seu CEP" 
+                        className="w-full text-xs p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        defaultValue="69077-747"
+                      />
+                    </div>
+                    <button className="text-blue-600 hover:underline text-xs px-2">OK</button>
+                  </div>
                 </div>
+                
+                {/* Delivery Options */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      <span>Entrega Padrão GRÁTIS</span>
+                    </div>
+                    <span className="font-medium">Qui, 4 Set</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                      <span>Entrega Expressa</span>
+                    </div>
+                    <span className="font-medium">R$ 9,90 - Ter, 2 Set</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      <span>Entrega Agendada</span>
+                    </div>
+                    <span className="font-medium">R$ 5,90 - Escolha o dia</span>
+                  </div>
+                </div>
+                
                 <div className="bg-blue-50 p-2 rounded text-xs">
                   <span className="text-green-700 font-semibold">Adicione ao carrinho e ganhe 5% off.</span>
                   <button className="text-blue-600 hover:underline ml-1">Confira os termos</button>
                 </div>
               </div>
               
-              {/* Promo */}
-              <div className="bg-green-100 p-2 rounded text-sm">
-                <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                  Mais por Menos: 10%
-                </span>
-                <span className="ml-2">off em 10 itens</span>
-                <a href="#" className="text-blue-600 hover:underline ml-1">Comprar itens elegíveis</a>
+              {/* Coupons & Promos */}
+              <div className="space-y-2">
+                <div className="bg-green-100 p-2 rounded text-sm">
+                  <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                    Mais por Menos: 10%
+                  </span>
+                  <span className="ml-2">off em 10 itens</span>
+                  <a href="#" className="text-blue-600 hover:underline ml-1">Comprar itens elegíveis</a>
+                </div>
+                
+                {/* Clickable Coupons */}
+                <div className="space-y-2">
+                  <button className="w-full bg-white border-2 border-dashed border-green-400 hover:border-green-500 p-3 rounded-lg text-left transition-colors group">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">CUPOM</span>
+                          <span className="text-green-700 font-semibold">Extra 15% OFF</span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">Em compras acima de R$ 50,00</p>
+                      </div>
+                      <div className="text-green-600 group-hover:text-green-700">
+                        <span className="text-sm">Aplicar</span>
+                        <div className="w-6 h-6 border-2 border-green-500 rounded ml-2 flex items-center justify-center">
+                          <span className="text-xs">✓</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                  
+                  <button className="w-full bg-white border-2 border-dashed border-blue-400 hover:border-blue-500 p-3 rounded-lg text-left transition-colors group">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold">PRIME</span>
+                          <span className="text-blue-700 font-semibold">Frete grátis</span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">Para membros Prime em qualquer valor</p>
+                      </div>
+                      <div className="text-blue-600 group-hover:text-blue-700">
+                        <span className="text-sm">Ativar</span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -333,10 +485,38 @@ export default function ProtetorSolarPage() {
                     <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-4 rounded-full font-medium text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-700">
                       Comprar agora
                     </button>
+                    
+                    {/* 1-Click Purchase */}
+                    <div className="border-t pt-3">
+                      <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 px-4 rounded-full font-medium text-sm transition-colors shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                        <div className="flex items-center justify-center gap-2">
+                          <span>⚡</span>
+                          <span>Comprar com 1-Click</span>
+                        </div>
+                      </button>
+                      <p className="text-xs text-gray-500 mt-1 text-center">
+                        Sem confirmação adicional
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Gift Options */}
+                  <div className="border-t pt-3">
+                    <div className="flex items-start gap-2">
+                      <input type="checkbox" id="gift-option" className="mt-1" />
+                      <div className="flex-1">
+                        <label htmlFor="gift-option" className="text-sm font-medium text-gray-800">
+                          Este pedido é um presente
+                        </label>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Adicionar embalagem para presente e cartão personalizado
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Wishlist and compare */}
-                  <div className="flex gap-4 pt-2">
+                  <div className="flex gap-4 pt-3">
                     <button className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
                       <span>♡</span>
                       Adicionar à Lista
@@ -344,6 +524,18 @@ export default function ProtetorSolarPage() {
                     <button className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
                       <span>⚖️</span>
                       Comparar
+                    </button>
+                  </div>
+                  
+                  {/* Additional Options */}
+                  <div className="pt-3 space-y-2">
+                    <button className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                      <span>🔔</span>
+                      Avisar quando o preço baixar
+                    </button>
+                    <button className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                      <span>📦</span>
+                      Ver outros vendedores
                     </button>
                   </div>
                 </div>
@@ -716,6 +908,103 @@ export default function ProtetorSolarPage() {
             </div>
           </section>
 
+          {/* Questions & Answers */}
+          <section className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-medium text-gray-900">Perguntas e respostas dos clientes</h2>
+              <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded font-medium text-sm">
+                Fazer uma pergunta
+              </button>
+            </div>
+            
+            {/* Search Questions */}
+            <div className="mb-6">
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Pesquisar perguntas e respostas sobre este produto..."
+                  className="w-full p-3 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <span className="text-gray-400">🔍</span>
+                </button>
+              </div>
+            </div>
+            
+            {/* Q&A List */}
+            <div className="space-y-6">
+              {/* Question 1 */}
+              <div className="border-b border-gray-200 pb-6">
+                <div className="mb-3">
+                  <h3 className="font-medium text-gray-900 mb-2">P: Este protetor solar é resistente à água?</h3>
+                  <p className="text-sm text-gray-600">Por Maria Silva em 20 de agosto de 2024</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-800 mb-2">
+                    <strong>R:</strong> Sim, o L'Oréal UV Defender Hidratação FPS 60 é resistente à água por até 80 minutos. 
+                    Recomendamos reaplicar após transpiração excessiva, natação ou banho de mar para manter a proteção ideal.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500">Por L'Oréal Paris em 21 de agosto de 2024</p>
+                    <div className="flex gap-2">
+                      <button className="text-xs text-blue-600 hover:underline">👍 Útil (23)</button>
+                      <button className="text-xs text-gray-500 hover:underline">Reportar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Question 2 */}
+              <div className="border-b border-gray-200 pb-6">
+                <div className="mb-3">
+                  <h3 className="font-medium text-gray-900 mb-2">P: Pode ser usado como base para maquiagem?</h3>
+                  <p className="text-sm text-gray-600">Por Ana Costa em 15 de agosto de 2024</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-800 mb-2">
+                    <strong>R:</strong> Perfeitamente! A textura leve e não oleosa deste protetor solar foi desenvolvida para servir como uma excelente base para maquiagem. 
+                    Aguarde cerca de 2-3 minutos após a aplicação antes de aplicar a maquiagem.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500">Por cliente verificado em 16 de agosto de 2024</p>
+                    <div className="flex gap-2">
+                      <button className="text-xs text-blue-600 hover:underline">👍 Útil (41)</button>
+                      <button className="text-xs text-gray-500 hover:underline">Reportar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Question 3 */}
+              <div className="pb-6">
+                <div className="mb-3">
+                  <h3 className="font-medium text-gray-900 mb-2">P: Quanto tempo dura o produto com uso diário?</h3>
+                  <p className="text-sm text-gray-600">Por João Oliveira em 10 de agosto de 2024</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-800 mb-2">
+                    <strong>R:</strong> Com aplicação diária no rosto, a embalagem de 40g dura aproximadamente 1 mês e meio a 2 meses, 
+                    dependendo da quantidade aplicada. Recomendamos aplicar uma camada generosa para proteção adequada.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-500">Por cliente verificado em 11 de agosto de 2024</p>
+                    <div className="flex gap-2">
+                      <button className="text-xs text-blue-600 hover:underline">👍 Útil (18)</button>
+                      <button className="text-xs text-gray-500 hover:underline">Reportar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Load More */}
+            <div className="text-center mt-6">
+              <button className="text-blue-600 hover:underline font-medium">
+                Ver todas as 47 perguntas e respostas
+              </button>
+            </div>
+          </section>
+
           {/* Related Products */}
           <section className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
@@ -748,7 +1037,7 @@ export default function ProtetorSolarPage() {
             </div>
           </section>
 
-          {/* Customer Reviews Preview */}
+          {/* Customer Reviews Advanced */}
           <section className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -765,6 +1054,86 @@ export default function ProtetorSolarPage() {
                 </div>
               </div>
               <a href="#" className="text-blue-600 hover:underline text-sm">Ver todas as avaliações</a>
+            </div>
+            
+            {/* Rating Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="font-medium text-gray-900 mb-3">Distribuição das avaliações</h3>
+                <div className="space-y-2">
+                  {[
+                    { stars: 5, percentage: 73, count: 2741 },
+                    { stars: 4, percentage: 15, count: 563 },
+                    { stars: 3, percentage: 8, count: 300 },
+                    { stars: 2, percentage: 3, count: 113 },
+                    { stars: 1, percentage: 1, count: 37 }
+                  ].map((rating) => (
+                    <div key={rating.stars} className="flex items-center gap-2 text-sm">
+                      <span className="w-8">{rating.stars} ★</span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-3">
+                        <div 
+                          className="bg-yellow-400 h-3 rounded-full" 
+                          style={{width: `${rating.percentage}%`}}
+                        ></div>
+                      </div>
+                      <span className="text-gray-600 w-8">{rating.percentage}%</span>
+                      <button className="text-blue-600 hover:underline w-12 text-right">
+                        {rating.count.toLocaleString('pt-BR')}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-gray-900 mb-3">Avaliações por tópico</h3>
+                <div className="space-y-3">
+                  {[
+                    { topic: "Proteção", rating: 4.8, mentions: "Mencionado em 89% das avaliações" },
+                    { topic: "Textura", rating: 4.7, mentions: "Mencionado em 76% das avaliações" },
+                    { topic: "Hidratação", rating: 4.6, mentions: "Mencionado em 82% das avaliações" },
+                    { topic: "Custo-benefício", rating: 4.3, mentions: "Mencionado em 64% das avaliações" }
+                  ].map((item) => (
+                    <div key={item.topic} className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium text-gray-900">{item.topic}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-yellow-400">★</span>
+                          <span className="text-sm text-gray-600">{item.rating}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500">{item.mentions}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Review Filters */}
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="text-sm font-medium text-gray-700">Filtrar por:</span>
+                <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                  <option>Todas as estrelas</option>
+                  <option>5 estrelas</option>
+                  <option>4 estrelas</option>
+                  <option>3 estrelas</option>
+                  <option>2 estrelas</option>
+                  <option>1 estrela</option>
+                </select>
+                <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                  <option>Todas as avaliações</option>
+                  <option>Com fotos</option>
+                  <option>Compra verificada</option>
+                  <option>Mais úteis</option>
+                </select>
+                <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                  <option>Mais recentes</option>
+                  <option>Mais antigas</option>
+                  <option>Mais úteis</option>
+                  <option>Menor classificação</option>
+                </select>
+              </div>
             </div>
             
             <div className="space-y-4">
@@ -827,7 +1196,6 @@ export default function ProtetorSolarPage() {
             </div>
           </section>
         </div>
-      </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white mt-16">
