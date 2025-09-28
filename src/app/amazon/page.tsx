@@ -85,8 +85,8 @@ export default function ProtetorSolarPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Product Images */}
-          <div className="flex flex-col">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="flex flex-col row-span-4">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden sticky top-4">
               <div className="flex">
                 {/* Left Thumbnail Column */}
                 <div className="flex flex-col gap-2 p-4 pr-2">
@@ -582,10 +582,9 @@ export default function ProtetorSolarPage() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Additional Sections */}
-        <div className="mt-12 space-y-8">
+          {/* Additional Sections */}
+          <div className="mt-12 space-y-8">
           
           {/* Frequently Bought Together */}
           <section className="bg-white rounded-lg shadow-sm p-6">
@@ -1196,6 +1195,7 @@ export default function ProtetorSolarPage() {
             </div>
           </section>
         </div>
+      </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white mt-16">
