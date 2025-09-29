@@ -11,53 +11,71 @@ const BLING_TOKEN_URL = "https://api.bling.com.br/Api/v3/oauth/token";
 // Provider constante para o Bling
 const BLING_PROVIDER = "bling";
 
-// Salvar tokens no banco de dados
+// Salvar tokens no banco de dados (upsert)
 async function saveTokensToDatabase(accessToken: string, refreshToken: string, expiresIn: number): Promise<void> {
   try {
     const now = new Date();
     const expiresAt = new Date(Date.now() + (expiresIn * 1000));
     const refreshExpiresAt = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)); // 30 dias
 
-    // Desativar tokens existentes do Bling
-    await prisma.authToken.updateMany({
-      where: {
-        provider: BLING_PROVIDER,
-        isActive: true
-      },
-      data: {
-        isActive: false
-      }
+    // Buscar token existente
+    const existingToken = await prisma.authToken.findFirst({
+      where: { provider: BLING_PROVIDER }
     });
 
-    // Criar novo token
-    await prisma.authToken.create({
-      data: {
-        provider: BLING_PROVIDER,
-        accessToken,
-        refreshToken,
-        tokenType: "Bearer",
-        expiresAt,
-        refreshExpiresAt,
-        clientId: BLING_CLIENT_ID,
-        isActive: true
-      }
-    });
+    if (existingToken) {
+      // Atualizar token existente
+      await prisma.authToken.update({
+        where: { id: existingToken.id },
+        data: {
+          accessToken,
+          refreshToken,
+          tokenType: "Bearer",
+          expiresAt,
+          refreshExpiresAt,
+          clientId: BLING_CLIENT_ID,
+          isActive: true
+        }
+      });
 
-    logMessage("Tokens salvos no banco com sucesso", {
-      provider: BLING_PROVIDER,
-      expiresAt: expiresAt.toISOString(),
-      refreshExpiresAt: refreshExpiresAt.toISOString()
-    });
+      logMessage("Token atualizado no banco com sucesso", {
+        provider: BLING_PROVIDER,
+        tokenId: existingToken.id,
+        expiresAt: expiresAt.toISOString(),
+        refreshExpiresAt: refreshExpiresAt.toISOString()
+      });
+    } else {
+      // Criar novo token
+      await prisma.authToken.create({
+        data: {
+          provider: BLING_PROVIDER,
+          accessToken,
+          refreshToken,
+          tokenType: "Bearer",
+          expiresAt,
+          refreshExpiresAt,
+          clientId: BLING_CLIENT_ID,
+          isActive: true
+        }
+      });
+
+      logMessage("Token criado no banco com sucesso", {
+        provider: BLING_PROVIDER,
+        expiresAt: expiresAt.toISOString(),
+        refreshExpiresAt: refreshExpiresAt.toISOString()
+      });
+    }
   } catch (error) {
     logMessage("Erro ao salvar tokens no banco", error);
     throw error;
   }
 }
 
-// Buscar token ativo do banco
+// Buscar token ativo do banco (ou reativar se tiver refresh válido)
 async function getActiveToken(): Promise<{ accessToken: string; refreshToken: string | null; expiresAt: Date } | null> {
   try {
-    const token = await prisma.authToken.findFirst({
+    // Primeiro tentar buscar token ativo
+    let token = await prisma.authToken.findFirst({
       where: {
         provider: BLING_PROVIDER,
         isActive: true
@@ -66,6 +84,36 @@ async function getActiveToken(): Promise<{ accessToken: string; refreshToken: st
         createdAt: 'desc'
       }
     });
+
+    // Se não encontrou token ativo, verificar se há token inativo com refresh válido
+    if (!token) {
+      const now = new Date();
+      const inactiveTokenWithValidRefresh = await prisma.authToken.findFirst({
+        where: {
+          provider: BLING_PROVIDER,
+          isActive: false,
+          refreshExpiresAt: {
+            gt: now // refresh token ainda não expirou
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      if (inactiveTokenWithValidRefresh) {
+        logMessage("Token inativo encontrado com refresh válido, reativando automaticamente", {
+          tokenId: inactiveTokenWithValidRefresh.id,
+          refreshExpiresAt: inactiveTokenWithValidRefresh.refreshExpiresAt
+        });
+
+        // Reativar o token
+        token = await prisma.authToken.update({
+          where: { id: inactiveTokenWithValidRefresh.id },
+          data: { isActive: true }
+        });
+      }
+    }
 
     if (!token) {
       return null;
@@ -167,7 +215,13 @@ export async function refreshAccessToken(): Promise<string> {
     const tokenData = await getActiveToken();
 
     if (!tokenData || !tokenData.refreshToken) {
-      throw new Error("Refresh token não encontrado");
+      const errorMsg = !tokenData ? "Token não encontrado no banco" : "Refresh token é null";
+      logMessage("Não foi possível renovar token", {
+        reason: errorMsg,
+        hasTokenData: !!tokenData,
+        hasRefreshToken: !!tokenData?.refreshToken
+      });
+      throw new Error(`Refresh token não encontrado: ${errorMsg}`);
     }
 
     const refreshToken = tokenData.refreshToken;
@@ -182,7 +236,8 @@ export async function refreshAccessToken(): Promise<string> {
 
     logMessage("Renovando access token", {
       url: BLING_TOKEN_URL,
-      refresh_token_length: refreshToken.length
+      refresh_token_length: refreshToken.length,
+      grant_type: "refresh_token"
     });
 
     const response = await fetch(BLING_TOKEN_URL, {
@@ -196,24 +251,31 @@ export async function refreshAccessToken(): Promise<string> {
 
     if (!response.ok) {
       const errorData = await response.text();
-      logMessage("Erro ao renovar token", {
+      logMessage("Erro ao renovar token - API Bling retornou erro", {
         status: response.status,
-        error: errorData
+        statusText: response.statusText,
+        error: errorData,
+        possibleCauses: "Refresh token pode ter expirado ou sido revogado"
       });
-      throw new Error(`Erro ao renovar token: ${response.status}`);
+      throw new Error(`Erro ao renovar token: ${response.status} - ${errorData}`);
     }
 
     const refreshResponse = await response.json();
     await saveTokensToDatabase(refreshResponse.access_token, refreshResponse.refresh_token || refreshToken, refreshResponse.expires_in);
 
-    logMessage("Token renovado com sucesso", {
+    logMessage("Token renovado com sucesso via refresh token", {
       expires_in: refreshResponse.expires_in,
-      token_type: refreshResponse.token_type
+      token_type: refreshResponse.token_type,
+      new_refresh_token_received: !!refreshResponse.refresh_token
     });
 
     return refreshResponse.access_token;
   } catch (error) {
-    logMessage("Erro na renovação de token", error);
+    logMessage("Erro crítico na renovação de token", {
+      error,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      errorMessage: error instanceof Error ? error.message : String(error)
+    });
     throw error;
   }
 }
@@ -229,9 +291,21 @@ export async function getCurrentToken(): Promise<string | null> {
     }
 
     if (isTokenExpired(tokenData.expiresAt)) {
-      logMessage("Token expirado, renovando automaticamente", { expiresAt: tokenData.expiresAt });
-      const newToken = await refreshAccessToken();
-      return newToken;
+      logMessage("Token expirado, renovando automaticamente", {
+        expiresAt: tokenData.expiresAt,
+        hasRefreshToken: !!tokenData.refreshToken
+      });
+
+      try {
+        const newToken = await refreshAccessToken();
+        return newToken;
+      } catch (refreshError) {
+        logMessage("Erro ao renovar token automaticamente", {
+          error: refreshError,
+          message: "Sistema não conseguiu renovar o token. Verifique se o refresh token ainda é válido."
+        });
+        return null;
+      }
     }
 
     // Atualizar último uso
