@@ -11,7 +11,12 @@
       "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
       "Bash(copy:*)",
       "Bash(powershell:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:developer.bling.com.br)",
+      "WebFetch(domain:ajuda.bling.com.br)",
+      "Bash(npm run lint:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []
