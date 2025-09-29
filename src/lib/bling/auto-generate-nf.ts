@@ -40,7 +40,18 @@ export async function tryAutoGenerateNF(pedidoId: string): Promise<boolean> {
     const orderData = {
       id: pedido.id,
       items: pedido.items as unknown as PedidoItem[],
-      additionalInfo: `Venda pela Internet. Pedido ${pedido.id}`
+      additionalInfo: `Venda pela Internet. Pedido ${pedido.id}`,
+      // Dados do cliente do formulário
+      nome: pedido.nome,
+      sobrenome: pedido.sobrenome,
+      cpf: pedido.cpf,
+      endereco: pedido.endereco,
+      numero: pedido.numero,
+      complemento: pedido.complemento,
+      bairro: pedido.bairro,
+      cep: pedido.cep,
+      cidade: pedido.cidade,
+      estado: pedido.estado
     };
 
     // Criar nota fiscal no Bling

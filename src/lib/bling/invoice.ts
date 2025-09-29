@@ -22,6 +22,17 @@ interface OrderData {
   id: string;
   items: OrderItem[];
   additionalInfo?: string;
+  // Dados do cliente do formulário
+  nome: string;
+  sobrenome: string;
+  cpf: string;
+  endereco: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cep: string;
+  cidade: string;
+  estado: string;
 }
 
 // Interface para resposta da API do Bling
@@ -63,22 +74,22 @@ export async function createInvoice(
     // Monta o corpo da requisição
     const invoiceData = {
       tipo: 1, // Nota fiscal de saída
-      serie: 1,
+      numero: orderData.id, // Campo obrigatório - usando ID do pedido
       dataOperacao: new Date().toISOString().split('T')[0] + " " + new Date().toTimeString().split(' ')[0], // Data e hora atual
       numeroPedidoLoja: `LV-${orderData.id}`,
       contato: {
-        nome: "Roberto de Almeida Cruz Neto",
+        nome: `${orderData.nome} ${orderData.sobrenome}`,
         tipoPessoa: "F", // Pessoa Física
-        numeroDocumento: "01055044248", // CPF sem pontuação
+        numeroDocumento: orderData.cpf.replace(/\D/g, ""), // CPF sem pontuação
         contribuinte: 9, // Não contribuinte
         endereco: {
-          endereco: "Rua Professor Lázaro Gonçalves",
-          numero: "SN",
-          complemento: "Bloco J, apto 201",
-          bairro: "Japiim",
-          cep: "69.077-747",
-          municipio: "Manaus",
-          uf: "AM"
+          endereco: orderData.endereco,
+          numero: orderData.numero,
+          ...(orderData.complemento ? { complemento: orderData.complemento } : {}),
+          bairro: orderData.bairro,
+          cep: orderData.cep.replace(/\D/g, ""), // CEP sem pontuação
+          municipio: orderData.cidade,
+          uf: orderData.estado
         }
       },
       naturezaOperacao: { id: 15106222880 }, // ID fornecido no exemplo
