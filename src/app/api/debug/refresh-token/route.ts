@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { refreshAccessToken, getTokenInfo } from "@/lib/bling/simple-auth";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     console.log("\n=== TESTE DE REFRESH TOKEN ===\n");
 

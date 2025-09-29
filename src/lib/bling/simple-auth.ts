@@ -14,7 +14,6 @@ const BLING_PROVIDER = "bling";
 // Salvar tokens no banco de dados (upsert)
 async function saveTokensToDatabase(accessToken: string, refreshToken: string, expiresIn: number): Promise<void> {
   try {
-    const now = new Date();
     const expiresAt = new Date(Date.now() + (expiresIn * 1000));
     const refreshExpiresAt = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)); // 30 dias
 
