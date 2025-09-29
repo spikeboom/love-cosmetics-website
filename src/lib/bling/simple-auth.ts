@@ -1,4 +1,5 @@
 import { createLogger } from "@/utils/logMessage";
+import { prisma } from "@/lib/prisma";
 
 const logMessage = createLogger();
 
@@ -7,17 +8,102 @@ const BLING_CLIENT_ID = "0fc9335fe026c928d97d7571eca24580ebe72aae";
 const BLING_CLIENT_SECRET = "2de51d4c3ac3aff33272c6c4843aaf0027655f6b15ef904bf3b42de65469";
 const BLING_TOKEN_URL = "https://api.bling.com.br/Api/v3/oauth/token";
 
-// Armazenar token em memória (simples) - temporário para desenvolvimento
-let currentAccessToken: string | null = null;
+// Provider constante para o Bling
+const BLING_PROVIDER = "bling";
 
-// Para desenvolvimento - salvar em env temporário
-function saveTokenToEnv(token: string) {
-  process.env.BLING_TEMP_TOKEN = token;
-  currentAccessToken = token;
+// Salvar tokens no banco de dados
+async function saveTokensToDatabase(accessToken: string, refreshToken: string, expiresIn: number): Promise<void> {
+  try {
+    const now = new Date();
+    const expiresAt = new Date(Date.now() + (expiresIn * 1000));
+    const refreshExpiresAt = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)); // 30 dias
+
+    // Desativar tokens existentes do Bling
+    await prisma.authToken.updateMany({
+      where: {
+        provider: BLING_PROVIDER,
+        isActive: true
+      },
+      data: {
+        isActive: false
+      }
+    });
+
+    // Criar novo token
+    await prisma.authToken.create({
+      data: {
+        provider: BLING_PROVIDER,
+        accessToken,
+        refreshToken,
+        tokenType: "Bearer",
+        expiresAt,
+        refreshExpiresAt,
+        clientId: BLING_CLIENT_ID,
+        isActive: true
+      }
+    });
+
+    logMessage("Tokens salvos no banco com sucesso", {
+      provider: BLING_PROVIDER,
+      expiresAt: expiresAt.toISOString(),
+      refreshExpiresAt: refreshExpiresAt.toISOString()
+    });
+  } catch (error) {
+    logMessage("Erro ao salvar tokens no banco", error);
+    throw error;
+  }
 }
 
-function getTokenFromEnv(): string | null {
-  return process.env.BLING_TEMP_TOKEN || currentAccessToken;
+// Buscar token ativo do banco
+async function getActiveToken(): Promise<{ accessToken: string; refreshToken: string | null; expiresAt: Date } | null> {
+  try {
+    const token = await prisma.authToken.findFirst({
+      where: {
+        provider: BLING_PROVIDER,
+        isActive: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    if (!token) {
+      return null;
+    }
+
+    return {
+      accessToken: token.accessToken,
+      refreshToken: token.refreshToken,
+      expiresAt: token.expiresAt
+    };
+  } catch (error) {
+    logMessage("Erro ao buscar token do banco", error);
+    return null;
+  }
+}
+
+// Verificar se token está expirado
+function isTokenExpired(expiresAt: Date): boolean {
+  const now = new Date();
+  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+  return expiresAt <= fiveMinutesFromNow;
+}
+
+// Atualizar último uso do token
+async function updateLastUsed(): Promise<void> {
+  try {
+    await prisma.authToken.updateMany({
+      where: {
+        provider: BLING_PROVIDER,
+        isActive: true
+      },
+      data: {
+        lastUsedAt: new Date()
+      }
+    });
+  } catch (error) {
+    logMessage("Erro ao atualizar last used", error);
+  }
 }
 
 // Troca o code por access_token
@@ -59,24 +145,177 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
       throw new Error(`Erro ao obter token: ${response.status}`);
     }
 
-    const tokenData = await response.json();
-    saveTokenToEnv(tokenData.access_token);
+    const tokenResponse = await response.json();
+    await saveTokensToDatabase(tokenResponse.access_token, tokenResponse.refresh_token, tokenResponse.expires_in);
 
     logMessage("Token obtido com sucesso", {
-      expires_in: tokenData.expires_in,
-      token_type: tokenData.token_type
+      expires_in: tokenResponse.expires_in,
+      token_type: tokenResponse.token_type,
+      has_refresh_token: !!tokenResponse.refresh_token
     });
 
-    return tokenData.access_token;
+    return tokenResponse.access_token;
   } catch (error) {
     logMessage("Erro na troca de token", error);
     throw error;
   }
 }
 
-// Obter token atual (simples)
-export function getCurrentToken(): string | null {
-  const token = getTokenFromEnv();
-  console.log("Token atual:", token);
-  return token;
+// Renovar access token usando refresh token
+export async function refreshAccessToken(): Promise<string> {
+  try {
+    const tokenData = await getActiveToken();
+
+    if (!tokenData || !tokenData.refreshToken) {
+      throw new Error("Refresh token não encontrado");
+    }
+
+    const refreshToken = tokenData.refreshToken;
+
+    const credentials = `${BLING_CLIENT_ID}:${BLING_CLIENT_SECRET}`;
+    const encodedCredentials = Buffer.from(credentials).toString('base64');
+
+    const requestBody = new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    });
+
+    logMessage("Renovando access token", {
+      url: BLING_TOKEN_URL,
+      refresh_token_length: refreshToken.length
+    });
+
+    const response = await fetch(BLING_TOKEN_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${encodedCredentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: requestBody,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      logMessage("Erro ao renovar token", {
+        status: response.status,
+        error: errorData
+      });
+      throw new Error(`Erro ao renovar token: ${response.status}`);
+    }
+
+    const refreshResponse = await response.json();
+    await saveTokensToDatabase(refreshResponse.access_token, refreshResponse.refresh_token || refreshToken, refreshResponse.expires_in);
+
+    logMessage("Token renovado com sucesso", {
+      expires_in: refreshResponse.expires_in,
+      token_type: refreshResponse.token_type
+    });
+
+    return refreshResponse.access_token;
+  } catch (error) {
+    logMessage("Erro na renovação de token", error);
+    throw error;
+  }
+}
+
+// Obter token atual com renovação automática
+export async function getCurrentToken(): Promise<string | null> {
+  try {
+    const tokenData = await getActiveToken();
+
+    if (!tokenData) {
+      logMessage("Token não encontrado no banco", { tokenData: null });
+      return null;
+    }
+
+    if (isTokenExpired(tokenData.expiresAt)) {
+      logMessage("Token expirado, renovando automaticamente", { expiresAt: tokenData.expiresAt });
+      const newToken = await refreshAccessToken();
+      return newToken;
+    }
+
+    // Atualizar último uso
+    try {
+      await updateLastUsed();
+    } catch (error) {
+      logMessage("Erro ao atualizar lastUsedAt, continuando com token", error);
+    }
+
+    return tokenData.accessToken;
+  } catch (error) {
+    logMessage("Erro ao obter token atual", error);
+    return null;
+  }
+}
+
+// Função para fazer requisições autenticadas com renovação automática
+export async function makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
+  try {
+    const token = await getCurrentToken();
+
+    if (!token) {
+      throw new Error("Token não disponível");
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    // Se a resposta indica token inválido, tenta renovar uma vez
+    if (response.status === 401) {
+      logMessage("Token inválido, tentando renovar", { status: response.status });
+
+      const newToken = await refreshAccessToken();
+
+      return await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          "Authorization": `Bearer ${newToken}`,
+        },
+      });
+    }
+
+    return response;
+  } catch (error) {
+    logMessage("Erro na requisição autenticada", error);
+    throw error;
+  }
+}
+
+// Função para obter informações detalhadas dos tokens (para debug)
+export async function getTokenInfo() {
+  const now = new Date();
+  const tokenData = await getActiveToken();
+
+  return {
+    timestamp: now.getTime(),
+    currentTime: now.toISOString(),
+    database: {
+      hasActiveToken: !!tokenData,
+      accessToken: {
+        value: tokenData?.accessToken ? `${tokenData.accessToken.substring(0, 20)}...` : null,
+        exists: !!tokenData?.accessToken,
+        length: tokenData?.accessToken?.length || 0
+      },
+      refreshToken: {
+        value: tokenData?.refreshToken ? `${tokenData.refreshToken.substring(0, 20)}...` : null,
+        exists: !!tokenData?.refreshToken,
+        length: tokenData?.refreshToken?.length || 0
+      },
+      expiration: {
+        expiresAt: tokenData?.expiresAt?.toISOString() || null,
+        timeUntilExpiration: tokenData?.expiresAt ? Math.max(0, tokenData.expiresAt.getTime() - now.getTime()) : null,
+        timeUntilExpirationMinutes: tokenData?.expiresAt ? Math.max(0, Math.floor((tokenData.expiresAt.getTime() - now.getTime()) / 60000)) : null,
+        isExpired: tokenData?.expiresAt ? isTokenExpired(tokenData.expiresAt) : true,
+        willExpireSoon: tokenData?.expiresAt ? isTokenExpired(tokenData.expiresAt) : true
+      }
+    },
+    provider: BLING_PROVIDER,
+    clientId: BLING_CLIENT_ID
+  };
 }

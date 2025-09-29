@@ -1,5 +1,6 @@
 import { createLogger } from "@/utils/logMessage";
 import { mapProductToBling } from "./product-mapping";
+import { makeAuthenticatedRequest } from "./simple-auth";
 
 const logMessage = createLogger();
 
@@ -92,7 +93,7 @@ export async function createInvoice(
           uf: orderData.estado
         }
       },
-      naturezaOperacao: { id: 15106222880 }, // ID fornecido no exemplo
+      naturezaOperacao: { id: 15106222870 }, // ID fornecido no exemplo
       presenca: 2, // Venda pela internet
       consumidorFinal: true,
       informacoesComplementares: orderData.additionalInfo || `Venda pela Internet. Pedido LV-${orderData.id}`,
@@ -110,10 +111,9 @@ export async function createInvoice(
     });
 
     // Faz a requisição para criar a nota fiscal
-    const response = await fetch(`${BLING_API_BASE_URL}/nfe`, {
+    const response = await makeAuthenticatedRequest(`${BLING_API_BASE_URL}/nfe`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(invoiceData),
@@ -152,10 +152,9 @@ export async function getInvoice(
   invoiceId: number
 ): Promise<BlingNFResponse> {
   try {
-    const response = await fetch(`${BLING_API_BASE_URL}/nfe/${invoiceId}`, {
+    const response = await makeAuthenticatedRequest(`${BLING_API_BASE_URL}/nfe/${invoiceId}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     });

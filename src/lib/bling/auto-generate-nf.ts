@@ -20,7 +20,7 @@ interface PedidoItem {
 export async function tryAutoGenerateNF(pedidoId: string): Promise<boolean> {
   try {
     // Verificar se há token disponível
-    const accessToken = getCurrentToken();
+    const accessToken = await getCurrentToken();
     if (!accessToken) {
       logMessage("Geração automática de NF ignorada - Token não disponível", { pedidoId });
       return false;
@@ -47,7 +47,7 @@ export async function tryAutoGenerateNF(pedidoId: string): Promise<boolean> {
       cpf: pedido.cpf,
       endereco: pedido.endereco,
       numero: pedido.numero,
-      complemento: pedido.complemento,
+      complemento: pedido.complemento || undefined,
       bairro: pedido.bairro,
       cep: pedido.cep,
       cidade: pedido.cidade,

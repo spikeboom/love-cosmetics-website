@@ -182,3 +182,35 @@ model EnderecoCliente {
   @@index([principal])
 }
 
+// ============================================
+// SISTEMA DE TOKENS DE AUTENTICAÇÃO (BLING API)
+// ============================================
+
+model AuthToken {
+  id            String    @id @default(uuid())
+  provider      String    // "bling", "mercadopago", etc
+  accessToken   String    @db.Text
+  refreshToken  String?   @db.Text
+  tokenType     String    @default("Bearer")
+
+  // Controle de expiração
+  expiresAt     DateTime
+  refreshExpiresAt DateTime?
+
+  // Metadados
+  scope         String?
+  clientId      String?
+
+  // Controle
+  isActive      Boolean   @default(true)
+  lastUsedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Índices para performance
+  @@index([provider, isActive])
+  @@index([expiresAt])
+  @@index([refreshExpiresAt])
+  @@unique([provider], name: "unique_active_provider")
+}
+

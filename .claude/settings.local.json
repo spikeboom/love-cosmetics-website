@@ -16,7 +16,9 @@
       "WebFetch(domain:developer.bling.com.br)",
       "WebFetch(domain:ajuda.bling.com.br)",
       "Bash(npm run lint:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: integrar dados do formulário de pedido com API do Bling\n\n- Atualizar invoice.ts para usar dados reais do cliente em vez de dados fixos\n- Adicionar campos obrigatórios: nome, cpf, endereço completo do formulário\n- Incluir campo ''numero'' obrigatório na estrutura da nota fiscal\n- Modificar auto-generate-nf.ts para passar dados completos do pedido\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

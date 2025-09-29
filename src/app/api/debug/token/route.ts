@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentToken } from "@/lib/bling/simple-auth";
+import { getCurrentToken, getTokenInfo } from "@/lib/bling/simple-auth";
 
 export async function GET(req: NextRequest) {
-  const token = getCurrentToken();
+  const token = await getCurrentToken();
+  const tokenInfo = await getTokenInfo();
 
   return NextResponse.json({
-    hasToken: !!token,
-    fullToken: token,
-    envVar: process.env.BLING_TEMP_TOKEN
+    ...tokenInfo,
+    getCurrentTokenResult: {
+      value: token ? `${token.substring(0, 20)}...` : null,
+      fullValue: token,
+      exists: !!token
+    },
+    durations: {
+      accessTokenDuration: "6 horas (21600 segundos)",
+      refreshTokenDuration: "30 dias"
+    }
   });
 }
