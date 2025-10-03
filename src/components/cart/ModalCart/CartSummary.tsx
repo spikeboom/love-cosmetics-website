@@ -3,6 +3,7 @@ import { CouponInputSection } from "./CouponInputSection";
 import { AppliedCouponsSection } from "./AppliedCouponsSection";
 import { TotalsSection } from "./TotalsSection";
 import { CheckoutActions } from "./CheckoutActions";
+import { useMeuContexto } from "@/components/common/Context/context";
 
 export function CartSummary({
   openCupom,
@@ -19,10 +20,12 @@ export function CartSummary({
   setOpenCart,
   setSidebarMounted,
 }: any) {
+  const { freight } = useMeuContexto();
+
   return (
     <div className="px-[12px] pb-[12px] pt-[4px]">
       <FreightSection />
-      <CouponInputSection 
+      <CouponInputSection
         openCupom={openCupom}
         setOpenCupom={setOpenCupom}
         cupom={cupom}
@@ -32,10 +35,11 @@ export function CartSummary({
       />
       <AppliedCouponsSection cupons={cupons} removeCoupon={removeCoupon} />
       <TotalsSection descontos={descontos} total={total} />
-      <CheckoutActions 
-        setOpenCart={setOpenCart} 
-        cart={cart} 
-        setSidebarMounted={setSidebarMounted} 
+      <CheckoutActions
+        setOpenCart={setOpenCart}
+        cart={cart}
+        setSidebarMounted={setSidebarMounted}
+        hasCalculatedFreight={freight.hasCalculated}
       />
     </div>
   );

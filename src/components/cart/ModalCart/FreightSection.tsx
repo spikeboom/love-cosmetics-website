@@ -17,6 +17,7 @@ export function FreightSection() {
     hasCalculated,
     availableServices,
     setSelectedFreight,
+    resetFreight,
   } = freight;
 
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
@@ -30,11 +31,17 @@ export function FreightSection() {
 
   // Recalcular frete automaticamente quando o carrinho mudar
   useEffect(() => {
+    const cartItems = Object.values(cart);
+
+    // Se carrinho estiver vazio, limpar valores de frete
+    if (cartItems.length === 0) {
+      resetFreight();
+      return;
+    }
+
+    // Se tem CEP e já calculou antes, recalcular
     if (cep && hasCalculated) {
-      const cartItems = Object.values(cart);
-      if (cartItems.length > 0) {
-        calculateFreight(cep, cartItems);
-      }
+      calculateFreight(cep, cartItems);
     }
   }, [cart]); // Recalcula quando cart mudar (adicionar/remover/mudar quantidade)
 

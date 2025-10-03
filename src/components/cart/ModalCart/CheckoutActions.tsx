@@ -1,10 +1,14 @@
 import Link from "next/link";
 
-export function CheckoutActions({ 
-  setOpenCart, 
-  cart, 
-  setSidebarMounted 
+export function CheckoutActions({
+  setOpenCart,
+  cart,
+  setSidebarMounted,
+  hasCalculatedFreight
 }: any) {
+  const isCartEmpty = Object.keys(cart).length === 0;
+  const canCheckout = !isCartEmpty && hasCalculatedFreight;
+
   return (
     <div className="flex items-center justify-end gap-[8px]">
       <span
@@ -15,11 +19,15 @@ export function CheckoutActions({
         <br />
         comprando
       </span>
-      {Object.keys(cart).length === 0 ? (
+      {!canCheckout ? (
         <button
           className="cursor-not-allowed rounded-[3px] bg-[#ccc] px-[18px] py-[12px] font-bold text-[#fff]"
           disabled
-          title="Adicione itens ao carrinho para finalizar o pedido"
+          title={
+            isCartEmpty
+              ? "Adicione itens ao carrinho para finalizar o pedido"
+              : "Calcule o frete antes de finalizar o pedido"
+          }
         >
           finalizar pedido
         </button>
