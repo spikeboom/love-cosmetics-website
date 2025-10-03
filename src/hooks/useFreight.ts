@@ -31,6 +31,7 @@ interface UseFreightReturn {
 }
 
 const STORAGE_KEY = 'love_cosmetics_last_cep';
+const FREIGHT_DATA_KEY = 'love_cosmetics_freight_data';
 const DEFAULT_FREIGHT = 15; // Valor padrão de frete
 
 export function useFreight(): UseFreightReturn {
@@ -49,20 +50,48 @@ export function useFreight(): UseFreightReturn {
   }>>([]);
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
 
-  // Carregar último CEP usado do localStorage
+  // Carregar dados salvos do localStorage
   useEffect(() => {
     const savedCep = localStorage.getItem(STORAGE_KEY);
+    const savedFreightData = localStorage.getItem(FREIGHT_DATA_KEY);
+
     if (savedCep) {
       setCep(savedCep);
     }
+
+    if (savedFreightData) {
+      try {
+        const data = JSON.parse(savedFreightData);
+        setFreightValue(data.freightValue || DEFAULT_FREIGHT);
+        setDeliveryTime(data.deliveryTime || '3-5 dias úteis');
+        setAvailableServices(data.availableServices || []);
+        setSelectedServiceIndex(data.selectedServiceIndex || 0);
+        setHasCalculated(data.hasCalculated || false);
+      } catch (error) {
+        console.error('Erro ao carregar dados de frete:', error);
+      }
+    }
   }, []);
 
-  // Salvar CEP no localStorage quando mudar
+  // Salvar dados no localStorage quando mudarem
   useEffect(() => {
     if (FreightService.isValidCep(cep)) {
       localStorage.setItem(STORAGE_KEY, cep);
     }
   }, [cep]);
+
+  useEffect(() => {
+    if (hasCalculated) {
+      const freightData = {
+        freightValue,
+        deliveryTime,
+        availableServices,
+        selectedServiceIndex,
+        hasCalculated
+      };
+      localStorage.setItem(FREIGHT_DATA_KEY, JSON.stringify(freightData));
+    }
+  }, [freightValue, deliveryTime, availableServices, selectedServiceIndex, hasCalculated]);
 
   const calculateFreightInternal = useCallback(async (cepValue: string, cartItems?: CartProduct[]) => {
     if (!FreightService.isValidCep(cepValue)) {
@@ -143,12 +172,21 @@ export function useFreight(): UseFreightReturn {
   const getSelectedFreightData = useCallback(() => {
     const selectedService = availableServices[selectedServiceIndex];
 
-    return {
+    const data = {
       frete_calculado: freightValue,
       transportadora_nome: selectedService?.carrier || null,
       transportadora_servico: selectedService?.service || null,
       transportadora_prazo: selectedService?.deliveryTime || null,
     };
+
+    console.log("📦 getSelectedFreightData chamado:", {
+      freightValue,
+      availableServices: availableServices.length,
+      selectedServiceIndex,
+      data
+    });
+
+    return data;
   }, [freightValue, availableServices, selectedServiceIndex]);
 
   const handleSetCep = useCallback((newCep: string) => {

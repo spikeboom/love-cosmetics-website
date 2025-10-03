@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         frete_calculado: body.frete_calculado,
         transportadora_nome: body.transportadora_nome,
         transportadora_servico: body.transportadora_servico,
-        transportadora_prazo: body.transportadora_prazo,
+        transportadora_prazo: body.transportadora_prazo ? parseInt(String(body.transportadora_prazo)) : null,
         salvar_minhas_informacoes: body.salvar_minhas_informacoes,
         aceito_receber_whatsapp: body.aceito_receber_whatsapp,
         destinatario: body.destinatario,
@@ -171,6 +171,12 @@ export async function POST(req: NextRequest) {
 
     logMessage("Base URL", getBaseURL({ STAGE: "PRODUCTION" }));
 
+    logMessage("Dados de frete recebidos", {
+      frete_calculado: body.frete_calculado,
+      freteValue,
+      final: body.frete_calculado || freteValue
+    });
+
     // Remove quaisquer caracteres não numéricos de telefone e CPF
     const cleanedPhone = body.telefone.replace(/\D/g, "");
     const cleanedCPF = body.cpf.replace(/\D/g, "");
@@ -187,7 +193,7 @@ export async function POST(req: NextRequest) {
         tax_id: cleanedCPF,
       },
       ...(body.descontos ? { discount_amount: body.descontos } : {}),
-      additional_amount: Math.trunc((body.frete_calculado || freteValue) * 100),
+      additional_amount: Math.trunc((body.frete_calculado ?? freteValue) * 100),
       reference_id: pedido.id,
       customer_modifiable: true,
       items: body.items,

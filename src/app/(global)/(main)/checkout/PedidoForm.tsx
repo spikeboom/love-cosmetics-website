@@ -140,10 +140,9 @@ const PedidoForm: React.FC = () => {
   const [clienteLogado, setClienteLogado] = useState<ClienteLogado | null>(null);
   const [showQuickLogin, setShowQuickLogin] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
-  const { cart, total, descontos, cupons } = useMeuContexto();
+  const { cart, total, descontos, cupons, freight } = useMeuContexto();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { checkAuth } = useAuth();
-  const { getSelectedFreightData } = useFreight();
 
   const {
     register,
@@ -196,7 +195,9 @@ const PedidoForm: React.FC = () => {
       }));
 
       const gaDataForAPI = await waitForGTMReady();
-      const freightData = getSelectedFreightData();
+      const freightData = freight.getSelectedFreightData();
+
+      console.log("🚚 Dados de frete do contexto:", freightData);
 
       const result = await postPedido({
         ...data,
