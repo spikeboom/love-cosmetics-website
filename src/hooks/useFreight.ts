@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FreightService } from '@/services/freight-service';
-import { calculateFreight } from '@/app/actions/freight-actions';
+import { calculateFreightFrenet } from '@/app/actions/freight-actions';
+import type { CartProduct } from './useModalCart';
 
 interface UseFreightReturn {
   cep: string;
@@ -9,9 +10,15 @@ interface UseFreightReturn {
   deliveryTime: string;
   isLoading: boolean;
   error: string | null;
-  calculateFreight: (cep: string) => Promise<void>;
+  calculateFreight: (cep: string, cartItems?: CartProduct[]) => Promise<void>;
   clearError: () => void;
   hasCalculated: boolean;
+  availableServices: Array<{
+    carrier: string;
+    service: string;
+    price: number;
+    deliveryTime: number;
+  }>;
 }
 
 const STORAGE_KEY = 'love_cosmetics_last_cep';
@@ -24,16 +31,18 @@ export function useFreight(): UseFreightReturn {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasCalculated, setHasCalculated] = useState<boolean>(false);
+  const [availableServices, setAvailableServices] = useState<Array<{
+    carrier: string;
+    service: string;
+    price: number;
+    deliveryTime: number;
+  }>>([]);
 
   // Carregar último CEP usado do localStorage
   useEffect(() => {
     const savedCep = localStorage.getItem(STORAGE_KEY);
     if (savedCep) {
       setCep(savedCep);
-      // Calcular frete automaticamente se tiver CEP salvo
-      if (FreightService.isValidCep(savedCep)) {
-        calculateFreightInternal(savedCep);
-      }
     }
   }, []);
 
@@ -44,9 +53,15 @@ export function useFreight(): UseFreightReturn {
     }
   }, [cep]);
 
-  const calculateFreightInternal = useCallback(async (cepValue: string) => {
+  const calculateFreightInternal = useCallback(async (cepValue: string, cartItems?: CartProduct[]) => {
     if (!FreightService.isValidCep(cepValue)) {
       setError('CEP inválido. Digite um CEP com 8 dígitos.');
+      return;
+    }
+
+    // Se não houver itens no carrinho, usar valores padrão
+    if (!cartItems || cartItems.length === 0) {
+      setError('Carrinho vazio. Adicione produtos para calcular o frete.');
       return;
     }
 
@@ -54,40 +69,31 @@ export function useFreight(): UseFreightReturn {
     setError(null);
 
     try {
-      const result = await calculateFreight(cepValue);
-      
-      if ('Sucesso' in result) {
-        const valor = parseFloat(result.Sucesso.valor);
-        setFreightValue(isNaN(valor) ? DEFAULT_FREIGHT : valor);
-        setDeliveryTime(FreightService.formatDeliveryTime(result.Sucesso.tempo));
+      // Mapear itens do carrinho para o formato da API Frenet
+      const items = cartItems.map(item => ({
+        quantity: item.quantity,
+        peso_gramas: item.peso_gramas,
+        altura: item.altura,
+        largura: item.largura,
+        comprimento: item.comprimento,
+        bling_number: item.bling_number,
+        preco: item.preco
+      }));
+
+      const result = await calculateFreightFrenet(cepValue, items);
+
+      if (result.success) {
+        // Usar o serviço mais barato
+        setFreightValue(result.cheapest.price);
+        setDeliveryTime(`${result.cheapest.deliveryTime} ${result.cheapest.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}`);
+        setAvailableServices(result.services);
         setHasCalculated(true);
-        
-        // Se houver observação sobre CEP fora da faixa
-        if (result.Sucesso.obs) {
-          console.warn('Aviso do serviço de frete:', result.Sucesso.obs);
-        }
       } else {
-        // Tratar erros específicos da API
-        let errorMessage = 'Erro ao calcular frete.';
-        
-        switch (result.Erro) {
-          case 'Token nao confere':
-            errorMessage = 'Erro de configuração. Entre em contato com o suporte.';
-            break;
-          case 'Codigo do cliente nao confere':
-            errorMessage = 'Erro de configuração. Entre em contato com o suporte.';
-            break;
-          case 'Para o tipo de calculo (tipoCalculo) não existe configuração.':
-            errorMessage = 'CEP fora da área de entrega.';
-            break;
-          default:
-            errorMessage = result.Erro || 'Erro ao calcular frete. Tente novamente.';
-        }
-        
-        setError(errorMessage);
+        setError(result.error);
         // Usar valor padrão em caso de erro
         setFreightValue(DEFAULT_FREIGHT);
         setDeliveryTime('3-5 dias úteis');
+        setAvailableServices([]);
         setHasCalculated(false);
       }
     } catch (err) {
@@ -95,6 +101,7 @@ export function useFreight(): UseFreightReturn {
       setError('Erro ao conectar com o serviço de frete. Tente novamente.');
       setFreightValue(DEFAULT_FREIGHT);
       setDeliveryTime('3-5 dias úteis');
+      setAvailableServices([]);
       setHasCalculated(false);
     } finally {
       setIsLoading(false);
@@ -131,5 +138,6 @@ export function useFreight(): UseFreightReturn {
     calculateFreight: calculateFreightInternal,
     clearError,
     hasCalculated,
+    availableServices,
   };
 }

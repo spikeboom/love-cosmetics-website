@@ -18,6 +18,12 @@ export interface CartProduct {
   tag_desconto_1?: string;
   tag_desconto_2?: string;
   carouselImagensPrincipal?: any;
+  // Dados para cálculo de frete Frenet
+  bling_number?: number;
+  altura?: number;
+  largura?: number;
+  comprimento?: number;
+  peso_gramas?: number;
 }
 
 export interface SuggestedProduct {
