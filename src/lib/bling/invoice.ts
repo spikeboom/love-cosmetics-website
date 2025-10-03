@@ -1,5 +1,4 @@
 import { createLogger } from "@/utils/logMessage";
-import { mapProductToBling } from "./product-mapping";
 import { makeAuthenticatedRequest } from "./simple-auth";
 
 const logMessage = createLogger();
@@ -16,6 +15,7 @@ interface OrderItem {
   reference_id?: string | number;
   unit_amount?: number;
   preco?: number;
+  bling_number?: number;
 }
 
 // Interface para dados do pedido
@@ -57,14 +57,15 @@ export async function createInvoice(
   try {
     // Monta os itens da nota fiscal
     const items = orderData.items.map(item => {
-      // O item vem com structure diferente do esperado
-      const productId = item.reference_id || item.id;
       const unitValue = (item.unit_amount ? item.unit_amount / 100 : item.preco) || item.value;
 
-      const blingProduct = mapProductToBling(productId);
+      // Usa bling_number do item diretamente
+      if (!item.bling_number) {
+        throw new Error(`Produto ${item.name} não possui bling_number`);
+      }
 
       return {
-        codigo: blingProduct.codigo, // Campo obrigatório como string
+        codigo: String(item.bling_number),
         quantidade: item.quantity,
         valor: unitValue,
         ...(item.discount && item.discount > 0 ? { desconto: item.discount } : {})

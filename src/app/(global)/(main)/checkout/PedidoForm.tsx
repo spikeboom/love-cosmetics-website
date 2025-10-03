@@ -189,6 +189,7 @@ const PedidoForm: React.FC = () => {
         image_url:
           process.env.NEXT_PUBLIC_STRAPI_URL +
           product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url,
+        bling_number: product.bling_number,
       }));
 
       const gaDataForAPI = await waitForGTMReady();
