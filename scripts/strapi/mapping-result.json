@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-10-03T20:01:03.464Z",
+  "totalMatches": 5,
+  "totalUnmatched": 8,
+  "matches": [
+    {
+      "strapiId": 272,
+      "strapiDocumentId": "wlpiqteizdxmblt9ge7za8f7",
+      "strapiNome": "Manteiga Corporal",
+      "blingId": 16341911314,
+      "blingCodigo": "112",
+      "blingNome": "Manteiga Corporal"
+    },
+    {
+      "strapiId": 273,
+      "strapiDocumentId": "supvi1j9g5bcjtvytlyxqhjg",
+      "strapiNome": "Máscara de Argila",
+      "blingId": 16341911315,
+      "blingCodigo": "107",
+      "blingNome": "Máscara de Argila"
+    },
+    {
+      "strapiId": 275,
+      "strapiDocumentId": "g8uh7zklp8v2auq2k9pacasq",
+      "strapiNome": "Sérum Facial",
+      "blingId": 16341911316,
+      "blingCodigo": "10",
+      "blingNome": "Sérum Facial"
+    },
+    {
+      "strapiId": 277,
+      "strapiDocumentId": "a58cbjhbc8gc6wjxxd1anhmy",
+      "strapiNome": "Espuma Facial",
+      "blingId": 16341911311,
+      "blingCodigo": "8",
+      "blingNome": "Espuma Facial"
+    },
+    {
+      "strapiId": 280,
+      "strapiDocumentId": "ez7cf5luhuovwr2vrblixg9q",
+      "strapiNome": "Hidratante Facial",
+      "blingId": 16341911312,
+      "blingCodigo": "4",
+      "blingNome": "Hidratante Facial"
+    }
+  ],
+  "unmatchedStrapi": [
+    {
+      "id": 266,
+      "nome": "Caixa de Presente + 4 brindes Lové"
+    },
+    {
+      "id": 267,
+      "nome": "Vitória Régia HOME SPRAY Simbioze 200ml"
+    },
+    {
+      "id": 268,
+      "nome": "Vitória Régia VELA AROMÁTICA Simbioze 180g"
+    },
+    {
+      "id": 269,
+      "nome": "Orquídeas da Amazônia VELA AROMÁTICA Simbioze 180g"
+    },
+    {
+      "id": 270,
+      "nome": "Vela Teste"
+    },
+    {
+      "id": 271,
+      "nome": "Orquídeas da Amazônia HOME SPRAY Simbioze 200ml"
+    },
+    {
+      "id": 281,
+      "nome": "Kit Completo"
+    },
+    {
+      "id": 282,
+      "nome": "Kit Uso Diário"
+    }
+  ]
+}
