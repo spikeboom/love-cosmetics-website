@@ -2,352 +2,91 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { SnackbarProvider, useSnackbar } from "notistack";
-import { freteValue } from "@/utils/frete-value";
-import { waitForGTMReady } from "@/utils/gtm-ready-helper";
-import { fetchCupom } from "@/modules/cupom/domain";
-import { IconButton } from "@mui/material";
-import { IoCloseCircle } from "react-icons/io5";
-import Cookies from "js-cookie";
-import { processProdutos } from "@/modules/produto/domain";
+import { 
+  addProductToCart as addProductToCartUtil,
+  addQuantityProductToCart as addQuantityProductToCartUtil,
+  subtractQuantityProductToCart as subtractQuantityProductToCartUtil,
+  removeProductFromCart as removeProductFromCartUtil,
+  clearCart as clearCartUtil
+} from "@/utils/cart-operations";
+import { handleCupom as handleCupomUtil, handleAddCupom as handleAddCupomUtil } from "@/utils/coupon-operations";
+import { calculateCartTotals } from "@/utils/cart-calculations";
+import { addProductEvent } from "@/core/tracking/product-tracking";
+import { processProdutosComOuSemCupom, processProdutosRevert } from "@/core/processing/product-processing";
+import { StorageService } from "@/core/storage/storage-service";
+import { CartCalculations } from "@/core/utils/cart-calculations";
+import { useNotifications } from "@/core/notifications/NotificationContext";
+import { useFreight } from "@/hooks/useFreight";
 
 const MeuContexto = createContext();
 
 export const MeuContextoProvider = ({ children }) => {
   const [cart, setCart] = useState({});
   const [total, setTotal] = useState(0);
-  const [sidebarMounted, setSidebarMounted] = useState(false);
-  const [menuMounted, setMenuMounted] = useState(false);
   const [cupons, setCupons] = useState([]);
   const [loadingAddItem, setLoadingAddItem] = useState(false);
 
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  // Usar sistema de notificações consolidado
+  const { notify, closeSnackbar } = useNotifications();
+  
+  // Hook de frete dinâmico
+  const freight = useFreight();
 
-  const addProductEvent = async (product) => {
-    const gaData = await waitForGTMReady();
-    
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "add_to_cart",
-      event_id: `addtocart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ecommerce: {
-        currency: "BRL",
-        value: product.preco,
-        items: [
-          {
-            item_id: product.id,
-            item_name: decodeURIComponent(product.nome),
-            price: product.preco,
-            quantity: 1,
-          },
-        ],
-      },
-      ...gaData,
-    });
-  };
-
-  const processProdutosComOuSemCupom = (data, cupom) => {
-    const produtosNoCarrinho = Object.keys(cart);
-
-    const novosProdutos = data.data.filter(
-      (item) => !produtosNoCarrinho.includes(item.id.toString()),
-    );
-
-    const enviarComCupom = novosProdutos.length > 0;
-
-    return enviarComCupom
-      ? processProdutos(data, cupom)
-      : processProdutos(data, "sem-cupom");
-  };
 
   const addProductToCart = (product) => {
-    setLoadingAddItem(true);
-
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      newCart[product.id].quantity += 1;
-    } else {
-      newCart[product.id] = { ...product, quantity: 1 };
-    }
-
-    processProdutosComOuSemCupom(
-      { data: Object.values(newCart) },
-      cupons?.[0]?.codigo,
-    ).then((cartResult) => {
-      cartResult = cartResult?.data?.reduce((acc, item) => {
-        acc[item.id] = item;
-        return acc;
-      }, {});
-      setCart(cartResult);
-
-      addProductEvent(product);
-
-      setLoadingAddItem(false);
-    });
+    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons, addProductEvent);
   };
 
   const addQuantityProductToCart = ({ product }) => {
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      newCart[product.id].quantity += 1;
-    }
-    setCart(newCart);
-
-    addProductEvent(product);
+    addQuantityProductToCartUtil({ product }, cart, setCart, addProductEvent);
   };
 
   const subtractQuantityProductToCart = ({ product }) => {
-    const newCart = { ...cart };
-    if (newCart[product.id] && newCart[product.id].quantity > 1) {
-      newCart[product.id].quantity -= 1;
-    } else if (newCart[product.id] && newCart[product.id].quantity === 1) {
-      removeProductFromCart({ product });
-      return;
-    }
-    setCart(newCart);
+    subtractQuantityProductToCartUtil({ product }, cart, setCart, removeProductFromCart);
   };
 
   const removeProductFromCart = ({ product }) => {
-    const newCart = { ...cart };
-    if (newCart[product.id]) {
-      delete newCart[product.id];
-    }
-    setCart(newCart);
+    removeProductFromCartUtil({ product }, cart, setCart);
   };
 
   const clearCart = () => {
-    localStorage.removeItem("cart");
-    localStorage.removeItem("cupons");
-    setCart({});
-    setCupons({});
+    clearCartUtil(setCart, setCupons);
   };
 
   const [firstRun, setFirstRun] = useState(false);
 
   useEffect(() => {
-    const cart = localStorage.getItem("cart");
-    if (cart) {
-      setCart(JSON.parse(cart));
-    }
-
-    const cupons = localStorage.getItem("cupons");
-    if (cupons) {
-      setCupons(JSON.parse(cupons));
-    }
+    // Usar StorageService para carregar dados
+    const initialData = StorageService.initializeFromStorage();
+    setCart(initialData.cart);
+    setCupons(initialData.cupons);
     setFirstRun(true);
   }, []);
 
-  const qtdItemsCart = Object.values(cart).reduce(
-    (acc, product) => acc + product.quantity,
-    0,
-  );
+  // Usar função extraída para cálculos
+  const qtdItemsCart = CartCalculations.getItemCount(cart);
 
-  function processProdutosRevert(rawData) {
-    rawData = Object.values(rawData.data);
-
-    const processedToReturn = rawData?.map((p) => {
-      return {
-        ...p,
-        ...p?.backup,
-        backup: p?.backup,
-      };
-    });
-
-    return { data: processedToReturn };
-  }
 
   const handleCupom = (cupom) => {
-    if (cupons.includes(cupom)) {
-      setCupons(cupons.filter((c) => c !== cupom));
-      try {
-        document.cookie = "cupomBackend=; path=/; max-age=0"; // remove o cookie se existir
-      } catch (e) {
-        console.error("Erro ao tentar remover o cookie cupomBackend:", e);
-      }
-
-      let cartResult = processProdutosRevert({ data: cart });
-
-      cartResult = cartResult?.data?.reduce((acc, item) => {
-        acc[item.id] = item;
-        return acc;
-      }, {});
-      setCart(cartResult);
-    } else {
-      Cookies.set("cupomBackend", cupom?.codigo, { path: "/" });
-      processProdutos({ data: Object.values(cart) }, cupom?.codigo).then(
-        (cartResult) => {
-          cartResult = cartResult?.data?.reduce((acc, item) => {
-            acc[item.id] = item;
-            return acc;
-          }, {});
-          setCart(cartResult);
-
-          setCupons([...cupons, cupom]);
-        },
-      );
-    }
+    handleCupomUtil(cupom, cupons, setCupons, cart, setCart);
   };
 
-  // função genérica para exibir snackbars
-  const notify = (message, { variant = "default", persist = false } = {}) => {
-    return enqueueSnackbar(message, {
-      variant,
-      persist,
-      action: (key) => (
-        <button
-          onClick={() => closeSnackbar(key)}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          <IoCloseCircle size={20} />
-        </button>
-      ),
-    });
-  };
 
   const handleAddCupom = async (codigo) => {
-    // aviso de busca
-    const loadingKey = notify("Buscando cupom...", {
-      variant: "info",
-      persist: true,
-    });
-    try {
-      const { data } = await fetchCupom({ code: codigo });
-      closeSnackbar(loadingKey);
-
-      if (!data?.[0]) {
-        notify(`Cupom "${codigo}" não encontrado!`, {
-          variant: "error",
-          persist: true,
-        });
-        return;
-      }
-
-      if (cupons.some((c) => c.codigo === data[0].codigo)) {
-        notify("Esse cupom já foi adicionado!", {
-          variant: "success",
-        });
-        return;
-      }
-
-      if (cupons.length >= 1) {
-        notify("Só é possível aplicar um cupom por vez!", {
-          variant: "error",
-          persist: true,
-        });
-        return;
-      }
-
-      // Tracking do evento de aplicar cupom
-      if (typeof window !== "undefined") {
-        const gaData = await waitForGTMReady();
-        
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: "apply_coupon",
-          event_id: `apply_coupon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          cupom_codigo: data[0].codigo,
-          cupom_nome: data[0].nome || data[0].codigo,
-          cupom_titulo: data[0].titulo || data[0].codigo,
-          elemento_clicado: "apply_coupon_button",
-          url_pagina: window.location.href,
-          ...gaData,
-        });
-      }
-
-      handleCupom(data[0]);
-      notify(`Cupom "${data[0].codigo}" aplicado com sucesso!`, {
-        variant: "success",
-      });
-    } catch (err) {
-      closeSnackbar(loadingKey);
-      console.error(err);
-      notify("Erro ao aplicar cupom.", { variant: "error" });
-    }
+    await handleAddCupomUtil(codigo, cupons, notify, closeSnackbar, handleCupom);
   };
 
   const [descontos, setDescontos] = useState(0);
 
   useEffect(() => {
-    if (!firstRun) return;
-
-    // Calculate base totals
-    const items = Object.values(cart);
-    const baseTotal = items.reduce(
-      (sum, { preco, quantity }) => sum + preco * quantity,
-      0,
-    );
-    const baseTotalPrecoDe = items.reduce(
-      (sum, { preco_de, quantity }) => sum + preco_de * quantity,
-      0,
-    );
-
-    // Ensure coupons is an array
-    const validCupons = Array.isArray(cupons) ? cupons : [];
-
-    // Compute cumulative coupon effect
-    const couponEffect = validCupons.reduce(
-      (acc, cupom) => ({
-        multiplicar: acc.multiplicar * cupom.multiplacar,
-        diminuir: acc.diminuir + cupom.diminuir,
-      }),
-      { multiplicar: 1, diminuir: 0 },
-    );
-
-    // Final totals with coupons
-    const totalWithCupons =
-      baseTotal * couponEffect.multiplicar - couponEffect.diminuir;
-    const totalDiscount = baseTotal - totalWithCupons;
-    const totalDiscountPrecoDe = baseTotalPrecoDe - baseTotal;
-
-    // Check for backend-specific coupon flags
-    const hasCupomBackend = /(?:^|; )cupomBackend=([^;]+)/.test(
-      document.cookie,
-    );
-
-    // Apply the correct discount based on backend coupon presence
-    const descontoAplicado = hasCupomBackend
-      ? totalDiscountPrecoDe
-      : totalDiscount;
-    setDescontos(descontoAplicado);
-
-    // Persist state
-    localStorage.setItem("cart", JSON.stringify(cart));
-    localStorage.setItem("cupons", JSON.stringify(validCupons));
-
-    // Compute and set final total including shipping
-    const shippingFee = freteValue;
-    const finalTotal =
-      (hasCupomBackend ? baseTotal : totalWithCupons) + shippingFee;
-    setTotal(finalTotal);
-
-    // Handle one-time URL or cookie coupon
-    const url = new URL(window.location.href);
-    const queryCupom = url.searchParams.get("cupom");
-    const cookieMatch = document.cookie.match(/(?:^|; )cupom=([^;]+)/);
-    const cookieCupom = cookieMatch?.[1] && decodeURIComponent(cookieMatch[1]);
-
-    const pendingCupom = cookieCupom || queryCupom;
-    if (pendingCupom) {
-      handleAddCupom(pendingCupom);
-      // Clear used coupon
-      document.cookie = "cupom=; path=/; max-age=0";
-      url.searchParams.delete("cupom");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [cart, cupons]);
+    calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom, freight.freightValue);
+  }, [cart, cupons, freight.freightValue]);
 
   return (
     <MeuContexto.Provider
       value={{
         cart,
         setCart,
-        sidebarMounted,
-        setSidebarMounted,
-        menuMounted,
-        setMenuMounted,
         addProductToCart,
         addQuantityProductToCart,
         subtractQuantityProductToCart,
@@ -360,6 +99,7 @@ export const MeuContextoProvider = ({ children }) => {
         handleAddCupom,
         descontos,
         loadingAddItem,
+        freight,
       }}
     >
       {children}

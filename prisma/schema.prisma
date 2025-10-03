@@ -32,6 +32,10 @@ model Pedido {
   cupons                    String[]
   descontos                 Float @default(0)
   total_pedido              Float @default(0)
+  frete_calculado           Float @default(15)
+  transportadora_nome       String? // Nome da transportadora (ex: "Correios")
+  transportadora_servico    String? // Serviço (ex: "Sedex", "PAC")
+  transportadora_prazo      Int?    // Prazo em dias úteis
   items                     Json[]
   salvar_minhas_informacoes Boolean
   aceito_receber_whatsapp   Boolean
@@ -39,6 +43,9 @@ model Pedido {
   createdAt                 DateTime @default(now())
   ga_session_id             String?
   ga_session_number         String?
+  
+  // Relação opcional com cliente
+  pedidoCliente             PedidoCliente?
 }
 
 model StatusCheckout {
@@ -50,5 +57,163 @@ model StatusCheckout {
 model StatusPagamento {
   id   Int    @id @default(autoincrement())
   info Json
+}
+
+// ============================================
+// SISTEMA DE AUTENTICAÇÃO DE CLIENTES
+// ============================================
+
+model Cliente {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  nome            String
+  sobrenome       String
+  cpf             String?   @unique
+  telefone        String?
+  dataNascimento  DateTime?
+  passwordHash    String
+  
+  // Dados salvos do checkout
+  cep             String?
+  endereco        String?
+  numero          String?
+  complemento     String?
+  bairro          String?
+  cidade          String?
+  estado          String?
+  
+  // Preferências
+  receberWhatsapp Boolean   @default(false)
+  receberEmail    Boolean   @default(true)
+  
+  // Relacionamentos
+  pedidos         PedidoCliente[]
+  sessoes         SessaoCliente[]
+  cuponsUsados    CupomUsado[]
+  enderecos       EnderecoCliente[]
+  
+  // Controle
+  emailVerificado Boolean   @default(false)
+  ativo           Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([email])
+  @@index([cpf])
+}
+
+model SessaoCliente {
+  id           String    @id @default(uuid())
+  token        String    @unique
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime  @default(now())
+  
+  @@index([token])
+  @@index([clienteId])
+  @@index([expiresAt])
+}
+
+model PedidoCliente {
+  id           String    @id @default(uuid())
+  pedidoId     String    @unique
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id])
+  pedido       Pedido    @relation(fields: [pedidoId], references: [id])
+  createdAt    DateTime  @default(now())
+
+  @@index([clienteId])
+}
+
+model CupomUsado {
+  id           String    @id @default(uuid())
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id])
+  cupom        String
+  valorDesconto Float
+  pedidoId     String?
+  usadoEm      DateTime  @default(now())
+
+  @@index([clienteId])
+  @@index([cupom])
+}
+
+model TokenRecuperacao {
+  id           String    @id @default(uuid())
+  clienteId    String
+  token        String    @unique
+  expiresAt    DateTime
+  usado        Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@index([token])
+  @@index([clienteId])
+}
+
+model EnderecoCliente {
+  id           String    @id @default(uuid())
+  clienteId    String
+  cliente      Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  
+  // Identificação do endereço
+  apelido      String    // Ex: "Casa", "Trabalho", "Casa dos Pais"
+  principal    Boolean   @default(false)
+  
+  // Dados do endereço
+  cep          String
+  logradouro   String
+  numero       String
+  complemento  String?
+  bairro       String
+  cidade       String
+  estado       String
+  pais         String    @default("Brasil")
+  
+  // Dados do destinatário
+  nomeDestinatario String?
+  telefone     String?
+  
+  // Controle
+  ativo        Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([clienteId])
+  @@index([principal])
+}
+
+// ============================================
+// SISTEMA DE TOKENS DE AUTENTICAÇÃO (BLING API)
+// ============================================
+
+model AuthToken {
+  id            String    @id @default(uuid())
+  provider      String    // "bling", "mercadopago", etc
+  accessToken   String    @db.Text
+  refreshToken  String?   @db.Text
+  tokenType     String    @default("Bearer")
+
+  // Controle de expiração
+  expiresAt     DateTime
+  refreshExpiresAt DateTime?
+
+  // Metadados
+  scope         String?
+  clientId      String?
+
+  // Controle
+  isActive      Boolean   @default(true)
+  lastUsedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Índices para performance
+  @@index([provider, isActive])
+  @@index([expiresAt])
+  @@index([refreshExpiresAt])
+  @@unique([provider], name: "unique_active_provider")
 }
 

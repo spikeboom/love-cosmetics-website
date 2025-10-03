@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git mv:*)",
+      "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
+      "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
+      "Read(C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\scrap amazon/**)",
+      "Bash(copy:*)",
+      "Bash(powershell:*)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:developer.bling.com.br)",
+      "WebFetch(domain:ajuda.bling.com.br)",
+      "Bash(npm run lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: integrar dados do formulário de pedido com API do Bling\n\n- Atualizar invoice.ts para usar dados reais do cliente em vez de dados fixos\n- Adicionar campos obrigatórios: nome, cpf, endereço completo do formulário\n- Incluir campo ''numero'' obrigatório na estrutura da nota fiscal\n- Modificar auto-generate-nf.ts para passar dados completos do pedido\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "WebFetch(domain:github.com)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: implementar sistema completo de tokens OAuth2 para API Bling\n\n- Adicionar modelo AuthToken ao schema Prisma com controle de expiração\n- Implementar renovação automática de tokens com refresh token\n- Migrar de armazenamento em memória para persistência em banco de dados\n- Adicionar função makeAuthenticatedRequest com retry automático\n- Atualizar rotas de invoice para usar autenticação persistente\n- Melhorar endpoint de debug com informações detalhadas de tokens\n- Incluir controle de último uso e status ativo dos tokens\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npx tsx:*)",
+      "Bash(git log:*)",
+      "WebFetch(domain:frenetapi.docs.apiary.io)",
+      "WebFetch(domain:ajuda.frenet.com.br)",
+      "WebFetch(domain:www.postman.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

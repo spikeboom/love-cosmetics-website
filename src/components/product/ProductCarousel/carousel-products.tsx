@@ -5,6 +5,7 @@ import IconSacola from "./icon-sacola";
 import "./style.css";
 import Link from "next/link";
 import { useMeuContexto } from "@/components/common/Context/context";
+import { useUI } from "@/core/ui/UIContext";
 import { formatPrice } from "@/utils/format-price";
 
 // const arrayProducts = [
@@ -86,7 +87,7 @@ export const Product = ({ data, handlerAdd }: any) => (
     <div className="w-full">
       <div
         aria-label="Carrossel - Comprar"
-        className="w-full"
+        className="w-full cursor-pointer"
         onClick={handlerAdd}
         // href={`/pdp/[slug]`}
         // as={`/pdp/${data.slug}?addToCart=1`}
@@ -166,13 +167,16 @@ export const ProductComplete = ({ data, handlerAdd }: any) => (
           <span className="text-[26px] font-bold leading-[1] tracking-[-0.5px] text-[#333]">
             <span className="">R$ {formatPrice(data.preco)}</span>
           </span>
+          <span className="text-[14px] text-[#666]">
+            ou 3x R$ {formatPrice(Math.round((data.preco * 100) / 3) / 100)}
+          </span>
         </div>
 
         <div
           // href={`/pdp/[slug]`}
           // as={`/pdp/${data.slug}?addToCart=1`}
           aria-label="Carrossel - Comprar"
-          className=""
+          className="flex items-center cursor-pointer"
           onClick={handlerAdd}
         >
           <div className="flex w-fit items-center justify-center rounded-[100px] bg-[#C0392B] px-[12px] py-[8px]">
@@ -232,7 +236,8 @@ export function CarouselProducts({
     };
   }, []);
 
-  const { addProductToCart, setSidebarMounted } = useMeuContexto();
+  const { addProductToCart } = useMeuContexto();
+  const { setSidebarMounted } = useUI();
 
   const handleComprar = (produto: any) => {
     addProductToCart(produto);

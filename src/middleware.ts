@@ -1,36 +1,90 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifyJWTOnly } from "@/lib/cliente/auth-edge";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
-  const cupom = url.searchParams.get("cupom");
+  const pathname = request.nextUrl.pathname;
+  
 
-  // 1) Lida com cupom (válido para qualquer rota)
-  if (cupom) {
-    console.log("🔖 middleware capturou cupom:", cupom);
-
-    const res = NextResponse.redirect(url);
-    res.cookies.set("cupom", cupom, { path: "/" });
-    res.cookies.set("cupomBackend", cupom, { path: "/" });
-
-    url.searchParams.delete("cupom");
-    res.headers.set("location", url.toString());
-
-    return res;
-  }
-
-  // 2) Protege rotas específicas
-  const protectedPaths = ["/pedidos", "/api/pedidos"];
-  const isProtected = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path),
+  // ===== PROTEÇÃO ADMIN =====
+  const adminPaths = ["/pedidos", "/api/pedidos"];
+  const isAdminRoute = adminPaths.some((path) =>
+    pathname.startsWith(path),
   );
 
-  if (isProtected) {
-    const token = request.cookies.get("auth_token")?.value;
+  if (isAdminRoute) {
+    const adminToken = request.cookies.get("auth_token")?.value;
 
-    // Substitua pela lógica real de validação do token
-    if (!token || token !== "sktE)7381J1") {
+    if (!adminToken || adminToken !== "sktE)7381J1") {
       return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
+  // ===== PROTEÇÃO CLIENTE =====
+  const clientePaths = [
+    "/minha-conta",
+    "/api/cliente/conta",
+    "/conta/dashboard",
+    "/conta/pedidos",
+    "/conta/enderecos",
+    "/conta/configuracoes"
+  ];
+  const isClienteRoute = clientePaths.some((path) =>
+    pathname.startsWith(path),
+  );
+
+  if (isClienteRoute) {
+    const clienteToken = request.cookies.get("cliente_token")?.value;
+
+    if (!clienteToken) {
+      // Redirecionar para login com URL de retorno
+      const loginUrl = new URL("/conta/entrar", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Verificar se o token é válido (apenas JWT, sem consulta ao banco)
+    const jwtPayload = await verifyJWTOnly(clienteToken);
+    
+    if (!jwtPayload) {
+      // Token inválido, redirecionar para login
+      const loginUrl = new URL("/conta/entrar", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      
+      // Remover cookie inválido
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.set("cliente_token", "", {
+        maxAge: 0,
+        path: "/"
+      });
+      return response;
+    }
+
+    // Adicionar dados do JWT aos headers para uso nas rotas
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-cliente-id", jwtPayload.clienteId);
+    requestHeaders.set("x-cliente-email", jwtPayload.email);
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
+  // ===== REDIRECIONAMENTOS =====
+  // Redirecionar usuários logados de páginas de auth
+  const authPages = ["/conta/entrar", "/conta/cadastrar"];
+  if (authPages.includes(pathname)) {
+    const clienteToken = request.cookies.get("cliente_token")?.value;
+    
+    if (clienteToken) {
+      const jwtPayload = await verifyJWTOnly(clienteToken);
+      if (jwtPayload) {
+        // Usuário já está logado, redirecionar para dashboard
+        return NextResponse.redirect(new URL("/minha-conta", request.url));
+      }
     }
   }
 
@@ -38,5 +92,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/:path*", // Middleware aplicado globalmente
+  matcher: [
+    // Rotas protegidas
+    "/pedidos/:path*",
+    "/api/pedidos/:path*",
+    "/minha-conta/:path*",
+    "/conta/:path*",
+    "/api/cliente/conta/:path*",
+    // Páginas de autenticação
+    "/login",
+  ],
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMeuContexto } from "@/components/common/Context/context";
+import { useUI } from "@/core/ui/UIContext";
 import { formatPrice } from "@/utils/format-price";
 
 interface BarraFixaComprarProps {
@@ -13,7 +14,8 @@ export function BarraFixaComprar({
   produto,
   extraClassesForTopDiv,
 }: BarraFixaComprarProps) {
-  const { setSidebarMounted, addProductToCart } = useMeuContexto();
+  const { addProductToCart } = useMeuContexto();
+  const { setSidebarMounted } = useUI();
 
   const preco = produto?.preco;
 
@@ -88,7 +90,8 @@ export function BotaoComprar({
   extraClassesForTopDiv,
   preco = 0,
 }: BarraFixaComprarProps) {
-  const { setSidebarMounted, addProductToCart } = useMeuContexto();
+  const { addProductToCart } = useMeuContexto();
+  const { setSidebarMounted } = useUI();
 
   const handleComprar = () => {
     addProductToCart(produto);

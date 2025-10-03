@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 export function createLogger() {
   const logHash = crypto.randomBytes(4).toString("hex");
-  // @ts-ignore
+  // @ts-expect-error
   return (message, data) => {
     if (process.env.STAGE === "LOCAL") {
       console.dir({ logHash, message, data }, { depth: null, colors: true });

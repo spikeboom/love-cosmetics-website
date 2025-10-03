@@ -46,3 +46,7 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+/tmp_importante
+/plano_auth
+/docs
