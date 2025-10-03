@@ -66,6 +66,9 @@ interface Pedido {
   estado: string;
   total_pedido: number;
   frete_calculado: number;
+  transportadora_nome?: string | null;
+  transportadora_servico?: string | null;
+  transportadora_prazo?: number | null;
   items: Item[];
   salvar_minhas_informacoes: boolean;
   aceito_receber_whatsapp: boolean;
@@ -386,11 +389,19 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                             </Typography>
                             <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e2e8f0' }}>
                               <Typography variant="body2" sx={{ fontWeight: 600, color: '#0369a1' }}>
-                                Valor do Frete: {pedido.frete_calculado.toLocaleString("pt-BR", {
+                                Frete: {pedido.frete_calculado.toLocaleString("pt-BR", {
                                   style: "currency",
                                   currency: "BRL",
                                 })}
                               </Typography>
+                              {pedido.transportadora_nome && (
+                                <Typography variant="body2" sx={{ fontSize: '0.875rem', color: '#64748b', mt: 0.5 }}>
+                                  {pedido.transportadora_nome} - {pedido.transportadora_servico}
+                                  {pedido.transportadora_prazo && (
+                                    <> ({pedido.transportadora_prazo} {pedido.transportadora_prazo === 1 ? 'dia útil' : 'dias úteis'})</>
+                                  )}
+                                </Typography>
+                              )}
                             </Box>
                           </Box>
                         </Box>

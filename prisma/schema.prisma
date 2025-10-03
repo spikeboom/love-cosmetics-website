@@ -33,6 +33,9 @@ model Pedido {
   descontos                 Float @default(0)
   total_pedido              Float @default(0)
   frete_calculado           Float @default(15)
+  transportadora_nome       String? // Nome da transportadora (ex: "Correios")
+  transportadora_servico    String? // Serviço (ex: "Sedex", "PAC")
+  transportadora_prazo      Int?    // Prazo em dias úteis
   items                     Json[]
   salvar_minhas_informacoes Boolean
   aceito_receber_whatsapp   Boolean

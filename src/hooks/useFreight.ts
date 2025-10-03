@@ -22,6 +22,12 @@ interface UseFreightReturn {
   }>;
   setSelectedFreight: (price: number, deliveryTime: number) => void;
   resetFreight: () => void;
+  getSelectedFreightData: () => {
+    frete_calculado: number;
+    transportadora_nome: string | null;
+    transportadora_servico: string | null;
+    transportadora_prazo: number | null;
+  };
 }
 
 const STORAGE_KEY = 'love_cosmetics_last_cep';
@@ -39,7 +45,9 @@ export function useFreight(): UseFreightReturn {
     service: string;
     price: number;
     deliveryTime: number;
+    serviceCode: string;
   }>>([]);
+  const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
 
   // Carregar último CEP usado do localStorage
   useEffect(() => {
@@ -115,9 +123,12 @@ export function useFreight(): UseFreightReturn {
     setError(null);
   }, []);
 
-  const setSelectedFreight = useCallback((price: number, days: number) => {
+  const setSelectedFreight = useCallback((price: number, days: number, index?: number) => {
     setFreightValue(price);
     setDeliveryTime(`${days} ${days === 1 ? 'dia útil' : 'dias úteis'}`);
+    if (index !== undefined) {
+      setSelectedServiceIndex(index);
+    }
   }, []);
 
   const resetFreight = useCallback(() => {
@@ -126,7 +137,19 @@ export function useFreight(): UseFreightReturn {
     setAvailableServices([]);
     setHasCalculated(false);
     setError(null);
+    setSelectedServiceIndex(0);
   }, []);
+
+  const getSelectedFreightData = useCallback(() => {
+    const selectedService = availableServices[selectedServiceIndex];
+
+    return {
+      frete_calculado: freightValue,
+      transportadora_nome: selectedService?.carrier || null,
+      transportadora_servico: selectedService?.service || null,
+      transportadora_prazo: selectedService?.deliveryTime || null,
+    };
+  }, [freightValue, availableServices, selectedServiceIndex]);
 
   const handleSetCep = useCallback((newCep: string) => {
     // Formatar CEP enquanto digita
@@ -163,5 +186,6 @@ export function useFreight(): UseFreightReturn {
     availableServices,
     setSelectedFreight,
     resetFreight,
+    getSelectedFreightData,
   };
 }

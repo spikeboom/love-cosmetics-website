@@ -87,6 +87,9 @@ export type PedidoFormData = z.infer<typeof pedidoSchema> & {
   cupons?: string[];
   total_pedido?: number;
   frete_calculado?: number;
+  transportadora_nome?: string | null;
+  transportadora_servico?: string | null;
+  transportadora_prazo?: number | null;
 };
 
 // Dados iniciais do formulário
@@ -140,7 +143,7 @@ const PedidoForm: React.FC = () => {
   const { cart, total, descontos, cupons } = useMeuContexto();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { checkAuth } = useAuth();
-  const { freightValue } = useFreight();
+  const { getSelectedFreightData } = useFreight();
 
   const {
     register,
@@ -193,14 +196,15 @@ const PedidoForm: React.FC = () => {
       }));
 
       const gaDataForAPI = await waitForGTMReady();
-      
+      const freightData = getSelectedFreightData();
+
       const result = await postPedido({
         ...data,
         items: items,
         cupons: cupons?.map((c: any) => c.codigo),
         descontos: Math.trunc(descontos * 100),
         total_pedido: total,
-        frete_calculado: freightValue,
+        ...freightData,
         ...gaDataForAPI,
       });
 

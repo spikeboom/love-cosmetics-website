@@ -56,7 +56,7 @@ export function FreightSection() {
     setSelectedServiceIndex(index);
     const service = availableServices[index];
     if (service) {
-      setSelectedFreight(service.price, service.deliveryTime);
+      setSelectedFreight(service.price, service.deliveryTime, index);
     }
   };
 
