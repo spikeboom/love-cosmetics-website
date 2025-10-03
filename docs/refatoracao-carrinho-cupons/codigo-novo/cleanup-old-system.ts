@@ -3,6 +3,8 @@
  * Remove dados antigos (localStorage, cookies) para evitar conflitos
  */
 
+import React from 'react';
+
 export function cleanupOldSystem(): boolean {
   try {
     // Flag para verificar se já foi executada
