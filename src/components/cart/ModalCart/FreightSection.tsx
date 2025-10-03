@@ -16,6 +16,7 @@ export function FreightSection() {
     calculateFreight,
     hasCalculated,
     availableServices,
+    setSelectedFreight,
   } = freight;
 
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
@@ -31,6 +32,14 @@ export function FreightSection() {
     if (cep) {
       const cartItems = Object.values(cart);
       calculateFreight(cep, cartItems);
+    }
+  };
+
+  const handleSelectService = (index: number) => {
+    setSelectedServiceIndex(index);
+    const service = availableServices[index];
+    if (service) {
+      setSelectedFreight(service.price, service.deliveryTime);
     }
   };
 
@@ -68,7 +77,7 @@ export function FreightSection() {
                   type="radio"
                   name="freight-option"
                   checked={selectedServiceIndex === index}
-                  onChange={() => setSelectedServiceIndex(index)}
+                  onChange={() => handleSelectService(index)}
                   className="w-4 h-4 text-[#7045f5] focus:ring-[#7045f5]"
                 />
 

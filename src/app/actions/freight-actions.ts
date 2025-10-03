@@ -200,7 +200,9 @@ export async function calculateFreightFrenet(
     const services = validServices.map(service => ({
       carrier: service.Carrier,
       service: service.ServiceDescription,
-      price: service.ShippingPrice,
+      price: typeof service.ShippingPrice === 'string'
+        ? parseFloat(service.ShippingPrice)
+        : service.ShippingPrice,
       deliveryTime: service.DeliveryTime,
       serviceCode: service.ServiceCode
     }));

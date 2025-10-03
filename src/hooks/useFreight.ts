@@ -18,7 +18,9 @@ interface UseFreightReturn {
     service: string;
     price: number;
     deliveryTime: number;
+    serviceCode: string;
   }>;
+  setSelectedFreight: (price: number, deliveryTime: number) => void;
 }
 
 const STORAGE_KEY = 'love_cosmetics_last_cep';
@@ -112,15 +114,20 @@ export function useFreight(): UseFreightReturn {
     setError(null);
   }, []);
 
+  const setSelectedFreight = useCallback((price: number, days: number) => {
+    setFreightValue(price);
+    setDeliveryTime(`${days} ${days === 1 ? 'dia útil' : 'dias úteis'}`);
+  }, []);
+
   const handleSetCep = useCallback((newCep: string) => {
     // Formatar CEP enquanto digita
     const formatted = newCep
       .replace(/\D/g, '') // Remove não números
       .slice(0, 8) // Limita a 8 dígitos
       .replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona hífen
-    
+
     setCep(formatted);
-    
+
     // Auto-calcular quando tiver 8 dígitos
     const cleanCep = formatted.replace(/\D/g, '');
     if (cleanCep.length === 8) {
@@ -139,5 +146,6 @@ export function useFreight(): UseFreightReturn {
     clearError,
     hasCalculated,
     availableServices,
+    setSelectedFreight,
   };
 }
