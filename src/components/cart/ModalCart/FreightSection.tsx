@@ -28,6 +28,16 @@ export function FreightSection() {
     }
   }, [hasCalculated, availableServices.length]);
 
+  // Recalcular frete automaticamente quando o carrinho mudar
+  useEffect(() => {
+    if (cep && hasCalculated) {
+      const cartItems = Object.values(cart);
+      if (cartItems.length > 0) {
+        calculateFreight(cep, cartItems);
+      }
+    }
+  }, [cart]); // Recalcula quando cart mudar (adicionar/remover/mudar quantidade)
+
   const handleCalculate = () => {
     if (cep) {
       const cartItems = Object.values(cart);

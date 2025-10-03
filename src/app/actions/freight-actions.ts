@@ -106,10 +106,6 @@ export type FreightCalculationResponse =
 // FRENET API - IMPLEMENTAÇÃO
 // ============================================
 
-// Cache para Frenet
-const frenetCache = new Map<string, { data: FrenetCalculationSuccess; timestamp: number }>();
-const FRENET_CACHE_TIMEOUT = 1000 * 60 * 30; // 30 minutos
-
 const FRENET_API_URL = "https://api.frenet.com.br/shipping/quote";
 const FRENET_TOKEN = process.env.FRENET_API_TOKEN || "";
 const SELLER_CEP = "69082-230"; // CEP de origem (Manaus)
@@ -135,15 +131,6 @@ export async function calculateFreightFrenet(
   // Validar se há itens
   if (!items || items.length === 0) {
     return { success: false, error: "Nenhum item para calcular frete." };
-  }
-
-  // Criar chave de cache baseada no CEP e itens
-  const cacheKey = `${cleanCep}-${JSON.stringify(items.map(i => ({ q: i.quantity, p: i.preco })))}`;
-
-  // Verificar cache
-  const cached = frenetCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < FRENET_CACHE_TIMEOUT) {
-    return cached.data;
   }
 
   try {
@@ -217,9 +204,6 @@ export async function calculateFreightFrenet(
       services,
       cheapest
     };
-
-    // Adicionar ao cache
-    frenetCache.set(cacheKey, { data: successResult, timestamp: Date.now() });
 
     return successResult;
   } catch (error) {
@@ -318,8 +302,3 @@ export async function clearFreightCache() {
   cache.clear();
 }
 */
-
-// Manter função de limpeza de cache
-export async function clearFreightCache() {
-  frenetCache.clear();
-}
