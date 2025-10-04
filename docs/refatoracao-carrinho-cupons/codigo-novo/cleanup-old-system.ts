@@ -3,7 +3,7 @@
  * Remove dados antigos (localStorage, cookies) para evitar conflitos
  */
 
-import React from 'react';
+import { useEffect } from 'react';
 
 export function cleanupOldSystem(): boolean {
   try {
@@ -50,7 +50,7 @@ export function cleanupOldSystem(): boolean {
  * Deve ser chamado no componente raiz ou layout principal
  */
 export function useSystemCleanup() {
-  React.useEffect(() => {
+  useEffect(() => {
     cleanupOldSystem();
   }, []);
 }

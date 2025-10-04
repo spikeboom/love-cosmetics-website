@@ -80,7 +80,7 @@ export function FreightSection() {
             Selecione a forma de envio:
           </p>
 
-          {availableServices.map((service: {carrier: string; service: string; price: number; deliveryTime: number; serviceCode: string}, index: number) => (
+          {availableServices.map((service: { carrier: string; service: string; price: number; deliveryTime: number; serviceCode: string }, index: number) => (
             <label
               key={service.serviceCode}
               className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all ${

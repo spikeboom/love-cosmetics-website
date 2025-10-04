@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const pedidoId = params.id;
+    const { id: pedidoId } = await params;
 
     // Busca o pedido no banco
     const pedido = await prisma.pedido.findUnique({
@@ -97,8 +97,9 @@ export async function POST(
 
     // Tenta salvar o erro no banco
     try {
+      const { id } = await params;
       await prisma.pedido.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           notaFiscalErro: error.message || "Erro desconhecido",
         },
