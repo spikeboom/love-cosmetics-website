@@ -427,14 +427,16 @@ function PedidoRow({ pedido, index, onNotaGerada }: { pedido: Pedido; index: num
                           <strong>Data de Nascimento:</strong>{" "}
                           {new Date(pedido.data_nascimento).toLocaleDateString("pt-BR")}
                         </Typography>
-                        <Typography variant="body2">
-                          <strong>WhatsApp:</strong>{" "}
-                          <Chip 
-                            label={pedido.aceito_receber_whatsapp ? "Aceita" : "Não aceita"} 
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2">
+                            <strong>WhatsApp:</strong>
+                          </Typography>
+                          <Chip
+                            label={pedido.aceito_receber_whatsapp ? "Aceita" : "Não aceita"}
                             color={pedido.aceito_receber_whatsapp ? "success" : "default"}
                             size="small"
                           />
-                        </Typography>
+                        </Box>
                       </Grid>
                       
                       <Grid item xs={12} md={6}>
@@ -553,12 +555,14 @@ function PedidoRow({ pedido, index, onNotaGerada }: { pedido: Pedido; index: num
                                         </Typography>
                                       </Grid>
                                       <Grid item xs={12} sm={6}>
-                                        <Typography variant="body2">
-                                          <strong>End to End ID:</strong><br />
+                                        <Box>
+                                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                            <strong>End to End ID:</strong>
+                                          </Typography>
                                           <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
                                             {charge.payment_method.pix.end_to_end_id || "N/A"}
                                           </Typography>
-                                        </Typography>
+                                        </Box>
                                       </Grid>
                                       <Grid item xs={12} sm={6}>
                                         <Typography variant="body2">
