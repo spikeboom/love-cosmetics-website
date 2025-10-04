@@ -34,6 +34,8 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import { useSnackbar } from "notistack";
 
 interface Pagamento {
   id: string;
@@ -77,16 +79,44 @@ interface Pedido {
   createdAt: string;
   pagamentos?: Pagamento[] | null;
   cupons: any[];
+  notaFiscalGerada?: boolean;
+  notaFiscalId?: string | null;
+  notaFiscalErro?: string | null;
 }
 
 // export const metadata = {
 //   title: "Admin - Painel de Pedidos",
 // };
 
-function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
+function PedidoRow({ pedido, index, onNotaGerada }: { pedido: Pedido; index: number; onNotaGerada: () => void }) {
   const [open, setOpen] = useState(false);
   const [openContato, setOpenContato] = useState(false);
   const [openPaymentMethods, setOpenPaymentMethods] = useState(false);
+  const [generatingNota, setGeneratingNota] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleGerarNota = async () => {
+    setGeneratingNota(true);
+    try {
+      const response = await fetch(`/api/pedidos/${pedido.id}/gerar-nota`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        enqueueSnackbar('Nota fiscal gerada com sucesso!', { variant: 'success' });
+        onNotaGerada();
+      } else {
+        enqueueSnackbar(data.message || 'Erro ao gerar nota fiscal', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Erro ao gerar nota:', error);
+      enqueueSnackbar('Erro ao gerar nota fiscal', { variant: 'error' });
+    } finally {
+      setGeneratingNota(false);
+    }
+  };
 
   const getPaymentStatusChip = (status: string) => {
     const statusMap: Record<string, { label: string; color: any }> = {
@@ -96,7 +126,7 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
       'CANCELLED': { label: 'Cancelado', color: 'error' },
       'WAITING_PAYMENT': { label: 'Aguardando', color: 'info' },
     };
-    
+
     return statusMap[status] || { label: status, color: 'default' };
   };
 
@@ -209,7 +239,7 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
                 const charge = pagamento?.info?.charges?.[0];
                 const status = charge?.status || pagamento.status;
                 const statusConfig = getPaymentStatusChip(status);
-                
+
                 return (
                   <Chip
                     key={idx}
@@ -223,19 +253,53 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
               })}
             </Stack>
           ) : (
-            <Chip 
-              label="Sem pagamento" 
-              color="default" 
-              size="small" 
+            <Chip
+              label="Sem pagamento"
+              color="default"
+              size="small"
               variant="outlined"
               sx={{ fontSize: '0.7rem', height: 20 }}
             />
           )}
         </TableCell>
+        <TableCell>
+          {pedido.notaFiscalGerada ? (
+            <Chip
+              label="NF Gerada"
+              color="success"
+              size="small"
+              icon={<ReceiptIcon />}
+              sx={{ fontSize: '0.7rem', height: 24 }}
+            />
+          ) : pedido.notaFiscalErro ? (
+            <Button
+              variant="outlined"
+              size="small"
+              color="error"
+              startIcon={generatingNota ? <CircularProgress size={14} /> : <ReceiptIcon />}
+              onClick={handleGerarNota}
+              disabled={generatingNota}
+              sx={{ fontSize: '0.7rem', py: 0.5 }}
+            >
+              Erro - Tentar
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={generatingNota ? <CircularProgress size={14} /> : <ReceiptIcon />}
+              onClick={handleGerarNota}
+              disabled={generatingNota}
+              sx={{ fontSize: '0.7rem', py: 0.5 }}
+            >
+              Gerar NF
+            </Button>
+          )}
+        </TableCell>
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 2, backgroundColor: '#f8fafc', borderRadius: 2, p: 2 }}>
               
@@ -705,11 +769,12 @@ export default function PedidosPage() {
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Frete</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Data</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Nota Fiscal</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {pedidos.map((pedido, index) => (
-                <PedidoRow key={pedido.id} pedido={pedido} index={index} />
+                <PedidoRow key={pedido.id} pedido={pedido} index={index} onNotaGerada={() => fetchPedidos(true)} />
               ))}
             </TableBody>
           </Table>

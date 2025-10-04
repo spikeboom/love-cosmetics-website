@@ -4,7 +4,6 @@ import { createLogger } from "@/utils/logMessage";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSession, hashPassword, createSession, setSessionCookie } from "@/lib/cliente/auth";
-import { tryAutoGenerateNF } from "@/lib/bling/auto-generate-nf";
 
 export async function POST(req: NextRequest) {
   const logMessage = createLogger();
@@ -230,14 +229,6 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       );
     }
-
-    // Tentar gerar nota fiscal automaticamente (não bloquear se falhar)
-    tryAutoGenerateNF(pedido.id).catch(error => {
-      logMessage("Erro na geração automática de NF (não bloqueante)", {
-        pedidoId: pedido.id,
-        error: error instanceof Error ? error.message : "Erro desconhecido"
-      });
-    });
 
     return NextResponse.json(
       {

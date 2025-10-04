@@ -43,7 +43,12 @@ model Pedido {
   createdAt                 DateTime @default(now())
   ga_session_id             String?
   ga_session_number         String?
-  
+
+  // Nota Fiscal
+  notaFiscalGerada          Boolean  @default(false)
+  notaFiscalId              String?
+  notaFiscalErro            String?
+
   // Relação opcional com cliente
   pedidoCliente             PedidoCliente?
 }
