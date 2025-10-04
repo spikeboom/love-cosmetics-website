@@ -14,19 +14,17 @@ export function CartProductList({
   removeProductFromCart: (args: { product: any }) => void;
 }) {
   return (
-    <div className="relative h-full overflow-y-auto">
-      <div className="absolute bottom-0 left-0 right-0 top-0 w-full">
-        {Object.entries(cart).map(([id, product]: any) => (
-          <CartProductItem
-            key={id}
-            product={product}
-            formatPrice={formatPrice}
-            addQuantity={() => addQuantityProductToCart({ product })}
-            subtractQuantity={() => subtractQuantityProductToCart({ product })}
-            removeProduct={() => removeProductFromCart({ product })}
-          />
-        ))}
-      </div>
+    <div className="flex flex-col gap-4 p-4">
+      {Object.entries(cart).map(([id, product]: any) => (
+        <CartProductItem
+          key={id}
+          product={product}
+          formatPrice={formatPrice}
+          addQuantity={() => addQuantityProductToCart({ product })}
+          subtractQuantity={() => subtractQuantityProductToCart({ product })}
+          removeProduct={() => removeProductFromCart({ product })}
+        />
+      ))}
     </div>
   );
 }

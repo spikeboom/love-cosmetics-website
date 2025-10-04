@@ -19,6 +19,7 @@ export function CartSummary({
   cart,
   setOpenCart,
   setSidebarMounted,
+  showCheckoutActions = true,
 }: any) {
   const { freight } = useMeuContexto();
 
@@ -35,12 +36,14 @@ export function CartSummary({
       />
       <AppliedCouponsSection cupons={cupons} removeCoupon={removeCoupon} />
       <TotalsSection descontos={descontos} total={total} />
-      <CheckoutActions
-        setOpenCart={setOpenCart}
-        cart={cart}
-        setSidebarMounted={setSidebarMounted}
-        hasCalculatedFreight={freight.hasCalculated}
-      />
+      {showCheckoutActions && (
+        <CheckoutActions
+          setOpenCart={setOpenCart}
+          cart={cart}
+          setSidebarMounted={setSidebarMounted}
+          hasCalculatedFreight={freight.hasCalculated}
+        />
+      )}
     </div>
   );
 }

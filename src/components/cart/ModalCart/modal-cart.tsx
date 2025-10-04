@@ -8,6 +8,7 @@ import { CartProductList } from "./CartProductList";
 import { EmptyCartMessage } from "./EmptyCartMessage";
 import { SuggestedProductsCarousel } from "./SuggestedProductsCarousel";
 import { CartSummary } from "./CartSummary";
+import { CheckoutActions } from "./CheckoutActions";
 
 export function ModalCart() {
   const {
@@ -75,9 +76,10 @@ export function ModalCart() {
             }}
             data-testid="cart-modal"
           >
-            <div className="flex h-full flex-col justify-between">
-              <div className="flex h-full flex-col">
-                <CartHeader onClose={() => setOpenCart(false)} />
+            <div className="flex h-full flex-col">
+              <CartHeader onClose={() => setOpenCart(false)} />
+
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                 <CartProductList
                   cart={cart}
                   formatPrice={formatPrice}
@@ -86,13 +88,12 @@ export function ModalCart() {
                   removeProductFromCart={removeProductFromCart}
                 />
                 {loadingAddItem && <div className="barra my-[8px]"></div>}
-              </div>
-              {Object.keys(cart).length === 0 && !loadingAddItem && (
-                <EmptyCartMessage />
-              )}
-              {suggestedProducts.length > 0 && (
-                <>
-                  <div className="flex-1" />
+
+                {Object.keys(cart).length === 0 && !loadingAddItem && (
+                  <EmptyCartMessage />
+                )}
+
+                {suggestedProducts.length > 0 && (
                   <SuggestedProductsCarousel
                     suggestedProducts={suggestedProducts}
                     carouselIndex={carouselIndex}
@@ -101,23 +102,34 @@ export function ModalCart() {
                     formatPrice={formatPrice}
                     onCloseCart={() => setSidebarMounted(false)}
                   />
-                </>
-              )}
-              <CartSummary
-                openCupom={openCupom}
-                setOpenCupom={setOpenCupom}
-                cupom={cupom}
-                setCupom={setCupom}
-                handleAddCupomLocal={handleAddCupomLocal}
-                loadingCupom={loadingCupom}
-                cupons={cupons}
-                removeCoupon={removeCoupon}
-                descontos={descontos}
-                total={total}
-                cart={cart}
-                setOpenCart={setOpenCart}
-                setSidebarMounted={setSidebarMounted}
-              />
+                )}
+
+                <CartSummary
+                  openCupom={openCupom}
+                  setOpenCupom={setOpenCupom}
+                  cupom={cupom}
+                  setCupom={setCupom}
+                  handleAddCupomLocal={handleAddCupomLocal}
+                  loadingCupom={loadingCupom}
+                  cupons={cupons}
+                  removeCoupon={removeCoupon}
+                  descontos={descontos}
+                  total={total}
+                  cart={cart}
+                  setOpenCart={setOpenCart}
+                  setSidebarMounted={setSidebarMounted}
+                  showCheckoutActions={false}
+                />
+              </div>
+
+              <div className="border-t border-gray-200 bg-white px-[12px] py-[12px]">
+                <CheckoutActions
+                  setOpenCart={setOpenCart}
+                  cart={cart}
+                  setSidebarMounted={setSidebarMounted}
+                  hasCalculatedFreight={freteValue > 0}
+                />
+              </div>
             </div>
           </div>
         </>
