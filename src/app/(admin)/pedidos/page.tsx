@@ -33,6 +33,7 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 interface Pagamento {
   id: string;
@@ -529,37 +530,47 @@ function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [filterMode, setFilterMode] = useState<'hideTests' | 'showOnlyTests'>('hideTests');
   // Controle de paginação (exemplo simples)
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  useEffect(() => {
-    const fetchPedidos = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `/api/pedidos?page=${page}&pageSize=${pageSize}&filterMode=${filterMode}`,
-        );
-        if (!response.ok) {
-          throw new Error("Erro ao buscar os pedidos.");
-        }
-        const data = await response.json();
-        setPedidos(data);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Erro desconhecido.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPedidos = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setInitialLoading(true);
+    }
 
-    fetchPedidos();
+    try {
+      const response = await fetch(
+        `/api/pedidos?page=${page}&pageSize=${pageSize}&filterMode=${filterMode}`,
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar os pedidos.");
+      }
+      const data = await response.json();
+      setPedidos(data);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Erro desconhecido.");
+    } finally {
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setInitialLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchPedidos(false);
   }, [page, filterMode]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <Box
         sx={{
@@ -626,36 +637,55 @@ export default function PedidosPage() {
                 size="small"
               />
             </Box>
-            
-            <ToggleButtonGroup
-              value={filterMode}
-              exclusive
-              onChange={(e, newMode) => {
-                if (newMode !== null) {
-                  setFilterMode(newMode);
-                }
-              }}
-              size="small"
-              sx={{
-                '& .MuiToggleButton-root': {
-                  borderColor: '#e2e8f0',
-                  '&.Mui-selected': {
-                    backgroundColor: '#1976d2',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: '#1565c0',
+
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Button
+                variant="outlined"
+                startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
+                onClick={() => fetchPedidos(true)}
+                disabled={refreshing}
+                sx={{
+                  borderColor: '#1976d2',
+                  color: '#1976d2',
+                  '&:hover': {
+                    backgroundColor: '#e3f2fd',
+                    borderColor: '#1565c0',
+                  }
+                }}
+              >
+                {refreshing ? 'Atualizando...' : 'Atualizar'}
+              </Button>
+
+              <ToggleButtonGroup
+                value={filterMode}
+                exclusive
+                onChange={(e, newMode) => {
+                  if (newMode !== null) {
+                    setFilterMode(newMode);
+                  }
+                }}
+                size="small"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    borderColor: '#e2e8f0',
+                    '&.Mui-selected': {
+                      backgroundColor: '#1976d2',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: '#1565c0',
+                      }
                     }
                   }
-                }
-              }}
-            >
-              <ToggleButton value="hideTests">
-                Ocultar Testes
-              </ToggleButton>
-              <ToggleButton value="showOnlyTests">
-                Mostrar Apenas Testes
-              </ToggleButton>
-            </ToggleButtonGroup>
+                }}
+              >
+                <ToggleButton value="hideTests">
+                  Ocultar Testes
+                </ToggleButton>
+                <ToggleButton value="showOnlyTests">
+                  Mostrar Apenas Testes
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
           </Box>
         </CardContent>
       </Card>
