@@ -65,7 +65,9 @@ export async function createInvoice(
       }
 
       return {
-        codigo: String(item.bling_number),
+        produto: {
+          id: Number(item.bling_number)
+        },
         quantidade: item.quantity,
         valor: unitValue,
         ...(item.discount && item.discount > 0 ? { desconto: item.discount } : {})
