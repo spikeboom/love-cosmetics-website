@@ -5,6 +5,20 @@ const logMessage = createLogger();
 
 const BLING_API_BASE_URL = "https://api.bling.com.br/Api/v3";
 
+// Interface para dados de tributação do produto
+interface TributacaoProduto {
+  origem?: number;
+  ncm?: string;
+  cest?: string;
+}
+
+// Interface para resposta do produto do Bling
+interface BlingProdutoResponse {
+  data?: {
+    tributacao?: TributacaoProduto;
+  };
+}
+
 // Interface para item do pedido
 interface OrderItem {
   id: number | string;
@@ -26,6 +40,8 @@ interface OrderData {
   // Dados do cliente do formulário
   nome: string;
   sobrenome: string;
+  email: string;
+  telefone: string;
   cpf: string;
   endereco: string;
   numero: string;
@@ -49,29 +65,79 @@ interface BlingNFResponse {
   }>;
 }
 
+// Busca dados fiscais do produto no Bling
+async function getProdutoTributacao(produtoId: number): Promise<TributacaoProduto> {
+  try {
+    const response = await makeAuthenticatedRequest(
+      `${BLING_API_BASE_URL}/produtos/${produtoId}`
+    );
+
+    if (!response.ok) {
+      logMessage("Erro ao buscar dados do produto", {
+        produtoId,
+        status: response.status
+      });
+      return {};
+    }
+
+    const data: BlingProdutoResponse = await response.json();
+    return data.data?.tributacao || {};
+  } catch (error) {
+    logMessage("Erro ao buscar tributação do produto", {
+      produtoId,
+      error
+    });
+    return {};
+  }
+}
+
 // Cria uma nota fiscal no Bling
 export async function createInvoice(
   accessToken: string,
   orderData: OrderData
 ): Promise<BlingNFResponse> {
   try {
+    // Busca dados fiscais de todos os produtos em paralelo
+    const produtosComTributacao = await Promise.all(
+      orderData.items.map(async (item) => {
+        if (!item.bling_number) {
+          throw new Error(`Produto ${item.name} não possui bling_number`);
+        }
+        const tributacao = await getProdutoTributacao(Number(item.bling_number));
+        return { item, tributacao };
+      })
+    );
+
     // Monta os itens da nota fiscal
-    const items = orderData.items.map(item => {
+    const items = produtosComTributacao.map(({ item, tributacao }) => {
       const unitValue = (item.unit_amount ? item.unit_amount / 100 : item.preco) || item.value;
 
-      // Usa bling_number do item diretamente
-      if (!item.bling_number) {
-        throw new Error(`Produto ${item.name} não possui bling_number`);
-      }
-
-      return {
-        produto: {
-          id: Number(item.bling_number)
-        },
+      const itemNF: any = {
+        codigo: String(item.bling_number),
+        descricao: item.name,
+        unidade: "UN",
         quantidade: item.quantity,
         valor: unitValue,
-        ...(item.discount && item.discount > 0 ? { desconto: item.discount } : {})
+        tipo: "P", // P = Produto
       };
+
+      // Adiciona dados fiscais se disponíveis
+      if (tributacao.origem !== undefined) {
+        itemNF.origem = tributacao.origem;
+      }
+      if (tributacao.ncm) {
+        itemNF.classificacaoFiscal = tributacao.ncm;
+      }
+      if (tributacao.cest) {
+        itemNF.cest = tributacao.cest;
+      }
+
+      // Adiciona desconto se houver
+      if (item.discount && item.discount > 0) {
+        itemNF.desconto = item.discount;
+      }
+
+      return itemNF;
     });
 
 
@@ -85,6 +151,8 @@ export async function createInvoice(
         nome: `${orderData.nome} ${orderData.sobrenome}`,
         tipoPessoa: "F", // Pessoa Física
         numeroDocumento: orderData.cpf.replace(/\D/g, ""), // CPF sem pontuação
+        email: orderData.email,
+        telefone: orderData.telefone,
         contribuinte: 9, // Não contribuinte
         endereco: {
           endereco: orderData.endereco,

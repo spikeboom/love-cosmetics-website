@@ -41,6 +41,8 @@ export async function POST(
       items: pedido.items as any[],
       nome: pedido.nome,
       sobrenome: pedido.sobrenome,
+      email: pedido.email,
+      telefone: pedido.telefone,
       cpf: pedido.cpf,
       endereco: pedido.endereco,
       numero: pedido.numero,

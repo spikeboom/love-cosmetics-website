@@ -44,6 +44,8 @@ export async function tryAutoGenerateNF(pedidoId: string): Promise<boolean> {
       // Dados do cliente do formulário
       nome: pedido.nome,
       sobrenome: pedido.sobrenome,
+      email: pedido.email,
+      telefone: pedido.telefone,
       cpf: pedido.cpf,
       endereco: pedido.endereco,
       numero: pedido.numero,
