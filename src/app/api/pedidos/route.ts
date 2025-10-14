@@ -18,15 +18,17 @@ export async function GET(req: NextRequest) {
     let whereClause = '';
     if (filterMode === 'hideTests') {
       whereClause = `WHERE NOT (
-        LOWER(p.email) LIKE '%teste%' OR 
-        LOWER(p.email) LIKE '%spikeboom%' OR 
-        LOWER(p.email) LIKE '%robertocruzneto%'
+        LOWER(p.email) LIKE '%teste%' OR
+        LOWER(p.email) LIKE '%spikeboom%' OR
+        LOWER(p.email) LIKE '%robertocruzneto%' OR
+        LOWER(p.email) LIKE '%+%test%'
       )`;
     } else if (filterMode === 'showOnlyTests') {
       whereClause = `WHERE (
-        LOWER(p.email) LIKE '%teste%' OR 
-        LOWER(p.email) LIKE '%spikeboom%' OR 
-        LOWER(p.email) LIKE '%robertocruzneto%'
+        LOWER(p.email) LIKE '%teste%' OR
+        LOWER(p.email) LIKE '%spikeboom%' OR
+        LOWER(p.email) LIKE '%robertocruzneto%' OR
+        LOWER(p.email) LIKE '%+%test%'
       )`;
     }
 

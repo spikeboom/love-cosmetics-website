@@ -144,7 +144,7 @@ export async function createInvoice(
     // Monta o corpo da requisição
     const invoiceData = {
       tipo: 1, // Nota fiscal de saída
-      numero: orderData.id, // Campo obrigatório - usando ID do pedido
+      // numero é gerado automaticamente pelo Bling de forma sequencial
       dataOperacao: new Date().toISOString().split('T')[0] + " " + new Date().toTimeString().split(' ')[0], // Data e hora atual
       numeroPedidoLoja: `LV-${orderData.id}`,
       contato: {
