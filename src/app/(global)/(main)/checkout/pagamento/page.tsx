@@ -67,7 +67,7 @@ function CheckoutPagamentoContent() {
 
   if (!pedidoId) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800">
             Pedido não encontrado
@@ -83,9 +83,9 @@ function CheckoutPagamentoContent() {
   // Mostrar loading enquanto verifica status
   if (checkingStatus) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
           <p className="text-gray-600">Verificando status do pedido...</p>
         </div>
       </div>
@@ -95,7 +95,7 @@ function CheckoutPagamentoContent() {
   // Mostrar aviso se já foi pago
   if (alreadyPaid) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
         <div className="mx-auto max-w-2xl px-4">
           <div className="rounded-lg bg-green-50 border-2 border-green-200 p-8 text-center">
             <div className="mb-4 flex justify-center">
@@ -306,9 +306,9 @@ export default function CheckoutPagamentoPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
+        <div className="flex min-h-[calc(100vh-80px)] items-center justify-center">
           <div className="text-center">
-            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
             <p className="text-gray-600">Carregando...</p>
           </div>
         </div>
