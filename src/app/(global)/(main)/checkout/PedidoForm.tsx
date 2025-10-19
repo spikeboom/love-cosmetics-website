@@ -307,11 +307,9 @@ const PedidoForm: React.FC = () => {
         action: createCloseAction
       });
 
-      // Calcular total com frete
-      const totalComFrete = total + (freightData.frete_calculado || 0);
-
+      // O total do contexto já inclui o frete, não precisa somar novamente
       // Redirecionar para página de pagamento interno (Checkout Transparente PagBank)
-      window.location.href = `/checkout/pagamento?pedidoId=${result.id}&total=${Math.trunc(totalComFrete * 100)}`;
+      window.location.href = `/checkout/pagamento?pedidoId=${result.id}&total=${Math.trunc(total * 100)}`;
 
       // OPÇÃO ANTIGA: Redirecionar para PagSeguro (API antiga)
       // window.location.href = result?.link;
