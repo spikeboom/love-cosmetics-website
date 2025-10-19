@@ -174,6 +174,19 @@ export default function CardPaymentForm({
     setLoading(true);
 
     try {
+      // Verificar se o pedido já foi pago
+      const statusResponse = await fetch(`/api/pedido/status?pedidoId=${pedidoId}`);
+      const statusResult = await statusResponse.json();
+
+      if (statusResult.success && statusResult.pedido.isPaid) {
+        setLoading(false);
+        onError("Este pedido já foi pago. Redirecionando...");
+        setTimeout(() => {
+          window.location.href = `/confirmacao?pedidoId=${pedidoId}`;
+        }, 2000);
+        return;
+      }
+
       // Validações básicas
       if (!cardData.holder || cardData.holder.length < 3) {
         throw new Error("Nome do titular inválido");

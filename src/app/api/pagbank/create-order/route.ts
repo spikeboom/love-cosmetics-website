@@ -36,6 +36,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verificar se o pedido já foi pago
+    if (pedido.status_pagamento === "PAID" || pedido.status_pagamento === "AUTHORIZED") {
+      logMessage("Tentativa de pagamento duplicado", {
+        pedidoId,
+        status_atual: pedido.status_pagamento,
+      });
+
+      return NextResponse.json(
+        {
+          error: "Este pedido já foi pago",
+          details: "Não é possível criar um novo pagamento para um pedido já pago",
+          status: pedido.status_pagamento,
+        },
+        { status: 400 }
+      );
+    }
+
     // Preparar dados do cliente
     const cleanedPhone = pedido.telefone.replace(/\D/g, "");
     const cleanedCPF = pedido.cpf.replace(/\D/g, "");

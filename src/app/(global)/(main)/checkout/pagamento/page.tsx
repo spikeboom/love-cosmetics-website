@@ -14,6 +14,8 @@ function CheckoutPagamentoContent() {
     "credit_card" | "pix" | null
   >(null);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [alreadyPaid, setAlreadyPaid] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
 
   useEffect(() => {
     // Definir título da página
@@ -29,6 +31,25 @@ function CheckoutPagamentoContent() {
     if (totalParam) {
       setTotalAmount(parseInt(totalParam));
     }
+
+    // Verificar se o pedido já foi pago
+    const checkPaymentStatus = async () => {
+      try {
+        setCheckingStatus(true);
+        const response = await fetch(`/api/pedido/status?pedidoId=${pedidoId}`);
+        const result = await response.json();
+
+        if (result.success && result.pedido.isPaid) {
+          setAlreadyPaid(true);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar status do pedido:", error);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+
+    checkPaymentStatus();
   }, [pedidoId, totalParam, router]);
 
   const handlePaymentSuccess = (result: any) => {
@@ -53,6 +74,55 @@ function CheckoutPagamentoContent() {
           <p className="mt-2 text-gray-600">
             Redirecionando para o checkout...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar loading enquanto verifica status
+  if (checkingStatus) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
+          <p className="text-gray-600">Verificando status do pedido...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar aviso se já foi pago
+  if (alreadyPaid) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="mx-auto max-w-2xl px-4">
+          <div className="rounded-lg bg-green-50 border-2 border-green-200 p-8 text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-4xl">
+                ✓
+              </div>
+            </div>
+            <h1 className="mb-4 text-2xl font-bold text-green-800">
+              Este pedido já foi pago!
+            </h1>
+            <p className="mb-6 text-gray-700">
+              O pedido #{pedidoId.slice(0, 8)} já teve seu pagamento confirmado.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <button
+                onClick={() => router.push(`/confirmacao?pedidoId=${pedidoId}`)}
+                className="rounded-md bg-green-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-700"
+              >
+                Ver Confirmação
+              </button>
+              <button
+                onClick={() => router.push("/")}
+                className="rounded-md bg-gray-200 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-300"
+              >
+                Voltar ao Início
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
