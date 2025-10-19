@@ -20,7 +20,7 @@ interface UseFreightReturn {
     deliveryTime: number;
     serviceCode: string;
   }>;
-  setSelectedFreight: (price: number, deliveryTime: number) => void;
+  setSelectedFreight: (price: number, deliveryTime: number, index?: number) => void;
   resetFreight: () => void;
   getSelectedFreightData: () => {
     frete_calculado: number;
@@ -28,6 +28,7 @@ interface UseFreightReturn {
     transportadora_servico: string | null;
     transportadora_prazo: number | null;
   };
+  selectedServiceIndex: number;
 }
 
 const STORAGE_KEY = 'love_cosmetics_last_cep';
@@ -123,10 +124,29 @@ export function useFreight(): UseFreightReturn {
       const result = await calculateFreightFrenet(cepValue, items);
 
       if (result.success) {
-        // Usar o serviço mais barato
-        setFreightValue(result.cheapest.price);
-        setDeliveryTime(`${result.cheapest.deliveryTime} ${result.cheapest.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}`);
+        // Tentar manter o serviço selecionado anteriormente se ainda existir
+        const previousService = availableServices[selectedServiceIndex];
+        let newSelectedIndex = 0; // Padrão: mais barato
+
+        if (previousService) {
+          // Procurar serviço equivalente (mesmo carrier e serviceCode)
+          const equivalentIndex = result.services.findIndex(
+            s => s.carrier === previousService.carrier && s.serviceCode === previousService.serviceCode
+          );
+
+          if (equivalentIndex !== -1) {
+            newSelectedIndex = equivalentIndex;
+            console.log(`📦 Mantendo seleção do serviço: ${previousService.carrier} - ${previousService.service}`);
+          } else {
+            console.log(`📦 Serviço anterior não disponível, selecionando mais barato`);
+          }
+        }
+
+        const selectedService = result.services[newSelectedIndex];
+        setFreightValue(selectedService.price);
+        setDeliveryTime(`${selectedService.deliveryTime} ${selectedService.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}`);
         setAvailableServices(result.services);
+        setSelectedServiceIndex(newSelectedIndex);
         setHasCalculated(true);
       } else {
         setError(result.error);
@@ -146,7 +166,7 @@ export function useFreight(): UseFreightReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [availableServices, selectedServiceIndex]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -225,5 +245,6 @@ export function useFreight(): UseFreightReturn {
     setSelectedFreight,
     resetFreight,
     getSelectedFreightData,
+    selectedServiceIndex,
   };
 }

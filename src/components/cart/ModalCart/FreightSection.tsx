@@ -1,7 +1,7 @@
 "use client";
 
 import { LuTruck } from "react-icons/lu";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { CepInput } from "./CepInput";
 import { formatPrice } from "@/utils/format-price";
 import { useMeuContexto } from "@/components/common/Context/context";
@@ -18,16 +18,8 @@ export function FreightSection() {
     availableServices,
     setSelectedFreight,
     resetFreight,
+    selectedServiceIndex,
   } = freight;
-
-  const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
-
-  // Resetar seleção quando calcular novo frete
-  useEffect(() => {
-    if (hasCalculated && availableServices.length > 0) {
-      setSelectedServiceIndex(0); // Selecionar o primeiro (mais barato) por padrão
-    }
-  }, [hasCalculated, availableServices.length]);
 
   // Recalcular frete automaticamente quando o carrinho mudar
   useEffect(() => {
@@ -53,7 +45,6 @@ export function FreightSection() {
   };
 
   const handleSelectService = (index: number) => {
-    setSelectedServiceIndex(index);
     const service = availableServices[index];
     if (service) {
       setSelectedFreight(service.price, service.deliveryTime, index);
