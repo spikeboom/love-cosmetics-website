@@ -37,6 +37,22 @@ export function FreightSection() {
     }
   }, [cart]); // Recalcula quando cart mudar (adicionar/remover/mudar quantidade)
 
+  // Auto-calcular quando CEP tiver 8 dígitos
+  useEffect(() => {
+    const cartItems = Object.values(cart);
+    const cleanCep = cep.replace(/\D/g, '');
+
+    // Se carrinho estiver vazio, não calcular
+    if (cartItems.length === 0) {
+      return;
+    }
+
+    // Se CEP tiver 8 dígitos e ainda não calculou, calcular automaticamente
+    if (cleanCep.length === 8 && !hasCalculated) {
+      calculateFreight(cep, cartItems);
+    }
+  }, [cep]); // Observa mudanças no CEP
+
   const handleCalculate = () => {
     if (cep) {
       const cartItems = Object.values(cart);
@@ -51,6 +67,11 @@ export function FreightSection() {
     }
   };
 
+  const handleClearCep = () => {
+    setCep('');
+    resetFreight();
+  };
+
   const selectedService = availableServices[selectedServiceIndex];
 
   return (
@@ -59,6 +80,7 @@ export function FreightSection() {
         value={cep}
         onChange={setCep}
         onCalculate={handleCalculate}
+        onClear={handleClearCep}
         isLoading={isLoading}
         error={error}
         hasCalculated={hasCalculated}

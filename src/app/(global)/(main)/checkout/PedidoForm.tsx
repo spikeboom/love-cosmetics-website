@@ -329,6 +329,20 @@ const PedidoForm: React.FC = () => {
   };
 
   useEffect(() => {
+    // PRIMEIRO: Verificar se tem CEP do carrinho (maior prioridade)
+    const savedCepCarrinho = localStorage.getItem("love_cosmetics_last_cep");
+    let cepDoCarrinho = false;
+    let cepCarrinhoLimpo = '';
+
+    if (savedCepCarrinho) {
+      cepCarrinhoLimpo = savedCepCarrinho.replace(/\D/g, '');
+      if (cepCarrinhoLimpo.length === 8) {
+        cepDoCarrinho = true;
+      }
+    }
+
+    // SEGUNDO: Carregar dados salvos do formulário
+    let cepFormulario = '';
     const savedData = localStorage.getItem("formulario_pedido");
     if (savedData) {
       const parsedData: PedidoFormData = JSON.parse(savedData);
@@ -343,6 +357,16 @@ const PedidoForm: React.FC = () => {
       Object.keys(parsedData).forEach((key) => {
         const campo = key as keyof PedidoFormData;
         let valor = parsedData[campo];
+
+        // Guardar CEP do formulário para comparar depois
+        if (key === "cep") {
+          cepFormulario = String(valor ?? '').replace(/\D/g, '');
+        }
+
+        // Se for CEP e tiver CEP do carrinho, pular (não carregar do formulário)
+        if (key === "cep" && cepDoCarrinho) {
+          return;
+        }
 
         // Força string para campos com máscara
         if (camposMascarados.includes(key)) {
@@ -360,6 +384,20 @@ const PedidoForm: React.FC = () => {
         setValue(campo, valor);
       });
     }
+
+    // TERCEIRO: Se tem CEP do carrinho, usar ele (sobrescreve o do formulário se diferente)
+    if (cepDoCarrinho && savedCepCarrinho) {
+      setValue('cep', savedCepCarrinho);
+
+      // Só buscar endereço se o CEP do carrinho for diferente do CEP do formulário
+      // (evita requisição desnecessária se forem iguais)
+      if (cepCarrinhoLimpo !== cepFormulario) {
+        setTimeout(() => {
+          buscarEnderecoPorCep(savedCepCarrinho);
+        }, 300);
+      }
+    }
+
     setLoadingFormData(false); // indica que os dados foram carregados
   }, [setValue]);
 

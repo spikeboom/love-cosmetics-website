@@ -225,11 +225,9 @@ export function useFreight(): UseFreightReturn {
       resetFreight();
     }
 
-    // Auto-calcular quando tiver 8 dígitos
-    if (cleanCep.length === 8) {
-      calculateFreightInternal(formatted);
-    }
-  }, [calculateFreightInternal, hasCalculated, resetFreight]);
+    // Nota: O auto-cálculo quando tiver 8 dígitos será feito pelo componente
+    // que tem acesso aos itens do carrinho (FreightSection)
+  }, [hasCalculated, resetFreight]);
 
   return {
     cep,
