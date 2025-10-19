@@ -18,7 +18,7 @@ function CheckoutPagamentoContent() {
 
   useEffect(() => {
     // Definir título da página
-    document.title = "Pagamento - Love Cosmetics";
+    document.title = "Lové Cosmeticos - Pagamento";
 
     if (!pedidoId) {
       // Se não há pedidoId, redirecionar para checkout
