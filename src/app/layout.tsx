@@ -6,6 +6,7 @@ import {
   Poppins,
   Playfair_Display,
 } from "next/font/google";
+import Script from "next/script";
 import "./(global)/globals.css";
 import { MeuContextoProvider } from "@/components/common/Context/context";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -60,6 +61,11 @@ export default function RootLayout({
         <GoogleTagManager
           gtmId="GTM-T7ZMDHZF"
           gtmScriptUrl="https://gtm.lovecosmetics.com.br/gtm.js"
+        />
+        {/* PagBank SDK para criptografia de cartão */}
+        <Script
+          src="https://assets.pagseguro.com.br/checkout-sdk-js/rc/dist/browser/pagseguro.min.js"
+          strategy="beforeInteractive"
         />
       </head>
       <body

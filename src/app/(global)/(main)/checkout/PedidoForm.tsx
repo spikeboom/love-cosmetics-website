@@ -301,14 +301,20 @@ const PedidoForm: React.FC = () => {
         });
       }
 
-      // add snackbar redirecting to payment link
+      // Redirecionar para a nova página de pagamento (Checkout Transparente)
       enqueueSnackbar("Redirecionando para o pagamento...", {
         variant: "success",
         action: createCloseAction
       });
 
-      // Se tudo ocorrer bem, redireciona para o link de pagamento
-      window.location.href = result?.link;
+      // Calcular total com frete
+      const totalComFrete = total + (freightData.frete_calculado || 0);
+
+      // Redirecionar para página de pagamento interno (Checkout Transparente PagBank)
+      window.location.href = `/checkout/pagamento?pedidoId=${result.id}&total=${Math.trunc(totalComFrete * 100)}`;
+
+      // OPÇÃO ANTIGA: Redirecionar para PagSeguro (API antiga)
+      // window.location.href = result?.link;
     } catch (error) {
       console.error("Erro:", error);
       enqueueSnackbar("Erro ao enviar o pedido.", { variant: "error" });

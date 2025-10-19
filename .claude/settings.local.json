@@ -24,7 +24,9 @@
       "Bash(git log:*)",
       "WebFetch(domain:frenetapi.docs.apiary.io)",
       "WebFetch(domain:ajuda.frenet.com.br)",
-      "WebFetch(domain:www.postman.com)"
+      "WebFetch(domain:www.postman.com)",
+      "Read(//c/Users/Administrator/Pictures/Screenshots/**)",
+      "WebFetch(domain:developer.pagbank.com.br)"
     ],
     "deny": [],
     "ask": []

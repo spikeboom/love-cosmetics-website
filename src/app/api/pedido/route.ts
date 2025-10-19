@@ -168,74 +168,24 @@ export async function POST(req: NextRequest) {
     }
     
 
-    logMessage("Base URL", getBaseURL({ STAGE: "PRODUCTION" }));
+    // ============================================================
+    // CHECKOUT TRANSPARENTE
+    // O pagamento será processado na página /checkout/pagamento
+    // usando a nova API Orders do PagBank
+    // ============================================================
 
-    logMessage("Dados de frete recebidos", {
-      frete_calculado: body.frete_calculado,
-      freteValue,
-      final: body.frete_calculado || freteValue
+    logMessage("Pedido criado com sucesso (Checkout Transparente)", {
+      pedidoId: pedido.id,
+      nome: body.nome,
+      email: body.email,
+      total: pedido.total_pedido,
+      frete: pedido.frete_calculado,
     });
-
-    // Remove quaisquer caracteres não numéricos de telefone e CPF
-    const cleanedPhone = body.telefone.replace(/\D/g, "");
-    const cleanedCPF = body.cpf.replace(/\D/g, "");
-
-    const bodyCheckoutPagSeguro = {
-      customer: {
-        phone: {
-          country: "+55",
-          area: cleanedPhone.substring(0, 2),
-          number: cleanedPhone.substring(2),
-        },
-        name: `${body.nome} ${body.sobrenome}`,
-        email: body.email,
-        tax_id: cleanedCPF,
-      },
-      ...(body.descontos ? { discount_amount: body.descontos } : {}),
-      additional_amount: Math.trunc((body.frete_calculado ?? freteValue) * 100),
-      reference_id: pedido.id,
-      customer_modifiable: true,
-      items: body.items,
-      redirect_url: `${getBaseURL({ STAGE: "PRODUCTION" })}/confirmacao`,
-      notification_urls: [
-        "https://www.lovecosmetics.com.br/api/checkout_notification",
-      ],
-      payment_notification_urls: [
-        "https://www.lovecosmetics.com.br/api/payment_notification",
-      ],
-    };
-
-    logMessage("Body Checkout PagSeguro", bodyCheckoutPagSeguro);
-
-    const fetchResponse = await fetch("https://api.pagseguro.com/checkouts", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: `Bearer ${process.env.PAGSEGURO_TOKEN_DEV}`,
-        accept: "*/*",
-      },
-      body: JSON.stringify(bodyCheckoutPagSeguro),
-    });
-
-    const responseData = await fetchResponse.json();
-    logMessage("Resposta PagSeguro", responseData);
-
-    // Se a requisição falhar, remove o pedido criado
-    if (!fetchResponse.ok) {
-      logMessage("Erro na API PagSeguro", responseData);
-      await prisma.pedido.delete({ where: { id: pedido.id } });
-      return NextResponse.json(
-        { error: "Erro ao processar pagamento", details: responseData },
-        { status: 500 },
-      );
-    }
 
     return NextResponse.json(
       {
         message: "Pedido criado com sucesso",
         id: pedido.id,
-        // @ts-ignore
-        link: responseData.links.find((link) => link.rel === "PAY")?.href,
         // Informações adicionais sobre conta criada
         contaCriada: contaCriada,
         clienteVinculado: !!clienteParaVincular,

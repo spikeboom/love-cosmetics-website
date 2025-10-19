@@ -49,6 +49,23 @@ model Pedido {
   notaFiscalId              String?
   notaFiscalErro            String?
 
+  // PagBank API Orders (Checkout Transparente)
+  pagbank_order_id          String?  // ID do pedido no PagBank (ORDE_xxx)
+  pagbank_charge_id         String?  // ID da cobrança (CHAR_xxx)
+  status_pagamento          String?  // Status do pagamento (PAID, AUTHORIZED, DECLINED, etc)
+  pagbank_error             String?  // Erro retornado pela API
+
+  // Informações PIX
+  pix_qr_code               String?  @db.Text // Código PIX copiável
+  pix_qr_code_url           String?  // URL da imagem do QR Code
+  pix_expiration            String?  // Data de expiração do QR Code
+
+  // Informações do cartão (apenas últimos dígitos para referência)
+  payment_card_info         String?  // JSON com brand, last_digits, etc
+
+  // Método de pagamento usado
+  payment_method            String?  // "credit_card", "pix", "boleto"
+
   // Relação opcional com cliente
   pedidoCliente             PedidoCliente?
 }
