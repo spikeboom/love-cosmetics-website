@@ -36,6 +36,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createCloseAction } from "@/utils/snackbar-helpers";
 import { useFreight } from "@/hooks/useFreight";
 import EnderecoSelector from "./EnderecoSelector";
+import { OrderSummary } from "./OrderSummary";
+import { Grid } from "@mui/material";
 
 // Definição do schema com zod
 const pedidoSchema = z.object({
@@ -652,10 +654,15 @@ const PedidoForm: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ maxWidth: 800, margin: "auto", padding: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Formulário de Pedido
+      <Box sx={{ maxWidth: 1400, margin: "auto", padding: { xs: 2, md: 4 } }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 4 }}>
+          Finalizar Pedido
         </Typography>
+
+        <Grid container spacing={4}>
+          {/* Coluna do Formulário - esquerda no desktop, full width no mobile */}
+          <Grid item xs={12} md={7}>
+            <Box>
         
         {/* Status do Cliente - Logado ou Não Logado */}
         {clienteLogado ? (
@@ -1092,6 +1099,20 @@ const PedidoForm: React.FC = () => {
           onClose={() => setShowQuickLogin(false)}
           onLoginSuccess={verificarClienteLogado}
         />
+            </Box>
+          </Grid>
+
+          {/* Coluna do Resumo - direita no desktop, abaixo do formulário no mobile */}
+          <Grid item xs={12} md={5}>
+            <OrderSummary
+              cart={cart}
+              freight={freight}
+              descontos={descontos}
+              cupons={cupons}
+              total={total}
+            />
+          </Grid>
+        </Grid>
       </Box>
     </ThemeProvider>
   );
