@@ -307,9 +307,9 @@ const PedidoForm: React.FC = () => {
         action: createCloseAction
       });
 
-      // O total do contexto já inclui o frete, não precisa somar novamente
       // Redirecionar para página de pagamento interno (Checkout Transparente PagBank)
-      window.location.href = `/checkout/pagamento?pedidoId=${result.id}&total=${Math.trunc(total * 100)}`;
+      // O valor não é passado pela URL por segurança - será buscado do backend
+      window.location.href = `/checkout/pagamento?pedidoId=${result.id}`;
 
       // OPÇÃO ANTIGA: Redirecionar para PagSeguro (API antiga)
       // window.location.href = result?.link;

@@ -9,7 +9,6 @@ function CheckoutPagamentoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pedidoId = searchParams.get("pedidoId");
-  const totalParam = searchParams.get("total");
   const [selectedMethod, setSelectedMethod] = useState<
     "credit_card" | "pix" | null
   >(null);
@@ -27,20 +26,22 @@ function CheckoutPagamentoContent() {
       return;
     }
 
-    // Converter total de string para número (em centavos)
-    if (totalParam) {
-      setTotalAmount(parseInt(totalParam));
-    }
-
-    // Verificar se o pedido já foi pago
+    // Verificar status e buscar o total do pedido do backend
     const checkPaymentStatus = async () => {
       try {
         setCheckingStatus(true);
         const response = await fetch(`/api/pedido/status?pedidoId=${pedidoId}`);
         const result = await response.json();
 
-        if (result.success && result.pedido.isPaid) {
-          setAlreadyPaid(true);
+        if (result.success) {
+          // Buscar o total do pedido do backend (já está em reais)
+          // Converter para centavos para manter compatibilidade
+          const totalEmCentavos = Math.trunc(result.pedido.total_pedido * 100);
+          setTotalAmount(totalEmCentavos);
+
+          if (result.pedido.isPaid) {
+            setAlreadyPaid(true);
+          }
         }
       } catch (error) {
         console.error("Erro ao verificar status do pedido:", error);
@@ -50,7 +51,7 @@ function CheckoutPagamentoContent() {
     };
 
     checkPaymentStatus();
-  }, [pedidoId, totalParam, router]);
+  }, [pedidoId, router]);
 
   const handlePaymentSuccess = (result: any) => {
     console.log("Pagamento realizado com sucesso!", result);

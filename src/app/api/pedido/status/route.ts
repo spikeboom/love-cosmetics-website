@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
         status_pagamento: true,
         pagbank_order_id: true,
         payment_method: true,
+        total_pedido: true,
         createdAt: true,
       },
     });
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
         isPaid,
         payment_method: pedido.payment_method,
         pagbank_order_id: pedido.pagbank_order_id,
+        total_pedido: pedido.total_pedido,
         createdAt: pedido.createdAt,
       },
     });
