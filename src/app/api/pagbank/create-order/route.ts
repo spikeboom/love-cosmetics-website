@@ -81,9 +81,17 @@ export async function POST(req: NextRequest) {
     };
 
     // URLs de notificação
+    // Prioridade: NGROK_URL (dev local) > BASE_URL_PRODUCTION > fallback
     const baseUrl =
-      process.env.BASE_URL_PRODUCTION || "https://www.lovecosmetics.com.br";
+      process.env.NGROK_URL ||
+      process.env.BASE_URL_PRODUCTION ||
+      "https://www.lovecosmetics.com.br";
     const notification_urls = [`${baseUrl}/api/pagbank/webhook`];
+
+    logMessage("URL de notificação configurada", {
+      baseUrl,
+      notification_url: notification_urls[0],
+    });
 
     let requestBody: PagBankOrderRequest | PagBankPixOrderRequest;
     let endpoint: string;

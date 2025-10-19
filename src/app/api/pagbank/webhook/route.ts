@@ -5,6 +5,15 @@ import type { PagBankWebhookNotification } from "@/types/pagbank";
 
 const logMessage = createLogger();
 
+// Função auxiliar para gerar SHA-256 e retornar como hex
+async function sha256Hex(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 /**
  * Webhook para receber notificações do PagBank sobre mudanças no status do pagamento
  * Documentação: https://dev.pagbank.uol.com.br/reference/notificacoes
@@ -22,6 +31,12 @@ export async function POST(req: NextRequest) {
     // Verificar se o pedido existe
     const pedido = await prisma.pedido.findUnique({
       where: { id: body.reference_id },
+      select: {
+        id: true,
+        status_pagamento: true,
+        ga_session_id: true,
+        ga_session_number: true,
+      },
     });
 
     if (!pedido) {
@@ -42,21 +57,68 @@ export async function POST(req: NextRequest) {
         status_pagamento: charge.status,
       };
 
-      // Se o pagamento foi confirmado, registrar a data
-      if (charge.paid_at) {
-        updateData.updatedAt = new Date(charge.paid_at);
-      }
-
       logMessage("Atualizando status do pedido", {
         pedidoId: pedido.id,
         oldStatus: pedido.status_pagamento,
         newStatus: charge.status,
+        paid_at: charge.paid_at,
       });
 
       await prisma.pedido.update({
         where: { id: body.reference_id },
         data: updateData,
       });
+
+      logMessage("Status do pedido atualizado com sucesso", {
+        pedidoId: pedido.id,
+        status: charge.status,
+      });
+
+      // ✅ Se o pagamento foi confirmado (PAID), enviar evento para GTM
+      if (charge.status === "PAID") {
+        const emailRaw = body.customer?.email ?? "";
+        const phoneRaw = [
+          body.customer?.phones?.[0]?.country ?? "",
+          body.customer?.phones?.[0]?.area ?? "",
+          body.customer?.phones?.[0]?.number ?? "",
+        ].join("");
+
+        const gtmPayload = {
+          event_name: "Purchase",
+          event_id: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          transaction_id: body.id ?? "unknown",
+          value: Number(charge.amount?.value ?? 0) / 100,
+          currency: charge.amount?.currency ?? "BRL",
+          items:
+            body.items?.map((item: any) => ({
+              item_id: item.reference_id ?? "unknown",
+              item_name: item.name ?? "Produto",
+              price: Number(item.unit_amount ?? 0) / 100,
+              quantity: item.quantity ?? 1,
+            })) ?? [],
+          user_data: {
+            em: emailRaw ? await sha256Hex(emailRaw) : undefined,
+            ph: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
+          },
+          user_email: emailRaw ? await sha256Hex(emailRaw) : undefined,
+          user_phone: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
+          ga_session_id: pedido.ga_session_id,
+          ga_session_number: pedido.ga_session_number,
+        };
+
+        logMessage("Enviando evento Purchase para GTM", {
+          transaction_id: body.id,
+          value: gtmPayload.value,
+        });
+
+        await fetch("https://gtm.lovecosmetics.com.br/data?v=2", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(gtmPayload),
+        });
+      }
 
       // TODO: Enviar email para cliente conforme status
       // - PAID: Pagamento confirmado
@@ -65,11 +127,6 @@ export async function POST(req: NextRequest) {
       // - IN_ANALYSIS: Pagamento em análise
 
       // TODO: Se for PIX e foi pago, pode gerar nota fiscal automaticamente
-
-      logMessage("Status do pedido atualizado com sucesso", {
-        pedidoId: pedido.id,
-        status: charge.status,
-      });
     }
 
     // Armazenar notificação para auditoria

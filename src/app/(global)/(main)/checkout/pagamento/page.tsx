@@ -16,6 +16,9 @@ function CheckoutPagamentoContent() {
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
+    // Definir título da página
+    document.title = "Pagamento - Love Cosmetics";
+
     if (!pedidoId) {
       // Se não há pedidoId, redirecionar para checkout
       router.push("/checkout");
@@ -57,11 +60,11 @@ function CheckoutPagamentoContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-4xl px-4">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Escolha a forma de pagamento
-          </h1>
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-800">
+              Escolha a forma de pagamento
+            </h1>
           <p className="mt-2 text-gray-600">
             Pedido #{pedidoId.slice(0, 8)} - Total: R${" "}
             {(totalAmount / 100).toLocaleString("pt-BR", {
