@@ -7,7 +7,7 @@ export const metadata = {
 
 export default async function ConfirmacaoPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-8">
+    <div className="flex min-h-screen flex-col items-center justify-center p-8">
       <h1 className="mb-6 text-center text-4xl font-extrabold">
         Compra realizada com sucesso!
       </h1>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { CardFormData } from "@/types/pagbank";
 import { getPagBankPublicKey } from "@/utils/pagbank-config";
 
@@ -20,6 +20,7 @@ export default function CardPaymentForm({
   const [loading, setLoading] = useState(false);
   const [installments, setInstallments] = useState(1);
   const [publicKey, setPublicKey] = useState<string>("");
+  const [checkingPayment, setCheckingPayment] = useState(false);
   const [cardData, setCardData] = useState<CardFormData>({
     holder: "",
     number: "",
@@ -27,6 +28,9 @@ export default function CardPaymentForm({
     expYear: "",
     securityCode: "",
   });
+
+  // Ref para armazenar o intervalId do polling
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Carregar chave pública quando componente montar
   useEffect(() => {
@@ -40,6 +44,16 @@ export default function CardPaymentForm({
       console.error("2. Reiniciar o servidor após adicionar a variável");
       console.error("3. A variável deve começar com NEXT_PUBLIC_");
     }
+  }, []);
+
+  // Limpar intervalo de polling quando componente desmontar
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
   }, []);
 
   // Formatar número do cartão (XXXX XXXX XXXX XXXX)
@@ -92,6 +106,67 @@ export default function CardPaymentForm({
   const handleCVVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCVV(e.target.value);
     setCardData({ ...cardData, securityCode: formatted });
+  };
+
+  // Verificar status do pagamento periodicamente
+  const startPaymentCheck = (orderId: string) => {
+    setCheckingPayment(true);
+
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const response = await fetch(
+          `/api/pagbank/webhook?orderId=${orderId}`
+        );
+        const result = await response.json();
+
+        if (result.success && result.order) {
+          const charge = result.order.charges?.[0];
+
+          // Se o pagamento foi confirmado ou autorizado
+          if (charge?.status === "PAID" || charge?.status === "AUTHORIZED") {
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+            setCheckingPayment(false);
+            onSuccess({
+              success: true,
+              status: charge.status,
+              message: charge.status === "PAID"
+                ? "Pagamento aprovado!"
+                : "Pagamento autorizado!",
+            });
+          }
+          // Se o pagamento foi recusado ou cancelado
+          else if (charge?.status === "DECLINED" || charge?.status === "CANCELED") {
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+            setCheckingPayment(false);
+            setLoading(false);
+            onError(
+              charge.status === "DECLINED"
+                ? "Pagamento recusado. Verifique os dados do cartão e tente novamente."
+                : "Pagamento cancelado."
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao verificar pagamento:", error);
+      }
+    }, 3000); // Verificar a cada 3 segundos
+
+    // Parar de verificar após 2 minutos
+    setTimeout(() => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+        setCheckingPayment(false);
+        setLoading(false);
+        onError("Tempo de verificação do pagamento expirado. Por favor, verifique o status do seu pedido.");
+      }
+    }, 2 * 60 * 1000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -210,8 +285,22 @@ export default function CardPaymentForm({
         throw new Error(result.error || "Erro ao processar pagamento");
       }
 
-      // Sucesso!
-      onSuccess(result);
+      // Iniciar verificação do status do pagamento
+      console.log("Pagamento enviado. Iniciando verificação de status...", {
+        orderId: result.orderId,
+        chargeId: result.chargeId,
+        initialStatus: result.status,
+      });
+
+      // Se o status inicial já é PAID ou AUTHORIZED, pode chamar onSuccess diretamente
+      if (result.status === "PAID" || result.status === "AUTHORIZED") {
+        setLoading(false);
+        onSuccess(result);
+      } else {
+        // Caso contrário, iniciar polling para verificar o status
+        setLoading(false);
+        startPaymentCheck(result.orderId);
+      }
     } catch (error) {
       console.error("Erro ao processar pagamento:", error);
       onError(
@@ -372,13 +461,28 @@ export default function CardPaymentForm({
           </select>
         </div>
 
+        {/* Status de Verificação */}
+        {checkingPayment && (
+          <div className="mb-4 rounded-md bg-blue-50 p-4 text-center">
+            <div className="mb-2 flex justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
+            </div>
+            <p className="text-sm font-medium text-blue-900">
+              Verificando pagamento...
+            </p>
+            <p className="text-xs text-blue-700">
+              Aguarde enquanto confirmamos seu pagamento com a operadora do cartão
+            </p>
+          </div>
+        )}
+
         {/* Botão de Pagamento */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || checkingPayment}
           className="w-full rounded-md bg-pink-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-pink-700 disabled:bg-gray-400"
         >
-          {loading ? "Processando..." : "Finalizar Pagamento"}
+          {loading ? "Processando..." : checkingPayment ? "Verificando..." : "Finalizar Pagamento"}
         </button>
 
         {/* Informações de Segurança */}
