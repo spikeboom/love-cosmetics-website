@@ -156,6 +156,8 @@ export interface PagBankWebhookNotification {
   id: string;
   reference_id: string;
   created_at: string;
+  customer?: PagBankCustomer;
+  items?: PagBankItem[];
   charges?: Array<{
     id: string;
     reference_id: string;
