@@ -39,6 +39,7 @@ export function ModalCart() {
     setCarouselIndex,
     formatPrice,
     freteValue,
+    freight,
   } = useModalCart();
 
   useEffect(() => {
@@ -127,7 +128,7 @@ export function ModalCart() {
                   setOpenCart={setOpenCart}
                   cart={cart}
                   setSidebarMounted={setSidebarMounted}
-                  hasCalculatedFreight={freteValue > 0}
+                  freight={freight}
                 />
               </div>
             </div>

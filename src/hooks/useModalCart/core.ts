@@ -13,8 +13,9 @@ export function useCartCore() {
     handleAddCupom,
     loadingAddItem,
     addProductToCart,
+    freight,
   } = useMeuContexto();
-  
+
   return {
     cart,
     addQuantityProductToCart,
@@ -27,5 +28,6 @@ export function useCartCore() {
     handleAddCupom,
     loadingAddItem,
     addProductToCart,
+    freight,
   };
 }

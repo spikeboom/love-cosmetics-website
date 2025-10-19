@@ -603,6 +603,11 @@ const PedidoForm: React.FC = () => {
     }
   };
 
+  // Verificar se o formulário está válido para envio
+  const cepPreenchido = watch("cep");
+  const temFreteCalculado = freight.hasCalculated && freight.availableServices.length > 0;
+  const isFormValid = cepPreenchido && temFreteCalculado;
+
   if (loadingFormData || loadingClienteCheck) {
     return <div>Carregando...</div>;
   }
@@ -964,6 +969,25 @@ const PedidoForm: React.FC = () => {
               {...register("destinatario")}
             />
 
+            {/* Aviso sobre cálculo de frete */}
+            {cepPreenchido && !temFreteCalculado && (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                <Typography variant="body2">
+                  <strong>Atenção!</strong> Você precisa calcular o frete antes de finalizar o pedido.
+                  Por favor, adicione os produtos ao carrinho e calcule o frete.
+                </Typography>
+              </Alert>
+            )}
+
+            {/* Mostrar resumo do frete selecionado se já calculado */}
+            {temFreteCalculado && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                <Typography variant="body2">
+                  <strong>Frete calculado!</strong> {freight.deliveryTime} - R$ {freight.freightValue.toFixed(2)}
+                </Typography>
+              </Alert>
+            )}
+
             {/* Opção de criar conta - apenas para clientes não logados */}
             {!clienteLogado && (
               <Controller
@@ -995,9 +1019,14 @@ const PedidoForm: React.FC = () => {
             <Button
               type="submit"
               variant="contained"
+              disabled={!isFormValid || loading}
               sx={{
                 backgroundColor: "#C0392B",
                 "&:hover": { backgroundColor: "#A93226" },
+                "&.Mui-disabled": {
+                  backgroundColor: "#ccc",
+                  color: "#888"
+                },
               }}
             >
               Enviar Pedido{" "}
@@ -1008,6 +1037,14 @@ const PedidoForm: React.FC = () => {
                 />
               )}
             </Button>
+
+            {/* Mensagem explicando por que o botão está desabilitado */}
+            {!isFormValid && (
+              <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                {!cepPreenchido && "Preencha o CEP para continuar. "}
+                {cepPreenchido && !temFreteCalculado && "Calcule o frete no carrinho antes de finalizar o pedido."}
+              </Typography>
+            )}
           </Stack>
         </form>
 

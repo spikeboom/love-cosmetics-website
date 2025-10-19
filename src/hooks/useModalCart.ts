@@ -65,6 +65,7 @@ export function useModalCart() {
     handleAddCupom: coreData.handleAddCupom,
     loadingAddItem: coreData.loadingAddItem,
     addProductToCart: coreData.addProductToCart,
+    freight: coreData.freight,
     // Estado local
     suggestedProductsRaw: suggestedData.suggestedProductsRaw,
     setSuggestedProductsRaw: suggestedData.setSuggestedProductsRaw,
