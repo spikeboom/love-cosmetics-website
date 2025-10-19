@@ -53,7 +53,12 @@ export async function tryAutoGenerateNF(pedidoId: string): Promise<boolean> {
       bairro: pedido.bairro,
       cep: pedido.cep,
       cidade: pedido.cidade,
-      estado: pedido.estado
+      estado: pedido.estado,
+      // Dados de frete
+      frete_calculado: pedido.frete_calculado,
+      transportadora_nome: pedido.transportadora_nome || undefined,
+      transportadora_servico: pedido.transportadora_servico || undefined,
+      transportadora_prazo: pedido.transportadora_prazo || undefined,
     };
 
     // Criar nota fiscal no Bling

@@ -50,6 +50,11 @@ interface OrderData {
   cep: string;
   cidade: string;
   estado: string;
+  // Dados de frete
+  frete_calculado?: number;
+  transportadora_nome?: string;
+  transportadora_servico?: string;
+  transportadora_prazo?: number;
 }
 
 // Interface para resposta da API do Bling
@@ -89,6 +94,53 @@ async function getProdutoTributacao(produtoId: number): Promise<TributacaoProdut
     });
     return {};
   }
+}
+
+// Monta os dados de transporte para a NF
+function buildTransporteData(orderData: OrderData) {
+  const transporte: any = {
+    // 0 = CIF (frete por conta do remetente)
+    // 1 = FOB (frete por conta do destinatário)
+    fretePorConta: 0, // CIF - vendedor paga o frete
+  };
+
+  // Adiciona valor do frete se disponível
+  // Campo "frete" conforme schema oficial da API v3 do Bling
+  if (orderData.frete_calculado && orderData.frete_calculado > 0) {
+    transporte.frete = orderData.frete_calculado;
+  }
+
+  // Adiciona volume básico (quantidade)
+  transporte.volume = {
+    quantidade: 1
+  };
+
+  // Adiciona dados da transportadora se disponíveis
+  // Campo "transportador" (não "transportadora") conforme schema oficial
+  if (orderData.transportadora_nome) {
+    transporte.transportador = {
+      nome: orderData.transportadora_nome
+    };
+  }
+
+  // Adiciona volumes com serviço de rastreamento se disponível
+  if (orderData.transportadora_servico) {
+    transporte.volumes = [
+      {
+        servico: orderData.transportadora_servico
+      }
+    ];
+  }
+
+  logMessage("Dados de transporte montados", {
+    orderId: orderData.id,
+    fretePorConta: transporte.fretePorConta,
+    frete: transporte.frete,
+    transportador: orderData.transportadora_nome,
+    servico: orderData.transportadora_servico
+  });
+
+  return transporte;
 }
 
 // Cria uma nota fiscal no Bling
@@ -169,10 +221,7 @@ export async function createInvoice(
       consumidorFinal: true,
       informacoesComplementares: orderData.additionalInfo || `Venda pela Internet. Pedido LV-${orderData.id}`,
       itens: items,
-      transporte: {
-        modalidadeFrete: "1", // Frete por conta do destinatário
-        volumes: [{ quantidade: 1 }]
-      }
+      transporte: buildTransporteData(orderData)
     };
 
     logMessage("Dados da NF para envio ao Bling", {

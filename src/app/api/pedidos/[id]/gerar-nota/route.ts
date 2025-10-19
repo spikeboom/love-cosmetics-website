@@ -51,6 +51,11 @@ export async function POST(
       cep: pedido.cep,
       cidade: pedido.cidade,
       estado: pedido.estado,
+      // Dados de frete
+      frete_calculado: pedido.frete_calculado,
+      transportadora_nome: pedido.transportadora_nome || undefined,
+      transportadora_servico: pedido.transportadora_servico || undefined,
+      transportadora_prazo: pedido.transportadora_prazo || undefined,
     };
 
     // Tenta criar a nota fiscal
