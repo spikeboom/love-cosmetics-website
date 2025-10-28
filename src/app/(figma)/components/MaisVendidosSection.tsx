@@ -32,6 +32,7 @@ export function MaisVendidosSection() {
       precoOriginal: 140.99,
       parcelas: "3x R$39,99 sem juros",
       rating: 4.5,
+      ultimasUnidades: true,
     },
     {
       imagem: "/new-home/produtos/produto-2.png",

@@ -36,7 +36,8 @@
       "Read(//c/Users/Administrator/Downloads/cera-pro-sv/cera pro sv/**)",
       "mcp__figma-dev-mode-mcp-server__get_metadata",
       "mcp__figma-dev-mode-mcp-server__get_code_connect_map",
-      "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\src\" /s /b)"
+      "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\src\" /s /b)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

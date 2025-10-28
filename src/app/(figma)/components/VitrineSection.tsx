@@ -32,6 +32,7 @@ export function VitrineSection({
       preco: 99.99,
       precoOriginal: 129.99,
       parcelas: "3x R$33,33 sem juros",
+      ultimasUnidades: false,
     },
     {
       imagem: "/new-home/produtos/produto-2.png",
@@ -41,6 +42,7 @@ export function VitrineSection({
       preco: 89.99,
       precoOriginal: 105.99,
       parcelas: "3x R$29,99 sem juros",
+      ultimasUnidades: true,
     },
     {
       imagem: "/new-home/produtos/produto-3.png",
@@ -50,6 +52,7 @@ export function VitrineSection({
       preco: 119.99,
       precoOriginal: 140.99,
       parcelas: "3x R$39,99 sem juros",
+      ultimasUnidades: true,
     },
     {
       imagem: "/new-home/produtos/produto-2.png",
@@ -59,6 +62,7 @@ export function VitrineSection({
       preco: 89.99,
       precoOriginal: 105.99,
       parcelas: "3x R$29,99 sem juros",
+      ultimasUnidades: true,
     },
     {
       imagem: "/new-home/produtos/produto-1.png",
@@ -68,6 +72,7 @@ export function VitrineSection({
       preco: 99.99,
       precoOriginal: 129.99,
       parcelas: "3x R$33,33 sem juros",
+      ultimasUnidades: true,
     },
   ];
 
@@ -113,6 +118,7 @@ export function VitrineSection({
               preco={produto.preco}
               precoOriginal={produto.precoOriginal}
               parcelas={produto.parcelas}
+              ultimasUnidades={produto.ultimasUnidades}
             />
           ))}
         </div>
