@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="instagram" clip-path="url(#clip0_119_6519)">
+<path id="Area [SIZE:MEDIUM][STATE:DEFAULT][STYLE:STYLE2]" d="M32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32C24.8366 32 32 24.8366 32 16Z" fill="var(--fill-0, #E7A63A)"/>
+<g id="Icon [ICON=feather/instagram][SIZE=MEDIUM][STATE=DEFAULT][STYLE=STYLE2]">
+<path id="Area [ICON:feather/instagram][SIZE:MEDIUM][STATE:DEFAULT][STYLE:STYLE2]" opacity="0" d="M22.6667 9.33333H9.33333V22.6667H22.6667V9.33333Z" fill="var(--fill-0, #254333)"/>
+<g id="Icon">
+<path id="0c48bc29-aaf9-4f71-b701-d56837f981b6" d="M19.3333 9.33333H12.6667C10.8257 9.33333 9.33333 10.8257 9.33333 12.6667V19.3333C9.33333 21.1743 10.8257 22.6667 12.6667 22.6667H19.3333C21.1743 22.6667 22.6667 21.1743 22.6667 19.3333V12.6667C22.6667 10.8257 21.1743 9.33333 19.3333 9.33333Z" fill="var(--fill-0, #254333)" stroke="var(--stroke-0, #E7A63A)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="a6234c66-f8ca-4c5d-9e93-3288cf35c3b8" d="M18.6667 15.58C18.7489 16.1348 18.6542 16.7015 18.3958 17.1993C18.1375 17.6972 17.7288 18.1009 17.2278 18.3531C16.7267 18.6053 16.159 18.6931 15.6052 18.604C15.0514 18.5148 14.5398 18.2534 14.1432 17.8568C13.7466 17.4602 13.4852 16.9486 13.396 16.3948C13.3069 15.841 13.3947 15.2733 13.6469 14.7722C13.8991 14.2712 14.3028 13.8625 14.8007 13.6042C15.2985 13.3458 15.8652 13.2511 16.42 13.3333C16.9859 13.4173 17.5099 13.681 17.9145 14.0855C18.319 14.4901 18.5827 15.0141 18.6667 15.58Z" fill="var(--fill-0, #254333)" stroke="var(--stroke-0, #E7A63A)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="0f4f0384-755f-4170-b4fc-12a08f9309ce" d="M19.6667 12.3333H19.6733" stroke="var(--stroke-0, #E7A63A)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_119_6519">
+<rect width="32" height="32" fill="white"/>
+</clipPath>
+</defs>
+</svg>
