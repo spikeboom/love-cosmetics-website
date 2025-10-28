@@ -132,21 +132,23 @@ export function BannerPrincipal() {
       </div>
 
       {/* Botões de navegação lateral */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 w-[1440px] mx-auto px-3 flex items-center justify-between pointer-events-none">
-        <button
+      <div className="absolute top-[250px] -translate-y-1/2 left-0 right-0 w-[1440px] mx-auto px-3 flex items-center justify-between pointer-events-none">
+        <div
           onClick={handlePrevious}
-          className="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center pointer-events-auto hover:bg-white transition-colors"
+          className="relative w-14 h-14 flex-shrink-0 pointer-events-auto cursor-pointer"
+          role="button"
           aria-label="Slide anterior"
         >
-          <Image src="/new-home/icons/arrow-left.svg" alt="" width={56} height={56} />
-        </button>
-        <button
+          <Image src="/new-home/icons/arrow-left.svg" alt="" fill className="object-contain" />
+        </div>
+        <div
           onClick={handleNext}
-          className="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center pointer-events-auto hover:bg-white transition-colors"
+          className="relative w-14 h-14 flex-shrink-0 pointer-events-auto cursor-pointer"
+          role="button"
           aria-label="Próximo slide"
         >
-          <Image src="/new-home/icons/arrow-right.svg" alt="" width={56} height={56} />
-        </button>
+          <Image src="/new-home/icons/arrow-right.svg" alt="" fill className="object-contain" />
+        </div>
       </div>
     </div>
   );
