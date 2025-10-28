@@ -15,16 +15,20 @@ export default async function FigmaHomePage() {
       {/* Banner principal com produto em destaque */}
       <BannerPrincipal />
 
-      {/* Cards de certificados/badges */}
-      <CertificadosSection />
+      {/* Cards de certificados/badges - Full width */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <CertificadosSection />
+      </div>
 
-      {/* Section 6 - Primeira vitrine de produtos com mini banners */}
-      <VitrineSection
-        titulo="Section title"
-        subtitulo="Hidratação profunda, alívio das inflamações e rachaduras"
-        backgroundColor="cream"
-        tipo="mini-banner"
-      />
+      {/* Section 6 - Primeira vitrine de produtos com mini banners - Full width */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <VitrineSection
+          titulo="Section title"
+          subtitulo="Hidratação profunda, alívio das inflamações e rachaduras"
+          backgroundColor="cream"
+          tipo="mini-banner"
+        />
+      </div>
 
       {/* Section 7 - Segunda vitrine de produtos com mini banners */}
       <VitrineSection
