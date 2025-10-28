@@ -128,9 +128,9 @@ export function Footer() {
 
       {/* Footer branco - Meios de pagamento */}
       <div className="bg-[#f8f3ed] w-full flex flex-col gap-2.5 items-center overflow-hidden py-8">
-        <div className="w-full max-w-[1440px] flex gap-10 items-center justify-center px-12">
+        <div className="w-full flex gap-10 items-center justify-center px-12">
           {/* Elo */}
-          <div className="relative w-[56.447px] h-[21.632px]">
+          <div className="relative shrink-0" style={{ width: "56.447px", height: "21.632px" }}>
             <Image
               src="/new-home/footer/elo.svg"
               alt="Elo"
@@ -140,7 +140,7 @@ export function Footer() {
           </div>
 
           {/* Mastercard */}
-          <div className="relative w-[31.502px] h-[24.479px]">
+          <div className="relative shrink-0" style={{ width: "31.502px", height: "24.479px" }}>
             <Image
               src="/new-home/footer/mastercard.svg"
               alt="Mastercard"
@@ -150,7 +150,7 @@ export function Footer() {
           </div>
 
           {/* Visa */}
-          <div className="relative w-[45.491px] h-[13.827px]">
+          <div className="relative shrink-0" style={{ width: "45.491px", height: "13.827px" }}>
             <Image
               src="/new-home/footer/visa.svg"
               alt="Visa"
@@ -160,7 +160,7 @@ export function Footer() {
           </div>
 
           {/* Amex */}
-          <div className="relative w-[28px] h-[28px]">
+          <div className="relative shrink-0" style={{ width: "28px", height: "28px" }}>
             <Image
               src="/new-home/footer/amex.svg"
               alt="American Express"
