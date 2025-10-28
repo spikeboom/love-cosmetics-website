@@ -39,34 +39,57 @@ const bannerSlides: BannerSlide[] = [
   },
 ];
 
+const TRANSITION_DURATION = 500;
+
 export function BannerPrincipal() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handlePrevious = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentSlide((prev) => (prev === 0 ? bannerSlides.length - 1 : prev - 1));
+    setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
   };
 
   const handleNext = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentSlide((prev) => (prev === bannerSlides.length - 1 ? 0 : prev + 1));
+    setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
   };
 
   const slide = bannerSlides[currentSlide];
+  const slideOffset = -currentSlide * 100;
 
   return (
     <div className="relative w-full h-[534px] bg-white">
-      {/* Imagem de fundo com transição */}
+      {/* Imagem de fundo com animação de slide */}
       <div className="relative w-full h-[500px] overflow-hidden">
-        <Image
-          src={slide.image}
-          alt={slide.title}
-          fill
-          className="object-cover transition-opacity duration-500"
-          priority
-        />
+        <div
+          style={{
+            transform: `translateX(${slideOffset}%)`,
+            transition: `transform ${TRANSITION_DURATION}ms ease-in-out`,
+          }}
+          className="relative w-full h-full flex"
+        >
+          {bannerSlides.map((item) => (
+            <div key={item.id} className="relative w-full h-full flex-shrink-0">
+              <Image
+                src={item.image}
+                alt={item.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Content Box - Desktop */}
-      <div className="absolute top-[97px] left-[720px] w-[600px] bg-white/75 backdrop-blur-sm p-8 flex flex-col gap-8 transition-opacity duration-500">
+      <div
+        className="absolute top-[97px] left-[720px] w-[600px] bg-white/75 backdrop-blur-sm p-8 flex flex-col gap-8">
         {/* Texto */}
         <div className="flex flex-col gap-8">
           <p className="font-cera-pro font-bold text-[32px] text-[#254333] leading-none">
