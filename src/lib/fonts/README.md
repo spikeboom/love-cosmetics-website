@@ -2,8 +2,8 @@
 
 ## 📝 Fontes Usadas no Figma
 
-### 1. **Cera Pro** → Substituída por **Nunito**
-Cera Pro é uma fonte comercial. Usamos **Nunito** do Google Fonts como alternativa gratuita (90% de similaridade).
+### 1. **Cera Pro** ✅ (Fonte Original)
+Cera Pro é a fonte comercial original do design Figma, agora integrada ao projeto.
 
 **Pesos configurados:**
 - Light 300: textos pequenos (12px, 14px, 20px)
@@ -39,8 +39,8 @@ className="font-roboto font-medium text-[16px]" // M3/title/medium
 
 ---
 
-### 3. **Times** → Substituída por **Libre Baskerville**
-Times é uma fonte de sistema. Usamos **Libre Baskerville** do Google Fonts como alternativa serifada.
+### 3. **Times New Roman** ✅ (Fonte de Sistema)
+Times New Roman é a fonte serifada original do design, carregada diretamente do sistema operacional.
 
 **Pesos configurados:**
 - Bold 700: títulos especiais do banner (32px, 60px)
@@ -100,11 +100,26 @@ import { fontClasses } from "@/lib/fonts";
 
 ## 📦 Fontes Instaladas
 
-As fontes são carregadas via `next/font/google` automaticamente:
+**Cera Pro** é carregada localmente via `next/font/local`:
 
 ```ts
 // src/lib/fonts/index.ts
-import { Nunito, Roboto, Libre_Baskerville } from "next/font/google";
+import localFont from "next/font/local";
+
+export const ceraPro = localFont({
+  src: [
+    { path: "../../../public/fonts/cera-pro/CeraProLight.otf", weight: "300" },
+    { path: "../../../public/fonts/cera-pro/CeraProMedium.otf", weight: "500" },
+    { path: "../../../public/fonts/cera-pro/CeraProBold.otf", weight: "700" },
+  ],
+  variable: "--font-cera-pro",
+});
+```
+
+**Roboto** é carregada via `next/font/google`:
+
+```ts
+import { Roboto } from "next/font/google";
 ```
 
 Isso garante:

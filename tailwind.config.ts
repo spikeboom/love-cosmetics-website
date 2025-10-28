@@ -18,12 +18,10 @@ export default {
         poppins: ["var(--font-poppins)", ...fontFamily.sans],
         playfair: ["var(--font-playfair)", ...fontFamily.sans],
         // Fontes do Figma
-        nunito: ["var(--font-nunito)", ...fontFamily.sans],
+        "cera-pro": ["var(--font-cera-pro)", ...fontFamily.sans], // Cera Pro original do Figma
         roboto: ["var(--font-roboto)", ...fontFamily.sans],
         "libre-baskerville": ["var(--font-libre-baskerville)", ...fontFamily.serif],
-        // Aliases para facilitar uso
-        "cera-pro": ["var(--font-nunito)", ...fontFamily.sans], // Nunito como substituto do Cera Pro
-        times: ["var(--font-libre-baskerville)", ...fontFamily.serif], // Libre Baskerville como substituto do Times
+        times: ['"Times New Roman"', "Times", ...fontFamily.serif], // Times New Roman (fonte de sistema)
       },
     },
   },
