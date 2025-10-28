@@ -27,11 +27,11 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-[#254333] w-full flex flex-col items-start">
+    <footer className="bg-[#254333] w-full flex flex-col items-center">
       {/* Conteúdo principal do footer */}
-      <div className="w-full flex flex-col gap-8 items-center py-6 px-0">
+      <div className="w-full max-w-[1440px] flex flex-col gap-8 items-center py-6 px-12">
         {/* Links e Logo */}
-        <div className="w-full flex gap-8 items-start justify-center px-12">
+        <div className="w-full flex gap-8 items-start justify-center">
           {/* Coluna 1 */}
           <div className="flex-1 flex flex-col gap-4 items-start py-2 min-h-0 min-w-0">
             {linksColumn1.map((link, index) => (
@@ -127,8 +127,8 @@ export function Footer() {
       </div>
 
       {/* Footer branco - Meios de pagamento */}
-      <div className="bg-[#f8f3ed] w-full flex flex-col gap-2.5 items-start overflow-hidden px-[751px] py-8">
-        <div className="flex gap-10 items-center justify-center w-full">
+      <div className="bg-[#f8f3ed] w-full flex flex-col gap-2.5 items-center overflow-hidden py-8">
+        <div className="w-full max-w-[1440px] flex gap-10 items-center justify-center px-12">
           {/* Elo */}
           <div className="relative w-[56.447px] h-[21.632px]">
             <Image
