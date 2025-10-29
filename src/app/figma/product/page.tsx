@@ -1,159 +1,306 @@
-import { Breadcrumbs } from "../components/Breadcrumbs";
-import { ProductGallery } from "../components/ProductGallery";
-import { ProductInfo } from "../components/ProductInfo";
-import { ProductFilters } from "../components/ProductFilters";
-import { ShippingCalculator } from "../components/ShippingCalculator";
-import { ProductActionButtons } from "../components/ProductActionButtons";
-import { VitrineSection } from "../components/VitrineSection";
+"use client";
 
-export const metadata = {
-  title: "Manteiga Corporal Lové Cosméticos",
-  description:
-    "A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras com ativos naturais da Amazônia",
-};
+import Image from "next/image";
+import { useState } from "react";
+import { NavigationArrows } from "../components/NavigationArrows";
+import { YouMayLikeSection } from "../components/YouMayLikeSection";
+import { CertificadosSection } from "../components/CertificadosSection";
 
 const productImages = [
-  "/new-home/produto-destaque.jpg",
-  "/new-home/produto-destaque.jpg",
-  "/new-home/produto-destaque.jpg",
-  "/new-home/produto-destaque.jpg",
-  "/new-home/produto-destaque.jpg",
-];
-
-const productFilters = [
-  {
-    name: "Tamanho",
-    options: [
-      { id: "200ml", label: "200ml" },
-      { id: "400ml", label: "400ml" },
-      { id: "500ml", label: "500ml" },
-    ],
-  },
-  {
-    name: "Tipo de pele",
-    options: [
-      { id: "seca", label: "Pele seca" },
-      { id: "mista", label: "Pele mista" },
-      { id: "oleosa", label: "Pele oleosa" },
-      { id: "sensivel", label: "Pele sensível" },
-    ],
-  },
+  "/new-home/produtos/produto-pdp.png",
+  "/new-home/produtos/produto-pdp.png",
+  "/new-home/produtos/produto-pdp.png",
+  "/new-home/produtos/produto-pdp.png",
+  "/new-home/produtos/produto-pdp.png",
 ];
 
 export default function ProductPage() {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
+
   return (
     <div className="w-full">
-      {/* Main Product Section */}
+      {/* Main Product Section - Frame 2608677 */}
       <div className="w-full max-w-[1440px] mx-auto">
-        <div className="px-[24px] py-[24px] flex gap-[48px]">
-          {/* Left: Gallery and Filters */}
-          <div className="flex flex-col gap-[32px] flex-1">
-            {/* Gallery */}
-            <ProductGallery
-              images={productImages}
-              productName="Manteiga Corporal Lové Cosméticos"
-            />
+        <div className="flex gap-[24px] items-start p-[24px]">
+          {/* Left Column: Gallery + Filters - Frame 2608679 */}
+          <div className="flex flex-col gap-[24px] items-start w-[921px]">
+            {/* Gallery Container - Frame 2608680 */}
+            <div className="flex items-start justify-between w-[921px]">
+              {/* Thumbnails - Frame 2608678 */}
+              <div className="flex flex-col gap-[24px] items-start w-[94px]">
+                {productImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`w-[94px] h-[94px] bg-white overflow-hidden flex-shrink-0 transition-all ${
+                      selectedImage === index ? "" : "opacity-50 hover:opacity-100"
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`Imagem ${index + 1}`}
+                      width={94}
+                      height={94}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
 
-            {/* Product Filters */}
-            <ProductFilters filters={productFilters} />
-          </div>
+              {/* Main Gallery - Frame 2608685 */}
+              <div className="relative w-[803px] h-[704px]">
+                {/* Image Container - Frame 2608687 */}
+                <div className="w-full h-full bg-white overflow-hidden">
+                  <Image
+                    src={productImages[selectedImage]}
+                    alt="Manteiga Corporal Lové Cosméticos"
+                    width={803}
+                    height={704}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                </div>
 
-          {/* Right: Product Info and Actions */}
-          <div className="w-[447px] flex flex-col gap-[32px]">
-            {/* Breadcrumbs */}
-            <div className="flex items-center gap-[16px] text-[12px] font-cera-pro text-[#666666]">
-              <a href="/figma/design" className="hover:underline">
-                lovecosmetics.com.br
-              </a>
-              <svg
-                width="8"
-                height="8"
-                viewBox="0 0 8 8"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M3 1L6 4L3 7" stroke="#666666" strokeWidth="1" />
-              </svg>
-              <a href="/figma/search" className="hover:underline">
-                todos produtos
-              </a>
-              <svg
-                width="8"
-                height="8"
-                viewBox="0 0 8 8"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M3 1L6 4L3 7" stroke="#666666" strokeWidth="1" />
-              </svg>
-              <span>manteiga</span>
+                {/* Navigation Arrows - Frame 20 */}
+                <NavigationArrows
+                  onPrevious={() =>
+                    setSelectedImage((prev) =>
+                      prev === 0 ? productImages.length - 1 : prev - 1
+                    )
+                  }
+                  onNext={() =>
+                    setSelectedImage((prev) =>
+                      prev === productImages.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                  position="center"
+                  containerWidth="w-[803px]"
+                  arrowSize={56}
+                  leftIcon="/new-home/icons/arrow-left.svg"
+                  rightIcon="/new-home/icons/arrow-right.svg"
+                />
+              </div>
             </div>
 
-            {/* Product Info */}
-            <ProductInfo
-              breadcrumbs={[]}
-              title="Manteiga Corporal Lové Cosméticos"
-              priceOriginal={129.99}
-              price={99.99}
-              discount="40% OFF"
-              installments="3x R$33,33 sem juros"
-              rating={4.5}
-              description="A manteiga corporal hidrata profundamente, alivia as inflamações e rachaduras. Proporciona maciez imediata, alívio de inflamações de foliculite. Tratamento de rachaduras. Alívio de inflamações de foliculite. Regeneração cutânea. Fortalecimento da barreira natural de pele."
-            />
-
-            {/* Shipping Calculator */}
-            <ShippingCalculator productId="manteiga-corporal" />
-
-            {/* Action Buttons */}
-            <ProductActionButtons productId="manteiga-corporal" />
-          </div>
-        </div>
-      </div>
-
-      {/* Related Products Section - "Você pode gostar" */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)] bg-white mt-[48px]">
-        <div className="w-full max-w-[1440px] mx-auto">
-          <VitrineSection
-            titulo="Você pode gostar"
-            subtitulo=""
-            backgroundColor="white"
-            tipo="produto-completo"
-            showNavigation={true}
-          />
-        </div>
-      </div>
-
-      {/* Certification Section */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)] bg-[#f8f3ed] mt-[48px]">
-        {/* Placeholder for certification section */}
-        <div className="w-full max-w-[1440px] mx-auto px-[24px] py-[48px]">
-          <div className="flex justify-between gap-[24px]">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="flex-1 flex flex-col gap-[16px] items-center text-center"
+            {/* Product Filters - Frame 2608675 */}
+            <div className="flex flex-col gap-0 w-full">
+              {/* Filter 1: Ativos presentes */}
+              <button
+                onClick={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
+                className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-0 py-[16px] hover:bg-[#f8f3ed] transition-colors"
               >
-                <div className="w-[64px] h-[64px] bg-white rounded-full flex items-center justify-center">
-                  <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="16" cy="16" r="15" stroke="#254333" />
-                  </svg>
-                </div>
-                <h3 className="font-cera-pro font-medium text-[14px] text-[#254333]">
-                  Certificado
-                </h3>
-                <p className="font-cera-pro font-light text-[12px] text-[#666666]">
-                  Pela Anvisa
+                <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
+                  Ativos presentes
                 </p>
+                <Image
+                  src="/new-home/icons/chevron-down.svg"
+                  alt="Expandir"
+                  width={24}
+                  height={24}
+                />
+              </button>
+
+              {/* Filter 2: Modo de uso */}
+              <button
+                onClick={() => setExpandedFilter(expandedFilter === "modo" ? null : "modo")}
+                className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-0 py-[16px] hover:bg-[#f8f3ed] transition-colors"
+              >
+                <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
+                  Modo de uso
+                </p>
+                <Image
+                  src="/new-home/icons/chevron-down.svg"
+                  alt="Expandir"
+                  width={24}
+                  height={24}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Product Info - Card de produto Frame 6999 */}
+          <div className="bg-white flex flex-col gap-[24px] items-start pb-[24px] pt-0 px-0 w-full">
+            {/* Breadcrumbs - Frame 7000 */}
+            <div className="flex gap-[8px] items-end px-[16px] py-0 w-[380px]">
+              <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
+                lovecosmetics.com.br
+              </p>
+              <div className="size-[8px] flex-shrink-0">
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                  <path d="M3 1L6 4L3 7" stroke="#1e1e1e" strokeWidth="1" />
+                </svg>
               </div>
-            ))}
+              <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
+                todos produtos
+              </p>
+              <div className="size-[8px] flex-shrink-0">
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                  <path d="M3 1L6 4L3 7" stroke="#1e1e1e" strokeWidth="1" />
+                </svg>
+              </div>
+              <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap">
+                manteiga
+              </p>
+            </div>
+
+            {/* Product Content Container - Frame 50804 */}
+            <div className="flex flex-col gap-[32px] items-start w-full">
+              {/* Title - Frame 7007 - Times Bold 32px */}
+              <p className="font-times font-bold text-[32px] text-black leading-[normal]">
+                Manteiga Corporal Lové Cosméticos
+              </p>
+
+              {/* Price & Rating Section - Frame 7014 */}
+              <div className="flex items-center justify-between w-full">
+                {/* Price Column - Frame 7015 */}
+                <div className="flex flex-col gap-[8px] items-start leading-[normal] text-nowrap whitespace-pre relative shrink-0">
+                  {/* Original Price - Frame 7016 */}
+                  <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid leading-[normal] relative shrink-0">
+                    R$ 129,99
+                  </p>
+
+                  {/* Current Price + Discount - Frame 7017 */}
+                  <div className="flex gap-[8px] items-center relative shrink-0 w-full">
+                    <p className="font-cera-pro font-bold text-[32px] text-black leading-[0px] relative shrink-0">
+                      R$ 99,99
+                    </p>
+                    <p className="font-cera-pro font-light text-[20px] text-[#009142] leading-[normal] relative shrink-0">
+                      40% OFF
+                    </p>
+                  </div>
+
+                  {/* Installments - Frame 7020 */}
+                  <p className="font-cera-pro font-light text-[12px] text-[#333333] leading-[normal] relative shrink-0">
+                    3x R$33,33 sem juros
+                  </p>
+                </div>
+
+                {/* Star Rating - Frame 7021 */}
+                <div className="flex gap-[4px] items-center relative shrink-0">
+                  {/* Stars - Frame 7022 */}
+                  <div className="flex gap-[2px] items-start relative shrink-0">
+                    {/* Estrelas - Frame 7023 */}
+                    <div className="flex gap-[4px] h-[12px] items-center relative shrink-0">
+                      {[...Array(5)].map((_, i) => {
+                        const rating = 4.5;
+                        const filled = i < Math.floor(rating);
+                        const half = i < rating && i >= Math.floor(rating);
+
+                        return (
+                          <div key={i} className="flex-shrink-0 size-[24px] relative">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                              <path
+                                d="M12 2L15 10L23 11L17 16L19 24L12 20L5 24L7 16L1 11L9 10L12 2Z"
+                                fill={filled ? "#FFB800" : half ? "url(#half)" : "#E0E0E0"}
+                              />
+                              {half && (
+                                <defs>
+                                  <linearGradient id="half">
+                                    <stop offset="50%" stopColor="#FFB800" />
+                                    <stop offset="50%" stopColor="#E0E0E0" />
+                                  </linearGradient>
+                                </defs>
+                              )}
+                            </svg>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description - Frame 7025 */}
+              <div className="flex flex-col gap-[10px] items-start w-full">
+                {/* Frame 7026 */}
+                <div className="bg-white flex flex-col gap-[8px] items-start w-full">
+                  {/* Frame 7027 */}
+                  <div className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal] text-justify">
+                    <p className="mb-[8px]">
+                      A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras, fortalece a barreira da pele e proporciona maciez imediata. Ideal para peles ressecadas, sensíveis ou com tatuagens.
+                    </p>
+                    <p className="font-cera-pro font-bold text-[16px] mb-[8px]">
+                      Quais são os benefícios da manteiga corporal?
+                    </p>
+                    <ul className="list-disc list-inside space-y-[4px]">
+                      <li>Hidratação e nutrição profunda</li>
+                      <li>Sensação de maciez imediata</li>
+                      <li>Tratamento de rachaduras</li>
+                      <li>Alívio de inflamações de foliculite</li>
+                      <li>Alívio de sintomas de psoríase</li>
+                      <li>Regeneração cutânea</li>
+                      <li>Fortalecimento da barreira natural da pele</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Calculator - Frame 7033 */}
+              <div className="flex flex-col gap-[16px] items-start w-full">
+                {/* Frame 7034 */}
+                <div className="flex flex-col gap-[16px] items-start w-full">
+                  {/* Frame 7035 - Title */}
+                  <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal] w-full">
+                    Calcule o frete
+                  </p>
+
+                  {/* Frame 7036 - Input */}
+                  <div className="bg-white border border-[#d2d2d2] flex items-center justify-between p-[8px] rounded-[8px] w-full">
+                    {/* Input placeholder */}
+                    <div className="flex gap-[10px] items-center justify-center px-[8px] py-0">
+                      <p className="font-cera-pro font-light text-[20px] text-[#8c8c8c] leading-[normal] text-nowrap whitespace-pre">
+                        Digite seu CEP
+                      </p>
+                    </div>
+
+                    {/* Calculate Button */}
+                    <div className="bg-[#8c8c8c] flex flex-col h-[32px] items-center justify-center overflow-hidden rounded-[4px] flex-shrink-0">
+                      <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
+                        <p className="font-cera-pro font-medium text-[16px] text-white leading-[normal] text-nowrap tracking-[0px]">
+                          Calcular
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons - Frame 10740 */}
+              <div className="flex flex-col gap-[16px] items-start w-full">
+                {/* Buy Button - Frame 7051 */}
+                <div className="flex h-[60px] items-center justify-center w-full">
+                  <div className="flex-1 bg-[#254333] flex flex-col h-full items-center justify-center overflow-hidden rounded-[8px]">
+                    <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
+                      <p className="font-cera-pro font-bold text-[24px] text-white leading-[normal] text-nowrap tracking-[0px]">
+                        Comprar
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add to Cart Button - Frame 10719 */}
+                <div className="flex h-[60px] items-center justify-center w-full">
+                  <div className="flex-1 bg-[#254333] flex flex-col h-full items-center justify-center overflow-hidden rounded-[8px]">
+                    <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
+                      <p className="font-cera-pro font-bold text-[24px] text-white leading-[normal] text-nowrap tracking-[0px]">
+                        Adicionar ao carrinho
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Você pode gostar Section - Section 8 */}
+      <YouMayLikeSection />
+
+      {/* Cards de certificados/badges - Full width */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <CertificadosSection />
       </div>
     </div>
   );
