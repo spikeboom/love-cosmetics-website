@@ -12,6 +12,7 @@ interface CardProdutoProps {
   ultimasUnidades?: boolean;
   tipo?: "mini-banner" | "produto-completo";
   ranking?: number;
+  fullWidth?: boolean;
 }
 
 export function CardProduto({
@@ -26,6 +27,7 @@ export function CardProduto({
   ultimasUnidades = false,
   tipo = "produto-completo",
   ranking,
+  fullWidth = false,
 }: CardProdutoProps) {
   if (tipo === "mini-banner") {
     return (
@@ -64,7 +66,7 @@ export function CardProduto({
 
   // Card de produto completo (para vitrines e mais vendidos)
   return (
-    <div className="bg-white box-border content-stretch flex flex-col gap-[16px] items-start pb-[16px] pt-0 px-0 relative rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-[230px]">
+    <div className={`bg-white box-border content-stretch flex flex-col gap-[16px] items-start pb-[16px] pt-0 px-0 relative rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] ${fullWidth ? "w-full" : "w-[230px]"}`}>
       {/* Imagem e Tag */}
       <div className="content-stretch flex gap-[10px] items-start justify-center max-h-[312px] relative shrink-0 w-full">
         <div className="basis-0 grow h-[196px] min-h-px min-w-px relative rounded-tl-[16px] rounded-tr-[16px] shrink-0 overflow-hidden">
