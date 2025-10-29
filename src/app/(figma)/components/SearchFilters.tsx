@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 interface FilterMenuItem {
+  id?: string;
   label: string;
   isActive?: boolean;
   hasIcon?: boolean;
@@ -10,6 +11,7 @@ interface FilterMenuItem {
 
 interface FilterSection {
   title: string;
+  type?: "single" | "multiple";
   items: FilterMenuItem[];
 }
 
@@ -40,7 +42,7 @@ export function SearchFilters({ sections, onFilterChange }: SearchFiltersProps) 
             {section.items.map((item, itemIndex) => (
               <button
                 key={itemIndex}
-                onClick={() => onFilterChange?.(section.title, item.label)}
+                onClick={() => onFilterChange?.(section.title, item.id || item.label)}
                 className="flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity w-full"
               >
                 <p
@@ -53,8 +55,8 @@ export function SearchFilters({ sections, onFilterChange }: SearchFiltersProps) 
                   {item.label}
                 </p>
 
-                {/* Close Icon (only for active filter in second section) */}
-                {item.hasIcon && item.isActive && (
+                {/* Close Icon (only for active items in multiple sections) */}
+                {section.type === "multiple" && item.isActive && (
                   <div className="w-[24px] h-[24px] shrink-0 flex items-center justify-center">
                     <svg
                       width="24"
@@ -65,7 +67,7 @@ export function SearchFilters({ sections, onFilterChange }: SearchFiltersProps) 
                     >
                       <path
                         d="M18 6L6 18M6 6L18 18"
-                        stroke="#1E1E1E"
+                        stroke="#ba7900"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"

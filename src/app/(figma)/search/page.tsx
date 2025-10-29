@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Breadcrumbs } from "../components/Breadcrumbs";
 import { SearchFilters } from "../components/SearchFilters";
 import { ProductGrid } from "../components/ProductGrid";
@@ -165,27 +165,29 @@ const mockProdutos: Produto[] = [
   },
 ];
 
-const filterSections = [
+const filterSectionsConfig = [
   {
     title: "Ordenar por",
+    type: "single" as const, // Apenas uma opção
     items: [
-      { label: "Relevância", isActive: true },
-      { label: "Menor preço", isActive: false },
-      { label: "Maior preço", isActive: false },
+      { id: "sort-relevancia", label: "Relevância" },
+      { id: "sort-menor", label: "Menor preço" },
+      { id: "sort-maior", label: "Maior preço" },
     ],
   },
   {
     title: "Filtrar por",
+    type: "multiple" as const, // Múltiplas opções
     items: [
-      { label: "Filtro", isActive: true, hasIcon: true },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
-      { label: "Filtro", isActive: false },
+      { id: "filtro-1", label: "Filtro", hasIcon: true },
+      { id: "filtro-2", label: "Filtro" },
+      { id: "filtro-3", label: "Filtro" },
+      { id: "filtro-4", label: "Filtro" },
+      { id: "filtro-5", label: "Filtro" },
+      { id: "filtro-6", label: "Filtro" },
+      { id: "filtro-7", label: "Filtro" },
+      { id: "filtro-8", label: "Filtro" },
+      { id: "filtro-9", label: "Filtro" },
     ],
   },
 ];
@@ -197,16 +199,43 @@ const breadcrumbItems = [
 ];
 
 export default function SearchPage() {
-  const [activeSort, setActiveSort] = useState("Relevância");
-  const [activeFilter, setActiveFilter] = useState("Filtro");
+  // Estado para "Ordenar por" (apenas uma opção - usa ID)
+  const [activeSort, setActiveSort] = useState("sort-relevancia");
 
-  const handleFilterChange = (section: string, item: string) => {
+  // Estado para "Filtrar por" (múltiplas opções - usa IDs)
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(["filtro-1"]));
+
+  const handleFilterChange = (section: string, itemId: string) => {
     if (section === "Ordenar por") {
-      setActiveSort(item);
+      // Radio button: substitui a seleção anterior
+      setActiveSort(itemId);
     } else if (section === "Filtrar por") {
-      setActiveFilter(item);
+      // Checkbox: alterna a seleção
+      const newFilters = new Set(activeFilters);
+      if (newFilters.has(itemId)) {
+        newFilters.delete(itemId);
+      } else {
+        newFilters.add(itemId);
+      }
+      setActiveFilters(newFilters);
     }
   };
+
+  // Cria as seções com as informações de ativo dinâmicas
+  const filterSections = useMemo(
+    () =>
+      filterSectionsConfig.map((section) => ({
+        ...section,
+        items: section.items.map((item: any) => ({
+          ...item,
+          isActive:
+            section.type === "single"
+              ? item.id === activeSort
+              : activeFilters.has(item.id),
+        })),
+      })),
+    [activeSort, activeFilters]
+  );
 
   return (
     <div className="w-full max-w-[1440px] mx-auto">
