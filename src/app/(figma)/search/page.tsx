@@ -23,7 +23,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-1.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras, fortalece a barreira da pele e proporciona maciez imediata. Ideal para peles ressecadas.",
     preco: 99.99,
     precoOriginal: 129.99,
     desconto: "40% OFF",
@@ -35,7 +35,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-2.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Formulação enriquecida com manteigas naturais e óleos essenciais. Proporciona hidratação duradoura e deixa a pele macia, suave e protegida. Para uso diário.",
     preco: 89.99,
     precoOriginal: 105.99,
     desconto: "15% OFF",
@@ -47,7 +47,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-3.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Com ingredientes ativos da Amazônia que regeneram a pele. Reduz inflamações, alivia coceira e proporciona conforto imediato. Textura cremosa e de rápida absorção.",
     preco: 119.99,
     precoOriginal: 140.99,
     desconto: "15% OFF",
@@ -59,7 +59,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-1.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Especializada em hidratar e proteger áreas ressecadas. Com componentes naturais que fortalecem a barreira protetora da pele. Indicada para peles sensíveis.",
     preco: 99.99,
     precoOriginal: 129.99,
     desconto: "40% OFF",
@@ -71,7 +71,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-2.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Blend perfeito de manteigas vegetais e óleos essenciais amazônicos. Nutre profundamente, deixa a pele aveludada e sem ressecamento. Uso noturno recomendado.",
     preco: 89.99,
     precoOriginal: 105.99,
     desconto: "15% OFF",
@@ -83,7 +83,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-3.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Tratamento intensivo para pele muito ressecada e inflamada. Regenera, acalma e hidrata profundamente com ação anti-inflamatória comprovada. Resultado visível.",
     preco: 119.99,
     precoOriginal: 140.99,
     desconto: "15% OFF",
@@ -95,7 +95,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-1.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Mantém a pele hidratada, macia e protegida por até 24 horas. Absorve rapidamente sem deixar oleosidade. Adequado para todos os tipos de pele.",
     preco: 99.99,
     precoOriginal: 129.99,
     desconto: "40% OFF",
@@ -107,7 +107,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-2.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Fórmula vegana e cruelty-free com extratos naturais da floresta amazônica. Repara rachaduras, hidrata e deixa aroma agradável. Resultado imediato.",
     preco: 89.99,
     precoOriginal: 105.99,
     desconto: "15% OFF",
@@ -119,7 +119,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-3.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Desenvolvida para aliviar inflamações e coceiras. Com manteiga de karité e óleos essenciais anti-inflamatórios. Proporciona alívio e conforto duradouros.",
     preco: 119.99,
     precoOriginal: 140.99,
     desconto: "15% OFF",
@@ -131,7 +131,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-1.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Hidratação profunda e duradoura. Repara a barreira de proteção da pele. Testado dermatologicamente. Não deixa resíduos gordurosos na pele.",
     preco: 99.99,
     precoOriginal: 129.99,
     desconto: "40% OFF",
@@ -143,7 +143,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-2.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Com ativos anti-inflamatórios e regeneradores. Ideal para recuperar pele ressecada, irritada ou com rachaduras. Uso contínuo potencializa resultados.",
     preco: 89.99,
     precoOriginal: 105.99,
     desconto: "15% OFF",
@@ -155,7 +155,7 @@ const mockProdutos: Produto[] = [
     imagem: "/new-home/produtos/produto-3.png",
     nome: "Manteiga Corporal Lové Cosméticos",
     descricao:
-      "A melhor solução hidratante para sua pele. Com ingredientes naturais da Amazônia e propriedades anti-inflamatórias.",
+      "Manteiga premium com concentração máxima de ativos naturais. Hidrata, protege e rejuvenesce a pele. Aroma sofisticado e textura sedosa.",
     preco: 119.99,
     precoOriginal: 140.99,
     desconto: "15% OFF",

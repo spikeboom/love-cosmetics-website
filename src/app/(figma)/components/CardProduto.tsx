@@ -118,6 +118,12 @@ export function CardProduto({
           {nome}
         </p>
 
+        {descricao && (
+          <p className="font-cera-pro font-light text-[14px] text-black leading-normal w-full line-clamp-3">
+            {descricao}
+          </p>
+        )}
+
         <div className="content-stretch flex flex-col gap-[2px] items-start leading-none text-nowrap whitespace-pre relative shrink-0">
           {precoOriginal && (
             <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid leading-none">

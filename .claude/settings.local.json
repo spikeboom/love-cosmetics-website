@@ -38,7 +38,8 @@
       "mcp__figma-dev-mode-mcp-server__get_code_connect_map",
       "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\src\" /s /b)",
       "Bash(tree:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\src\\app\\(figma)\\design\" /s /b)"
     ],
     "deny": [],
     "ask": []
