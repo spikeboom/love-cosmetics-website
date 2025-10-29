@@ -64,15 +64,15 @@ export function CardProduto({
 
   // Card de produto completo (para vitrines e mais vendidos)
   return (
-    <div className="bg-white flex flex-col gap-4 items-start pb-4 pt-0 px-0 rounded-2xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-[230px]">
+    <div className="bg-white box-border content-stretch flex flex-col gap-[16px] items-start pb-[16px] pt-0 px-0 relative rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-[230px]">
       {/* Imagem e Tag */}
-      <div className="relative w-full h-[196px] max-h-[312px]">
-        <div className="relative w-full h-full rounded-t-2xl overflow-hidden">
+      <div className="content-stretch flex gap-[10px] items-start justify-center max-h-[312px] relative shrink-0 w-full">
+        <div className="basis-0 grow h-[196px] min-h-px min-w-px relative rounded-tl-[16px] rounded-tr-[16px] shrink-0 overflow-hidden">
           <Image
             src={imagem}
             alt={nome}
             fill
-            className="object-cover rounded-t-2xl"
+            className="object-cover pointer-events-none"
           />
         </div>
 
@@ -91,9 +91,9 @@ export function CardProduto({
 
         {/* Tag de últimas unidades */}
         {ultimasUnidades && (
-          <div className="absolute left-2 top-[163px] w-[214px]">
-            <div className="bg-[#f8f3ed] flex gap-1 items-center justify-center px-4 py-1 rounded">
-              <div className="w-4 h-4 relative">
+          <div className="absolute content-stretch flex flex-col gap-[10px] items-center left-1/2 top-[163px] w-[214px] translate-x-[-50%]">
+            <div className="bg-[#f8f3ed] box-border content-stretch flex gap-[4px] items-center justify-center px-[16px] py-[4px] relative rounded-[4px] shrink-0 w-full">
+              <div className="relative shrink-0 size-[16px]">
                 <Image
                   src="/new-home/icons/alert.svg"
                   alt=""
@@ -102,7 +102,7 @@ export function CardProduto({
                   className="w-full h-full"
                 />
               </div>
-              <p className="font-cera-pro font-light text-[14px] text-[#b3261e] leading-normal whitespace-pre">
+              <p className="font-cera-pro font-light text-[14px] text-[#b3261e] leading-normal whitespace-nowrap">
                 Últimas unidades
               </p>
             </div>
@@ -111,38 +111,38 @@ export function CardProduto({
       </div>
 
       {/* Conteúdo */}
-      <div className="flex flex-col gap-4 items-start px-4 w-full">
+      <div className="box-border content-stretch flex flex-col gap-[12px] items-start px-[16px] py-0 relative shrink-0 w-full">
         <p className="font-cera-pro font-medium text-[16px] text-black leading-normal min-w-full w-min">
           {nome}
         </p>
 
-        <div className="flex flex-col gap-2 items-start leading-normal whitespace-pre">
+        <div className="content-stretch flex flex-col gap-[2px] items-start leading-none text-nowrap whitespace-pre relative shrink-0">
           {precoOriginal && (
-            <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid leading-normal">
+            <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid leading-none">
               R$ {precoOriginal.toFixed(2)}
             </p>
           )}
-          <div className="flex gap-2 items-center w-full">
-            <p className="font-cera-pro font-bold text-[20px] text-black leading-normal">
+          <div className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full">
+            <p className="font-cera-pro font-bold text-[20px] text-black leading-none">
               R$ {preco.toFixed(2)}
             </p>
             {desconto && (
-              <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-normal">
+              <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-none">
                 {desconto}
               </p>
             )}
           </div>
           {parcelas && (
-            <p className="font-cera-pro font-light text-[12px] text-[#333333] leading-normal">
+            <p className="font-cera-pro font-light text-[12px] text-[#333333] leading-none">
               {parcelas}
             </p>
           )}
         </div>
 
         {/* Star Rating */}
-        <div className="flex gap-1 items-center">
-          <div className="flex gap-0.5 items-start">
-            <div className="flex gap-1 h-3 items-center">
+        <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+          <div className="content-stretch flex gap-[2px] items-start relative shrink-0">
+            <div className="content-stretch flex gap-[4px] h-[12px] items-center relative shrink-0">
               {[...Array(5)].map((_, i) => {
                 const filled = i < Math.floor(rating);
                 const half = i < rating && i >= Math.floor(rating);

@@ -55,7 +55,7 @@ export function MaisVendidosSection() {
   ];
 
   return (
-    <section className="bg-white w-full flex flex-col gap-4 items-start py-8 px-0">
+    <section className="bg-[#f8f3ed] w-full flex flex-col gap-4 items-start py-8 px-0">
       {/* Header */}
       <div className="flex flex-col gap-4 items-center justify-center px-4 w-full">
         <div className="flex gap-2.5 items-center justify-center">

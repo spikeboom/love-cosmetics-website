@@ -51,8 +51,12 @@ export default async function FigmaHomePage() {
         tipo="produto-completo"
       />
 
-      {/* Mais vendidos */}
-      <MaisVendidosSection />
+      {/* Mais vendidos - Full width cream */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)] bg-[#f8f3ed]">
+        <div className="w-full max-w-[1440px] mx-auto">
+          <MaisVendidosSection />
+        </div>
+      </div>
     </div>
   );
 }
