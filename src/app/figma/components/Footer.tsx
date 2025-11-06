@@ -29,68 +29,36 @@ export function Footer() {
   return (
     <footer className="bg-[#254333] w-full flex flex-col items-center">
       {/* Conteúdo principal do footer */}
-      <div className="w-full max-w-[1440px] flex flex-col gap-8 items-center py-6 lg:px-12 px-4">
-        {/* Logo e Redes Sociais - Mobile First */}
-        <div className="flex flex-col gap-6 items-center lg:hidden">
-          <div className="relative w-[180px] h-[100px]">
-            <Image
-              src="/new-home/header/logo.png"
-              alt="Lové Cosméticos"
-              fill
-              className="object-contain"
-            />
-          </div>
-
-          {/* Ícones de Redes Sociais */}
-          <div className="flex gap-4 items-center">
-            <Link href="#" className="w-8 h-8">
-              <Image
-                src="/new-home/social/facebook.svg"
-                alt="Facebook"
-                width={32}
-                height={32}
-              />
-            </Link>
-            <Link href="#" className="w-8 h-8">
-              <Image
-                src="/new-home/social/instagram.svg"
-                alt="Instagram"
-                width={32}
-                height={32}
-              />
-            </Link>
-            <Link href="#" className="w-8 h-8">
-              <Image
-                src="/new-home/social/whatsapp.svg"
-                alt="WhatsApp"
-                width={32}
-                height={32}
-              />
-            </Link>
-            <Link href="#" className="w-8 h-8">
-              <Image
-                src="/new-home/social/tiktok.svg"
-                alt="TikTok"
-                width={32}
-                height={32}
-              />
-            </Link>
-          </div>
-        </div>
-
-        {/* Links - Mobile: 1 coluna, Desktop: 3 colunas + Logo */}
+      <div className="w-full max-w-[1440px] flex flex-col gap-6 lg:gap-8 items-center py-6 lg:px-12 px-0 lg:px-4">
+        {/* Links - Mobile: 2 colunas lado a lado, Desktop: 3 colunas + Logo */}
         <div className="w-full flex lg:flex-row flex-col gap-8 items-start justify-center">
-          {/* Mobile: Links em uma coluna */}
-          <div className="lg:hidden flex flex-col gap-3 items-center w-full">
-            {[...linksColumn1, ...linksColumn2, ...linksColumn3].map((link, index) => (
-              <Link
-                key={index}
-                href="#"
-                className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline text-center"
-              >
-                {link}
-              </Link>
-            ))}
+          {/* Mobile: 2 colunas lado a lado */}
+          <div className="lg:hidden flex items-start justify-between w-full max-w-[360px] mx-auto px-4">
+            {/* Coluna 1 - menor */}
+            <div className="flex flex-col gap-4 items-start">
+              {linksColumn1.map((link, index) => (
+                <Link
+                  key={index}
+                  href="#"
+                  className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline whitespace-nowrap"
+                >
+                  {link}
+                </Link>
+              ))}
+            </div>
+
+            {/* Coluna 2 - maior */}
+            <div className="flex flex-col gap-4 items-start">
+              {linksColumn2.map((link, index) => (
+                <Link
+                  key={index}
+                  href="#"
+                  className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline whitespace-nowrap"
+                >
+                  {link}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Desktop: 3 colunas + Logo */}
@@ -184,15 +152,74 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Divider - apenas mobile */}
+        <div className="lg:hidden w-full h-px bg-[#ba7900]"></div>
+
+        {/* Logo e Redes Sociais - Mobile */}
+        <div className="flex flex-row gap-8 items-center lg:hidden">
+          <div className="relative w-[102px] h-[58px]">
+            <Image
+              src="/new-home/header/logo.png"
+              alt="Lové Cosméticos"
+              fill
+              className="object-contain"
+            />
+          </div>
+
+          {/* Ícones de Redes Sociais */}
+          <div className="flex gap-4 items-center">
+            <Link href="#" className="w-8 h-8">
+              <Image
+                src="/new-home/social/facebook.svg"
+                alt="Facebook"
+                width={32}
+                height={32}
+              />
+            </Link>
+            <Link href="#" className="w-8 h-8">
+              <Image
+                src="/new-home/social/instagram.svg"
+                alt="Instagram"
+                width={32}
+                height={32}
+              />
+            </Link>
+            <Link href="#" className="w-8 h-8">
+              <Image
+                src="/new-home/social/whatsapp.svg"
+                alt="WhatsApp"
+                width={32}
+                height={32}
+              />
+            </Link>
+            <Link href="#" className="w-8 h-8">
+              <Image
+                src="/new-home/social/tiktok.svg"
+                alt="TikTok"
+                width={32}
+                height={32}
+              />
+            </Link>
+          </div>
+        </div>
+
         {/* Copyright */}
-        <p className="font-cera-pro font-light text-[11px] lg:text-[12px] text-[#f2f2f2] text-center leading-[18px] lg:leading-[22px] w-full">
-          2025 Lovè. Todos os direitos reservados. Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM CEP: 69083-040 CNPJ: 42.609.440.0001-90
-        </p>
+        <div className="px-4 w-full">
+          <p className="font-cera-pro font-light text-[12px] text-[#f2f2f2] text-center leading-[22px] w-full lg:hidden">
+            2025 Lovè. Todos os direitos reservados.<br />
+            Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM<br />
+            CEP: 69083-040<br />
+            CNPJ: 42.609.440.0001-90
+          </p>
+          <p className="hidden lg:block font-cera-pro font-light text-[12px] text-[#f2f2f2] text-center leading-[22px] w-full">
+            2025 Lovè. Todos os direitos reservados. Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM CEP: 69083-040 CNPJ: 42.609.440.0001-90
+          </p>
+        </div>
       </div>
 
       {/* Footer branco - Meios de pagamento */}
-      <div className="bg-[#f8f3ed] w-full flex flex-col gap-2.5 items-center overflow-hidden py-6 lg:py-8">
-        <div className="w-full flex gap-6 lg:gap-10 items-center justify-center px-4 lg:px-12">
+      <div className="bg-[#f8f3ed] w-full flex flex-col gap-2.5 items-center overflow-hidden py-8">
+        <div className="w-full flex gap-10 items-center justify-center px-4">
           {/* Elo */}
           <div className="relative shrink-0 w-[45px] h-[17px] lg:w-[57px] lg:h-[22px]">
             <Image
