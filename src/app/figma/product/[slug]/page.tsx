@@ -3,13 +3,13 @@ import { ProductPageClient } from "./ProductPageClient";
 import { notFound } from "next/navigation";
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   try {
     const { data } = await fetchProdutoBySlug({ slug });
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   try {
     const { data } = await fetchProdutoBySlug({ slug });
