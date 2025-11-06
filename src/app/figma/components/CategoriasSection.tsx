@@ -1,4 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+// Import Swiper styles
+import 'swiper/css';
 
 interface CategoryCardProps {
   imagem: string;
@@ -7,8 +13,8 @@ interface CategoryCardProps {
 
 function CategoryCard({ imagem, nome }: CategoryCardProps) {
   return (
-    <div className="flex flex-col gap-2 items-start shrink-0">
-      <div className="relative w-24 h-24 rounded-2xl overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)]">
+    <div className="flex flex-col gap-2 items-center w-full">
+      <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)]">
         <Image
           src={imagem}
           alt={nome}
@@ -16,7 +22,7 @@ function CategoryCard({ imagem, nome }: CategoryCardProps) {
           className="object-cover rounded-2xl"
         />
       </div>
-      <p className="font-cera-pro font-light text-[12px] text-[#1d1b20] text-center leading-none min-w-full w-min overflow-hidden text-ellipsis line-clamp-2">
+      <p className="font-cera-pro font-light text-[12px] text-[#1d1b20] text-center leading-none w-full overflow-hidden text-ellipsis line-clamp-2">
         {nome}
       </p>
     </div>
@@ -39,17 +45,22 @@ export function CategoriasSection() {
 
   return (
     <section className="bg-white w-full flex flex-col gap-4 items-center py-8 px-0">
-      {/* Mobile: Scroll horizontal */}
-      <div className="lg:hidden overflow-x-auto scrollbar-hide w-full">
-        <div className="flex gap-4 px-4 pb-2">
+      {/* Mobile: Swiper carousel */}
+      <div className="lg:hidden w-full">
+        <Swiper
+          spaceBetween={16}
+          slidesPerView="auto"
+          className="!px-4 !pb-2"
+        >
           {categorias.map((categoria, index) => (
-            <CategoryCard
-              key={index}
-              imagem={categoria.imagem}
-              nome={categoria.nome}
-            />
+            <SwiperSlide key={index} className="!w-[100px]">
+              <CategoryCard
+                imagem={categoria.imagem}
+                nome={categoria.nome}
+              />
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
       </div>
 
       {/* Desktop: Grid centrado */}

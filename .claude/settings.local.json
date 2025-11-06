@@ -46,7 +46,8 @@
       "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\public\\new-home\")",
       "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\public\\New folder\")",
       "Bash(dir:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "WebFetch(domain:swiperjs.com)"
     ],
     "deny": [],
     "ask": []

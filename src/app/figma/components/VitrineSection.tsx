@@ -1,8 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import { Swiper, SwiperSlide } from 'swiper/react';
 import { CardProduto } from "./CardProduto";
 import { transformProdutosStrapi } from "@/utils/transform-produtos-strapi";
+
+// Import Swiper styles
+import 'swiper/css';
 
 interface VitrineSectionProps {
   titulo: string;
@@ -123,11 +127,15 @@ export function VitrineSection({
 
       {/* Cards Container */}
       <div className="relative w-full">
-        {/* Mobile: Scroll horizontal */}
-        <div className="lg:hidden overflow-x-auto scrollbar-hide">
-          <div className="flex gap-4 px-4 pb-2">
+        {/* Mobile: Swiper carousel */}
+        <div className="lg:hidden">
+          <Swiper
+            spaceBetween={16}
+            slidesPerView="auto"
+            className="!px-4 !pb-2"
+          >
             {produtos.map((produto, index) => (
-              <div key={index} className="flex-shrink-0 w-[280px]">
+              <SwiperSlide key={index} style={{ width: 'calc((100vw - 2rem) / 1.3)' }}>
                 <CardProduto
                   tipo={tipo}
                   imagem={produto.imagem}
@@ -142,9 +150,9 @@ export function VitrineSection({
                   ranking={showRanking ? index + 1 : undefined}
                   rating={produto.rating}
                 />
-              </div>
+              </SwiperSlide>
             ))}
-          </div>
+          </Swiper>
         </div>
 
         {/* Desktop: Grid centrado */}
