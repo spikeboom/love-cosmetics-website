@@ -90,6 +90,7 @@ export function MaisVendidosSection({ produtos: produtosStrapi = [] }: MaisVendi
       parcelas: parcelasTexto,
       rating: produtosMockados[index % produtosMockados.length].rating,
       ultimasUnidades: produtosMockados[index % produtosMockados.length].ultimasUnidades,
+      slug: produto.slug || null,
     };
   });
 
@@ -125,6 +126,7 @@ export function MaisVendidosSection({ produtos: produtosStrapi = [] }: MaisVendi
             rating={produto.rating}
             ultimasUnidades={produto.ultimasUnidades}
             ranking={index + 1}
+            slug={produto.slug}
           />
         ))}
       </div>

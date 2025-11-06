@@ -2,26 +2,51 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { NavigationArrows } from "../components/NavigationArrows";
-import { YouMayLikeSection } from "../components/YouMayLikeSection";
-import { CertificadosSection } from "../components/CertificadosSection";
-import { ShippingCalculator } from "../components/ShippingCalculator";
+import { NavigationArrows } from "../../components/NavigationArrows";
+import { YouMayLikeSection } from "../../components/YouMayLikeSection";
+import { CertificadosSection } from "../../components/CertificadosSection";
+import { ShippingCalculator } from "../../components/ShippingCalculator";
 
-// Note: metadata não funciona em client components, mas mantemos para referência
-// export const metadata = {
-//   title: "Lové Cosméticos - Produto",
-//   description: "Detalhes do produto - Beleza natural e sustentável",
-// };
+interface ProductPageClientProps {
+  produto: any;
+}
 
-const productImages = [
-  "/new-home/produtos/produto-pdp.png",
-  "/new-home/produtos/produto-pdp.png",
-  "/new-home/produtos/produto-pdp.png",
-  "/new-home/produtos/produto-pdp.png",
-  "/new-home/produtos/produto-pdp.png",
-];
+export function ProductPageClient({ produto }: ProductPageClientProps) {
+  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
-export default function ProductPage() {
+  // Pega as imagens do produto do Strapi
+  // Para imagem principal: usa large, xlarge ou url original
+  const productImagesMain = produto?.carouselImagensPrincipal?.length > 0
+    ? produto.carouselImagensPrincipal.map((item: any) => {
+        const imgUrl = item?.imagem?.formats?.large?.url ||
+                       item?.imagem?.formats?.xlarge?.url ||
+                       item?.imagem?.url;
+        return imgUrl ? `${baseURL}${imgUrl}` : "/new-home/produtos/produto-pdp.png";
+      })
+    : [
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+      ];
+
+  // Para thumbnails laterais: usa thumbnail ou small
+  const productImagesThumbs = produto?.carouselImagensPrincipal?.length > 0
+    ? produto.carouselImagensPrincipal.map((item: any) => {
+        const imgUrl = item?.imagem?.formats?.thumbnail?.url ||
+                       item?.imagem?.formats?.small?.url ||
+                       item?.imagem?.url;
+        return imgUrl ? `${baseURL}${imgUrl}` : "/new-home/produtos/produto-pdp.png";
+      })
+    : [
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+        "/new-home/produtos/produto-pdp.png",
+      ];
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
@@ -36,7 +61,7 @@ export default function ProductPage() {
             <div className="flex items-start justify-between w-[921px]">
               {/* Thumbnails - Frame 2608678 */}
               <div className="flex flex-col gap-[24px] items-start w-[94px]">
-                {productImages.map((image, index) => (
+                {productImagesThumbs.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -60,7 +85,7 @@ export default function ProductPage() {
                 {/* Image Container - Frame 2608687 */}
                 <div className="w-full h-full bg-white overflow-hidden">
                   <Image
-                    src={productImages[selectedImage]}
+                    src={productImagesMain[selectedImage]}
                     alt="Manteiga Corporal Lové Cosméticos"
                     width={803}
                     height={704}
@@ -73,12 +98,12 @@ export default function ProductPage() {
                 <NavigationArrows
                   onPrevious={() =>
                     setSelectedImage((prev) =>
-                      prev === 0 ? productImages.length - 1 : prev - 1
+                      prev === 0 ? productImagesMain.length - 1 : prev - 1
                     )
                   }
                   onNext={() =>
                     setSelectedImage((prev) =>
-                      prev === productImages.length - 1 ? 0 : prev + 1
+                      prev === productImagesMain.length - 1 ? 0 : prev + 1
                     )
                   }
                   position="center"

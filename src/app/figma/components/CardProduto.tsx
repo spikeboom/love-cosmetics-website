@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 interface CardProdutoProps {
   imagem: string;
@@ -13,6 +14,7 @@ interface CardProdutoProps {
   tipo?: "mini-banner" | "produto-completo";
   ranking?: number;
   fullWidth?: boolean;
+  slug?: string;
 }
 
 export function CardProduto({
@@ -28,44 +30,41 @@ export function CardProduto({
   tipo = "produto-completo",
   ranking,
   fullWidth = false,
+  slug,
 }: CardProdutoProps) {
-  if (tipo === "mini-banner") {
-    return (
-      <div className="bg-white flex flex-col gap-4 items-start pb-4 pt-0 px-0 rounded-2xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-[230px]">
-        {/* Imagem */}
-        <div className="relative w-full h-[230px] max-h-[312px] rounded-t-2xl overflow-hidden">
-          <Image
-            src={imagem}
-            alt={nome}
-            fill
-            className="object-cover rounded-t-2xl"
-          />
-        </div>
-
-        {/* Conteúdo */}
-        <div className="flex flex-col gap-4 items-start px-4 w-[230px]">
-          {desconto && (
-            <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
-              {desconto}
-            </p>
-          )}
-          <div className="flex gap-2.5 items-center w-full">
-            <p className="flex-1 font-cera-pro font-bold text-[20px] text-black leading-none min-h-0 min-w-0">
-              {nome}
-            </p>
-          </div>
-          {descricao && (
-            <p className="font-cera-pro font-light text-[14px] text-black leading-none w-full">
-              {descricao}
-            </p>
-          )}
-        </div>
+  const cardContent = tipo === "mini-banner" ? (
+    <div className="bg-white flex flex-col gap-4 items-start pb-4 pt-0 px-0 rounded-2xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-[230px]">
+      {/* Imagem */}
+      <div className="relative w-full h-[230px] max-h-[312px] rounded-t-2xl overflow-hidden">
+        <Image
+          src={imagem}
+          alt={nome}
+          fill
+          className="object-cover rounded-t-2xl"
+        />
       </div>
-    );
-  }
 
-  // Card de produto completo (para vitrines e mais vendidos)
-  return (
+      {/* Conteúdo */}
+      <div className="flex flex-col gap-4 items-start px-4 w-[230px]">
+        {desconto && (
+          <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
+            {desconto}
+          </p>
+        )}
+        <div className="flex gap-2.5 items-center w-full">
+          <p className="flex-1 font-cera-pro font-bold text-[20px] text-black leading-none min-h-0 min-w-0">
+            {nome}
+          </p>
+        </div>
+        {descricao && (
+          <p className="font-cera-pro font-light text-[14px] text-black leading-none w-full">
+            {descricao}
+          </p>
+        )}
+      </div>
+    </div>
+  ) : (
+    // Card de produto completo (para vitrines e mais vendidos)
     <div className={`bg-white box-border content-stretch flex flex-col gap-[16px] items-start pb-[16px] pt-0 px-0 relative rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] ${fullWidth ? "w-full" : "w-[230px]"}`}>
       {/* Imagem e Tag */}
       <div className="content-stretch flex gap-[10px] items-start justify-center max-h-[312px] relative shrink-0 w-full">
@@ -180,4 +179,15 @@ export function CardProduto({
       </div>
     </div>
   );
+
+  // Se tiver slug, envolve com Link
+  if (slug) {
+    return (
+      <Link href={`/figma/product/${slug}`} className="cursor-pointer hover:opacity-90 transition-opacity">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

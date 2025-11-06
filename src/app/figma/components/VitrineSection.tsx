@@ -113,6 +113,7 @@ export function VitrineSection({
       precoOriginal: precoOriginal || produtosMockados[index % produtosMockados.length].precoOriginal,
       parcelas: parcelasTexto,
       ultimasUnidades: produtosMockados[index % produtosMockados.length].ultimasUnidades,
+      slug: produto.slug || null,
     };
   });
 
@@ -162,6 +163,7 @@ export function VitrineSection({
               precoOriginal={produto.precoOriginal}
               parcelas={produto.parcelas}
               ultimasUnidades={produto.ultimasUnidades}
+              slug={produto.slug}
             />
           ))}
         </div>
