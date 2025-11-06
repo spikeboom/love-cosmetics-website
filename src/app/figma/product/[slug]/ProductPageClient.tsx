@@ -6,6 +6,7 @@ import { NavigationArrows } from "../../components/NavigationArrows";
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
+import { calculateProductPrices } from "@/utils/calculate-prices";
 
 interface ProductPageClientProps {
   produto: any;
@@ -14,6 +15,12 @@ interface ProductPageClientProps {
 
 export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
+  // Calcula preços do produto
+  const priceInfo = calculateProductPrices(
+    produto?.preco || 99.99,
+    produto?.preco_de
+  );
 
   // Pega as imagens do produto do Strapi
   // Para imagem principal: usa large, xlarge ou url original
@@ -181,7 +188,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
             <div className="flex flex-col gap-[32px] items-start w-full">
               {/* Title - Frame 7007 - Times Bold 32px */}
               <p className="font-times font-bold text-[32px] text-black leading-[normal]">
-                Manteiga Corporal Lové Cosméticos
+                {produto?.nome || "Manteiga Corporal Lové Cosméticos"}
               </p>
 
               {/* Price & Rating Section - Frame 7014 */}
@@ -205,7 +212,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
                   {/* Installments - Frame 7020 */}
                   <p className="font-cera-pro font-light text-[12px] text-[#333333] leading-[normal] relative shrink-0">
-                    3x R$33,33 sem juros
+                    {priceInfo.parcelas}
                   </p>
                 </div>
 
