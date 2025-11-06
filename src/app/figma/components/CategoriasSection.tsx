@@ -13,7 +13,7 @@ interface CategoryCardProps {
 
 function CategoryCard({ imagem, nome }: CategoryCardProps) {
   return (
-    <div className="flex flex-col gap-2 items-center w-full">
+    <div className="flex flex-col gap-2 items-center w-full lg:w-[96px]">
       <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)]">
         <Image
           src={imagem}

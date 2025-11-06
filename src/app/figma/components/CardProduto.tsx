@@ -33,7 +33,7 @@ export function CardProduto({
   slug,
 }: CardProdutoProps) {
   const cardContent = tipo === "mini-banner" ? (
-    <div className="bg-white flex flex-col gap-4 items-start pb-4 pt-0 px-0 rounded-2xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-[230px]">
+    <div className="bg-white flex flex-col gap-4 items-start pb-4 pt-0 px-0 rounded-2xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-full lg:w-[230px]">
       {/* Imagem */}
       <div className="relative w-full h-[230px] max-h-[312px] rounded-t-2xl overflow-hidden">
         <Image
@@ -45,7 +45,7 @@ export function CardProduto({
       </div>
 
       {/* Conteúdo */}
-      <div className="flex flex-col gap-4 items-start px-4 w-[230px]">
+      <div className="flex flex-col gap-4 items-start px-4 w-full">
         {desconto && (
           <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
             {desconto}
