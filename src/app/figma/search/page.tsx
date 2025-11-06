@@ -5,6 +5,12 @@ import { Breadcrumbs } from "../components/Breadcrumbs";
 import { SearchFilters } from "../components/SearchFilters";
 import { ProductGrid } from "../components/ProductGrid";
 
+// Note: metadata não funciona em client components, mas mantemos para referência
+// export const metadata = {
+//   title: "Lové Cosméticos - Busca de Produtos",
+//   description: "Encontre os melhores produtos de beleza natural e sustentável",
+// };
+
 interface Produto {
   imagem: string;
   nome: string;

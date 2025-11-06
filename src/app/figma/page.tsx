@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Lové Cosméticos - Figma Designs",
+  description: "Navegação das páginas de design do projeto Figma",
+};
+
 export default function FigmaIndexPage() {
   const pages = [
     {

@@ -3,6 +3,7 @@ import { CertificadosSection } from "../components/CertificadosSection";
 import { CategoriasSection } from "../components/CategoriasSection";
 import { VitrineSection } from "../components/VitrineSection";
 import { MaisVendidosSection } from "../components/MaisVendidosSection";
+import { fetchProdutosForDesign } from "@/modules/produto/domain";
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
@@ -10,6 +11,8 @@ export const metadata = {
 };
 
 export default async function FigmaHomePage() {
+  const { data: produtos } = await fetchProdutosForDesign();
+
   return (
     <div className="w-full max-w-[1440px] mx-auto">
       {/* Banner principal com produto em destaque */}
@@ -27,6 +30,7 @@ export default async function FigmaHomePage() {
           subtitulo="Hidratação profunda, alívio das inflamações e rachaduras"
           backgroundColor="cream"
           tipo="mini-banner"
+          produtos={produtos}
         />
       </div>
 
@@ -37,6 +41,7 @@ export default async function FigmaHomePage() {
         backgroundColor="white"
         tipo="mini-banner"
         showIconeTitulo={true}
+        produtos={produtos}
       />
 
       {/* Seção de categorias */}
@@ -49,12 +54,13 @@ export default async function FigmaHomePage() {
         backgroundColor="white"
         showNavigation={true}
         tipo="produto-completo"
+        produtos={produtos}
       />
 
       {/* Mais vendidos - Full width cream */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)] bg-[#f8f3ed]">
         <div className="w-full max-w-[1440px] mx-auto">
-          <MaisVendidosSection />
+          <MaisVendidosSection produtos={produtos} />
         </div>
       </div>
     </div>

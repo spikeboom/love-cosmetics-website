@@ -282,3 +282,39 @@ export const fetchProdutosSugeridosCarrinho = async (): Promise<any> => {
 
   return processProdutosNothing(await response.json());
 };
+
+export const fetchProdutosForDesign = async (): Promise<any> => {
+  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters: {
+        $or: [
+          { backgroundFlags: { $notContainsi: "hide" } },
+          { backgroundFlags: { $null: true } },
+        ],
+      },
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    console.error("Failed to fetch produtos for design", response);
+    throw new Error("Failed to fetch produtos for design");
+  }
+
+  return processProdutosNothing(await response.json());
+};

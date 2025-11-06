@@ -7,6 +7,12 @@ import { YouMayLikeSection } from "../components/YouMayLikeSection";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { ShippingCalculator } from "../components/ShippingCalculator";
 
+// Note: metadata não funciona em client components, mas mantemos para referência
+// export const metadata = {
+//   title: "Lové Cosméticos - Produto",
+//   description: "Detalhes do produto - Beleza natural e sustentável",
+// };
+
 const productImages = [
   "/new-home/produtos/produto-pdp.png",
   "/new-home/produtos/produto-pdp.png",
