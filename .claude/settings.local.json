@@ -44,7 +44,9 @@
       "Bash(findstr:*)",
       "Read(//c/Users/Administrator/Downloads/**)",
       "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\public\\new-home\")",
-      "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\public\\New folder\")"
+      "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\public\\New folder\")",
+      "Bash(dir:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

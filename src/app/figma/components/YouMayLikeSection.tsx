@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CardProduto } from "./CardProduto";
-import { NavigationArrows } from "./NavigationArrows";
+import { transformProdutosStrapi } from "@/utils/transform-produtos-strapi";
 
 interface Produto {
   id: string;
@@ -18,7 +18,7 @@ interface Produto {
 }
 
 interface YouMayLikeSectionProps {
-  produtos?: Produto[];
+  produtos?: any[]; // Produtos vindos do Strapi
   titulo?: string;
 }
 
@@ -86,14 +86,43 @@ const produtosPadrao: Produto[] = [
 ];
 
 export function YouMayLikeSection({
-  produtos = produtosPadrao,
+  produtos: produtosStrapi = [],
   titulo = "Você pode gostar",
 }: YouMayLikeSectionProps) {
+  // Converte produtosPadrao para formato compatível com mockados
+  const produtosMockados = produtosPadrao.map((p) => ({
+    imagem: p.imagem,
+    nome: p.nome,
+    descricao: p.descricao,
+    desconto: p.desconto,
+    preco: p.preco,
+    precoOriginal: p.precoOriginal,
+    parcelas: p.parcelas,
+    rating: p.rating,
+    ultimasUnidades: p.ultimasUnidades,
+  }));
+
+  // Transforma produtos do Strapi e adiciona id
+  const produtosTransformados = transformProdutosStrapi({
+    produtosStrapi,
+    produtosMockados,
+    limite: 10,
+    incluirSlug: true,
+  });
+
+  const produtos = produtosTransformados.length > 0
+    ? produtosTransformados.map((p, index) => ({
+        ...p,
+        id: produtosStrapi[index]?.id?.toString() || `${index + 1}`,
+        slug: p.slug,
+      }))
+    : produtosPadrao;
+
   const [currentPosition, setCurrentPosition] = useState(0);
   const cardWidth = 230; // w-[230px]
   const gap = 32; // gap-[32px]
   const containerPadding = 16; // px-[16px]
-  const maxScroll = Math.max(0, (produtos.length - 5) * (cardWidth + gap));
+  const maxScroll = Math.max(0, (produtos.length - 4) * (cardWidth + gap));
 
   const handlePrevious = () => {
     setCurrentPosition((prev) => Math.max(0, prev - (cardWidth + gap)));
@@ -104,7 +133,7 @@ export function YouMayLikeSection({
   };
 
   return (
-    <div className="relative bg-white flex flex-col gap-[16px] items-start px-0 py-[32px] w-full">
+    <div className="bg-white flex flex-col gap-[16px] items-center px-0 py-[32px] w-full">
       {/* Title header - Frame 7053 */}
       <div className="flex flex-col gap-[16px] items-center justify-center px-[16px] py-0 w-full">
         <div className="flex gap-[10px] items-center justify-center">
@@ -114,12 +143,21 @@ export function YouMayLikeSection({
         </div>
       </div>
 
-      {/* Cards Container - Frame 7059 */}
-      <div className="relative w-full">
-        <div className="flex gap-[32px] items-center justify-center px-[16px] py-0">
+      {/* Cards Container with Arrows - Frame 7059 */}
+      <div className="relative w-full max-w-[1440px] mx-auto flex items-center justify-center gap-[24px] py-[8px]">
+        {/* Left Arrow */}
+        <button
+          onClick={handlePrevious}
+          className="flex-shrink-0 w-[56px] h-[56px] rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors z-10"
+        >
+          <img src="/new-home/icons/arrow-left.svg" alt="Anterior" width={56} height={56} />
+        </button>
+
+        {/* Overflow container for cards */}
+        <div className="flex-1 overflow-hidden py-[4px]">
           {/* Scrollable Cards */}
           <div
-            className="flex gap-[32px] items-center transition-transform duration-300 ease-in-out"
+            className="flex gap-[32px] items-start transition-transform duration-300 ease-in-out pl-[4px] pr-[4px]"
             style={{
               transform: `translateX(-${currentPosition}px)`,
             }}
@@ -137,23 +175,21 @@ export function YouMayLikeSection({
                   rating={produto.rating}
                   ultimasUnidades={produto.ultimasUnidades}
                   tipo="produto-completo"
+                  slug={produto.slug}
                 />
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Navigation Arrows - Frame 7066 */}
-      <NavigationArrows
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        position="center"
-        containerWidth="w-[1440px]"
-        arrowSize={56}
-        leftIcon="/new-home/icons/arrow-left.svg"
-        rightIcon="/new-home/icons/arrow-right.svg"
-      />
+        {/* Right Arrow */}
+        <button
+          onClick={handleNext}
+          className="flex-shrink-0 w-[56px] h-[56px] rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors z-10"
+        >
+          <img src="/new-home/icons/arrow-right.svg" alt="Próximo" width={56} height={56} />
+        </button>
+      </div>
     </div>
   );
 }

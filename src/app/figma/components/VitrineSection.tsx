@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { CardProduto } from "./CardProduto";
+import { transformProdutosStrapi } from "@/utils/transform-produtos-strapi";
 
 interface VitrineSectionProps {
   titulo: string;
@@ -24,8 +25,6 @@ export function VitrineSection({
   showIconeTitulo = false,
   produtos: produtosStrapi = [],
 }: VitrineSectionProps) {
-  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-
   // Dados mockados para fallback quando não houver produtos do Strapi
   const produtosMockados = [
     {
@@ -37,6 +36,7 @@ export function VitrineSection({
       precoOriginal: 129.99,
       parcelas: "3x R$33,33 sem juros",
       ultimasUnidades: false,
+      rating: 4.5,
     },
     {
       imagem: "/new-home/produtos/produto-2.png",
@@ -47,6 +47,7 @@ export function VitrineSection({
       precoOriginal: 105.99,
       parcelas: "3x R$29,99 sem juros",
       ultimasUnidades: true,
+      rating: 4.0,
     },
     {
       imagem: "/new-home/produtos/produto-3.png",
@@ -57,6 +58,7 @@ export function VitrineSection({
       precoOriginal: 140.99,
       parcelas: "3x R$39,99 sem juros",
       ultimasUnidades: true,
+      rating: 4.5,
     },
     {
       imagem: "/new-home/produtos/produto-2.png",
@@ -67,6 +69,7 @@ export function VitrineSection({
       precoOriginal: 105.99,
       parcelas: "3x R$29,99 sem juros",
       ultimasUnidades: true,
+      rating: 3.5,
     },
     {
       imagem: "/new-home/produtos/produto-1.png",
@@ -77,48 +80,16 @@ export function VitrineSection({
       precoOriginal: 129.99,
       parcelas: "3x R$33,33 sem juros",
       ultimasUnidades: true,
+      rating: 5.0,
     },
   ];
 
-  // Transforma produtos do Strapi para o formato esperado pelo CardProduto
-  const produtosTransformados = produtosStrapi.slice(0, 5).map((produto: any, index: number) => {
-    const imagemUrl = produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
-      || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
-
-    // Preço final (com desconto) vindo do Strapi
-    const preco = produto.preco || 0;
-    // Preço original (de) vindo do Strapi
-    const precoOriginal = produto.preco_de || null;
-
-    // Calcula o desconto baseado no preço final e preço original
-    let desconto = null;
-    if (preco && precoOriginal && precoOriginal > preco) {
-      const percentualDesconto = Math.round(((precoOriginal - preco) / precoOriginal) * 100);
-      desconto = `${percentualDesconto}% OFF`;
-    }
-
-    // Pega a primeira descrição disponível da listaDescricao
-    const descricao = produto.listaDescricao?.[0]?.descricao || produtosMockados[index % produtosMockados.length].descricao;
-
-    // Calcula o valor de cada parcela (3x sem juros)
-    const valorParcela = preco > 0 ? (preco / 3).toFixed(2).replace('.', ',') : null;
-    const parcelasTexto = valorParcela ? `3x R$${valorParcela} sem juros` : produtosMockados[index % produtosMockados.length].parcelas;
-
-    return {
-      imagem: imagemUrl ? `${baseURL}${imagemUrl}` : produtosMockados[index % produtosMockados.length].imagem,
-      nome: produto.nome || produtosMockados[index % produtosMockados.length].nome,
-      descricao: descricao,
-      desconto: desconto || produtosMockados[index % produtosMockados.length].desconto,
-      preco: preco || produtosMockados[index % produtosMockados.length].preco,
-      precoOriginal: precoOriginal || produtosMockados[index % produtosMockados.length].precoOriginal,
-      parcelas: parcelasTexto,
-      ultimasUnidades: produtosMockados[index % produtosMockados.length].ultimasUnidades,
-      slug: produto.slug || null,
-    };
+  const produtos = transformProdutosStrapi({
+    produtosStrapi,
+    produtosMockados,
+    limite: 5,
+    incluirSlug: true,
   });
-
-  // Se não houver produtos do Strapi, usa os mockados
-  const produtos = produtosTransformados.length > 0 ? produtosTransformados : produtosMockados;
 
   const bgColor = backgroundColor === "white" ? "bg-white" : "bg-[#f8f3ed]";
 

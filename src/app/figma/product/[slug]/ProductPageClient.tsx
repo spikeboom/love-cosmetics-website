@@ -9,9 +9,10 @@ import { ShippingCalculator } from "../../components/ShippingCalculator";
 
 interface ProductPageClientProps {
   produto: any;
+  produtosVitrine: any[];
 }
 
-export function ProductPageClient({ produto }: ProductPageClientProps) {
+export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   // Pega as imagens do produto do Strapi
@@ -301,7 +302,7 @@ export function ProductPageClient({ produto }: ProductPageClientProps) {
       </div>
 
       {/* Você pode gostar Section - Section 8 */}
-      <YouMayLikeSection />
+      <YouMayLikeSection produtos={produtosVitrine} />
 
       {/* Cards de certificados/badges - Full width */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">

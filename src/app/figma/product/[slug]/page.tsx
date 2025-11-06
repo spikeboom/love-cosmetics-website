@@ -1,4 +1,4 @@
-import { fetchProdutoBySlug } from "@/modules/produto/domain";
+import { fetchProdutoBySlug, fetchProdutosForDesign } from "@/modules/produto/domain";
 import { ProductPageClient } from "./ProductPageClient";
 import { notFound } from "next/navigation";
 
@@ -45,7 +45,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       notFound();
     }
 
-    return <ProductPageClient produto={produto} />;
+    // Busca produtos para a seção "Você pode gostar"
+    const { data: produtosVitrine } = await fetchProdutosForDesign();
+
+    return <ProductPageClient produto={produto} produtosVitrine={produtosVitrine} />;
   } catch (error) {
     console.error("Erro ao buscar produto:", error);
     notFound();
