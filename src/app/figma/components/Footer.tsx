@@ -129,40 +129,40 @@ export function Footer() {
       {/* Footer branco - Meios de pagamento */}
       <div className="bg-[#f8f3ed] w-full flex flex-col gap-2.5 items-center overflow-hidden py-8">
         <div className="w-full flex gap-10 items-center justify-center px-12">
-          {/* Elo */}
-          <div className="relative shrink-0" style={{ width: "56.447px", height: "21.632px" }}>
+          {/* Elo - 57x22 */}
+          <div className="relative shrink-0" style={{ width: "57px", height: "22px" }}>
             <Image
-              src="/new-home/footer/elo.svg"
+              src="/new-home/footer/elo.png"
               alt="Elo"
               fill
               className="object-contain"
             />
           </div>
 
-          {/* Mastercard */}
-          <div className="relative shrink-0" style={{ width: "31.502px", height: "24.479px" }}>
+          {/* Mastercard - 32x25 */}
+          <div className="relative shrink-0" style={{ width: "32px", height: "25px" }}>
             <Image
-              src="/new-home/footer/mastercard.svg"
+              src="/new-home/footer/mastercard.png"
               alt="Mastercard"
               fill
               className="object-contain"
             />
           </div>
 
-          {/* Visa */}
-          <div className="relative shrink-0" style={{ width: "45.491px", height: "13.827px" }}>
+          {/* Visa - 46x14 */}
+          <div className="relative shrink-0" style={{ width: "46px", height: "14px" }}>
             <Image
-              src="/new-home/footer/visa.svg"
+              src="/new-home/footer/visa.png"
               alt="Visa"
               fill
               className="object-contain"
             />
           </div>
 
-          {/* Amex */}
+          {/* Amex - 28x28 */}
           <div className="relative shrink-0" style={{ width: "28px", height: "28px" }}>
             <Image
-              src="/new-home/footer/amex.svg"
+              src="/new-home/footer/amex.png"
               alt="American Express"
               fill
               className="object-contain"
