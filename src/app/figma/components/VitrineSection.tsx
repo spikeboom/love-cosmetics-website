@@ -98,8 +98,8 @@ export function VitrineSection({
   return (
     <section className={`${bgColor} w-full flex flex-col gap-4 items-start py-8 px-0`}>
       {/* Header */}
-      <div className="flex flex-col gap-4 items-center justify-center px-4 w-full">
-        <div className="flex gap-2.5 items-center justify-center">
+      <div className="flex flex-col gap-4 lg:items-center items-start justify-center px-4 w-full">
+        <div className="flex gap-2.5 lg:items-center items-start lg:justify-center justify-start">
           <div className="flex flex-col justify-center leading-[0]">
             <p className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-black leading-normal whitespace-pre">{titulo}</p>
           </div>
@@ -115,7 +115,7 @@ export function VitrineSection({
           )}
         </div>
         {subtitulo && (
-          <p className="font-cera-pro font-light text-[16px] lg:text-[20px] text-black leading-normal text-center min-w-full w-min">
+          <p className="font-cera-pro font-light text-[16px] lg:text-[20px] text-black leading-normal lg:text-center text-left min-w-full w-min">
             {subtitulo}
           </p>
         )}
@@ -185,8 +185,8 @@ export function VitrineSection({
 
       {/* Ver todos */}
       {showVerTodos && (
-        <div className="flex flex-col gap-2 items-center justify-center px-4 w-full">
-          <div className="flex gap-2.5 items-center justify-center">
+        <div className="flex flex-col gap-2 lg:items-center items-start justify-center px-4 w-full">
+          <div className="flex gap-2.5 lg:items-center items-start lg:justify-center justify-start">
             <div className="flex flex-col justify-center leading-[0]">
               <p className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-black underline decoration-solid [text-underline-position:from-font] leading-normal whitespace-pre">
                 Ver todos produtos
