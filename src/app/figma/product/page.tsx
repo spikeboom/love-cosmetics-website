@@ -5,6 +5,7 @@ import { useState } from "react";
 import { NavigationArrows } from "../components/NavigationArrows";
 import { YouMayLikeSection } from "../components/YouMayLikeSection";
 import { CertificadosSection } from "../components/CertificadosSection";
+import { ShippingCalculator } from "../components/ShippingCalculator";
 
 const productImages = [
   "/new-home/produtos/produto-pdp.png",
@@ -237,34 +238,7 @@ export default function ProductPage() {
               </div>
 
               {/* Shipping Calculator - Frame 7033 */}
-              <div className="flex flex-col gap-[16px] items-start w-full">
-                {/* Frame 7034 */}
-                <div className="flex flex-col gap-[16px] items-start w-full">
-                  {/* Frame 7035 - Title */}
-                  <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal] w-full">
-                    Calcule o frete
-                  </p>
-
-                  {/* Frame 7036 - Input */}
-                  <div className="bg-white border border-[#d2d2d2] flex items-center justify-between p-[8px] rounded-[8px] w-full">
-                    {/* Input placeholder */}
-                    <div className="flex gap-[10px] items-center justify-center px-[8px] py-0">
-                      <p className="font-cera-pro font-light text-[20px] text-[#8c8c8c] leading-[normal] text-nowrap whitespace-pre">
-                        Digite seu CEP
-                      </p>
-                    </div>
-
-                    {/* Calculate Button */}
-                    <div className="bg-[#8c8c8c] flex flex-col h-[32px] items-center justify-center overflow-hidden rounded-[4px] flex-shrink-0">
-                      <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
-                        <p className="font-cera-pro font-medium text-[16px] text-white leading-[normal] text-nowrap tracking-[0px]">
-                          Calcular
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ShippingCalculator />
 
               {/* Action Buttons - Frame 10740 */}
               <div className="flex flex-col gap-[16px] items-start w-full">
