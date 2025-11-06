@@ -39,7 +39,21 @@ export function CategoriasSection() {
 
   return (
     <section className="bg-white w-full flex flex-col gap-4 items-center py-8 px-0">
-      <div className="flex gap-8 items-start justify-center px-4 w-full">
+      {/* Mobile: Scroll horizontal */}
+      <div className="lg:hidden overflow-x-auto scrollbar-hide w-full">
+        <div className="flex gap-4 px-4 pb-2">
+          {categorias.map((categoria, index) => (
+            <CategoryCard
+              key={index}
+              imagem={categoria.imagem}
+              nome={categoria.nome}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: Grid centrado */}
+      <div className="hidden lg:flex gap-8 items-start justify-center px-4 w-full">
         {categorias.map((categoria, index) => (
           <CategoryCard
             key={index}

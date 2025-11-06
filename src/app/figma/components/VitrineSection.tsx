@@ -13,6 +13,7 @@ interface VitrineSectionProps {
   tipo?: "mini-banner" | "produto-completo";
   showIconeTitulo?: boolean;
   produtos?: any[];
+  showRanking?: boolean;
 }
 
 export function VitrineSection({
@@ -24,6 +25,7 @@ export function VitrineSection({
   tipo = "mini-banner",
   showIconeTitulo = false,
   produtos: produtosStrapi = [],
+  showRanking = false,
 }: VitrineSectionProps) {
   // Dados mockados para fallback quando não houver produtos do Strapi
   const produtosMockados = [
@@ -99,7 +101,7 @@ export function VitrineSection({
       <div className="flex flex-col gap-4 items-center justify-center px-4 w-full">
         <div className="flex gap-2.5 items-center justify-center">
           <div className="flex flex-col justify-center leading-[0]">
-            <p className="font-cera-pro font-bold text-[24px] text-black leading-normal whitespace-pre">{titulo}</p>
+            <p className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-black leading-normal whitespace-pre">{titulo}</p>
           </div>
           {showIconeTitulo && (
             <div className="w-6 h-6 shrink-0 relative">
@@ -113,7 +115,7 @@ export function VitrineSection({
           )}
         </div>
         {subtitulo && (
-          <p className="font-cera-pro font-light text-[20px] text-black leading-normal text-center min-w-full w-min">
+          <p className="font-cera-pro font-light text-[16px] lg:text-[20px] text-black leading-normal text-center min-w-full w-min">
             {subtitulo}
           </p>
         )}
@@ -121,35 +123,64 @@ export function VitrineSection({
 
       {/* Cards Container */}
       <div className="relative w-full">
-        <div className="flex gap-8 items-start justify-center px-4 w-full">
-          {produtos.map((produto, index) => (
-            <CardProduto
-              key={index}
-              tipo={tipo}
-              imagem={produto.imagem}
-              nome={produto.nome}
-              descricao={produto.descricao}
-              desconto={produto.desconto}
-              preco={produto.preco}
-              precoOriginal={produto.precoOriginal}
-              parcelas={produto.parcelas}
-              ultimasUnidades={produto.ultimasUnidades}
-              slug={produto.slug}
-            />
-          ))}
+        {/* Mobile: Scroll horizontal */}
+        <div className="lg:hidden overflow-x-auto scrollbar-hide">
+          <div className="flex gap-4 px-4 pb-2">
+            {produtos.map((produto, index) => (
+              <div key={index} className="flex-shrink-0 w-[280px]">
+                <CardProduto
+                  tipo={tipo}
+                  imagem={produto.imagem}
+                  nome={produto.nome}
+                  descricao={produto.descricao}
+                  desconto={produto.desconto}
+                  preco={produto.preco}
+                  precoOriginal={produto.precoOriginal}
+                  parcelas={produto.parcelas}
+                  ultimasUnidades={produto.ultimasUnidades}
+                  slug={produto.slug}
+                  ranking={showRanking ? index + 1 : undefined}
+                  rating={produto.rating}
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Navegação lateral */}
-        {showNavigation && (
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 w-[1440px] mx-auto px-6 flex items-center justify-between pointer-events-none">
-            <button className="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center pointer-events-auto hover:bg-white transition-colors">
-              <Image src="/new-home/icons/arrow-left.svg" alt="Anterior" width={56} height={56} />
-            </button>
-            <button className="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center pointer-events-auto hover:bg-white transition-colors">
-              <Image src="/new-home/icons/arrow-right.svg" alt="Próximo" width={56} height={56} />
-            </button>
+        {/* Desktop: Grid centrado */}
+        <div className="hidden lg:block">
+          <div className="flex gap-8 items-start justify-center px-4 w-full">
+            {produtos.map((produto, index) => (
+              <CardProduto
+                key={index}
+                tipo={tipo}
+                imagem={produto.imagem}
+                nome={produto.nome}
+                descricao={produto.descricao}
+                desconto={produto.desconto}
+                preco={produto.preco}
+                precoOriginal={produto.precoOriginal}
+                parcelas={produto.parcelas}
+                ultimasUnidades={produto.ultimasUnidades}
+                slug={produto.slug}
+                ranking={showRanking ? index + 1 : undefined}
+                rating={produto.rating}
+              />
+            ))}
           </div>
-        )}
+
+          {/* Navegação lateral - apenas desktop */}
+          {showNavigation && (
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 w-[1440px] mx-auto px-6 flex items-center justify-between pointer-events-none">
+              <button className="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center pointer-events-auto hover:bg-white transition-colors">
+                <Image src="/new-home/icons/arrow-left.svg" alt="Anterior" width={56} height={56} />
+              </button>
+              <button className="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center pointer-events-auto hover:bg-white transition-colors">
+                <Image src="/new-home/icons/arrow-right.svg" alt="Próximo" width={56} height={56} />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Ver todos */}
@@ -157,7 +188,7 @@ export function VitrineSection({
         <div className="flex flex-col gap-2 items-center justify-center px-4 w-full">
           <div className="flex gap-2.5 items-center justify-center">
             <div className="flex flex-col justify-center leading-[0]">
-              <p className="font-cera-pro font-medium text-[16px] text-black underline decoration-solid [text-underline-position:from-font] leading-normal whitespace-pre">
+              <p className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-black underline decoration-solid [text-underline-position:from-font] leading-normal whitespace-pre">
                 Ver todos produtos
               </p>
             </div>
