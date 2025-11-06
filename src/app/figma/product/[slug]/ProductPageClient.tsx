@@ -69,7 +69,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
             <div className="flex items-start justify-between w-[921px]">
               {/* Thumbnails - Frame 2608678 */}
               <div className="flex flex-col gap-[24px] items-start w-[94px]">
-                {productImagesThumbs.map((image, index) => (
+                {productImagesThumbs.map((image: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
