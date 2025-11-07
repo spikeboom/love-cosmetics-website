@@ -6,6 +6,8 @@ import { NavigationArrows } from "../../components/NavigationArrows";
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
+import { ProductActionButtons } from "../../components/ProductActionButtons";
+import { FloatingProductCTA } from "../../components/FloatingProductCTA";
 import { calculateProductPrices } from "@/utils/calculate-prices";
 
 interface ProductPageClientProps {
@@ -59,16 +61,16 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-[100px] md:pb-0">
       {/* Main Product Section - Frame 2608677 */}
       <div className="w-full max-w-[1440px] mx-auto">
-        <div className="flex gap-[24px] items-start p-[24px]">
+        <div className="flex flex-col md:flex-row gap-0 md:gap-[24px] items-start p-0 md:p-[24px]">
           {/* Left Column: Gallery + Filters - Frame 2608679 */}
-          <div className="flex flex-col gap-[24px] items-start w-[921px]">
+          <div className="flex flex-col gap-[24px] items-start w-full md:w-[921px]">
             {/* Gallery Container - Frame 2608680 */}
-            <div className="flex items-start justify-between w-[921px]">
-              {/* Thumbnails - Frame 2608678 */}
-              <div className="flex flex-col gap-[24px] items-start w-[94px]">
+            <div className="flex items-start justify-between w-full md:w-[921px]">
+              {/* Thumbnails - Frame 2608678 - Hidden on mobile */}
+              <div className="hidden md:flex flex-col gap-[24px] items-start w-[94px]">
                 {productImagesThumbs.map((image: string, index: number) => (
                   <button
                     key={index}
@@ -89,7 +91,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               </div>
 
               {/* Main Gallery - Frame 2608685 */}
-              <div className="relative w-[803px] h-[704px]">
+              <div className="relative w-full md:w-[803px] h-[424px] md:h-[704px]">
                 {/* Image Container - Frame 2608687 */}
                 <div className="w-full h-full bg-white overflow-hidden">
                   <Image
@@ -115,7 +117,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                     )
                   }
                   position="center"
-                  containerWidth="w-[803px]"
+                  containerWidth="w-full md:w-[803px]"
                   arrowSize={56}
                   leftIcon="/new-home/icons/arrow-left.svg"
                   rightIcon="/new-home/icons/arrow-right.svg"
@@ -123,8 +125,8 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               </div>
             </div>
 
-            {/* Product Filters - Frame 2608675 */}
-            <div className="flex flex-col gap-0 w-full">
+            {/* Product Filters - Frame 2608675 - Hidden on mobile, shown on desktop */}
+            <div className="hidden md:flex flex-col gap-0 w-full">
               {/* Filter 1: Ativos presentes */}
               <button
                 onClick={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
@@ -160,9 +162,9 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
           </div>
 
           {/* Right Column: Product Info - Card de produto Frame 6999 */}
-          <div className="bg-white flex flex-col gap-[24px] items-start pb-[24px] pt-0 px-0 w-full">
+          <div className="bg-white flex flex-col gap-[24px] items-start pb-[24px] pt-0 md:pt-0 px-0 w-full">
             {/* Breadcrumbs - Frame 7000 */}
-            <div className="flex gap-[8px] items-end px-[16px] py-0 w-[380px]">
+            <div className="relative flex gap-[8px] items-end px-[16px] py-[24px] md:py-0 w-full md:w-[380px]">
               <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
                 lovecosmetics.com.br
               </p>
@@ -182,10 +184,16 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap">
                 manteiga
               </p>
+              {/* Share Icon - Visible on mobile only */}
+              <button className="md:hidden absolute right-[16px] top-[16px]">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12548 15.0077 5.24917 15.0227 5.37061L8.08259 9.16716C7.54305 8.46371 6.72164 8 5.8 8C4.14315 8 2.8 9.34315 2.8 11C2.8 12.6569 4.14315 14 5.8 14C6.72164 14 7.54305 13.5363 8.08259 12.8328L15.0227 16.6294C15.0077 16.7508 15 16.8745 15 17C15 18.6569 16.3431 20 18 20C19.6569 20 21 18.6569 21 17C21 15.3431 19.6569 14 18 14C17.0784 14 16.257 14.4637 15.7174 15.1672L8.77731 11.3706C8.79229 11.2492 8.8 11.1255 8.8 11C8.8 10.8745 8.79229 10.7508 8.77731 10.6294L15.7174 6.83284C16.257 7.53629 17.0784 8 18 8Z" stroke="#1e1e1e" strokeWidth="1.5" fill="none"/>
+                </svg>
+              </button>
             </div>
 
             {/* Product Content Container - Frame 50804 */}
-            <div className="flex flex-col gap-[32px] items-start w-full">
+            <div className="flex flex-col gap-[24px] md:gap-[32px] items-start w-full px-[16px] md:px-0">
               {/* Title - Frame 7007 - Times Bold 32px */}
               <p className="font-times font-bold text-[32px] text-black leading-[normal]">
                 {produto?.nome || "Manteiga Corporal Lové Cosméticos"}
@@ -279,29 +287,46 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               {/* Shipping Calculator - Frame 7033 */}
               <ShippingCalculator />
 
-              {/* Action Buttons - Frame 10740 */}
-              <div className="flex flex-col gap-[16px] items-start w-full">
-                {/* Buy Button - Frame 7051 */}
-                <div className="flex h-[60px] items-center justify-center w-full">
-                  <div className="flex-1 bg-[#254333] flex flex-col h-full items-center justify-center overflow-hidden rounded-[8px]">
-                    <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
-                      <p className="font-cera-pro font-bold text-[24px] text-white leading-[normal] text-nowrap tracking-[0px]">
-                        Comprar
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              {/* Action Buttons - Frame 2608683 (Mobile) / Frame 2608698 (Desktop) */}
+              <ProductActionButtons
+                onBuy={() => console.log('Comprar')}
+                onShare={() => console.log('Compartilhar')}
+                onAddToCart={() => console.log('Adicionar ao carrinho')}
+              />
 
-                {/* Add to Cart Button - Frame 10719 */}
-                <div className="flex h-[60px] items-center justify-center w-full">
-                  <div className="flex-1 bg-[#254333] flex flex-col h-full items-center justify-center overflow-hidden rounded-[8px]">
-                    <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
-                      <p className="font-cera-pro font-bold text-[24px] text-white leading-[normal] text-nowrap tracking-[0px]">
-                        Adicionar ao carrinho
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              {/* Mobile Filters Section - Shown only on mobile */}
+              <div className="md:hidden flex flex-col gap-0 w-full">
+                {/* Filter 1: Ativos presentes */}
+                <button
+                  onClick={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
+                  className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-[16px] py-[16px] hover:bg-[#f8f3ed] transition-colors"
+                >
+                  <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
+                    Ativos presentes
+                  </p>
+                  <Image
+                    src="/new-home/icons/chevron-down.svg"
+                    alt="Expandir"
+                    width={24}
+                    height={24}
+                  />
+                </button>
+
+                {/* Filter 2: Modo de uso */}
+                <button
+                  onClick={() => setExpandedFilter(expandedFilter === "modo" ? null : "modo")}
+                  className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-[16px] py-[16px] hover:bg-[#f8f3ed] transition-colors"
+                >
+                  <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
+                    Modo de uso
+                  </p>
+                  <Image
+                    src="/new-home/icons/chevron-down.svg"
+                    alt="Expandir"
+                    width={24}
+                    height={24}
+                  />
+                </button>
               </div>
             </div>
           </div>
@@ -315,6 +340,15 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <CertificadosSection />
       </div>
+
+      {/* Floating Product CTA - Mobile Only */}
+      <FloatingProductCTA
+        precoDe={priceInfo.precoOriginal}
+        preco={priceInfo.preco}
+        desconto={priceInfo.desconto || '40% OFF'}
+        parcelas={priceInfo.parcelas}
+        onBuy={() => console.log('Comprar')}
+      />
     </div>
   );
 }

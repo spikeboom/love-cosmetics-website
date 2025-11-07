@@ -133,9 +133,9 @@ export function YouMayLikeSection({
   };
 
   return (
-    <div className="bg-white flex flex-col gap-[16px] items-center px-0 py-[32px] w-full">
+    <div className="bg-white flex flex-col gap-[16px] items-center px-0 py-[24px] md:py-[32px] w-full">
       {/* Title header - Frame 7053 */}
-      <div className="flex flex-col gap-[16px] items-center justify-center px-[16px] py-0 w-full">
+      <div className="flex flex-col gap-[16px] items-start md:items-center justify-center px-[16px] py-0 w-full">
         <div className="flex gap-[10px] items-center justify-center">
           <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal] text-nowrap">
             {titulo}
@@ -144,7 +144,8 @@ export function YouMayLikeSection({
       </div>
 
       {/* Cards Container with Arrows - Frame 7059 */}
-      <div className="relative w-full max-w-[1440px] mx-auto flex items-center justify-center gap-[24px] py-[8px]">
+      {/* Desktop: Cards with arrows navigation */}
+      <div className="hidden md:flex relative w-full max-w-[1440px] mx-auto items-center justify-center gap-[24px] py-[8px]">
         {/* Left Arrow */}
         <button
           onClick={handlePrevious}
@@ -189,6 +190,29 @@ export function YouMayLikeSection({
         >
           <img src="/new-home/icons/arrow-right.svg" alt="Próximo" width={56} height={56} />
         </button>
+      </div>
+
+      {/* Mobile: Scrollable cards without arrows */}
+      <div className="md:hidden w-full overflow-x-scroll scrollbar-hide">
+        <div className="flex gap-[16px] items-start px-[16px]">
+          {produtos.map((produto) => (
+            <div key={produto.id} className="flex-shrink-0 w-[230px]">
+              <CardProduto
+                imagem={produto.imagem}
+                nome={produto.nome}
+                descricao={produto.descricao}
+                precoOriginal={produto.precoOriginal}
+                preco={produto.preco}
+                desconto={produto.desconto}
+                parcelas={produto.parcelas}
+                rating={produto.rating}
+                ultimasUnidades={produto.ultimasUnidades}
+                tipo="produto-completo"
+                slug={produto.slug}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
