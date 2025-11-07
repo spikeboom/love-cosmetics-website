@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { NavigationArrows } from "../../components/NavigationArrows";
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
@@ -10,6 +11,8 @@ import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
 import { ExpandableSection } from "../../components/ExpandableSection";
 import { calculateProductPrices } from "@/utils/calculate-prices";
+import { useMeuContexto } from "@/components/common/Context/context";
+import { useNotifications } from "@/core/notifications/NotificationContext";
 
 interface ProductPageClientProps {
   produto: any;
@@ -18,12 +21,83 @@ interface ProductPageClientProps {
 
 export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const router = useRouter();
+  const { addProductToCart } = useMeuContexto();
+  const { notify } = useNotifications();
 
   // Calcula preços do produto
   const priceInfo = calculateProductPrices(
     produto?.preco || 99.99,
     produto?.preco_de
   );
+
+  // Handler para adicionar ao carrinho
+  const handleAddToCart = () => {
+    const productData = {
+      id: produto.id.toString(),
+      nome: produto.nome,
+      preco: produto.preco,
+      quantity: 1,
+      slug: produto.slug,
+      preco_de: produto.preco_de,
+      tag_desconto_1: produto.tag_desconto_1,
+      tag_desconto_2: produto.tag_desconto_2,
+      carouselImagensPrincipal: produto.carouselImagensPrincipal,
+      // Dados para frete (se disponíveis)
+      bling_number: produto.bling_number,
+      altura: produto.altura,
+      largura: produto.largura,
+      comprimento: produto.comprimento,
+      peso_gramas: produto.peso_gramas,
+    };
+
+    addProductToCart(productData);
+    notify.success("Produto adicionado ao carrinho!");
+  };
+
+  // Handler para comprar (adiciona e vai pro carrinho)
+  const handleBuy = () => {
+    const productData = {
+      id: produto.id.toString(),
+      nome: produto.nome,
+      preco: produto.preco,
+      quantity: 1,
+      slug: produto.slug,
+      preco_de: produto.preco_de,
+      tag_desconto_1: produto.tag_desconto_1,
+      tag_desconto_2: produto.tag_desconto_2,
+      carouselImagensPrincipal: produto.carouselImagensPrincipal,
+      // Dados para frete (se disponíveis)
+      bling_number: produto.bling_number,
+      altura: produto.altura,
+      largura: produto.largura,
+      comprimento: produto.comprimento,
+      peso_gramas: produto.peso_gramas,
+    };
+
+    addProductToCart(productData);
+    router.push('/figma/cart');
+  };
+
+  // Handler para compartilhar
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: produto.nome,
+          text: `Confira ${produto.nome} na Lové Cosméticos!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        // Usuário cancelou ou erro ao compartilhar
+        console.log('Compartilhamento cancelado');
+      }
+    } else {
+      // Fallback: copiar link
+      navigator.clipboard.writeText(window.location.href);
+      notify.success("Link copiado para a área de transferência!");
+    }
+  };
 
   // Pega as imagens do produto do Strapi
   // Para imagem principal: usa large, xlarge ou url original
@@ -336,9 +410,9 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
               {/* Action Buttons - Frame 2608683 (Mobile) / Frame 2608698 (Desktop) */}
               <ProductActionButtons
-                onBuy={() => console.log('Comprar')}
-                onShare={() => console.log('Compartilhar')}
-                onAddToCart={() => console.log('Adicionar ao carrinho')}
+                onBuy={handleBuy}
+                onShare={handleShare}
+                onAddToCart={handleAddToCart}
               />
 
               {/* Mobile Filters Section - Shown only on mobile */}
@@ -412,7 +486,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         preco={priceInfo.preco}
         desconto={priceInfo.desconto || '40% OFF'}
         parcelas={priceInfo.parcelas}
-        onBuy={() => console.log('Comprar')}
+        onBuy={handleBuy}
       />
     </div>
   );

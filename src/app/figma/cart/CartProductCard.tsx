@@ -3,13 +3,15 @@
 import Image from 'next/image';
 
 interface CartProductCardProps {
+  produto: any;
   imagem?: string;
   nome: string;
   preco: number;
   precoAntigo?: number;
   descontoPercentual?: number;
-  quantidade?: number;
-  onQuantidadeChange?: (quantidade: number) => void;
+  onAdd: () => void;
+  onSubtract: () => void;
+  onRemove: () => void;
   tags?: Array<{
     texto: string;
     icon?: string;
@@ -18,23 +20,27 @@ interface CartProductCardProps {
 }
 
 export function CartProductCard({
+  produto,
   imagem,
   nome,
   preco,
   precoAntigo,
   descontoPercentual,
-  quantidade = 1,
-  onQuantidadeChange,
+  onAdd,
+  onSubtract,
+  onRemove,
   tags = [],
 }: CartProductCardProps) {
+  const quantidade = produto.quantity || 1;
+
   const handleMinus = () => {
     if (quantidade > 1) {
-      onQuantidadeChange?.(quantidade - 1);
+      onSubtract();
     }
   };
 
   const handlePlus = () => {
-    onQuantidadeChange?.(quantidade + 1);
+    onAdd();
   };
 
   const precoFormatado = new Intl.NumberFormat('pt-BR', {
@@ -50,7 +56,7 @@ export function CartProductCard({
     : null;
 
   return (
-    <div className="flex w-[921px] flex-col rounded-lg shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)]">
+    <div className="flex w-[921px] flex-col rounded-lg overflow-clip shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)]">
       <div className="flex flex-col gap-4 self-stretch bg-white p-4">
         <div className="flex gap-4 self-stretch">
           {/* Imagem */}
@@ -108,56 +114,67 @@ export function CartProductCard({
                 </div>
 
                 {/* Preço */}
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end gap-[2px]">
                   {(precoAntigo || descontoPercentual) && (
                     <div className="flex items-center justify-center gap-[10px]">
                       {descontoPercentual && (
-                        <span className="font-cera-pro text-xs font-light leading-[1.257] text-[#009142]">
+                        <span className="font-cera-pro text-xs font-light text-[#009142] leading-none">
                           {descontoPercentual}% OFF
                         </span>
                       )}
                       {precoAntigoFormatado && (
-                        <span className="font-cera-pro text-xs font-light leading-[1.257] text-[#333333] line-through">
+                        <span className="font-cera-pro text-xs font-light text-[#333333] line-through leading-none">
                           {precoAntigoFormatado}
                         </span>
                       )}
                     </div>
                   )}
-                  <span className="font-cera-pro text-2xl font-bold leading-[1.257] text-black">
+                  <span className="font-cera-pro text-2xl font-bold text-black leading-none">
                     {precoFormatado}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Tags */}
-            {tags.length > 0 && (
-              <div className="flex gap-[10px] self-stretch">
-                {tags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-center gap-1 rounded bg-[#F8F3ED] px-4 py-1"
-                  >
-                    {tag.icon && (
-                      <Image
-                        src={tag.icon}
-                        alt=""
-                        width={16}
-                        height={16}
-                        className="h-4 w-4"
-                      />
-                    )}
-                    <span
-                      className={`font-cera-pro text-sm font-light leading-[1.257] ${
-                        tag.tipo === 'alerta' ? 'text-[#B3261E]' : 'text-[#B3261E]'
-                      }`}
+            {/* Tags e Remover */}
+            <div className="flex items-center justify-between gap-4 self-stretch">
+              {tags.length > 0 && (
+                <div className="flex gap-[10px]">
+                  {tags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-center gap-1 rounded bg-[#F8F3ED] px-4 py-1"
                     >
-                      {tag.texto}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+                      {tag.icon && (
+                        <Image
+                          src={tag.icon}
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="h-4 w-4"
+                        />
+                      )}
+                      <span
+                        className={`font-cera-pro text-sm font-light leading-[1.257] ${
+                          tag.tipo === 'alerta' ? 'text-[#B3261E]' : 'text-[#B3261E]'
+                        }`}
+                      >
+                        {tag.texto}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Botão Remover */}
+              <button
+                onClick={onRemove}
+                className="font-cera-pro text-sm font-light text-[#B3261E] hover:text-[#8a1c17] underline transition-colors"
+                aria-label="Remover produto"
+              >
+                Remover
+              </button>
+            </div>
           </div>
         </div>
       </div>

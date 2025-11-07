@@ -4,18 +4,17 @@ interface CartSummaryProps {
   subtotal: number;
   frete: number;
   cupom?: number;
+  total: number;
+  onCheckout: () => void;
 }
 
 export function CartSummary({
   subtotal,
   frete,
   cupom = 0,
+  total,
+  onCheckout,
 }: CartSummaryProps) {
-  const handleContinue = () => {
-    // Navegar para próxima etapa
-    console.log('Continuar com compra');
-  };
-  const total = subtotal + frete - (cupom || 0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -25,7 +24,7 @@ export function CartSummary({
   };
 
   return (
-    <div className="flex flex-col gap-6 self-stretch rounded-lg bg-white p-4 shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)]">
+    <div className="flex flex-col gap-6 self-stretch rounded-lg bg-white p-4 shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)] h-fit">
       <h2 className="w-full font-cera-pro text-2xl font-bold leading-[1.257] text-[#111111]">
         Resumo da compra
       </h2>
@@ -78,11 +77,11 @@ export function CartSummary({
       {/* Botão */}
       <div className="flex flex-col gap-4 self-stretch">
         <button
-          onClick={handleContinue}
+          onClick={onCheckout}
           className="flex items-center justify-center self-stretch rounded-lg bg-[#254333] py-3 hover:bg-[#1a3023] transition-colors"
         >
           <span className="font-cera-pro text-base font-medium text-white">
-            Continuar
+            Finalizar Compra
           </span>
         </button>
       </div>

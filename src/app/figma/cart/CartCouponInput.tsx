@@ -4,28 +4,34 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 interface CartCouponInputProps {
-  onApply?: (cupom: string) => void;
-  onRemove?: () => void;
+  onApply: (cupom: string) => Promise<void>;
+  cupons: any[];
 }
 
-export function CartCouponInput({ onApply, onRemove }: CartCouponInputProps) {
+export function CartCouponInput({ onApply, cupons }: CartCouponInputProps) {
   const [cupom, setCupom] = useState('');
-  const [isApplied, setIsApplied] = useState(false);
-  const [appliedCoupon, setAppliedCoupon] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleApply = () => {
-    if (cupom.trim()) {
-      setAppliedCoupon(cupom);
-      setIsApplied(true);
-      onApply?.(cupom);
+  const hasAppliedCoupons = cupons && cupons.length > 0;
+
+  const handleApply = async () => {
+    if (cupom.trim() && !isLoading) {
+      setIsLoading(true);
+      try {
+        await onApply(cupom);
+        setCupom('');
+      } catch (error) {
+        console.error('Erro ao aplicar cupom:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleRemove = () => {
-    setCupom('');
-    setAppliedCoupon('');
-    setIsApplied(false);
-    onRemove?.();
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleApply();
+    }
   };
 
   return (
@@ -41,35 +47,32 @@ export function CartCouponInput({ onApply, onRemove }: CartCouponInputProps) {
         <div className="flex items-center justify-center gap-[10px] px-[8px]">
           <input
             type="text"
-            value={isApplied ? appliedCoupon : cupom}
-            onChange={(e) => !isApplied && setCupom(e.target.value.toUpperCase())}
+            value={cupom}
+            onChange={(e) => setCupom(e.target.value.toUpperCase())}
+            onKeyPress={handleKeyPress}
             placeholder="Digite o cupom"
-            disabled={isApplied}
-            className={`font-cera-pro font-light ${
-              isApplied ? 'text-[14px]' : 'text-[20px]'
-            } text-black leading-[1.257] focus:outline-none bg-transparent placeholder:font-light ${
-              isApplied ? 'cursor-not-allowed' : ''
-            }`}
+            disabled={isLoading}
+            className="font-cera-pro font-light text-[20px] text-black leading-[1.257] focus:outline-none bg-transparent placeholder:font-light disabled:cursor-wait"
           />
         </div>
 
         {/* Button */}
         <button
-          onClick={isApplied ? handleRemove : handleApply}
-          disabled={!isApplied && !cupom.trim()}
+          onClick={handleApply}
+          disabled={!cupom.trim() || isLoading}
           className="bg-[#254333] hover:bg-[#1a3226] disabled:bg-[#999999] flex flex-col h-[32px] items-center justify-center overflow-hidden rounded-[4px] flex-shrink-0 transition-colors"
         >
           <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
             <p className="font-cera-pro font-medium text-[16px] text-white leading-[1.257] text-nowrap tracking-[0px]">
-              {isApplied ? 'Remover' : 'Aplicar'}
+              {isLoading ? 'Aplicando...' : 'Aplicar'}
             </p>
           </div>
         </button>
       </div>
 
-      {/* Success Message - Frame 233:11702 */}
-      {isApplied && (
-        <div className="flex gap-[8px] items-center w-full">
+      {/* Success Message - Cupons Aplicados */}
+      {hasAppliedCoupons && cupons.map((c: any, index: number) => (
+        <div key={index} className="flex gap-[8px] items-center w-full">
           <div className="flex-shrink-0 size-[16px]">
             <Image
               src="/new-home/icons/verified-green.svg"
@@ -80,10 +83,10 @@ export function CartCouponInput({ onApply, onRemove }: CartCouponInputProps) {
             />
           </div>
           <p className="flex-1 font-cera-pro font-light text-[14px] text-[#009142] leading-[1.257]">
-            Cupom aplicado com sucesso!
+            Cupom {c.nome || c.codigo} aplicado com sucesso!
           </p>
         </div>
-      )}
+      ))}
     </div>
   );
 }

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useMeuContexto } from "@/components/common/Context/context";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { qtdItemsCart } = useMeuContexto();
 
   return (
     <header className="w-full flex flex-col items-start">
@@ -69,7 +71,7 @@ export function Header() {
 
           {/* Carrinho com badge */}
           <div className="flex gap-[10px] items-center relative">
-            <Link href="/carrinho" className="relative lg:w-[32px] lg:h-[32px] w-[24px] h-[24px] shrink-0">
+            <Link href="/figma/cart" className="relative lg:w-[32px] lg:h-[32px] w-[24px] h-[24px] shrink-0">
               <Image
                 src="/new-home/header/shopping-cart.svg"
                 alt="Carrinho"
@@ -77,21 +79,23 @@ export function Header() {
                 height={32}
               />
             </Link>
-            {/* Badge */}
-            <div className="absolute bottom-1/2 left-1/2 right-0 top-0 flex items-center justify-center">
-              <div className="relative w-full h-full flex items-center justify-center">
-                <Image
-                  src="/new-home/header/badge-area.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="absolute inset-0"
-                />
-                <span className="text-[8px] font-cera-pro font-bold text-white relative z-10">
-                  01
-                </span>
+            {/* Badge - só aparece se tiver itens */}
+            {qtdItemsCart > 0 && (
+              <div className="absolute bottom-1/2 left-1/2 right-0 top-0 flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <Image
+                    src="/new-home/header/badge-area.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="absolute inset-0"
+                  />
+                  <span className="text-[8px] font-cera-pro font-bold text-white relative z-10">
+                    {qtdItemsCart.toString().padStart(2, '0')}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
