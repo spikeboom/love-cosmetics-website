@@ -52,7 +52,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
     };
 
     addProductToCart(productData);
-    notify.success("Produto adicionado ao carrinho!");
+    notify("Produto adicionado ao carrinho!", { variant: "success" });
   };
 
   // Handler para comprar (adiciona e vai pro carrinho)
@@ -95,7 +95,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
     } else {
       // Fallback: copiar link
       navigator.clipboard.writeText(window.location.href);
-      notify.success("Link copiado para a área de transferência!");
+      notify("Link copiado para a área de transferência!", { variant: "success" });
     }
   };
 
@@ -482,7 +482,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
       {/* Floating Product CTA - Mobile Only */}
       <FloatingProductCTA
-        precoDe={priceInfo.precoOriginal}
+        precoDe={priceInfo.precoOriginal ?? undefined}
         preco={priceInfo.preco}
         desconto={priceInfo.desconto || '40% OFF'}
         parcelas={priceInfo.parcelas}

@@ -153,7 +153,7 @@ export function ShippingCalculator({
             Selecione a forma de envio:
           </p>
 
-          {availableServices.map((service, index) => (
+          {availableServices.map((service: any, index: number) => (
             <label
               key={service.serviceCode}
               className={`flex items-center justify-between w-full border rounded-lg p-3 cursor-pointer transition-all ${
