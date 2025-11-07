@@ -25,7 +25,7 @@ export function Header() {
         </button>
 
         {/* Logo */}
-        <Link href="/" className="relative lg:w-[130px] lg:h-[104px] w-[80px] h-[64px]">
+        <Link href="/figma/design" className="relative lg:w-[130px] lg:h-[104px] w-[80px] h-[64px]">
           <Image
             src="/new-home/header/logo.png"
             alt="Lové Cosméticos"

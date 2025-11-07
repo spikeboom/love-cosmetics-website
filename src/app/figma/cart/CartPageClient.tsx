@@ -27,6 +27,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
     subtractQuantityProductToCart,
     removeProductFromCart,
     handleAddCupom,
+    handleCupom,
   } = useMeuContexto();
 
   // Converter cart object para array
@@ -91,16 +92,28 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
 
   // Carrinho com produtos
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-white">
+    <div className="flex min-h-screen w-full flex-col items-center bg-white md:relative">
+      {/* Mobile: Resumo Fixo no Bottom (Bottom Sheet) - Hidden no Desktop */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
+        <CartSummary
+          subtotal={subtotal}
+          frete={freight.freightValue}
+          cupom={descontos}
+          total={total}
+          onCheckout={() => router.push('/checkout')}
+          isMobile={true}
+        />
+      </div>
+
       <div className="w-full flex flex-col items-center">
-        <div className="max-w-[1440px]">
+        <div className="max-w-[1440px] w-full">
           {/* Título */}
           <CartHeader />
 
           {/* Conteúdo Principal */}
-          <div className="flex w-full self-stretch gap-6 px-6 pb-8 pt-6">
-            {/* Coluna Esquerda - Produtos, Frete e Cupom */}
-            <div className="flex flex-col gap-8">
+          <div className="flex flex-col md:flex-row w-full self-stretch gap-8 md:gap-6 px-4 md:px-6 pb-[200px] md:pb-8 pt-4 md:pt-6">
+            {/* Coluna Esquerda/Única - Produtos, Frete e Cupom */}
+            <div className="flex flex-col gap-8 w-full md:w-auto">
               {/* Lista de Produtos */}
               <CartProductsList
                 produtos={cartArray}
@@ -110,26 +123,35 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
               />
 
               {/* Frete */}
-              <ShippingCalculator
-                title="Calcule o frete"
-                buttonLabel="Calcular"
-                placeholder="Digite seu CEP"
-                inputFontSize="large"
-                width="fixed"
-              />
+              <div className="w-full md:w-[447px]">
+                <ShippingCalculator
+                  title="Calcule o frete"
+                  buttonLabel="Calcular"
+                  placeholder="Digite seu CEP"
+                  inputFontSize="large"
+                  width="full"
+                />
+              </div>
 
               {/* Cupom */}
-              <CartCouponInput onApply={handleAddCupom} cupons={cupons} />
+              <CartCouponInput
+                onApply={handleAddCupom}
+                onRemove={handleCupom}
+                cupons={cupons}
+              />
             </div>
 
-            {/* Coluna Direita - Resumo */}
-            <CartSummary
-              subtotal={subtotal}
-              frete={freight.freightValue}
-              cupom={descontos}
-              total={total}
-              onCheckout={() => router.push('/checkout')}
-            />
+            {/* Coluna Direita - Resumo (Hidden no Mobile) */}
+            <div className="hidden md:block">
+              <CartSummary
+                subtotal={subtotal}
+                frete={freight.freightValue}
+                cupom={descontos}
+                total={total}
+                onCheckout={() => router.push('/checkout')}
+                isMobile={false}
+              />
+            </div>
           </div>
         </div>
       </div>

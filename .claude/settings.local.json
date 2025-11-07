@@ -47,7 +47,8 @@
       "Bash(dir \"C:\\Users\\Administrator\\Documents\\Love Drive\\NextLove\\love-cosmetics-website\\public\\New folder\")",
       "Bash(dir:*)",
       "Bash(git rm:*)",
-      "WebFetch(domain:swiperjs.com)"
+      "WebFetch(domain:swiperjs.com)",
+      "mcp__Framelink_Figma_MCP__get_figma_data"
     ],
     "deny": [],
     "ask": []

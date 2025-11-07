@@ -1,17 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
-
-interface ShippingOption {
-  type: string;
-  time: string;
-  price: string;
-}
+import { LuTruck } from "react-icons/lu";
+import { useMeuContexto } from "@/components/common/Context/context";
+import { formatPrice } from "@/utils/format-price";
 
 interface ShippingCalculatorProps {
-  productId?: string;
-  onCalculate?: (cep: string) => Promise<ShippingOption[]>;
   title?: string;
   buttonLabel?: string;
   placeholder?: string;
@@ -20,76 +15,88 @@ interface ShippingCalculatorProps {
 }
 
 export function ShippingCalculator({
-  productId,
-  onCalculate,
   title = "Calcule o frete",
   buttonLabel = "Calcular",
   placeholder = "Digite seu CEP",
   inputFontSize = 'large',
   width = 'full',
 }: ShippingCalculatorProps) {
-  const [cep, setCep] = useState("");
-  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [address, setAddress] = useState<string>("");
+  const { freight, cart } = useMeuContexto();
+  const {
+    cep,
+    setCep,
+    isLoading,
+    error,
+    calculateFreight,
+    hasCalculated,
+    availableServices,
+    setSelectedFreight,
+    resetFreight,
+    selectedServiceIndex,
+  } = freight;
 
-  const handleCalculate = async () => {
-    if (!cep || cep.length < 8) {
+  // Recalcular frete automaticamente quando o carrinho mudar
+  useEffect(() => {
+    const cartItems = Object.values(cart);
+
+    // Se carrinho estiver vazio, limpar valores de frete
+    if (cartItems.length === 0) {
+      resetFreight();
       return;
     }
 
-    setLoading(true);
-    try {
-      if (onCalculate) {
-        const options = await onCalculate(cep);
-        setShippingOptions(options);
-      } else {
-        // Mock data
-        setShippingOptions([
-          { type: "Normal", time: "5 a 6 dias úteis", price: "Grátis" },
-          { type: "Expressa", time: "Receba amanhã", price: "R$ 14,99" },
-        ]);
+    // Se tem CEP e já calculou antes, recalcular
+    if (cep && hasCalculated) {
+      const cleanCep = cep.replace(/\D/g, '');
+      if (cleanCep.length === 8) {
+        calculateFreight(cep, cartItems);
       }
-      // Mock address
-      setAddress("Rua Emília Marengo - Vila Regente Feijó, São Paulo - SP");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [cart]);
 
-  // Auto-calculate when CEP has 8 digits
-  const handleCepChange = (value: string) => {
-    const formattedCep = value.replace(/\D/g, "").slice(0, 8);
-    setCep(formattedCep);
+  // Auto-calcular quando CEP tiver 8 dígitos
+  useEffect(() => {
+    const cartItems = Object.values(cart);
+    const cleanCep = cep.replace(/\D/g, '');
 
-    // Se tiver menos de 8 dígitos, volta ao estado inicial
-    if (formattedCep.length < 8) {
-      setAddress("");
-      setShippingOptions([]);
-      setLoading(false);
+    // Se carrinho estiver vazio, não calcular
+    if (cartItems.length === 0) {
       return;
     }
 
-    // Se tiver 8 dígitos, calcula automaticamente
-    if (formattedCep.length === 8 && !loading) {
-      setLoading(true);
-      setTimeout(() => {
-        // Mock data
-        setShippingOptions([
-          { type: "Normal", time: "5 a 6 dias úteis", price: "Grátis" },
-          { type: "Expressa", time: "Receba amanhã", price: "R$ 14,99" },
-        ]);
-        // Mock address
-        setAddress("Rua Emília Marengo - Vila Regente Feijó, São Paulo - SP");
-        setLoading(false);
-      }, 300);
+    // Se CEP tiver 8 dígitos e ainda não calculou, calcular automaticamente
+    if (cleanCep.length === 8 && !hasCalculated) {
+      calculateFreight(cep, cartItems);
+    }
+  }, [cep]);
+
+  const handleCalculate = () => {
+    if (cep) {
+      const cartItems = Object.values(cart);
+      calculateFreight(cep, cartItems);
     }
   };
+
+  const handleSelectService = (index: number) => {
+    const service = availableServices[index];
+    if (service) {
+      setSelectedFreight(service.price, service.deliveryTime, index);
+    }
+  };
+
+  const handleClearCep = () => {
+    setCep('');
+    resetFreight();
+  };
+
+  const selectedService = availableServices[selectedServiceIndex];
+
+  const cleanCep = cep.replace(/\D/g, '');
 
   return (
-    <div className={`flex flex-col gap-[16px] items-start ${width === 'fixed' ? 'w-[447px]' : 'w-full'}`}>
+    <div className={`flex flex-col gap-[16px] items-start w-full ${width === 'fixed' ? 'md:w-[447px]' : ''}`}>
       {/* Title - Frame 7149 */}
-      <p className="font-cera-pro font-bold text-[24px] text-black leading-[1.257] w-full">
+      <p className="font-cera-pro font-bold text-[20px] text-black leading-[1.257] w-full">
         {title}
       </p>
 
@@ -100,75 +107,114 @@ export function ShippingCalculator({
           inputMode="numeric"
           placeholder={placeholder}
           value={cep}
-          onChange={(e) => handleCepChange(e.target.value)}
-          maxLength={8}
+          onChange={(e) => setCep(e.target.value)}
+          maxLength={9}
           className={`flex-1 font-cera-pro font-light ${
-            inputFontSize === 'small' ? 'text-[14px]' : 'text-[20px]'
-          } text-black leading-[1.257] px-[8px] py-0 focus:outline-none bg-transparent`}
+            inputFontSize === 'small' ? 'text-[14px]' : 'text-base md:text-[20px]'
+          } text-black leading-[1.257] px-[8px] py-0 focus:outline-none bg-transparent min-w-0`}
         />
+
+        {/* Botão Limpar CEP (aparece quando tem CEP) */}
+        {cep && (
+          <button
+            onClick={handleClearCep}
+            className="text-[#B3261E] hover:text-[#8a1c17] px-1 md:px-2 text-[11px] md:text-[12px] font-cera-pro font-light underline whitespace-nowrap flex-shrink-0"
+          >
+            Limpar
+          </button>
+        )}
+
         <button
           onClick={handleCalculate}
-          disabled={loading || cep.length < 8}
+          disabled={isLoading || cleanCep.length < 8}
           className="bg-[#254333] hover:bg-[#1a3226] disabled:bg-[#999999] flex flex-col h-[32px] items-center justify-center overflow-hidden rounded-[4px] flex-shrink-0 transition-colors"
         >
-          <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
-            <p className="font-cera-pro font-medium text-[16px] text-white leading-[1.257] text-nowrap tracking-[0px]">
-              {buttonLabel}
+          <div className="flex gap-[8px] items-center justify-center px-3 md:px-[16px] py-[10px]">
+            <p className="font-cera-pro font-medium text-sm md:text-[16px] text-white leading-[1.257] whitespace-nowrap tracking-[0px]">
+              {isLoading ? 'Calculando...' : buttonLabel}
             </p>
           </div>
         </button>
       </div>
 
-      {/* Address Info - Frame 7151 */}
-      {address && (
-        <div className="flex gap-[8px] items-center w-full">
-          <div className="flex flex-col items-start overflow-hidden flex-shrink-0">
-            <div className="relative size-[16px]">
-              <Image
-                src="/new-home/icons/location.svg"
-                alt="Localização"
-                width={16}
-                height={16}
-                className="w-full h-full"
-              />
-            </div>
-          </div>
-          <p className="flex-1 font-cera-pro font-light text-[14px] text-[#111111] leading-[normal]">
-            {address}
+      {/* Mensagem de Erro */}
+      {error && (
+        <div className="flex gap-[8px] items-center w-full bg-red-50 rounded-lg p-3">
+          <p className="font-cera-pro font-light text-[14px] text-[#B3261E] leading-[1.257]">
+            {error}
           </p>
         </div>
       )}
 
-      {/* Shipping Options - Frame 7154 */}
-      {shippingOptions.length > 0 && (
-        <div className="flex flex-col items-start w-full">
-          {shippingOptions.map((option, index) => (
-            <div
-              key={index}
-              className="border-b border-[#d2d2d2] flex gap-[16px] items-end leading-[normal] px-0 py-[16px] text-[14px] text-nowrap w-full whitespace-pre"
+      {/* Opções de Frete Disponíveis */}
+      {hasCalculated && !error && availableServices.length > 0 && (
+        <div className="flex flex-col gap-[8px] items-start w-full">
+          <p className="font-cera-pro font-medium text-[14px] text-[#111111] leading-[normal]">
+            Selecione a forma de envio:
+          </p>
+
+          {availableServices.map((service, index) => (
+            <label
+              key={service.serviceCode}
+              className={`flex items-center justify-between w-full border rounded-lg p-3 cursor-pointer transition-all ${
+                selectedServiceIndex === index
+                  ? 'border-[#254333] bg-[#F0F9F4]'
+                  : 'border-[#d2d2d2] hover:border-[#254333]'
+              }`}
             >
-              {/* Type + Time */}
-              <div className="flex-1 flex gap-[6px] items-center text-[#111111]">
-                <p className="font-cera-pro font-medium text-[14px] leading-[normal]">
-                  {option.type}
-                </p>
-                <p className="font-cera-pro font-light text-[14px] leading-[normal]">
-                  {option.time}
-                </p>
+              <div className="flex items-center gap-3 flex-1">
+                <input
+                  type="radio"
+                  name="freight-option"
+                  checked={selectedServiceIndex === index}
+                  onChange={() => handleSelectService(index)}
+                  className="w-4 h-4 text-[#254333] focus:ring-[#254333]"
+                />
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <LuTruck className="text-[#B3261E] flex-shrink-0" size={16} />
+                    <span className="font-cera-pro font-bold text-[14px] text-[#111111]">
+                      {service.carrier}
+                    </span>
+                    <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                      ({service.service})
+                    </span>
+                  </div>
+
+                  <p className="font-cera-pro font-light text-[12px] text-[#666666] mt-1">
+                    Entrega em {service.deliveryTime} {service.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}
+                  </p>
+                </div>
               </div>
 
-              {/* Price */}
-              <p
-                className={`font-cera-pro font-medium text-[14px] leading-[normal] text-right ${
-                  option.price === "Grátis"
-                    ? "text-[#009142]"
-                    : "text-[#111111]"
-                }`}
-              >
-                {option.price}
-              </p>
-            </div>
+              <div className="text-right ml-2">
+                <p className={`font-cera-pro font-bold text-[16px] ${
+                  service.price === 0 ? 'text-[#009142]' : 'text-[#254333]'
+                }`}>
+                  {service.price === 0 ? 'Grátis' : formatPrice(service.price)}
+                </p>
+              </div>
+            </label>
           ))}
+
+          {/* Resumo do frete selecionado */}
+          {selectedService && (
+            <div className="mt-2 p-3 bg-[#F0F9F4] rounded-lg border border-[#009142] w-full">
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/new-home/icons/verified-green.svg"
+                  alt="Verificado"
+                  width={16}
+                  height={16}
+                  className="w-4 h-4 flex-shrink-0"
+                />
+                <p className="font-cera-pro font-light text-[12px] text-[#009142] leading-[1.257]">
+                  CEP {cep} - {selectedService.carrier} - Entrega em {selectedService.deliveryTime} {selectedService.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
