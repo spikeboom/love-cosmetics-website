@@ -8,6 +8,7 @@ import { CertificadosSection } from "../../components/CertificadosSection";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
 import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
+import { ExpandableSection } from "../../components/ExpandableSection";
 import { calculateProductPrices } from "@/utils/calculate-prices";
 
 interface ProductPageClientProps {
@@ -128,36 +129,54 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
             {/* Product Filters - Frame 2608675 - Hidden on mobile, shown on desktop */}
             <div className="hidden md:flex flex-col gap-0 w-full">
               {/* Filter 1: Ativos presentes */}
-              <button
-                onClick={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
-                className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-0 py-[16px] hover:bg-[#f8f3ed] transition-colors"
-              >
-                <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
-                  Ativos presentes
-                </p>
-                <Image
-                  src="/new-home/icons/chevron-down.svg"
-                  alt="Expandir"
-                  width={24}
-                  height={24}
-                />
-              </button>
+              {produto?.o_que_ele_tem?.length > 0 && (
+                <ExpandableSection
+                  title="Ativos presentes"
+                  isExpanded={expandedFilter === "ativos"}
+                  onToggle={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
+                  isMobile={false}
+                >
+                  <ul className="space-y-[8px]">
+                    {produto.o_que_ele_tem.map((item: any) => (
+                      <li key={item.id} className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal]">
+                        <strong className="font-bold">{item.titulo}:</strong> {item.descricao}
+                      </li>
+                    ))}
+                  </ul>
+                </ExpandableSection>
+              )}
 
               {/* Filter 2: Modo de uso */}
-              <button
-                onClick={() => setExpandedFilter(expandedFilter === "modo" ? null : "modo")}
-                className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-0 py-[16px] hover:bg-[#f8f3ed] transition-colors"
-              >
-                <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
-                  Modo de uso
-                </p>
-                <Image
-                  src="/new-home/icons/chevron-down.svg"
-                  alt="Expandir"
-                  width={24}
-                  height={24}
-                />
-              </button>
+              {produto?.como_usar_essa_formula?.length > 0 && (
+                <ExpandableSection
+                  title="Modo de uso"
+                  isExpanded={expandedFilter === "modo"}
+                  onToggle={() => setExpandedFilter(expandedFilter === "modo" ? null : "modo")}
+                  isMobile={false}
+                >
+                  <ul className="space-y-[8px]">
+                    {produto.como_usar_essa_formula.map((item: any) => (
+                      <li key={item.id} className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal]">
+                        {item.texto}
+                      </li>
+                    ))}
+                  </ul>
+                </ExpandableSection>
+              )}
+
+              {/* Filter 3: Conheça mais sobre o produto */}
+              {produto?.o_que_ele_e && (
+                <ExpandableSection
+                  title="Conheça mais sobre o produto"
+                  isExpanded={expandedFilter === "conheca"}
+                  onToggle={() => setExpandedFilter(expandedFilter === "conheca" ? null : "conheca")}
+                  isMobile={false}
+                >
+                  <p className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal] text-justify">
+                    {produto.o_que_ele_e}
+                  </p>
+                </ExpandableSection>
+              )}
             </div>
           </div>
 
@@ -265,21 +284,49 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                 <div className="bg-white flex flex-col gap-[8px] items-start w-full">
                   {/* Frame 7027 */}
                   <div className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal] text-justify">
-                    <p className="mb-[8px]">
-                      A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras, fortalece a barreira da pele e proporciona maciez imediata. Ideal para peles ressecadas, sensíveis ou com tatuagens.
-                    </p>
-                    <p className="font-cera-pro font-bold text-[16px] mb-[8px]">
-                      Quais são os benefícios da manteiga corporal?
-                    </p>
-                    <ul className="list-disc list-inside space-y-[4px]">
-                      <li>Hidratação e nutrição profunda</li>
-                      <li>Sensação de maciez imediata</li>
-                      <li>Tratamento de rachaduras</li>
-                      <li>Alívio de inflamações de foliculite</li>
-                      <li>Alívio de sintomas de psoríase</li>
-                      <li>Regeneração cutânea</li>
-                      <li>Fortalecimento da barreira natural da pele</li>
-                    </ul>
+                    {/* Descrição resumida do Strapi */}
+                    {produto?.descricaoResumida && (
+                      <p className="mb-[8px]">
+                        {produto.descricaoResumida}
+                      </p>
+                    )}
+
+                    {/* Título da lista de benefícios */}
+                    {produto?.listaDescricao?.length > 0 && (
+                      <p className="font-cera-pro font-bold text-[16px] mb-[8px]">
+                        Quais são os benefícios?
+                      </p>
+                    )}
+
+                    {/* Lista de benefícios do Strapi */}
+                    {produto?.listaDescricao?.length > 0 && (
+                      <ul className="list-disc list-inside space-y-[4px]">
+                        {produto.listaDescricao.map((item: any) => (
+                          <li key={item.id}>{item.texto}</li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Fallback caso não tenha dados do Strapi */}
+                    {!produto?.descricaoResumida && (
+                      <>
+                        <p className="mb-[8px]">
+                          A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras, fortalece a barreira da pele e proporciona maciez imediata. Ideal para peles ressecadas, sensíveis ou com tatuagens.
+                        </p>
+                        <p className="font-cera-pro font-bold text-[16px] mb-[8px]">
+                          Quais são os benefícios da manteiga corporal?
+                        </p>
+                        <ul className="list-disc list-inside space-y-[4px]">
+                          <li>Hidratação e nutrição profunda</li>
+                          <li>Sensação de maciez imediata</li>
+                          <li>Tratamento de rachaduras</li>
+                          <li>Alívio de inflamações de foliculite</li>
+                          <li>Alívio de sintomas de psoríase</li>
+                          <li>Regeneração cutânea</li>
+                          <li>Fortalecimento da barreira natural da pele</li>
+                        </ul>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -297,36 +344,54 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               {/* Mobile Filters Section - Shown only on mobile */}
               <div className="md:hidden flex flex-col gap-0 w-full">
                 {/* Filter 1: Ativos presentes */}
-                <button
-                  onClick={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
-                  className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-[16px] py-[16px] hover:bg-[#f8f3ed] transition-colors"
-                >
-                  <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
-                    Ativos presentes
-                  </p>
-                  <Image
-                    src="/new-home/icons/chevron-down.svg"
-                    alt="Expandir"
-                    width={24}
-                    height={24}
-                  />
-                </button>
+                {produto?.o_que_ele_tem?.length > 0 && (
+                  <ExpandableSection
+                    title="Ativos presentes"
+                    isExpanded={expandedFilter === "ativos"}
+                    onToggle={() => setExpandedFilter(expandedFilter === "ativos" ? null : "ativos")}
+                    isMobile={true}
+                  >
+                    <ul className="space-y-[8px]">
+                      {produto.o_que_ele_tem.map((item: any) => (
+                        <li key={item.id} className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal]">
+                          <strong className="font-bold">{item.titulo}:</strong> {item.descricao}
+                        </li>
+                      ))}
+                    </ul>
+                  </ExpandableSection>
+                )}
 
                 {/* Filter 2: Modo de uso */}
-                <button
-                  onClick={() => setExpandedFilter(expandedFilter === "modo" ? null : "modo")}
-                  className="w-full bg-white border-b border-[#d2d2d2] flex items-center justify-between px-[16px] py-[16px] hover:bg-[#f8f3ed] transition-colors"
-                >
-                  <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal]">
-                    Modo de uso
-                  </p>
-                  <Image
-                    src="/new-home/icons/chevron-down.svg"
-                    alt="Expandir"
-                    width={24}
-                    height={24}
-                  />
-                </button>
+                {produto?.como_usar_essa_formula?.length > 0 && (
+                  <ExpandableSection
+                    title="Modo de uso"
+                    isExpanded={expandedFilter === "modo"}
+                    onToggle={() => setExpandedFilter(expandedFilter === "modo" ? null : "modo")}
+                    isMobile={true}
+                  >
+                    <ul className="space-y-[8px]">
+                      {produto.como_usar_essa_formula.map((item: any) => (
+                        <li key={item.id} className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal]">
+                          {item.texto}
+                        </li>
+                      ))}
+                    </ul>
+                  </ExpandableSection>
+                )}
+
+                {/* Filter 3: Conheça mais sobre o produto */}
+                {produto?.o_que_ele_e && (
+                  <ExpandableSection
+                    title="Conheça mais sobre o produto"
+                    isExpanded={expandedFilter === "conheca"}
+                    onToggle={() => setExpandedFilter(expandedFilter === "conheca" ? null : "conheca")}
+                    isMobile={true}
+                  >
+                    <p className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal] text-justify">
+                      {produto.o_que_ele_e}
+                    </p>
+                  </ExpandableSection>
+                )}
               </div>
             </div>
           </div>
