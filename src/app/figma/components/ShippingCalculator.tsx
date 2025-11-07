@@ -12,11 +12,21 @@ interface ShippingOption {
 interface ShippingCalculatorProps {
   productId?: string;
   onCalculate?: (cep: string) => Promise<ShippingOption[]>;
+  title?: string;
+  buttonLabel?: string;
+  placeholder?: string;
+  inputFontSize?: 'small' | 'large';
+  width?: 'full' | 'fixed';
 }
 
 export function ShippingCalculator({
   productId,
   onCalculate,
+  title = "Calcule o frete",
+  buttonLabel = "Calcular",
+  placeholder = "Digite seu CEP",
+  inputFontSize = 'large',
+  width = 'full',
 }: ShippingCalculatorProps) {
   const [cep, setCep] = useState("");
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -77,10 +87,10 @@ export function ShippingCalculator({
   };
 
   return (
-    <div className="flex flex-col gap-[16px] items-start w-full">
+    <div className={`flex flex-col gap-[16px] items-start ${width === 'fixed' ? 'w-[447px]' : 'w-full'}`}>
       {/* Title - Frame 7149 */}
-      <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal] w-full">
-        Calcule o frete
+      <p className="font-cera-pro font-bold text-[24px] text-black leading-[1.257] w-full">
+        {title}
       </p>
 
       {/* Input Container - Frame 7150 */}
@@ -88,11 +98,13 @@ export function ShippingCalculator({
         <input
           type="text"
           inputMode="numeric"
-          placeholder="Digite seu CEP"
+          placeholder={placeholder}
           value={cep}
           onChange={(e) => handleCepChange(e.target.value)}
           maxLength={8}
-          className="flex-1 font-cera-pro font-light text-[20px] text-black leading-[normal] px-[8px] py-0 focus:outline-none bg-transparent"
+          className={`flex-1 font-cera-pro font-light ${
+            inputFontSize === 'small' ? 'text-[14px]' : 'text-[20px]'
+          } text-black leading-[1.257] px-[8px] py-0 focus:outline-none bg-transparent`}
         />
         <button
           onClick={handleCalculate}
@@ -100,8 +112,8 @@ export function ShippingCalculator({
           className="bg-[#254333] hover:bg-[#1a3226] disabled:bg-[#999999] flex flex-col h-[32px] items-center justify-center overflow-hidden rounded-[4px] flex-shrink-0 transition-colors"
         >
           <div className="flex gap-[8px] items-center justify-center px-[16px] py-[10px]">
-            <p className="font-cera-pro font-medium text-[16px] text-white leading-[normal] text-nowrap tracking-[0px]">
-              Calcular
+            <p className="font-cera-pro font-medium text-[16px] text-white leading-[1.257] text-nowrap tracking-[0px]">
+              {buttonLabel}
             </p>
           </div>
         </button>

@@ -1,5 +1,6 @@
 import { VitrineSection } from "../components/VitrineSection";
 import { CertificadosSection } from "../components/CertificadosSection";
+import { ShippingCalculator } from "../components/ShippingCalculator";
 import { fetchProdutosForDesign } from "@/modules/produto/domain";
 import { CartHeader } from "./CartHeader";
 import { CartProductsList } from "./CartProductsList";
@@ -18,26 +19,39 @@ export default async function CartPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-white">
-      {/* Título */}
-      <CartHeader />
+      <div className="w-full flex flex-col items-center">
+        <div className="max-w-[1440px]">
+          {/* Título */}
+          <CartHeader />
 
-      {/* Conteúdo Principal */}
-      <div className="flex w-full max-w-[1440px] self-stretch gap-6 px-6 pb-8 pt-6">
-        {/* Coluna Esquerda - Produtos e Cupom */}
-        <div className="flex flex-col gap-8">
-          {/* Lista de Produtos */}
-          <CartProductsList produtos={cartProdutos} />
+          {/* Conteúdo Principal */}
+          <div className="flex w-full self-stretch gap-6 px-6 pb-8 pt-6">
+            {/* Coluna Esquerda - Produtos, Frete e Cupom */}
+            <div className="flex flex-col gap-8">
+              {/* Lista de Produtos */}
+              <CartProductsList produtos={cartProdutos} />
 
-          {/* Cupom */}
-          <CartCouponInput />
+              {/* Frete */}
+              <ShippingCalculator
+                title="Calcule o frete"
+                buttonLabel="Calcular"
+                placeholder="Digite seu CEP"
+                inputFontSize="large"
+                width="fixed"
+              />
+
+              {/* Cupom */}
+              <CartCouponInput />
+            </div>
+
+            {/* Coluna Direita - Resumo */}
+            <CartSummary
+              subtotal={299.97}
+              frete={9.99}
+              cupom={9.99}
+            />
+          </div>
         </div>
-
-        {/* Coluna Direita - Resumo */}
-        <CartSummary
-          subtotal={299.97}
-          frete={9.99}
-          cupom={9.99}
-        />
       </div>
 
       <div className="w-full bg-[#f8f3ed]">
