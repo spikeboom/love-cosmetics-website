@@ -136,7 +136,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
 
   return (
-    <div className="w-full pb-[100px] md:pb-0">
+    <div className="w-full">
       {/* Main Product Section - Frame 2608677 */}
       <div className="w-full max-w-[1440px] mx-auto">
         <div className="flex flex-col md:flex-row gap-0 md:gap-[24px] items-start p-0 md:p-[24px]">

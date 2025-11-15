@@ -111,9 +111,9 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           <CartHeader />
 
           {/* Conteúdo Principal */}
-          <div className="flex flex-col md:flex-row w-full self-stretch gap-8 md:gap-6 px-4 md:px-6 pb-[200px] md:pb-8 pt-4 md:pt-6">
+          <div className="flex flex-col md:flex-row w-full self-stretch gap-8 md:gap-6 px-4 md:px-6 pb-8 pt-4 md:pt-6">
             {/* Coluna Esquerda/Única - Produtos, Frete e Cupom */}
-            <div className="flex flex-col gap-8 w-full md:w-auto">
+            <div className="flex flex-col gap-8 w-full md:flex-1 md:min-w-0">
               {/* Lista de Produtos */}
               <CartProductsList
                 produtos={cartArray}
@@ -123,7 +123,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
               />
 
               {/* Frete */}
-              <div className="w-full md:w-[447px]">
+              <div className="w-full md:max-w-[447px]">
                 <ShippingCalculator
                   title="Calcule o frete"
                   buttonLabel="Calcular"
@@ -142,7 +142,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
             </div>
 
             {/* Coluna Direita - Resumo (Hidden no Mobile) */}
-            <div className="hidden md:block">
+            <div className="hidden md:block md:w-[30%] md:max-w-[447px]">
               <CartSummary
                 subtotal={subtotal}
                 frete={freight.freightValue}

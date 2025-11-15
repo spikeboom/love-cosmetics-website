@@ -56,7 +56,7 @@ export function CartProductCard({
     : null;
 
   return (
-    <div className="flex w-full md:w-[921px] flex-col rounded-lg overflow-clip shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)]">
+    <div className="flex w-full flex-col rounded-lg overflow-clip shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)]">
       <div className="flex flex-col gap-4 self-stretch bg-white p-4">
         {/* Mobile: Tags em cima - Desktop: Hidden */}
         {tags.length > 0 && (
