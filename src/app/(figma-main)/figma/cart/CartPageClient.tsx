@@ -100,7 +100,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           frete={freight.freightValue}
           cupom={descontos}
           total={total}
-          onCheckout={() => router.push('/checkout')}
+          onCheckout={() => router.push('/figma/checkout')}
           isMobile={true}
         />
       </div>
@@ -148,7 +148,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                 frete={freight.freightValue}
                 cupom={descontos}
                 total={total}
-                onCheckout={() => router.push('/checkout')}
+                onCheckout={() => router.push('/figma/checkout')}
                 isMobile={false}
               />
             </div>
