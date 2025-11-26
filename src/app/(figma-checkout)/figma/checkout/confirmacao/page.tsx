@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function ConfirmacaoPage() {
+function ConfirmacaoContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pedidoId = searchParams.get("pedidoId");
@@ -134,5 +134,24 @@ export default function ConfirmacaoPage() {
           )}
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="w-12 h-12 border-4 border-[#254333] border-t-transparent rounded-full animate-spin mb-4" />
+      <p className="font-cera-pro text-[16px] text-[#333333]">
+        Carregando...
+      </p>
+    </div>
+  );
+}
+
+export default function ConfirmacaoPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ConfirmacaoContent />
+    </Suspense>
   );
 }

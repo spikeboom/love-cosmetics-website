@@ -189,9 +189,9 @@ export interface CardFormData {
 }
 
 export interface EncryptedCardResult {
-  encryptedCard: string;
+  encryptedCard?: string;
   hasErrors: boolean;
-  errors: string[];
+  errors?: any[];
 }
 
 // Declaração global do SDK PagBank

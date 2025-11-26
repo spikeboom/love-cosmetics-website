@@ -54,24 +54,7 @@ interface UsePagBankPaymentReturn {
   clearError: () => void;
 }
 
-declare global {
-  interface Window {
-    PagSeguro?: {
-      encryptCard: (data: {
-        publicKey: string;
-        holder: string;
-        number: string;
-        expMonth: string;
-        expYear: string;
-        securityCode: string;
-      }) => {
-        hasErrors: boolean;
-        errors?: any[];
-        encryptedCard?: string;
-      };
-    };
-  }
-}
+// Tipo declarado em @/types/pagbank.ts
 
 export function usePagBankPayment(): UsePagBankPaymentReturn {
   const [loading, setLoading] = useState(false);
