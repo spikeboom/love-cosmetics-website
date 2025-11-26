@@ -304,7 +304,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                   {/* Current Price + Discount - Frame 7017 */}
                   <div className="flex gap-[8px] items-center relative shrink-0 w-full">
                     <p className="font-cera-pro font-bold text-[32px] text-black leading-[0px] relative shrink-0">
-                      R$ 99,99
+                      R$ {priceInfo.precoFormatado}
                     </p>
                     <p className="font-cera-pro font-light text-[20px] text-[#009142] leading-[normal] relative shrink-0">
                       40% OFF
