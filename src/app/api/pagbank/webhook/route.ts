@@ -54,10 +54,10 @@ async function validateWebhookSignature(
   // Se não há token configurado mas temos header, validar mesmo assim
   if (!token) {
     if (isSandbox) {
-      logMessage("AVISO: PAGBANK_WEBHOOK_TOKEN não configurado, aceitando webhook em sandbox");
+      logMessage("AVISO: PAGBANK_WEBHOOK_TOKEN não configurado, aceitando webhook em sandbox", {});
       return { valid: true };
     }
-    logMessage("ERRO: PAGBANK_WEBHOOK_TOKEN não configurado");
+    logMessage("ERRO: PAGBANK_WEBHOOK_TOKEN não configurado", {});
     return { valid: false, reason: "Token de webhook não configurado no servidor" };
   }
 
