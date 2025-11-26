@@ -52,6 +52,30 @@ export function PagamentoCartaoReal({
     parcelas: 1,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof CartaoFormData, string>>>({});
+  const [showTestCards, setShowTestCards] = useState(false);
+
+  // Cartoes de teste do PagBank Sandbox
+  const testCards = [
+    { numero: "4539620659922097", cvv: "123", bandeira: "VISA", status: "Aprovado" },
+    { numero: "4929291898380766", cvv: "123", bandeira: "VISA", status: "Recusado" },
+    { numero: "5240082975622454", cvv: "123", bandeira: "MASTER", status: "Aprovado" },
+    { numero: "5530062640663264", cvv: "123", bandeira: "MASTER", status: "Recusado" },
+    { numero: "345817690311361", cvv: "1234", bandeira: "AMEX", status: "Aprovado" },
+    { numero: "372938001199778", cvv: "1234", bandeira: "AMEX", status: "Recusado" },
+    { numero: "6062828598919021", cvv: "123", bandeira: "ELO", status: "Aprovado" },
+    { numero: "6062822916014409", cvv: "123", bandeira: "ELO", status: "Recusado" },
+  ];
+
+  const selectTestCard = (card: typeof testCards[0]) => {
+    setCartaoData((prev) => ({
+      ...prev,
+      numero: formatCardNumber(card.numero),
+      cvv: card.cvv,
+      validade: "12/26",
+      nome: "TESTE SANDBOX",
+    }));
+    setShowTestCards(false);
+  };
 
   const parcelas = [
     { valor: 1 as Parcelas, total: valorTotal },
@@ -174,9 +198,42 @@ export function PagamentoCartaoReal({
           <div className="flex flex-col gap-8">
             {/* Titulo e Preview do Cartao */}
             <div className="flex flex-col gap-4">
-              <h2 className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Adicionar cartao de credito
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                  Adicionar cartao de credito
+                </h2>
+                <button
+                  onClick={() => setShowTestCards(!showTestCards)}
+                  className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showTestCards ? "Fechar" : "Sandbox"}
+                </button>
+              </div>
+
+              {/* Cartoes de Teste (Sandbox) */}
+              {showTestCards && (
+                <div className="bg-gray-50 rounded-[8px] p-3 border border-gray-200">
+                  <p className="text-[11px] text-gray-500 mb-2">Cartoes de teste:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {testCards.map((card, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => selectTestCard(card)}
+                        className={`text-left px-2 py-1.5 rounded text-[11px] transition-colors ${
+                          card.status === "Aprovado"
+                            ? "bg-green-50 hover:bg-green-100 text-green-700"
+                            : "bg-red-50 hover:bg-red-100 text-red-700"
+                        }`}
+                      >
+                        <span className="font-medium">{card.bandeira}</span>
+                        <span className="text-gray-400 ml-1">
+                          ({card.status === "Aprovado" ? "✓" : "✗"})
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Preview do Cartao */}
               <div className="relative w-[314px] h-[185px] bg-[#d2d2d2] rounded-[8px] flex flex-col justify-center px-3">

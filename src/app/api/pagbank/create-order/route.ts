@@ -125,9 +125,9 @@ export async function POST(req: NextRequest) {
               value: Math.round(totalAmount),
               currency: "BRL",
             },
-            // Expiração em 24 horas (opcional)
+            // Expiracao em 15 minutos (alinhado com timer do frontend)
             expiration_date: new Date(
-              Date.now() + 24 * 60 * 60 * 1000
+              Date.now() + 15 * 60 * 1000
             ).toISOString(),
           },
         ],

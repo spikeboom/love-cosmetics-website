@@ -16,7 +16,7 @@ import {
 
 export function PagamentoPageClient() {
   const router = useRouter();
-  const { cart, total, descontos, freight } = useMeuContexto();
+  const { cart, total, descontos, freight, clearCart } = useMeuContexto();
   const { loading: creatingOrder, error: orderError, createOrder } = useCreateOrder();
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
@@ -105,11 +105,12 @@ export function PagamentoPageClient() {
   };
 
   const handlePaymentSuccess = () => {
-    // Limpar apenas dados de pagamento, carrinho e cupons
+    // Limpar carrinho do Context (estado em memoria)
+    clearCart();
+
+    // Limpar dados de pagamento do localStorage
     // Manter identificacao e entrega para proximas compras
     localStorage.removeItem("checkoutPagamento");
-    localStorage.removeItem("cart");
-    localStorage.removeItem("cupons");
 
     // Redirecionar para confirmacao
     router.push(`/figma/checkout/confirmacao?pedidoId=${pedidoId}`);
