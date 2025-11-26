@@ -17,6 +17,8 @@ interface CartProductCardProps {
     icon?: string;
     tipo?: 'alerta' | 'sucesso';
   }>;
+  isOutdated?: boolean;
+  precoAtualizado?: number;
 }
 
 export function CartProductCard({
@@ -30,6 +32,8 @@ export function CartProductCard({
   onSubtract,
   onRemove,
   tags = [],
+  isOutdated = false,
+  precoAtualizado,
 }: CartProductCardProps) {
   const quantidade = produto.quantity || 1;
 
@@ -55,9 +59,39 @@ export function CartProductCard({
       }).format(precoAntigo)
     : null;
 
+  const precoAtualizadoFormatado = precoAtualizado
+    ? new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(precoAtualizado)
+    : null;
+
   return (
-    <div className="flex w-full flex-col rounded-lg overflow-clip shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)]">
-      <div className="flex flex-col gap-4 self-stretch bg-white p-4">
+    <div className={`flex w-full flex-col rounded-lg overflow-clip shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)] ${
+      isOutdated ? 'ring-2 ring-[#FFE69C]' : ''
+    }`}>
+      {/* Banner de preço desatualizado */}
+      {isOutdated && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#FFF3CD] border-b border-[#FFE69C]">
+          <svg
+            className="w-4 h-4 text-[#856404] flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="font-cera-pro text-xs md:text-sm font-medium text-[#856404]">
+            Preço atualizado{precoAtualizadoFormatado && `: ${precoAtualizadoFormatado}`}
+          </span>
+        </div>
+      )}
+      <div className={`flex flex-col gap-4 self-stretch bg-white p-4 ${
+        isOutdated ? 'opacity-60' : ''
+      }`}>
         {/* Mobile: Tags em cima - Desktop: Hidden */}
         {tags.length > 0 && (
           <div className="flex md:hidden gap-[10px] self-stretch">

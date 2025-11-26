@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMeuContexto } from "@/components/common/Context/context";
 import { VitrineSection } from "../components/VitrineSection";
@@ -9,6 +10,7 @@ import { CartHeader } from "./CartHeader";
 import { CartProductsList } from "./CartProductsList";
 import { CartCouponInput } from "./CartCouponInput";
 import { CartSummary } from "./CartSummary";
+import { CartLoadingSkeleton } from "@/components/cart/CartLoadingSkeleton";
 import Link from "next/link";
 
 interface CartPageClientProps {
@@ -28,11 +30,27 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
     removeProductFromCart,
     handleAddCupom,
     handleCupom,
+    cartValidation,
+    refreshCartPrices,
+    isCartLoaded,
   } = useMeuContexto();
+
+  // Validar carrinho ao carregar a página
+  useEffect(() => {
+    const cartItems = Object.keys(cart);
+    if (cartItems.length > 0 && cartValidation.isValid === null && !cartValidation.isValidating) {
+      cartValidation.validateCart(cart, cupons);
+    }
+  }, [cart, cupons, cartValidation]);
 
   // Converter cart object para array
   const cartArray = Object.values(cart);
   const isEmpty = cartArray.length === 0;
+
+  // Mostrar loading enquanto carrega do localStorage
+  if (!isCartLoaded) {
+    return <CartLoadingSkeleton />;
+  }
 
   // Calcular subtotal dos produtos (valor original SEM desconto)
   // total = (produtos - descontos) + frete
@@ -106,6 +124,9 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           onCheckout={() => router.push('/figma/checkout')}
           isMobile={true}
           freteCalculado={freight.hasCalculated}
+          isCartValid={cartValidation.isValid}
+          isValidating={cartValidation.isValidating}
+          onRefreshCart={refreshCartPrices}
         />
       </div>
 
@@ -124,6 +145,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                 onAdd={addQuantityProductToCart}
                 onSubtract={subtractQuantityProductToCart}
                 onRemove={removeProductFromCart}
+                produtosDesatualizados={cartValidation.produtosDesatualizados}
               />
 
               {/* Frete */}
@@ -156,6 +178,9 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                 onCheckout={() => router.push('/figma/checkout')}
                 isMobile={false}
                 freteCalculado={freight.hasCalculated}
+                isCartValid={cartValidation.isValid}
+                isValidating={cartValidation.isValidating}
+                onRefreshCart={refreshCartPrices}
               />
             </div>
           </div>

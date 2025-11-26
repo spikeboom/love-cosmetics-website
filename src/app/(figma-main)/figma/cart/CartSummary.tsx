@@ -1,6 +1,7 @@
 'use client';
 
 import { getTipoDesconto } from '@/utils/cart-calculations';
+import { OutdatedCartAlert } from '@/components/cart/OutdatedCartAlert';
 
 interface CartSummaryProps {
   subtotal: number;
@@ -11,6 +12,9 @@ interface CartSummaryProps {
   onCheckout: () => void;
   isMobile?: boolean;
   freteCalculado?: boolean;
+  isCartValid?: boolean | null;
+  isValidating?: boolean;
+  onRefreshCart?: () => void;
 }
 
 export function CartSummary({
@@ -22,8 +26,17 @@ export function CartSummary({
   onCheckout,
   isMobile = false,
   freteCalculado = false,
+  isCartValid = null,
+  isValidating = false,
+  onRefreshCart,
 }: CartSummaryProps) {
   const tipoDesconto = getTipoDesconto(cupons);
+
+  // Carrinho desatualizado se validação retornou false
+  const isOutdated = isCartValid === false;
+
+  // Pode continuar se frete calculado E carrinho válido (ou ainda não validado)
+  const canCheckout = freteCalculado && !isOutdated;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -108,12 +121,21 @@ export function CartSummary({
           </h2>
         </div>
 
-        {/* Botão */}
+        {/* Aviso de carrinho desatualizado */}
+        {isOutdated && onRefreshCart && (
+          <OutdatedCartAlert
+            onRefresh={onRefreshCart}
+            isRefreshing={isValidating}
+            isMobile={isMobile}
+          />
+        )}
+
+        {/* Botão Continuar */}
         <button
           onClick={onCheckout}
-          disabled={!freteCalculado}
+          disabled={!canCheckout}
           className={`flex items-center justify-center self-stretch rounded-lg transition-colors ${
-            freteCalculado
+            canCheckout
               ? 'bg-[#254333] hover:bg-[#1a3023]'
               : 'bg-[#999999] cursor-not-allowed'
           }`}
@@ -122,7 +144,7 @@ export function CartSummary({
             <span className={`font-cera-pro font-medium text-white ${
               isMobile ? 'text-base' : 'text-base'
             }`}>
-              Continuar
+              {!freteCalculado ? 'Calcule o frete' : isOutdated ? 'Atualize o carrinho' : 'Continuar'}
             </span>
           </div>
         </button>

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { SnackbarProvider, useSnackbar } from "notistack";
-import { 
+import {
   addProductToCart as addProductToCartUtil,
   addQuantityProductToCart as addQuantityProductToCartUtil,
   subtractQuantityProductToCart as subtractQuantityProductToCartUtil,
@@ -17,6 +17,7 @@ import { StorageService } from "@/core/storage/storage-service";
 import { CartCalculations } from "@/core/utils/cart-calculations";
 import { useNotifications } from "@/core/notifications/NotificationContext";
 import { useFreight } from "@/hooks/useFreight";
+import { useCartValidation } from "@/hooks/useCartValidation";
 
 const MeuContexto = createContext();
 
@@ -32,6 +33,73 @@ export const MeuContextoProvider = ({ children }) => {
   // Hook de frete dinâmico
   const freight = useFreight();
 
+  // Hook de validação do carrinho
+  const cartValidation = useCartValidation();
+
+  // Função para atualizar preços do carrinho com valores atuais do Strapi
+  const refreshCartPrices = useCallback(async () => {
+    if (Object.keys(cart).length === 0) return false;
+
+    // Buscar dados atualizados
+    const result = await cartValidation.validateCart(cart, cupons);
+    if (!result) return false;
+
+    let newCupons = cupons;
+    let newCart = { ...cart };
+    let houveAtualizacao = false;
+
+    // Se há cupons inválidos, removê-los
+    if (result.cuponsDesatualizados.length > 0) {
+      newCupons = cupons.filter(
+        c => !result.cuponsDesatualizados.some(cd => cd.codigo === c.codigo)
+      );
+      houveAtualizacao = true;
+      notify("Cupom removido pois não é mais válido", { variant: "warning" });
+    }
+
+    // Atualizar preços dos produtos no carrinho
+    for (const produtoAtualizado of result.produtosAtualizados) {
+      const cartItem = newCart[produtoAtualizado.id];
+      if (cartItem) {
+        // Se cupom foi removido, usar preço sem cupom
+        const novoPreco = result.cuponsDesatualizados.length > 0
+          ? produtoAtualizado.precoAtual
+          : produtoAtualizado.precoComCupom;
+
+        if (Math.abs(cartItem.preco - novoPreco) > 0.01) {
+          newCart[produtoAtualizado.id] = {
+            ...cartItem,
+            preco: novoPreco,
+            preco_de: produtoAtualizado.precoAtual,
+            documentId: produtoAtualizado.documentId,
+          };
+          houveAtualizacao = true;
+        }
+      }
+    }
+
+    if (houveAtualizacao) {
+      // Limpar validação antes de atualizar
+      cartValidation.clearValidation();
+
+      // Atualizar estado
+      setCupons(newCupons);
+      setCart(newCart);
+
+      // Revalidar com novos valores após pequeno delay para setState processar
+      setTimeout(async () => {
+        await cartValidation.validateCart(newCart, newCupons);
+      }, 100);
+
+      notify("Carrinho atualizado com os preços atuais", { variant: "success" });
+    } else {
+      // Não havia nada para atualizar, apenas limpar a validação
+      cartValidation.clearValidation();
+      await cartValidation.validateCart(cart, cupons);
+    }
+
+    return true;
+  }, [cart, cupons, cartValidation, notify]);
 
   const addProductToCart = (product) => {
     addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons, addProductEvent);
@@ -54,6 +122,7 @@ export const MeuContextoProvider = ({ children }) => {
   };
 
   const [firstRun, setFirstRun] = useState(false);
+  const [isCartLoaded, setIsCartLoaded] = useState(false);
 
   useEffect(() => {
     // Usar StorageService para carregar dados
@@ -61,6 +130,7 @@ export const MeuContextoProvider = ({ children }) => {
     setCart(initialData.cart);
     setCupons(initialData.cupons);
     setFirstRun(true);
+    setIsCartLoaded(true);
   }, []);
 
   // Usar função extraída para cálculos
@@ -100,6 +170,9 @@ export const MeuContextoProvider = ({ children }) => {
         descontos,
         loadingAddItem,
         freight,
+        cartValidation,
+        refreshCartPrices,
+        isCartLoaded,
       }}
     >
       {children}

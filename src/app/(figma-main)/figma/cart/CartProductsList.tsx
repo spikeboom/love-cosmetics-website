@@ -24,11 +24,20 @@ interface Product {
   }>;
 }
 
+interface ProdutoDesatualizado {
+  id: string;
+  nome: string;
+  precoCarrinho: number;
+  precoAtual: number;
+  precoAtualComCupom: number;
+}
+
 interface CartProductsListProps {
   produtos: any[];
   onAdd: (data: { product: any }) => void;
   onSubtract: (data: { product: any }) => void;
   onRemove: (data: { product: any }) => void;
+  produtosDesatualizados?: ProdutoDesatualizado[];
 }
 
 export function CartProductsList({
@@ -36,7 +45,12 @@ export function CartProductsList({
   onAdd,
   onSubtract,
   onRemove,
+  produtosDesatualizados = [],
 }: CartProductsListProps) {
+  // Criar mapa de produtos desatualizados para lookup rápido
+  const desatualizadosMap = new Map(
+    produtosDesatualizados.map(p => [p.id, p])
+  );
   const getImageUrl = (produto: Product) => {
     const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
     const imagemUrl =
@@ -82,6 +96,10 @@ export function CartProductsList({
 
         const tags = produto.tags || tagsMock;
 
+        // Verificar se produto está desatualizado
+        const produtoDesatualizado = desatualizadosMap.get(String(produto.id));
+        const isOutdated = !!produtoDesatualizado;
+
         return (
           <CartProductCard
             key={produto.id}
@@ -95,6 +113,8 @@ export function CartProductsList({
             onAdd={() => onAdd({ product: produto })}
             onSubtract={() => onSubtract({ product: produto })}
             onRemove={() => onRemove({ product: produto })}
+            isOutdated={isOutdated}
+            precoAtualizado={produtoDesatualizado?.precoAtualComCupom}
           />
         );
       })}
