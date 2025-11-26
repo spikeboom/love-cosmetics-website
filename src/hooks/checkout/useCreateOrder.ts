@@ -28,11 +28,13 @@ interface CreateOrderResult {
   success: boolean;
   pedidoId?: string;
   error?: string;
+  code?: string;
 }
 
 interface UseCreateOrderReturn {
   loading: boolean;
   error: string | null;
+  errorCode: string | null;
   createOrder: () => Promise<CreateOrderResult>;
   clearError: () => void;
 }
@@ -40,15 +42,18 @@ interface UseCreateOrderReturn {
 export function useCreateOrder(): UseCreateOrderReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const { cart, total, descontos, cupons, freight } = useMeuContexto();
 
   const clearError = useCallback(() => {
     setError(null);
+    setErrorCode(null);
   }, []);
 
   const createOrder = useCallback(async (): Promise<CreateOrderResult> => {
     setLoading(true);
     setError(null);
+    setErrorCode(null);
 
     try {
       // Buscar dados do localStorage
@@ -139,7 +144,11 @@ export function useCreateOrder(): UseCreateOrderReturn {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Erro ao criar pedido");
+        const errorMessage = result.error || "Erro ao criar pedido";
+        const errorCodeResult = result.code || null;
+        setError(errorMessage);
+        setErrorCode(errorCodeResult);
+        return { success: false, error: errorMessage, code: errorCodeResult };
       }
 
       return {
@@ -158,6 +167,7 @@ export function useCreateOrder(): UseCreateOrderReturn {
   return {
     loading,
     error,
+    errorCode,
     createOrder,
     clearError,
   };

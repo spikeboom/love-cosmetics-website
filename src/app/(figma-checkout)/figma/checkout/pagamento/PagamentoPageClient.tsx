@@ -17,7 +17,11 @@ import {
 export function PagamentoPageClient() {
   const router = useRouter();
   const { cart, total, descontos, cupons, freight, clearCart } = useMeuContexto();
-  const { loading: creatingOrder, error: orderError, createOrder } = useCreateOrder();
+  const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder } = useCreateOrder();
+
+  // Códigos de erro que indicam carrinho desatualizado
+  const cartOutdatedCodes = ["PRICE_MISMATCH", "DISCOUNT_MISMATCH", "TOTAL_MISMATCH", "PRODUCT_NOT_FOUND"];
+  const isCartOutdated = orderErrorCode && cartOutdatedCodes.includes(orderErrorCode);
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
   const [telaAtual, setTelaAtual] = useState<TelaAtual>("selecao");
@@ -155,16 +159,23 @@ export function PagamentoPageClient() {
   if (orderError && !pedidoId) {
     return (
       <div className="bg-white flex flex-col w-full flex-1 items-center justify-center min-h-[400px] px-4">
-        <div className="bg-red-50 border border-red-200 rounded-[8px] p-6 text-center max-w-md">
-          <p className="font-cera-pro font-bold text-[18px] text-red-600 mb-2">
-            Erro ao criar pedido
+        <div className={`${isCartOutdated ? 'bg-[#FFF3CD] border-[#FFE69C]' : 'bg-red-50 border-red-200'} border rounded-[8px] p-6 text-center max-w-md`}>
+          <p className={`font-cera-pro font-bold text-[18px] ${isCartOutdated ? 'text-[#856404]' : 'text-red-600'} mb-2`}>
+            {isCartOutdated ? 'Carrinho desatualizado' : 'Erro ao criar pedido'}
           </p>
-          <p className="font-cera-pro text-[14px] text-red-500 mb-4">{orderError}</p>
+          <p className={`font-cera-pro text-[14px] ${isCartOutdated ? 'text-[#856404]' : 'text-red-500'} mb-4`}>{orderError}</p>
           <button
-            onClick={() => router.push("/figma/checkout/entrega")}
-            className="px-6 py-2 bg-[#254333] text-white rounded-[8px] font-cera-pro"
+            onClick={() => {
+              if (isCartOutdated) {
+                router.push("/figma/cart");
+                window.location.href = "/figma/cart";
+              } else {
+                router.push("/figma/checkout/entrega");
+              }
+            }}
+            className={`px-6 py-2 ${isCartOutdated ? 'bg-[#856404]' : 'bg-[#254333]'} text-white rounded-[8px] font-cera-pro`}
           >
-            Voltar
+            {isCartOutdated ? 'Voltar ao carrinho' : 'Voltar'}
           </button>
         </div>
       </div>
