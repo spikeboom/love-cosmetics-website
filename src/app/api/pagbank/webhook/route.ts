@@ -29,19 +29,36 @@ async function sha256Raw(text: string): Promise<string> {
  *
  * A assinatura é: SHA256(token + "-" + payload_raw)
  * Header: x-authenticity-token
+ *
+ * NOTA: O ambiente sandbox do PagBank frequentemente não envia o header de autenticidade
  */
 async function validateWebhookSignature(
   rawBody: string,
   signatureHeader: string | null
 ): Promise<{ valid: boolean; reason?: string }> {
   const token = process.env.PAGBANK_WEBHOOK_TOKEN;
-  if (!token) {
-    logMessage("ERRO: PAGBANK_WEBHOOK_TOKEN não configurado");
-    return { valid: false, reason: "Token de webhook não configurado no servidor" };
+  const isSandbox = process.env.PAGBANK_API_URL?.includes("sandbox") ?? true;
+
+  // Se não há header de assinatura
+  if (!signatureHeader) {
+    // Em sandbox, aceitar webhooks sem assinatura (comportamento normal do PagBank sandbox)
+    if (isSandbox) {
+      logMessage("Webhook sem assinatura aceito (ambiente sandbox)", {
+        warning: "Em produção, webhooks sem assinatura serão rejeitados",
+      });
+      return { valid: true };
+    }
+    return { valid: false, reason: "Header x-authenticity-token ausente" };
   }
 
-  if (!signatureHeader) {
-    return { valid: false, reason: "Header x-authenticity-token ausente" };
+  // Se não há token configurado mas temos header, validar mesmo assim
+  if (!token) {
+    if (isSandbox) {
+      logMessage("AVISO: PAGBANK_WEBHOOK_TOKEN não configurado, aceitando webhook em sandbox");
+      return { valid: true };
+    }
+    logMessage("ERRO: PAGBANK_WEBHOOK_TOKEN não configurado");
+    return { valid: false, reason: "Token de webhook não configurado no servidor" };
   }
 
   // Gerar hash esperado: SHA256(token + "-" + payload)
