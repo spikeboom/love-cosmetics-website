@@ -95,8 +95,8 @@ export function useCreateOrder(): UseCreateOrderReturn {
         bling_number: product.bling_number,
       }));
 
-      // Calcular frete
-      const freteCalculado = entrega.tipoEntrega === "expressa" ? 14.99 : 0;
+      // Usar frete do Context (ja calculado corretamente)
+      const freteCalculado = freight.freightValue;
       const freightData = freight.getSelectedFreightData?.() || {};
 
       // Montar payload para API

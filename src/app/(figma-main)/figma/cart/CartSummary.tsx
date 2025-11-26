@@ -1,22 +1,29 @@
 'use client';
 
+import { getTipoDesconto } from '@/utils/cart-calculations';
+
 interface CartSummaryProps {
   subtotal: number;
   frete: number;
   cupom?: number;
+  cupons?: any[];
   total: number;
   onCheckout: () => void;
   isMobile?: boolean;
+  freteCalculado?: boolean;
 }
 
 export function CartSummary({
   subtotal,
   frete,
   cupom = 0,
+  cupons = [],
   total,
   onCheckout,
   isMobile = false,
+  freteCalculado = false,
 }: CartSummaryProps) {
+  const tipoDesconto = getTipoDesconto(cupons);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -63,10 +70,10 @@ export function CartSummary({
             }`}>
               Frete
             </p>
-            <p className={`font-cera-pro font-light leading-[1.257] text-black ${
+            <p className={`font-cera-pro font-light leading-[1.257] ${
               isMobile ? 'text-[14px]' : 'text-xl'
-            }`}>
-              {formatPrice(frete)}
+            } ${freteCalculado ? 'text-black' : 'text-[#B3261E]'}`}>
+              {freteCalculado ? formatPrice(frete) : 'Calcule o frete'}
             </p>
           </div>
 
@@ -76,7 +83,7 @@ export function CartSummary({
               <p className={`font-cera-pro font-light leading-[1.257] text-[#111111] ${
                 isMobile ? 'text-[14px]' : 'text-xl'
               }`}>
-                Cupom
+                Cupom{tipoDesconto && <span className="text-[#666666] text-[12px] ml-1">({tipoDesconto})</span>}
               </p>
               <p className={`font-cera-pro font-light leading-[1.257] text-[#009142] ${
                 isMobile ? 'text-[14px]' : 'text-xl'
@@ -104,7 +111,12 @@ export function CartSummary({
         {/* Botão */}
         <button
           onClick={onCheckout}
-          className="flex items-center justify-center self-stretch rounded-lg bg-[#254333] hover:bg-[#1a3023] transition-colors"
+          disabled={!freteCalculado}
+          className={`flex items-center justify-center self-stretch rounded-lg transition-colors ${
+            freteCalculado
+              ? 'bg-[#254333] hover:bg-[#1a3023]'
+              : 'bg-[#999999] cursor-not-allowed'
+          }`}
         >
           <div className={`flex items-center justify-center ${isMobile ? 'px-4 py-[10px]' : 'py-3'}`}>
             <span className={`font-cera-pro font-medium text-white ${

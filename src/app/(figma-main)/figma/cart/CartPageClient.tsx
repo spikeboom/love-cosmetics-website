@@ -34,8 +34,10 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
   const cartArray = Object.values(cart);
   const isEmpty = cartArray.length === 0;
 
-  // Calcular subtotal (total sem frete)
-  const subtotal = total - freight.freightValue;
+  // Calcular subtotal dos produtos (valor original SEM desconto)
+  // total = (produtos - descontos) + frete
+  // produtos = total - frete + descontos
+  const subtotal = total - freight.freightValue + descontos;
 
   // Se carrinho vazio, mostrar mensagem
   if (isEmpty) {
@@ -99,9 +101,11 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           subtotal={subtotal}
           frete={freight.freightValue}
           cupom={descontos}
+          cupons={cupons}
           total={total}
           onCheckout={() => router.push('/figma/checkout')}
           isMobile={true}
+          freteCalculado={freight.hasCalculated}
         />
       </div>
 
@@ -147,9 +151,11 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                 subtotal={subtotal}
                 frete={freight.freightValue}
                 cupom={descontos}
+                cupons={cupons}
                 total={total}
                 onCheckout={() => router.push('/figma/checkout')}
                 isMobile={false}
+                freteCalculado={freight.hasCalculated}
               />
             </div>
           </div>

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useViaCep } from "@/hooks/checkout";
+import { useMeuContexto } from "@/components/common/Context/context";
+import { FreightOptions } from "@/app/(figma-main)/figma/components/FreightOptions";
 
 interface FormData {
   cep: string;
@@ -15,12 +17,13 @@ interface FormData {
   cidade: string;
   estado: string;
   informacoesAdicionais: string;
-  tipoEntrega: "normal" | "expressa";
+  selectedFreightIndex: number;
 }
 
 export function EntregaPageClient() {
   const router = useRouter();
   const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
+  const { freight } = useMeuContexto();
 
   const [formData, setFormData] = useState<FormData>({
     cep: "",
@@ -32,30 +35,53 @@ export function EntregaPageClient() {
     cidade: "",
     estado: "",
     informacoesAdicionais: "",
-    tipoEntrega: "normal",
+    selectedFreightIndex: 0,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
-  // Verificar se o usuario passou pela identificacao
+  // Verificar se o usuario passou pela identificacao e se frete foi calculado
   useEffect(() => {
     const identificacao = localStorage.getItem("checkoutIdentificacao");
     if (!identificacao) {
       router.push("/figma/checkout/identificacao");
+      return;
     }
-  }, [router]);
 
-  // Carregar dados salvos
+    // Verificar se frete foi calculado no carrinho
+    if (!freight.hasCalculated || freight.availableServices.length === 0) {
+      router.push("/figma/cart");
+      return;
+    }
+  }, [router, freight.hasCalculated, freight.availableServices.length]);
+
+  // Carregar dados salvos do localStorage (exceto selectedFreightIndex que vem do Context)
   useEffect(() => {
     const saved = localStorage.getItem("checkoutEntrega");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setFormData(parsed);
+        // Nao sobrescrever selectedFreightIndex - esse vem do Context
+        const { selectedFreightIndex: _ignored, ...restData } = parsed;
+        setFormData(prev => ({
+          ...prev,
+          ...restData,
+        }));
       } catch {
         // Ignorar erro
       }
     }
   }, []);
+
+  // Inicializar CEP e selectedFreightIndex do Context (tem prioridade)
+  useEffect(() => {
+    if (freight.hasCalculated) {
+      setFormData(prev => ({
+        ...prev,
+        cep: freight.cep || prev.cep,
+        selectedFreightIndex: freight.selectedServiceIndex,
+      }));
+    }
+  }, [freight.cep, freight.hasCalculated, freight.selectedServiceIndex]);
 
   // Preencher campos quando endereco for buscado
   useEffect(() => {
@@ -96,6 +122,16 @@ export function EntregaPageClient() {
     }
   };
 
+  // Selecionar opcao de frete
+  const handleSelectFreight = (index: number) => {
+    const service = freight.availableServices[index];
+    if (service) {
+      setFormData((prev) => ({ ...prev, selectedFreightIndex: index }));
+      // Atualizar o Context com a nova selecao
+      freight.setSelectedFreight(service.price, service.deliveryTime, index);
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
@@ -109,10 +145,6 @@ export function EntregaPageClient() {
 
     if (!formData.semNumero && (!formData.numero || formData.numero.trim().length === 0)) {
       newErrors.numero = "Numero obrigatorio";
-    }
-
-    if (!formData.complemento || formData.complemento.trim().length < 1) {
-      newErrors.complemento = "Complemento obrigatorio";
     }
 
     if (!formData.bairro || formData.bairro.trim().length < 2) {
@@ -297,7 +329,7 @@ export function EntregaPageClient() {
             {/* Complemento */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Complemento *
+                Complemento (opcional)
               </label>
               <input
                 type="text"
@@ -327,62 +359,17 @@ export function EntregaPageClient() {
               />
             </div>
 
-            {/* Tipo de entrega */}
+            {/* Opcoes de Frete (Frenet) */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Selecione o tipo de entrega
+                Selecione a forma de envio
               </label>
-              <div className="flex flex-col">
-                {/* Normal */}
-                <label className="flex items-center gap-1 py-2 cursor-pointer">
-                  <div className="p-[11px]">
-                    <input
-                      type="radio"
-                      name="tipoEntrega"
-                      value="normal"
-                      checked={formData.tipoEntrega === "normal"}
-                      onChange={(e) => handleChange("tipoEntrega", e.target.value)}
-                      className="w-[18px] h-[18px] border-2 border-[#333333] cursor-pointer accent-[#254333]"
-                    />
-                  </div>
-                  <div className="flex-1 flex items-center gap-[6px]">
-                    <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#111111]">
-                      Normal
-                    </span>
-                    <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
-                      5 a 6 dias uteis
-                    </span>
-                  </div>
-                  <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#009142]">
-                    Gratis
-                  </span>
-                </label>
-
-                {/* Expressa */}
-                <label className="flex items-center gap-1 py-2 cursor-pointer">
-                  <div className="p-[11px]">
-                    <input
-                      type="radio"
-                      name="tipoEntrega"
-                      value="expressa"
-                      checked={formData.tipoEntrega === "expressa"}
-                      onChange={(e) => handleChange("tipoEntrega", e.target.value)}
-                      className="w-[18px] h-[18px] border-2 border-[#333333] cursor-pointer accent-[#254333]"
-                    />
-                  </div>
-                  <div className="flex-1 flex items-center gap-[6px]">
-                    <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#111111]">
-                      Expressa
-                    </span>
-                    <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
-                      Receba amanha
-                    </span>
-                  </div>
-                  <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-black">
-                    R$ 14,99
-                  </span>
-                </label>
-              </div>
+              <FreightOptions
+                services={freight.availableServices}
+                selectedIndex={formData.selectedFreightIndex}
+                onSelect={handleSelectFreight}
+                radioName="freight-option-checkout"
+              />
             </div>
           </div>
 

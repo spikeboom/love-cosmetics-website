@@ -35,6 +35,7 @@ export interface ResumoProps {
   freteGratis: boolean;
   valorFrete: number;
   descontos: number;
+  cupons?: any[];
   valorTotal: number;
   enderecoCompleto: string;
   formatPrice: (price: number) => string;

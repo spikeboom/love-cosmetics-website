@@ -72,7 +72,16 @@ export function CartCouponInput({ onApply, onRemove, cupons }: CartCouponInputPr
       </div>
 
       {/* Success Message - Cupons Aplicados */}
-      {hasAppliedCoupons && cupons.map((c: any, index: number) => (
+      {hasAppliedCoupons && cupons.map((c: any, index: number) => {
+        // Calcular tipo de desconto para este cupom individual
+        const temPorcentagem = c.multiplacar && c.multiplacar < 1 && c.multiplacar > 0;
+        const temValorFixo = c.diminuir && c.diminuir > 0;
+        const partes: string[] = [];
+        if (temPorcentagem) partes.push(`${Math.round((1 - c.multiplacar) * 100)}%`);
+        if (temValorFixo) partes.push(`R$${c.diminuir.toFixed(2).replace('.', ',')}`);
+        const tipoDesconto = partes.join(' + ');
+
+        return (
         <div key={index} className="flex gap-[8px] items-center justify-between w-full bg-[#F0F9F4] rounded-lg p-3">
           <div className="flex gap-[8px] items-center flex-1">
             <div className="flex-shrink-0 size-[16px]">
@@ -86,6 +95,7 @@ export function CartCouponInput({ onApply, onRemove, cupons }: CartCouponInputPr
             </div>
             <p className="flex-1 font-cera-pro font-light text-[14px] text-[#009142] leading-[1.257]">
               Cupom <strong className="font-bold">{c.nome || c.codigo}</strong> aplicado com sucesso!
+              {tipoDesconto && <span className="text-[#666666] ml-1">({tipoDesconto})</span>}
             </p>
           </div>
           <button
@@ -96,7 +106,8 @@ export function CartCouponInput({ onApply, onRemove, cupons }: CartCouponInputPr
             Remover
           </button>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

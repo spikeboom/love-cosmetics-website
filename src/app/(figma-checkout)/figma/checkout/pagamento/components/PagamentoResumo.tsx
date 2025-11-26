@@ -1,3 +1,4 @@
+import { getTipoDesconto } from "@/utils/cart-calculations";
 import { ResumoProps } from "./types";
 
 export function PagamentoResumo({
@@ -6,12 +7,14 @@ export function PagamentoResumo({
   freteGratis,
   valorFrete,
   descontos,
+  cupons = [],
   valorTotal,
   enderecoCompleto,
   formatPrice,
   onAlterarProdutos,
   onAlterarEntrega,
 }: ResumoProps) {
+  const tipoDesconto = getTipoDesconto(cupons);
   return (
     <div className="bg-[#f8f3ed] rounded-[8px] w-full">
       {/* Produtos */}
@@ -71,7 +74,7 @@ export function PagamentoResumo({
         <>
           <div className="p-4 flex items-center justify-between">
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111111]">
-              Descontos
+              Descontos{tipoDesconto && <span className="font-light text-[12px] text-[#666666] ml-1">({tipoDesconto})</span>}
             </span>
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
               - {formatPrice(descontos)}

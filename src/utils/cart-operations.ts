@@ -60,5 +60,5 @@ export const clearCart = (setCart: any, setCupons: any) => {
   localStorage.removeItem("cart");
   localStorage.removeItem("cupons");
   setCart({});
-  setCupons({});
+  setCupons([]); // Array vazio, nao objeto
 };

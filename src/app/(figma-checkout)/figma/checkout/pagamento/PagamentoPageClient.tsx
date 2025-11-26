@@ -16,7 +16,7 @@ import {
 
 export function PagamentoPageClient() {
   const router = useRouter();
-  const { cart, total, descontos, freight, clearCart } = useMeuContexto();
+  const { cart, total, descontos, cupons, freight, clearCart } = useMeuContexto();
   const { loading: creatingOrder, error: orderError, createOrder } = useCreateOrder();
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
@@ -48,12 +48,16 @@ export function PagamentoPageClient() {
     });
   }, [router]);
 
-  // Calculos de valores
+  // Calculos de valores - usar valores do Context diretamente
   const cartArray = Object.values(cart);
-  const subtotal = total - freight.freightValue;
-  const freteGratis = checkoutData.entrega?.tipoEntrega === "normal";
-  const valorFrete = freteGratis ? 0 : 14.99;
-  const valorTotal = subtotal + valorFrete - descontos;
+
+  // O total do Context ja inclui desconto e frete
+  // Para mostrar corretamente: Produtos (original) - Desconto + Frete = Total
+  // Entao: Produtos = Total - Frete + Desconto
+  const valorFrete = freight.freightValue;
+  const subtotal = total - valorFrete + descontos; // Valor original dos produtos (sem desconto)
+  const freteGratis = valorFrete === 0;
+  const valorTotal = total; // Usar direto do Context
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -127,6 +131,7 @@ export function PagamentoPageClient() {
     freteGratis,
     valorFrete,
     descontos,
+    cupons,
     valorTotal,
     enderecoCompleto,
     formatPrice,
