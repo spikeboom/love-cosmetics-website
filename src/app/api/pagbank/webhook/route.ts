@@ -14,15 +14,83 @@ async function sha256Hex(text: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// Função para gerar SHA-256 sem normalização (para validação HMAC)
+async function sha256Raw(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Valida a assinatura HMAC do webhook PagBank
+ * Documentação: https://developer.pagbank.com.br/reference/confirmar-autenticidade-da-notificacao
+ *
+ * A assinatura é: SHA256(token + "-" + payload_raw)
+ * Header: x-authenticity-token
+ */
+async function validateWebhookSignature(
+  rawBody: string,
+  signatureHeader: string | null
+): Promise<{ valid: boolean; reason?: string }> {
+  const token = process.env.PAGBANK_WEBHOOK_TOKEN;
+  if (!token) {
+    logMessage("ERRO: PAGBANK_WEBHOOK_TOKEN não configurado");
+    return { valid: false, reason: "Token de webhook não configurado no servidor" };
+  }
+
+  if (!signatureHeader) {
+    return { valid: false, reason: "Header x-authenticity-token ausente" };
+  }
+
+  // Gerar hash esperado: SHA256(token + "-" + payload)
+  const expectedSignature = await sha256Raw(`${token}-${rawBody}`);
+
+  // Comparar com o header recebido
+  const isValid = expectedSignature === signatureHeader.toLowerCase();
+
+  if (!isValid) {
+    logMessage("Assinatura do webhook inválida", {
+      received: signatureHeader.substring(0, 16) + "...",
+      expected: expectedSignature.substring(0, 16) + "...",
+    });
+  }
+
+  return {
+    valid: isValid,
+    reason: isValid ? undefined : "Assinatura inválida",
+  };
+}
+
 /**
  * Webhook para receber notificações do PagBank sobre mudanças no status do pagamento
  * Documentação: https://dev.pagbank.uol.com.br/reference/notificacoes
  */
 export async function POST(req: NextRequest) {
   try {
-    const body: PagBankWebhookNotification = await req.json();
+    // Ler body como texto raw (necessário para validação HMAC)
+    const rawBody = await req.text();
 
-    logMessage("Webhook PagBank recebido", {
+    // Validar assinatura HMAC do PagBank
+    const signatureHeader = req.headers.get("x-authenticity-token");
+    const validation = await validateWebhookSignature(rawBody, signatureHeader);
+
+    if (!validation.valid) {
+      logMessage("Webhook rejeitado - assinatura inválida", {
+        reason: validation.reason,
+        ip: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip"),
+      });
+      return NextResponse.json(
+        { error: "Unauthorized", reason: validation.reason },
+        { status: 401 }
+      );
+    }
+
+    // Parsear JSON após validação
+    const body: PagBankWebhookNotification = JSON.parse(rawBody);
+
+    logMessage("Webhook PagBank recebido (assinatura válida)", {
       id: body.id,
       reference_id: body.reference_id,
       charges: body.charges,
