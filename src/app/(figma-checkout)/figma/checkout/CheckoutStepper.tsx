@@ -60,8 +60,8 @@ export function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
 
   return (
     <div className="bg-[#f8f3ed] border-b border-[#ba7900] w-full">
-      <div className="flex gap-2 lg:gap-4 items-center justify-center p-3 lg:p-[16px]">
-        <div className="flex items-center justify-between w-full max-w-[684px]">
+      <div className="flex gap-2 lg:gap-4 items-center lg:justify-center p-3 lg:p-[16px] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex items-center justify-between w-full max-w-[684px] min-w-max lg:min-w-0">
           {steps.map((step, index) => {
             const isActive = index === currentIndex;
             const isPast = index < currentIndex;
