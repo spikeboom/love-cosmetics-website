@@ -335,7 +335,7 @@ function PedidoRow({ pedido, index, onNotaGerada }: { pedido: Pedido; index: num
                             Quantidade: <strong>{item.quantity}</strong>
                           </Typography>
                           <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                            {(item.unit_amount / 100).toLocaleString("pt-BR", {
+                            {item.unit_amount.toLocaleString("pt-BR", {
                               style: "currency",
                               currency: "BRL",
                             })}

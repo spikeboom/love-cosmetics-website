@@ -77,11 +77,11 @@ export async function POST(req: NextRequest) {
       reference_id: item.reference_id || item.id,
       name: item.name,
       quantity: item.quantity,
-      unit_amount: item.unit_amount, // já deve vir em centavos
+      unit_amount: Math.round(item.unit_amount * 100), // Converter de REAIS para centavos
     }));
 
-    // Calcular valor total em centavos
-    const totalAmount = pedido.total_pedido + (pedido.frete_calculado || 0);
+    // Calcular valor total em centavos (converter de REAIS)
+    const totalAmount = Math.round((pedido.total_pedido + (pedido.frete_calculado || 0)) * 100);
 
     // Preparar endereço de entrega
     const shipping = {

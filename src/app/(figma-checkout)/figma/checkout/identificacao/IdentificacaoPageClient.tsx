@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
+import { identificacaoSchema } from "@/lib/checkout/validation";
+import { validacoes } from "@/lib/checkout/validation";
 
 interface FormData {
   cpf: string;
@@ -22,6 +24,19 @@ export function IdentificacaoPageClient() {
     telefone: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
+
+  // Carregar dados salvos
+  useEffect(() => {
+    const saved = localStorage.getItem("checkoutIdentificacao");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFormData(parsed);
+      } catch {
+        // Ignorar erro de parse
+      }
+    }
+  }, []);
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -61,44 +76,39 @@ export function IdentificacaoPageClient() {
 
     setFormData((prev) => ({ ...prev, [field]: formattedValue }));
 
-    // Clear error when user types
+    // Limpar erro ao digitar
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const validateForm = () => {
-    const newErrors: Partial<FormData> = {};
+    const result = identificacaoSchema.safeParse(formData);
 
-    if (!formData.cpf || formData.cpf.length < 14) {
-      newErrors.cpf = "CPF inválido";
+    if (!result.success) {
+      const newErrors: Partial<FormData> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof FormData;
+        newErrors[field] = err.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
 
-    if (!formData.dataNascimento || formData.dataNascimento.length < 10) {
-      newErrors.dataNascimento = "Data inválida";
+    // Validacao adicional de CPF com checksum
+    if (!validacoes.cpf(formData.cpf)) {
+      setErrors({ cpf: "CPF invalido" });
+      return false;
     }
 
-    if (!formData.nome || formData.nome.trim().length < 3) {
-      newErrors.nome = "Nome obrigatório";
-    }
-
-    if (!formData.email || !formData.email.includes("@")) {
-      newErrors.email = "E-mail inválido";
-    }
-
-    if (!formData.telefone || formData.telefone.length < 15) {
-      newErrors.telefone = "Telefone inválido";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      // Salvar dados no localStorage para próxima etapa
       localStorage.setItem("checkoutIdentificacao", JSON.stringify(formData));
       router.push("/figma/checkout/entrega");
     }
@@ -106,10 +116,8 @@ export function IdentificacaoPageClient() {
 
   return (
     <div className="bg-white flex flex-col w-full flex-1">
-      {/* Stepper */}
       <CheckoutStepper currentStep="identificacao" />
 
-      {/* Formulário */}
       <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
@@ -212,7 +220,7 @@ export function IdentificacaoPageClient() {
             </div>
           </div>
 
-          {/* Botão Continuar */}
+          {/* Botao Continuar */}
           <button
             type="submit"
             className="w-full h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"

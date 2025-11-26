@@ -48,7 +48,8 @@
       "Bash(dir:*)",
       "Bash(git rm:*)",
       "WebFetch(domain:swiperjs.com)",
-      "mcp__Framelink_Figma_MCP__get_figma_data"
+      "mcp__Framelink_Figma_MCP__get_figma_data",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []

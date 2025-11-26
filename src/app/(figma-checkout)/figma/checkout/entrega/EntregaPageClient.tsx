@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
+import { useViaCep } from "@/hooks/checkout";
 
 interface FormData {
   cep: string;
@@ -10,30 +11,64 @@ interface FormData {
   numero: string;
   semNumero: boolean;
   complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
   informacoesAdicionais: string;
   tipoEntrega: "normal" | "expressa";
 }
 
 export function EntregaPageClient() {
   const router = useRouter();
+  const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
+
   const [formData, setFormData] = useState<FormData>({
     cep: "",
     rua: "",
     numero: "",
     semNumero: false,
     complemento: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
     informacoesAdicionais: "",
     tipoEntrega: "normal",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
-  // Verificar se o usuário passou pela identificação
+  // Verificar se o usuario passou pela identificacao
   useEffect(() => {
     const identificacao = localStorage.getItem("checkoutIdentificacao");
     if (!identificacao) {
       router.push("/figma/checkout/identificacao");
     }
   }, [router]);
+
+  // Carregar dados salvos
+  useEffect(() => {
+    const saved = localStorage.getItem("checkoutEntrega");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFormData(parsed);
+      } catch {
+        // Ignorar erro
+      }
+    }
+  }, []);
+
+  // Preencher campos quando endereco for buscado
+  useEffect(() => {
+    if (endereco) {
+      setFormData((prev) => ({
+        ...prev,
+        rua: endereco.rua || prev.rua,
+        bairro: endereco.bairro || prev.bairro,
+        cidade: endereco.cidade || prev.cidade,
+        estado: endereco.estado || prev.estado,
+      }));
+    }
+  }, [endereco]);
 
   const formatCEP = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -47,29 +82,49 @@ export function EntregaPageClient() {
 
     setFormData((prev) => ({ ...prev, [field]: value }));
 
-    // Clear error when user types
+    // Limpar erro ao digitar
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  // Buscar CEP quando completar 9 caracteres (00000-000)
+  const handleCepBlur = async () => {
+    const cepLimpo = formData.cep.replace(/\D/g, "");
+    if (cepLimpo.length === 8) {
+      await buscarCep(formData.cep);
     }
   };
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof FormData, string>> = {};
 
-    if (!formData.cep || formData.cep.length < 9) {
-      newErrors.cep = "CEP inválido";
+    if (!formData.cep || formData.cep.replace(/\D/g, "").length !== 8) {
+      newErrors.cep = "CEP invalido";
     }
 
     if (!formData.rua || formData.rua.trim().length < 3) {
-      newErrors.rua = "Rua obrigatória";
+      newErrors.rua = "Rua obrigatoria";
     }
 
     if (!formData.semNumero && (!formData.numero || formData.numero.trim().length === 0)) {
-      newErrors.numero = "Número obrigatório";
+      newErrors.numero = "Numero obrigatorio";
     }
 
     if (!formData.complemento || formData.complemento.trim().length < 1) {
-      newErrors.complemento = "Complemento obrigatório";
+      newErrors.complemento = "Complemento obrigatorio";
+    }
+
+    if (!formData.bairro || formData.bairro.trim().length < 2) {
+      newErrors.bairro = "Bairro obrigatorio";
+    }
+
+    if (!formData.cidade || formData.cidade.trim().length < 2) {
+      newErrors.cidade = "Cidade obrigatoria";
+    }
+
+    if (!formData.estado || formData.estado.trim().length < 2) {
+      newErrors.estado = "Estado obrigatorio";
     }
 
     setErrors(newErrors);
@@ -80,7 +135,6 @@ export function EntregaPageClient() {
     e.preventDefault();
 
     if (validateForm()) {
-      // Salvar dados no localStorage para próxima etapa
       localStorage.setItem("checkoutEntrega", JSON.stringify(formData));
       router.push("/figma/checkout/pagamento");
     }
@@ -88,10 +142,8 @@ export function EntregaPageClient() {
 
   return (
     <div className="bg-white flex flex-col w-full flex-1">
-      {/* Stepper */}
       <CheckoutStepper currentStep="entrega" />
 
-      {/* Formulário */}
       <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
@@ -105,10 +157,11 @@ export function EntregaPageClient() {
                   type="text"
                   value={formData.cep}
                   onChange={(e) => handleChange("cep", e.target.value)}
+                  onBlur={handleCepBlur}
                   placeholder="00000-000"
                   maxLength={9}
                   className={`w-full h-[48px] px-4 bg-white border ${
-                    errors.cep ? "border-red-500" : "border-[#d2d2d2]"
+                    errors.cep || errorCep ? "border-red-500" : "border-[#d2d2d2]"
                   } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
                 />
                 <a
@@ -117,18 +170,21 @@ export function EntregaPageClient() {
                   rel="noopener noreferrer"
                   className="absolute right-4 top-1/2 -translate-y-1/2 font-cera-pro font-light text-[14px] lg:text-[16px] text-[#254333] underline"
                 >
-                  Não sei meu CEP
+                  Nao sei meu CEP
                 </a>
               </div>
-              {errors.cep && (
-                <span className="text-red-500 text-sm">{errors.cep}</span>
+              {loadingCep && (
+                <span className="text-[#254333] text-sm">Buscando endereco...</span>
+              )}
+              {(errors.cep || errorCep) && (
+                <span className="text-red-500 text-sm">{errors.cep || errorCep}</span>
               )}
             </div>
 
             {/* Rua / Avenida */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Rua / Avenida
+                Rua / Avenida *
               </label>
               <input
                 type="text"
@@ -144,10 +200,69 @@ export function EntregaPageClient() {
               )}
             </div>
 
-            {/* Número */}
+            {/* Bairro */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Número *
+                Bairro *
+              </label>
+              <input
+                type="text"
+                value={formData.bairro}
+                onChange={(e) => handleChange("bairro", e.target.value)}
+                placeholder=""
+                className={`w-full h-[48px] px-4 bg-white border ${
+                  errors.bairro ? "border-red-500" : "border-[#d2d2d2]"
+                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
+              />
+              {errors.bairro && (
+                <span className="text-red-500 text-sm">{errors.bairro}</span>
+              )}
+            </div>
+
+            {/* Cidade e Estado */}
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-3 lg:gap-[16px] flex-1">
+                <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                  Cidade *
+                </label>
+                <input
+                  type="text"
+                  value={formData.cidade}
+                  onChange={(e) => handleChange("cidade", e.target.value)}
+                  placeholder=""
+                  className={`w-full h-[48px] px-4 bg-white border ${
+                    errors.cidade ? "border-red-500" : "border-[#d2d2d2]"
+                  } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
+                />
+                {errors.cidade && (
+                  <span className="text-red-500 text-sm">{errors.cidade}</span>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 lg:gap-[16px] w-[100px]">
+                <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                  Estado *
+                </label>
+                <input
+                  type="text"
+                  value={formData.estado}
+                  onChange={(e) => handleChange("estado", e.target.value)}
+                  placeholder="UF"
+                  maxLength={2}
+                  className={`w-full h-[48px] px-4 bg-white border ${
+                    errors.estado ? "border-red-500" : "border-[#d2d2d2]"
+                  } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333] uppercase`}
+                />
+                {errors.estado && (
+                  <span className="text-red-500 text-sm">{errors.estado}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Numero */}
+            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                Numero *
               </label>
               <div className="relative flex items-center">
                 <input
@@ -164,7 +279,7 @@ export function EntregaPageClient() {
                 />
                 <div className="absolute right-4 flex items-center gap-2">
                   <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#333333]">
-                    Sem número
+                    Sem numero
                   </span>
                   <input
                     type="checkbox"
@@ -198,15 +313,15 @@ export function EntregaPageClient() {
               )}
             </div>
 
-            {/* Informações adicionais */}
+            {/* Informacoes adicionais */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Informações adicionais (opcional)
+                Informacoes adicionais (opcional)
               </label>
               <textarea
                 value={formData.informacoesAdicionais}
                 onChange={(e) => handleChange("informacoesAdicionais", e.target.value)}
-                placeholder="Ponto de referência, instruções para entrega..."
+                placeholder="Ponto de referencia, instrucoes para entrega..."
                 rows={3}
                 className="w-full min-h-[80px] px-4 py-3 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333] resize-none"
               />
@@ -235,11 +350,11 @@ export function EntregaPageClient() {
                       Normal
                     </span>
                     <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
-                      5 a 6 dias úteis
+                      5 a 6 dias uteis
                     </span>
                   </div>
                   <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#009142]">
-                    Grátis
+                    Gratis
                   </span>
                 </label>
 
@@ -260,7 +375,7 @@ export function EntregaPageClient() {
                       Expressa
                     </span>
                     <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
-                      Receba amanhã
+                      Receba amanha
                     </span>
                   </div>
                   <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-black">
@@ -271,13 +386,13 @@ export function EntregaPageClient() {
             </div>
           </div>
 
-          {/* Botão Finalizar compra */}
+          {/* Botao Continuar */}
           <button
             type="submit"
             className="w-full h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
           >
             <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-white">
-              Finalizar compra
+              Continuar
             </span>
           </button>
         </form>

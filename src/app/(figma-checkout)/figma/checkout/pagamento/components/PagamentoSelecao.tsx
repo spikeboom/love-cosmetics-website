@@ -5,7 +5,6 @@ import { PagamentoResumo } from "./PagamentoResumo";
 import { ResumoProps } from "./types";
 
 interface PagamentoSelecaoProps {
-  valorPix: number;
   valorTotal: number;
   formatPrice: (price: number) => string;
   onSelecionarPix: () => void;
@@ -14,7 +13,6 @@ interface PagamentoSelecaoProps {
 }
 
 export function PagamentoSelecao({
-  valorPix,
   valorTotal,
   formatPrice,
   onSelecionarPix,
@@ -65,7 +63,7 @@ export function PagamentoSelecao({
                       />
                     </svg>
                     <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#254333]">
-                      Pix {formatPrice(valorPix)}
+                      Pix {formatPrice(valorTotal)}
                     </span>
                   </div>
                   <div className="bg-[#f8f3ed] px-4 py-1 rounded flex items-center gap-1">
