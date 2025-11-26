@@ -82,8 +82,9 @@ export function useCreateOrder(): UseCreateOrderReturn {
       }
 
       // Preparar items do carrinho
+      // Usar documentId (estável no Strapi v5) em vez de id (muda ao publicar)
       const items = Object.entries(cart).map(([id, product]: [string, any]) => ({
-        reference_id: id,
+        reference_id: product.documentId || id,
         name: product.nome,
         quantity: product.quantity,
         preco: product.preco,

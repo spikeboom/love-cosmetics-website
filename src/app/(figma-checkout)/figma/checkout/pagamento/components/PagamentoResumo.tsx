@@ -69,15 +69,15 @@ export function PagamentoResumo({
 
       <div className="bg-white h-px w-full" />
 
-      {/* Descontos */}
-      {descontos > 0 && (
+      {/* Descontos (positivo) ou Acréscimo (negativo) */}
+      {descontos !== 0 && (
         <>
           <div className="p-4 flex items-center justify-between">
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111111]">
-              Descontos{tipoDesconto && <span className="font-light text-[12px] text-[#666666] ml-1">({tipoDesconto})</span>}
+              {descontos > 0 ? 'Descontos' : 'Acréscimo'}{tipoDesconto && <span className="font-light text-[12px] text-[#666666] ml-1">({tipoDesconto})</span>}
             </span>
-            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-              - {formatPrice(descontos)}
+            <span className={`font-cera-pro font-bold text-[18px] lg:text-[20px] ${descontos > 0 ? 'text-[#009142]' : 'text-[#B3261E]'}`}>
+              {descontos > 0 ? '-' : '+'} {formatPrice(Math.abs(descontos))}
             </span>
           </div>
           <div className="bg-white h-px w-full" />

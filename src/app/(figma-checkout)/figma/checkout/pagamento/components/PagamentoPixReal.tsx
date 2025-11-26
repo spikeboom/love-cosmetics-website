@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../../CheckoutStepper";
+import { BotaoVoltar } from "./BotaoVoltar";
 import { PagamentoResumo } from "./PagamentoResumo";
 import { ResumoProps } from "./types";
 import { usePagBankPayment } from "@/hooks/checkout";
@@ -167,6 +168,8 @@ export function PagamentoPixReal({
 
       <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
         <div className="flex flex-col gap-8 w-full max-w-[684px]">
+          <BotaoVoltar onClick={onVoltar} />
+
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="w-12 h-12 border-4 border-[#254333] border-t-transparent rounded-full animate-spin mb-4" />

@@ -4,16 +4,54 @@ import { createLogger } from "@/utils/logMessage";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentSession, hashPassword, createSession, setSessionCookie } from "@/lib/cliente/auth";
+import { validateOrder } from "@/lib/pedido/validate-order";
 
 export async function POST(req: NextRequest) {
   const logMessage = createLogger();
   try {
     const body = await req.json();
 
+    // ============================================================
+    // VALIDAÇÃO DE SEGURANÇA - Previne manipulação de preços
+    // ============================================================
+    const validationResult = await validateOrder(
+      body.items,
+      body.cupons,
+      body.descontos,
+      body.total_pedido,
+      body.frete_calculado
+    );
+
+    if (!validationResult.valid) {
+      logMessage("Validação do pedido falhou - carrinho desatualizado ou valores divergentes", {
+        error: validationResult.error,
+        code: validationResult.code,
+        email: body.email,
+        totalEnviado: body.total_pedido,
+        totalCalculado: validationResult.calculatedTotal,
+        descontosEnviado: body.descontos,
+        descontosCalculado: validationResult.calculatedDescontos,
+        items: body.items?.map((i: any) => ({ name: i.name, preco: i.preco, qty: i.quantity })),
+        cupons: body.cupons,
+      });
+
+      return NextResponse.json(
+        {
+          error: validationResult.error,
+          code: validationResult.code,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Usar valores calculados pelo servidor (mais seguro)
+    const totalSeguro = validationResult.calculatedTotal;
+    const descontosSeguro = validationResult.calculatedDescontos;
+
     // Verificar se há cliente logado
     const clienteSession = await getCurrentSession();
 
-    // Cria o registro do pedido no banco
+    // Cria o registro do pedido no banco (usando valores validados)
     const pedido = await prisma.pedido.create({
       data: {
         nome: body.nome,
@@ -32,8 +70,8 @@ export async function POST(req: NextRequest) {
         estado: body.estado,
         items: body.items,
         cupons: body.cupons,
-        descontos: body.descontos,
-        total_pedido: body.total_pedido,
+        descontos: descontosSeguro, // Valor calculado pelo servidor
+        total_pedido: totalSeguro,  // Valor calculado pelo servidor
         frete_calculado: body.frete_calculado,
         transportadora_nome: body.transportadora_nome,
         transportadora_servico: body.transportadora_servico,
@@ -149,7 +187,6 @@ export async function POST(req: NextRequest) {
           logMessage("Nova conta criada e pedido vinculado", {
             clienteId: novoCliente.id,
             email: novoCliente.email,
-            senhaTemporaria: senhaTemporaria, // TODO: Enviar por email
           });
         } else {
           // Email já existe - não permitir vinculação automática por segurança

@@ -41,7 +41,9 @@ export async function processProdutos(rawData: any, cupom?: string) {
     rawData?.data?.map((p: any) => {
       const { ...dataLog } = p || {};
 
-      if (p?.cupom_applied === dataCookie?.[0]?.multiplacar) {
+      // Verificar se o cupom já foi aplicado (usando codigo do cupom, não multiplacar)
+      const cupomCodigo = dataCookie?.[0]?.codigo;
+      if (p?.cupom_applied_codigo === cupomCodigo) {
         // se o cupom já foi aplicado, não faz nada
         return {
           ...dataLog,
@@ -59,6 +61,7 @@ export async function processProdutos(rawData: any, cupom?: string) {
         // se quiser aplicar desconto:
         // tag_desconto_1_modified
         cupom_applied: dataCookie?.[0]?.multiplacar || null,
+        cupom_applied_codigo: dataCookie?.[0]?.codigo || null,
         preco_de: preco_de || 0,
         preco: preco_modificado || 0,
         tag_desconto_1: `${preco_desconto >= 0 ? "-" : "+"}R$ ${formatPrice(Math.abs(preco_desconto))}`,
