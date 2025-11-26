@@ -1,0 +1,24 @@
+https://callentregas.com.br/integracaoWebService/doc
+
+
+
+Calcular serviços
+c31d5c4c5411b59430f3fae98733059d-calcular
+Cancelar serviços
+c31d5c4c5411b59430f3fae98733059d-cancelar
+Upload serviço
+c31d5c4c5411b59430f3fae98733059d-upload
+Código do cliente
+c3a690be93aa602ee2dc0ccab5b7b67e
+Bairro, cidade e região
+c31d5c4c5411b59430f3fae98733059d-regiao
+Gravar serviços
+c31d5c4c5411b59430f3fae98733059d-gravar
+Status serviços
+c31d5c4c5411b59430f3fae98733059d-status
+ Finalizar serviço
+c31d5c4c5411b59430f3fae98733059d-finalizar
+ Adicionar / Remover Endereço
+c31d5c4c5411b59430f3fae98733059d-endereco
+Buscar profissionais
+c31d5c4c5411b59430f3fae98733059d-profissionais

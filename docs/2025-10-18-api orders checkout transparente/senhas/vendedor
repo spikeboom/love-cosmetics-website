@@ -1,0 +1,29 @@
+Vendedor de testes
+Credenciais
+Utilize as informações abaixo para acessar as APIs do PagBank Sandbox.
+
+Seu e-mail é: lovecosmetic23@gmail.com
+Seu token é: F16C5EDC1A054248814D449EA5495369
+Chave Pública: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr+ZqgD892U9/HXsa7XqBZUayPquAfh9xx4iwUbTSUAvTlmiXFQNTp0Bvt/5vK2FhMj39qSv1zi2OuBjvW38q1E374nzx6NNBL5JosV0+SDINTlCG0cmigHuBOyWzYmjgca+mtQu4WczCaApNaSuVqgb8u7Bd9GCOL4YJotvV5+81frlSwQXralhwRzGhj/A57CGPgGKiuPT+AOGmykIGEZsSD9RKkyoKIoc0OS8CPIzdBOtTQCIwrLn2FxI83Clcg55W8gkFSOS6rWNbG5qFZWMll6yl02HtunalHmUlRUL66YeGXdMDC2PuRcmZbGO5a/2tbVppW6mfSWG3NPRpgwIDAQAB
+Configurações
+Notificação de transações
+Consulte a documentação Configurar no ambiente real
+Essa configuração permite que seu sistema seja avisado sempre que uma transação muda de estado.
+
+Definir URL para receber as notificações:
+exemplo: http://www.sualoja.com.br/retornopagamento.php
+ 
+Página de redirecionamento
+Configurar no ambiente real
+Ao final do pagamento você pode configurar uma página para redirecionarmos o seu cliente.
+
+A. Página fixa de redirecionamento
+Definir página de redirecionamento:
+exemplo: http://www.sualoja.com.br/retornopagamento.php
+ 
+B. Redirecionamento com o código da transação
+Ao redirecionar o cliente para sua página, já podemos enviar o código da transação no PagBank, você pode escolher qual será o nome desse parâmetro.
+
+Escolha um nome para o parâmetro:
+exemplo: id, transaction_id, id_pagseguro
+ 

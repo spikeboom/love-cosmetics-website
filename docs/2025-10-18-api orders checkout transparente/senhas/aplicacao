@@ -1,0 +1,49 @@
+Meu Sandbox
+Primeiros passos
+Transações
+Transações (aplicação)
+Autorizações
+Comprador de testes
+Assinaturas
+Planos
+Planos (aplicação)
+Assinaturas
+Assinaturas (aplicação)
+Perfis de integração
+Vendedor
+Aplicação
+Aplicação
+Credenciais
+Ao criar sua conta no Sandbox, criamos automaticamente uma Aplicação para você testar as integrações via API. Abaixo estão os dados de acesso.
+
+appID: app1917528666copiar
+AppKey: 4B50AA43F6F6FA1DD4CA5F937DD62285copiar
+Vendedor de Testes
+Para simular um vendedor de testes no ambiente da Aplicação, utilize as credenciais abaixo:
+
+Vendedor 1
+E-mail: v28541694563001983244@sandbox.pagseguro.com.brcopiar
+Senha: C63828142Mt3U11Jcopiar
+Chave Pública: PUB21D327F285314AD589CB2F85E9E0F493copiar
+Configurações
+Notificação de transações
+Consulte a documentação Configurar no ambiente real
+Essa configuração permite que seu sistema seja avisado sempre que uma transação muda de estado.
+
+Definir URL para receber as notificações:
+http://www.sualoja.com.br/retornopagamento.php
+ 
+Página de redirecionamento
+Configurar no ambiente real
+Ao final do pagamento você pode configurar uma página para redirecionarmos o seu cliente.
+
+A. Página fixa de redirecionamento
+Definir página de redirecionamento:
+exemplo: http://www.sualoja.com.br/retornopagamento.php
+ 
+B. Redirecionamento com o código da transação
+Ao redirecionar o cliente para sua página, já podemos enviar o código da transação no PagBank, você pode escolher qual será o nome desse parâmetro.
+
+Escolha um nome para o parâmetro:
+exemplo: id, transaction_id, id_pagseguro
+ 
