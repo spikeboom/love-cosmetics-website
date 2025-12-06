@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useSnackbar } from "notistack";
 
 interface Pagamento {
@@ -134,6 +135,7 @@ function StatusBadge({ status }: { status: string }) {
     'FAILED': { label: 'Falhou', bgColor: 'bg-red-50', textColor: 'text-[#B3261E]', borderColor: 'border-[#B3261E]' },
     'CANCELLED': { label: 'Cancelado', bgColor: 'bg-red-50', textColor: 'text-[#B3261E]', borderColor: 'border-[#B3261E]' },
     'WAITING_PAYMENT': { label: 'Aguardando', bgColor: 'bg-blue-50', textColor: 'text-blue-600', borderColor: 'border-blue-600' },
+    'CORTESIA': { label: 'Cortesia', bgColor: 'bg-purple-50', textColor: 'text-purple-600', borderColor: 'border-purple-600' },
   };
 
   const config = statusMap[status] || { label: status, bgColor: 'bg-gray-100', textColor: 'text-[#666666]', borderColor: 'border-[#d2d2d2]' };
@@ -696,6 +698,18 @@ export default function PedidosPage() {
 
             {/* Ações */}
             <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/pedidos/novo"
+                className="flex items-center gap-2 px-4 py-2 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span className="font-cera-pro font-medium text-[14px] text-white">
+                  Novo Pedido
+                </span>
+              </Link>
               <button
                 onClick={() => fetchPedidos(true)}
                 disabled={refreshing}
