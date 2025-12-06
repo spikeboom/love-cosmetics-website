@@ -158,7 +158,9 @@ export async function POST(req: NextRequest) {
         frete_calculado: freteValor,
         transportadora_nome: frete.transportadora_nome || null,
         transportadora_servico: frete.transportadora_servico || null,
-        transportadora_prazo: frete.transportadora_prazo || null,
+        transportadora_prazo: frete.transportadora_prazo
+          ? parseInt(String(frete.transportadora_prazo), 10)
+          : null,
         salvar_minhas_informacoes: false,
         aceito_receber_whatsapp: false,
         destinatario: null,
