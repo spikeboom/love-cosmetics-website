@@ -266,7 +266,7 @@ export default function NovoPedidoPage() {
         setOpcoesFrenet(resultado.services);
         // Auto-selecionar o mais barato
         if (resultado.cheapest) {
-          setServicoSelecionado(resultado.cheapest.serviceCode || `${resultado.cheapest.carrier}-${resultado.cheapest.service}`);
+          setServicoSelecionado(`${resultado.cheapest.carrier}-${resultado.cheapest.service}`);
           setFreteValor(resultado.cheapest.price);
           setFreteTransportadora(`${resultado.cheapest.carrier} - ${resultado.cheapest.service}`);
           setFretePrazo(resultado.cheapest.deliveryTime);
