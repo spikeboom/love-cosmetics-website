@@ -1,45 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Button,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Collapse,
-  IconButton,
-  ToggleButton,
-  ToggleButtonGroup,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  Divider,
-  Grid,
-} from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ReceiptIcon from "@mui/icons-material/Receipt";
+import Image from "next/image";
 import { useSnackbar } from "notistack";
 
 interface Pagamento {
   id: string;
-  info: any; // ajuste o tipo conforme necessário
+  info: any;
   status: string;
 }
 
@@ -84,14 +51,104 @@ interface Pedido {
   notaFiscalErro?: string | null;
 }
 
-// export const metadata = {
-//   title: "Admin - Painel de Pedidos",
-// };
+// Ícones SVG inline
+const ChevronDownIcon = ({ className = "" }: { className?: string }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M6 9l6 6 6-6" />
+  </svg>
+);
 
-function PedidoRow({ pedido, index, onNotaGerada }: { pedido: Pedido; index: number; onNotaGerada: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [openContato, setOpenContato] = useState(false);
-  const [openPaymentMethods, setOpenPaymentMethods] = useState(false);
+const UserIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M22 6l-10 7L2 6" />
+  </svg>
+);
+
+const PhoneIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </svg>
+);
+
+const MapPinIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const CreditCardIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="1" y="4" width="22" height="16" rx="2" />
+    <line x1="1" y1="10" x2="23" y2="10" />
+  </svg>
+);
+
+const PackageIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
+
+const RefreshIcon = ({ className = "" }: { className?: string }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+    <polyline points="23 4 23 10 17 10" />
+    <polyline points="1 20 1 14 7 14" />
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>
+);
+
+const ReceiptIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z" />
+    <line x1="8" y1="6" x2="16" y2="6" />
+    <line x1="8" y1="10" x2="16" y2="10" />
+    <line x1="8" y1="14" x2="12" y2="14" />
+  </svg>
+);
+
+function StatusBadge({ status }: { status: string }) {
+  const statusMap: Record<string, { label: string; bgColor: string; textColor: string; borderColor: string }> = {
+    'PAID': { label: 'Pago', bgColor: 'bg-[#F0F9F4]', textColor: 'text-[#009142]', borderColor: 'border-[#009142]' },
+    'IN_ANALYSIS': { label: 'Em Análise', bgColor: 'bg-[#FFF8E6]', textColor: 'text-[#ba7900]', borderColor: 'border-[#ba7900]' },
+    'FAILED': { label: 'Falhou', bgColor: 'bg-red-50', textColor: 'text-[#B3261E]', borderColor: 'border-[#B3261E]' },
+    'CANCELLED': { label: 'Cancelado', bgColor: 'bg-red-50', textColor: 'text-[#B3261E]', borderColor: 'border-[#B3261E]' },
+    'WAITING_PAYMENT': { label: 'Aguardando', bgColor: 'bg-blue-50', textColor: 'text-blue-600', borderColor: 'border-blue-600' },
+  };
+
+  const config = statusMap[status] || { label: status, bgColor: 'bg-gray-100', textColor: 'text-[#666666]', borderColor: 'border-[#d2d2d2]' };
+
+  return (
+    <span className={`inline-flex items-center px-2 py-1 rounded-[4px] border ${config.bgColor} ${config.textColor} ${config.borderColor} font-cera-pro font-light text-[12px]`}>
+      {config.label}
+    </span>
+  );
+}
+
+function PedidoCard({ pedido, onNotaGerada }: { pedido: Pedido; onNotaGerada: () => void }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showContato, setShowContato] = useState(false);
+  const [showPagamentos, setShowPagamentos] = useState(false);
   const [generatingNota, setGeneratingNota] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -118,481 +175,392 @@ function PedidoRow({ pedido, index, onNotaGerada }: { pedido: Pedido; index: num
     }
   };
 
-  const getPaymentStatusChip = (status: string) => {
-    const statusMap: Record<string, { label: string; color: any }> = {
-      'PAID': { label: 'Pago', color: 'success' },
-      'IN_ANALYSIS': { label: 'Em Análise', color: 'warning' },
-      'FAILED': { label: 'Falhou', color: 'error' },
-      'CANCELLED': { label: 'Cancelado', color: 'error' },
-      'WAITING_PAYMENT': { label: 'Aguardando', color: 'info' },
-    };
-
-    return statusMap[status] || { label: status, color: 'default' };
+  const getMainPaymentStatus = () => {
+    if (!pedido.pagamentos || pedido.pagamentos.length === 0) return null;
+    const charge = pedido.pagamentos[0]?.info?.charges?.[0];
+    return charge?.status || pedido.pagamentos[0].status;
   };
 
+  const mainStatus = getMainPaymentStatus();
+
   return (
-    <>
-      <TableRow 
-        sx={{ 
-          backgroundColor: index % 2 === 0 ? "white" : "#f8fafc",
-          '&:hover': {
-            backgroundColor: '#f1f5f9',
-          },
-          transition: 'background-color 0.2s ease',
-        }}
+    <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] overflow-hidden">
+      {/* Header do Card */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-4 lg:p-6 flex items-center justify-between hover:bg-[#f8f3ed] transition-colors"
       >
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-            sx={{
-              color: open ? '#1976d2' : '#64748b',
-              '&:hover': {
-                backgroundColor: '#e3f2fd',
-              }
-            }}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell>
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              fontFamily: 'monospace',
-              fontSize: '0.75rem',
-              color: '#64748b'
-            }}
-          >
-            #{pedido.id.slice(-8)}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar sx={{ width: 24, height: 24, bgcolor: '#1976d2' }}>
-              <PersonIcon sx={{ fontSize: 14 }} />
-            </Avatar>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {pedido.nome}
-            </Typography>
-          </Box>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            {pedido.sobrenome}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <EmailIcon sx={{ fontSize: 16, color: '#64748b' }} />
-            <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {pedido.email}
-            </Typography>
-          </Box>
-        </TableCell>
-        <TableCell>
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              fontWeight: 600,
-              color: '#059669',
-              fontSize: '0.95rem'
-            }}
-          >
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          {/* Avatar */}
+          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#254333] rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="font-cera-pro font-bold text-[16px] lg:text-[18px] text-white">
+              {pedido.nome.charAt(0).toUpperCase()}
+            </span>
+          </div>
+
+          {/* Info Principal */}
+          <div className="flex-1 min-w-0 text-left">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-cera-pro font-bold text-[16px] lg:text-[18px] text-black truncate">
+                {pedido.nome} {pedido.sobrenome}
+              </p>
+              {mainStatus && <StatusBadge status={mainStatus} />}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                #{pedido.id.slice(-8)}
+              </span>
+              <span className="text-[#d2d2d2]">•</span>
+              <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                {new Date(pedido.createdAt).toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+          </div>
+
+          {/* Valor */}
+          <div className="text-right flex-shrink-0 hidden sm:block">
+            <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
+              {pedido.total_pedido.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+            </p>
+            <p className="font-cera-pro font-light text-[12px] text-[#666666]">
+              + {pedido.frete_calculado.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })} frete
+            </p>
+          </div>
+        </div>
+
+        {/* Chevron */}
+        <ChevronDownIcon
+          className={`w-6 h-6 text-[#666666] flex-shrink-0 ml-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {/* Valor Mobile */}
+      <div className="px-4 pb-4 sm:hidden">
+        <div className="flex items-center justify-between">
+          <p className="font-cera-pro font-bold text-[18px] text-[#009142]">
             {pedido.total_pedido.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
             })}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              fontWeight: 500,
-              color: '#0369a1',
-              fontSize: '0.85rem'
-            }}
-          >
-            {pedido.frete_calculado.toLocaleString("pt-BR", {
+          </p>
+          <p className="font-cera-pro font-light text-[12px] text-[#666666]">
+            + {pedido.frete_calculado.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
-            })}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.8rem' }}>
-            {new Date(pedido.createdAt).toLocaleString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          {pedido.pagamentos && pedido.pagamentos.length > 0 ? (
-            <Stack spacing={0.5}>
-              {pedido.pagamentos.map((pagamento, idx) => {
-                const charge = pagamento?.info?.charges?.[0];
-                const status = charge?.status || pagamento.status;
-                const statusConfig = getPaymentStatusChip(status);
+            })} frete
+          </p>
+        </div>
+      </div>
 
-                return (
-                  <Chip
-                    key={idx}
-                    label={statusConfig.label}
-                    color={statusConfig.color}
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.7rem', height: 20 }}
-                  />
-                );
-              })}
-            </Stack>
-          ) : (
-            <Chip
-              label="Sem pagamento"
-              color="default"
-              size="small"
-              variant="outlined"
-              sx={{ fontSize: '0.7rem', height: 20 }}
-            />
-          )}
-        </TableCell>
-        <TableCell>
-          {pedido.notaFiscalGerada ? (
-            <Chip
-              label="NF Gerada"
-              color="success"
-              size="small"
-              icon={<ReceiptIcon />}
-              sx={{ fontSize: '0.7rem', height: 24 }}
-            />
-          ) : pedido.notaFiscalErro ? (
-            <Button
-              variant="outlined"
-              size="small"
-              color="error"
-              startIcon={generatingNota ? <CircularProgress size={14} /> : <ReceiptIcon />}
-              onClick={handleGerarNota}
-              disabled={generatingNota}
-              sx={{ fontSize: '0.7rem', py: 0.5 }}
-            >
-              Erro - Tentar
-            </Button>
-          ) : (
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={generatingNota ? <CircularProgress size={14} /> : <ReceiptIcon />}
-              onClick={handleGerarNota}
-              disabled={generatingNota}
-              sx={{ fontSize: '0.7rem', py: 0.5 }}
-            >
-              Gerar NF
-            </Button>
-          )}
-        </TableCell>
-      </TableRow>
+      {/* Conteúdo Expandido */}
+      {isExpanded && (
+        <div className="border-t border-[#d2d2d2]">
+          {/* Itens do Pedido */}
+          <div className="p-4 lg:p-6 border-b border-[#d2d2d2]">
+            <div className="flex items-center gap-2 mb-4">
+              <PackageIcon />
+              <h3 className="font-cera-pro font-bold text-[16px] lg:text-[18px] text-black">
+                Itens do Pedido
+              </h3>
+            </div>
 
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2, backgroundColor: '#f8fafc', borderRadius: 2, p: 2 }}>
-              
-              {/* Seção de Itens do Pedido */}
-              <Card sx={{ mb: 2, boxShadow: 1 }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <ShoppingCartIcon sx={{ color: '#1976d2' }} />
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Itens do Pedido
-                    </Typography>
-                  </Box>
-                  
-                  <Grid container spacing={2}>
-                    {pedido.items.map((item, idx) => (
-                      <Grid item xs={12} sm={6} md={4} key={idx}>
-                        <Box 
-                          sx={{ 
-                            p: 2, 
-                            border: '1px solid #e2e8f0',
-                            borderRadius: 2,
-                            backgroundColor: 'white',
-                            '&:hover': {
-                              boxShadow: 2,
-                            },
-                            transition: 'box-shadow 0.2s ease'
-                          }}
-                        >
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                            {item.name}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#64748b', mb: 0.5 }}>
-                            Quantidade: <strong>{item.quantity}</strong>
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#059669', fontWeight: 600 }}>
-                            {item.unit_amount.toLocaleString("pt-BR", {
-                              style: "currency",
-                              currency: "BRL",
-                            })}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: '#94a3b8', fontFamily: 'monospace' }}>
-                            ID: {item.reference_id}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-
-                  {pedido.cupons && pedido.cupons.length > 0 && (
-                    <Box sx={{ mt: 2, p: 2, backgroundColor: '#f0f9ff', borderRadius: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                        Cupons Aplicados
-                      </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap">
-                        {pedido.cupons.map((cupom, idx) => (
-                          <Chip
-                            key={idx}
-                            label={cupom}
-                            color="primary"
-                            variant="outlined"
-                            size="small"
-                          />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Botões de Ação */}
-              <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PersonIcon />}
-                  onClick={() => setOpenContato(!openContato)}
-                  sx={{
-                    borderColor: '#1976d2',
-                    '&:hover': {
-                      backgroundColor: '#e3f2fd',
-                    }
-                  }}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {pedido.items.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-[#f8f3ed] rounded-[8px] p-3"
                 >
-                  {openContato ? "Ocultar" : "Ver"} Dados do Cliente
-                </Button>
+                  <p className="font-cera-pro font-medium text-[14px] text-black line-clamp-2 mb-2">
+                    {item.name}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                      Qtd: {item.quantity}
+                    </span>
+                    <span className="font-cera-pro font-bold text-[14px] text-[#254333]">
+                      {item.unit_amount.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CreditCardIcon />}
-                  onClick={() => setOpenPaymentMethods(!openPaymentMethods)}
-                  sx={{
-                    borderColor: '#059669',
-                    color: '#059669',
-                    '&:hover': {
-                      backgroundColor: '#f0fdf4',
-                    }
-                  }}
-                >
-                  {openPaymentMethods ? "Ocultar" : "Ver"} Pagamentos
-                </Button>
-              </Stack>
+            {/* Cupons */}
+            {pedido.cupons && pedido.cupons.length > 0 && (
+              <div className="mt-4 p-3 bg-[#F0F9F4] rounded-[8px] border border-[#009142]">
+                <p className="font-cera-pro font-medium text-[12px] text-[#009142] mb-2">
+                  Cupons Aplicados
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {pedido.cupons.map((cupom, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-white px-2 py-1 rounded-[4px] font-cera-pro font-light text-[12px] text-[#009142] border border-[#009142]"
+                    >
+                      {cupom}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-              {/* Dados do Cliente */}
-              <Collapse in={openContato} timeout="auto" unmountOnExit>
-                <Card sx={{ mb: 2, boxShadow: 1 }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <PersonIcon sx={{ color: '#1976d2' }} />
-                      Informações do Cliente
-                    </Typography>
-                    
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <PhoneIcon sx={{ fontSize: 16, color: '#64748b' }} />
-                          <Typography variant="body2">
-                            <strong>Telefone:</strong> {pedido.telefone}
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          <strong>CPF:</strong> {pedido.cpf}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          <strong>Data de Nascimento:</strong>{" "}
-                          {new Date(pedido.data_nascimento).toLocaleDateString("pt-BR")}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2">
-                            <strong>WhatsApp:</strong>
-                          </Typography>
-                          <Chip
-                            label={pedido.aceito_receber_whatsapp ? "Aceita" : "Não aceita"}
-                            color={pedido.aceito_receber_whatsapp ? "success" : "default"}
-                            size="small"
-                          />
-                        </Box>
-                      </Grid>
-                      
-                      <Grid item xs={12} md={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                          <LocationOnIcon sx={{ fontSize: 16, color: '#64748b', mt: 0.5 }} />
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              Endereço de Entrega:
-                            </Typography>
-                            <Typography variant="body2" sx={{ lineHeight: 1.4 }}>
-                              {pedido.endereco}, {pedido.numero}
-                              {pedido.complemento && `, ${pedido.complemento}`}
-                              <br />
-                              {pedido.bairro} - {pedido.cidade}/{pedido.estado}
-                              <br />
-                              CEP: {pedido.cep} - {pedido.pais}
-                            </Typography>
-                            <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e2e8f0' }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#0369a1' }}>
-                                Frete: {pedido.frete_calculado.toLocaleString("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
-                                })}
-                              </Typography>
-                              {pedido.transportadora_nome && (
-                                <Typography variant="body2" sx={{ fontSize: '0.875rem', color: '#64748b', mt: 0.5 }}>
-                                  {pedido.transportadora_nome} - {pedido.transportadora_servico}
-                                  {pedido.transportadora_prazo && (
-                                    <> ({pedido.transportadora_prazo} {pedido.transportadora_prazo === 1 ? 'dia útil' : 'dias úteis'})</>
-                                  )}
-                                </Typography>
-                              )}
-                            </Box>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Collapse>
+          {/* Ações */}
+          <div className="p-4 lg:p-6 flex flex-wrap gap-3">
+            <button
+              onClick={() => setShowContato(!showContato)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] rounded-[8px] transition-colors"
+            >
+              <UserIcon />
+              <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                {showContato ? "Ocultar" : "Ver"} Cliente
+              </span>
+            </button>
 
-              {/* Métodos de Pagamento */}
-              <Collapse in={openPaymentMethods} timeout="auto" unmountOnExit>
-                <Card sx={{ boxShadow: 1 }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CreditCardIcon sx={{ color: '#059669' }} />
-                      Métodos de Pagamento
-                    </Typography>
-                    
-                    {pedido.pagamentos?.length ? (
-                      <Stack spacing={2}>
-                        {pedido.pagamentos.map((pagamento, pIdx) => {
-                          const charge = pagamento?.info?.charges?.[0];
-                          const status = charge?.status || pagamento.status;
-                          const statusConfig = getPaymentStatusChip(status);
-                          
-                          return (
-                            <Box
-                              key={pIdx}
-                              sx={{
-                                p: 2,
-                                border: '1px solid #e2e8f0',
-                                borderRadius: 2,
-                                backgroundColor: 'white',
-                              }}
-                            >
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                  Pagamento #{pIdx + 1}
-                                </Typography>
-                                <Chip
-                                  label={statusConfig.label}
-                                  color={statusConfig.color}
-                                  size="small"
-                                />
-                              </Box>
-                              
-                              {charge && (
-                                <Grid container spacing={2}>
-                                  <Grid item xs={12} sm={6}>
-                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                      <strong>ID da Transação:</strong>
-                                    </Typography>
-                                    <Typography variant="caption" sx={{ fontFamily: 'monospace', color: '#64748b' }}>
-                                      {charge.id}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={12} sm={6}>
-                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                      <strong>Valor:</strong>
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#059669' }}>
-                                      {(charge.amount.value / 100).toLocaleString("pt-BR", {
-                                        style: "currency",
-                                        currency: charge.amount.currency,
-                                      })}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={12} sm={4}>
-                                    <Typography variant="body2">
-                                      <strong>Método:</strong> {charge.payment_method?.type ?? "N/A"}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={12} sm={4}>
-                                    <Typography variant="body2">
-                                      <strong>Parcelas:</strong> {charge.payment_method?.installments ?? "N/A"}
-                                    </Typography>
-                                  </Grid>
-                                  {charge.payment_method?.pix && (
-                                    <>
-                                      <Grid item xs={12}>
-                                        <Divider sx={{ my: 1 }} />
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                                          Dados PIX
-                                        </Typography>
-                                      </Grid>
-                                      <Grid item xs={12} sm={6}>
-                                        <Box>
-                                          <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                            <strong>End to End ID:</strong>
-                                          </Typography>
-                                          <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                                            {charge.payment_method.pix.end_to_end_id || "N/A"}
-                                          </Typography>
-                                        </Box>
-                                      </Grid>
-                                      <Grid item xs={12} sm={6}>
-                                        <Typography variant="body2">
-                                          <strong>Titular:</strong> {charge.payment_method.pix.holder?.name || "N/A"}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                          <strong>CPF:</strong> {charge.payment_method.pix.holder?.tax_id || "N/A"}
-                                        </Typography>
-                                      </Grid>
-                                    </>
-                                  )}
-                                </Grid>
-                              )}
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    ) : (
-                      <Typography variant="body2" sx={{ color: '#64748b', textAlign: 'center', py: 2 }}>
-                        Nenhum método de pagamento registrado
-                      </Typography>
+            <button
+              onClick={() => setShowPagamentos(!showPagamentos)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] rounded-[8px] transition-colors"
+            >
+              <CreditCardIcon />
+              <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                {showPagamentos ? "Ocultar" : "Ver"} Pagamentos
+              </span>
+            </button>
+
+            {/* Botão Nota Fiscal */}
+            {pedido.notaFiscalGerada ? (
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#F0F9F4] rounded-[8px] border border-[#009142]">
+                <ReceiptIcon />
+                <span className="font-cera-pro font-medium text-[14px] text-[#009142]">
+                  NF Gerada
+                </span>
+              </div>
+            ) : (
+              <button
+                onClick={handleGerarNota}
+                disabled={generatingNota}
+                className={`flex items-center gap-2 px-4 py-2 rounded-[8px] transition-colors ${
+                  pedido.notaFiscalErro
+                    ? "bg-red-50 hover:bg-red-100 border border-[#B3261E]"
+                    : "bg-[#254333] hover:bg-[#1a3226]"
+                }`}
+              >
+                {generatingNota ? (
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                ) : (
+                  <ReceiptIcon />
+                )}
+                <span className={`font-cera-pro font-medium text-[14px] ${
+                  pedido.notaFiscalErro ? "text-[#B3261E]" : "text-white"
+                }`}>
+                  {pedido.notaFiscalErro ? "Erro - Tentar" : "Gerar NF"}
+                </span>
+              </button>
+            )}
+          </div>
+
+          {/* Dados do Cliente */}
+          {showContato && (
+            <div className="p-4 lg:p-6 border-t border-[#d2d2d2] bg-[#f8f3ed]">
+              <h4 className="font-cera-pro font-bold text-[16px] text-black mb-4 flex items-center gap-2">
+                <UserIcon />
+                Informações do Cliente
+              </h4>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Contato */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <MailIcon />
+                    <span className="font-cera-pro font-light text-[14px] text-[#333333]">
+                      {pedido.email}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PhoneIcon />
+                    <span className="font-cera-pro font-light text-[14px] text-[#333333]">
+                      {pedido.telefone}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-cera-pro font-light text-[14px] text-[#333333]">
+                      <strong>CPF:</strong> {pedido.cpf}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-cera-pro font-light text-[14px] text-[#333333]">
+                      <strong>Nascimento:</strong>{" "}
+                      {new Date(pedido.data_nascimento).toLocaleDateString("pt-BR")}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-[4px] font-cera-pro font-light text-[12px] ${
+                      pedido.aceito_receber_whatsapp
+                        ? "bg-[#F0F9F4] text-[#009142] border border-[#009142]"
+                        : "bg-gray-100 text-[#666666] border border-[#d2d2d2]"
+                    }`}>
+                      WhatsApp: {pedido.aceito_receber_whatsapp ? "Aceita" : "Não aceita"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Endereço */}
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <MapPinIcon />
+                    <div>
+                      <p className="font-cera-pro font-medium text-[14px] text-black">
+                        Endereço de Entrega
+                      </p>
+                      <p className="font-cera-pro font-light text-[14px] text-[#333333]">
+                        {pedido.endereco}, {pedido.numero}
+                        {pedido.complemento && `, ${pedido.complemento}`}
+                      </p>
+                      <p className="font-cera-pro font-light text-[14px] text-[#333333]">
+                        {pedido.bairro} - {pedido.cidade}/{pedido.estado}
+                      </p>
+                      <p className="font-cera-pro font-light text-[14px] text-[#333333]">
+                        CEP: {pedido.cep}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 p-3 bg-white rounded-[8px]">
+                    <p className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                      Frete: {pedido.frete_calculado.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </p>
+                    {pedido.transportadora_nome && (
+                      <p className="font-cera-pro font-light text-[12px] text-[#666666] mt-1">
+                        {pedido.transportadora_nome} - {pedido.transportadora_servico}
+                        {pedido.transportadora_prazo && (
+                          <> ({pedido.transportadora_prazo} {pedido.transportadora_prazo === 1 ? 'dia útil' : 'dias úteis'})</>
+                        )}
+                      </p>
                     )}
-                  </CardContent>
-                </Card>
-              </Collapse>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Pagamentos */}
+          {showPagamentos && (
+            <div className="p-4 lg:p-6 border-t border-[#d2d2d2] bg-[#f8f3ed]">
+              <h4 className="font-cera-pro font-bold text-[16px] text-black mb-4 flex items-center gap-2">
+                <CreditCardIcon />
+                Métodos de Pagamento
+              </h4>
+
+              {pedido.pagamentos?.length ? (
+                <div className="space-y-3">
+                  {pedido.pagamentos.map((pagamento, pIdx) => {
+                    const charge = pagamento?.info?.charges?.[0];
+                    const status = charge?.status || pagamento.status;
+
+                    return (
+                      <div
+                        key={pIdx}
+                        className="bg-white rounded-[8px] p-4"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-cera-pro font-medium text-[14px] text-black">
+                            Pagamento #{pIdx + 1}
+                          </span>
+                          <StatusBadge status={status} />
+                        </div>
+
+                        {charge && (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                                ID: {charge.id?.slice(-12)}
+                              </span>
+                              <span className="font-cera-pro font-bold text-[16px] text-[#009142]">
+                                {(charge.amount.value / 100).toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: charge.amount.currency,
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-[12px]">
+                              <span className="font-cera-pro font-light text-[#333333]">
+                                <strong>Método:</strong> {charge.payment_method?.type ?? "N/A"}
+                              </span>
+                              <span className="font-cera-pro font-light text-[#333333]">
+                                <strong>Parcelas:</strong> {charge.payment_method?.installments ?? "N/A"}
+                              </span>
+                            </div>
+
+                            {charge.payment_method?.pix && (
+                              <div className="mt-3 pt-3 border-t border-[#d2d2d2]">
+                                <p className="font-cera-pro font-medium text-[12px] text-[#254333] mb-2">
+                                  Dados PIX
+                                </p>
+                                <p className="font-cera-pro font-light text-[12px] text-[#333333]">
+                                  End to End: {charge.payment_method.pix.end_to_end_id || "N/A"}
+                                </p>
+                                {charge.payment_method.pix.holder && (
+                                  <p className="font-cera-pro font-light text-[12px] text-[#333333]">
+                                    Titular: {charge.payment_method.pix.holder.name} ({charge.payment_method.pix.holder.tax_id})
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <p className="font-cera-pro font-light text-[14px] text-[#666666]">
+                    Nenhum método de pagamento registrado
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -602,7 +570,6 @@ export default function PedidosPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [filterMode, setFilterMode] = useState<'hideTests' | 'showOnlyTests'>('hideTests');
-  // Controle de paginação (exemplo simples)
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -640,191 +607,182 @@ export default function PedidosPage() {
 
   if (initialLoading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <div className="min-h-screen bg-[#f8f3ed] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <svg
+            className="animate-spin h-10 w-10 text-[#254333]"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="font-cera-pro font-light text-[14px] text-[#666666]">
+            Carregando pedidos...
+          </p>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <Typography color="error">{error}</Typography>
-      </Box>
+      <div className="min-h-screen bg-[#f8f3ed] flex items-center justify-center p-4">
+        <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6 max-w-md w-full">
+          <div className="flex gap-[8px] items-center w-full bg-red-50 rounded-lg p-3 mb-4">
+            <p className="font-cera-pro font-light text-[14px] text-[#B3261E]">
+              {error}
+            </p>
+          </div>
+          <button
+            onClick={() => fetchPedidos(false)}
+            className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] transition-colors"
+          >
+            <RefreshIcon />
+            <span className="font-cera-pro font-medium text-[16px] text-white">
+              Tentar Novamente
+            </span>
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ p: 3, backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+    <div className="min-h-screen bg-[#f8f3ed]">
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography 
-          variant="h4" 
-          sx={{ 
-            fontWeight: 700, 
-            color: '#1e293b',
-            mb: 1 
-          }}
-        >
-          Painel de Pedidos
-        </Typography>
-        <Typography variant="body1" sx={{ color: '#64748b' }}>
-          Gerencie e visualize todos os pedidos da loja
-        </Typography>
-      </Box>
+      <div className="bg-[#254333] px-4 lg:px-8 py-6">
+        <div className="max-w-[1440px] mx-auto">
+          <h1 className="font-cera-pro font-bold text-[24px] lg:text-[32px] text-white leading-normal">
+            Painel de Pedidos
+          </h1>
+          <p className="font-cera-pro font-light text-[14px] lg:text-[16px] text-white/80 mt-1">
+            Gerencie e visualize todos os pedidos da loja
+          </p>
+        </div>
+      </div>
 
-      {/* Filtros e Estatísticas */}
-      <Card sx={{ mb: 3, boxShadow: 2 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ShoppingCartIcon sx={{ color: '#1976d2' }} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Total: {pedidos.length} pedidos
-                </Typography>
-              </Box>
-              <Chip 
-                label={filterMode === 'hideTests' ? 'Sem testes' : 'Apenas testes'}
-                color="primary"
-                variant="outlined"
-                size="small"
-              />
-            </Box>
+      {/* Conteúdo */}
+      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-6">
+        {/* Barra de Ações */}
+        <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-4 lg:p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Info */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-[#D8F9E7] rounded-full flex items-center justify-center">
+                <PackageIcon />
+              </div>
+              <div>
+                <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                  {pedidos.length} pedidos
+                </p>
+                <p className="font-cera-pro font-light text-[12px] text-[#666666]">
+                  {filterMode === 'hideTests' ? 'Excluindo testes' : 'Apenas testes'}
+                </p>
+              </div>
+            </div>
 
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Button
-                variant="outlined"
-                startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
+            {/* Ações */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
                 onClick={() => fetchPedidos(true)}
                 disabled={refreshing}
-                sx={{
-                  borderColor: '#1976d2',
-                  color: '#1976d2',
-                  '&:hover': {
-                    backgroundColor: '#e3f2fd',
-                    borderColor: '#1565c0',
-                  }
-                }}
+                className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] disabled:opacity-50 rounded-[8px] transition-colors"
               >
-                {refreshing ? 'Atualizando...' : 'Atualizar'}
-              </Button>
+                <RefreshIcon className={refreshing ? "animate-spin" : ""} />
+                <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                  {refreshing ? 'Atualizando...' : 'Atualizar'}
+                </span>
+              </button>
 
-              <ToggleButtonGroup
-                value={filterMode}
-                exclusive
-                onChange={(e, newMode) => {
-                  if (newMode !== null) {
-                    setFilterMode(newMode);
-                  }
-                }}
-                size="small"
-                sx={{
-                  '& .MuiToggleButton-root': {
-                    borderColor: '#e2e8f0',
-                    '&.Mui-selected': {
-                      backgroundColor: '#1976d2',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: '#1565c0',
-                      }
-                    }
-                  }
-                }}
-              >
-                <ToggleButton value="hideTests">
+              <div className="flex rounded-[8px] overflow-hidden border border-[#d2d2d2]">
+                <button
+                  onClick={() => setFilterMode('hideTests')}
+                  className={`px-4 py-2 font-cera-pro font-medium text-[14px] transition-colors ${
+                    filterMode === 'hideTests'
+                      ? 'bg-[#254333] text-white'
+                      : 'bg-white text-[#333333] hover:bg-[#f8f3ed]'
+                  }`}
+                >
                   Ocultar Testes
-                </ToggleButton>
-                <ToggleButton value="showOnlyTests">
-                  Mostrar Apenas Testes
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+                </button>
+                <button
+                  onClick={() => setFilterMode('showOnlyTests')}
+                  className={`px-4 py-2 font-cera-pro font-medium text-[14px] transition-colors ${
+                    filterMode === 'showOnlyTests'
+                      ? 'bg-[#254333] text-white'
+                      : 'bg-white text-[#333333] hover:bg-[#f8f3ed]'
+                  }`}
+                >
+                  Apenas Testes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      {/* Tabela de Pedidos */}
-      <Card sx={{ boxShadow: 2, overflow: 'hidden' }}>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#f1f5f9' }}>
-                <TableCell />
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>ID</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Cliente</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Sobrenome</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Total</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Frete</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Data</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#374151' }}>Nota Fiscal</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {pedidos.map((pedido, index) => (
-                <PedidoRow key={pedido.id} pedido={pedido} index={index} onNotaGerada={() => fetchPedidos(true)} />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
+        {/* Lista de Pedidos */}
+        <div className="space-y-4">
+          {pedidos.length === 0 ? (
+            <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-8 text-center">
+              <p className="font-cera-pro font-light text-[16px] text-[#666666]">
+                Nenhum pedido encontrado
+              </p>
+            </div>
+          ) : (
+            pedidos.map((pedido) => (
+              <PedidoCard
+                key={pedido.id}
+                pedido={pedido}
+                onNotaGerada={() => fetchPedidos(true)}
+              />
+            ))
+          )}
+        </div>
 
-      {/* Paginação */}
-      <Card sx={{ mt: 3, boxShadow: 1 }}>
-        <CardContent>
-          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, textAlign: 'center' }}>
-            Navegação
-          </Typography>
-          <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
-            <Button
-              variant="outlined"
+        {/* Paginação */}
+        <div className="mt-6 bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-4">
+          <div className="flex items-center justify-center gap-4">
+            <button
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1}
-              sx={{
-                borderColor: '#e2e8f0',
-                '&:hover': {
-                  backgroundColor: '#f8fafc',
-                }
-              }}
+              className="px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] disabled:bg-[#d2d2d2] disabled:cursor-not-allowed rounded-[8px] transition-colors"
             >
-              Anterior
-            </Button>
-            <Box sx={{ px: 3, py: 1, backgroundColor: '#f1f5f9', borderRadius: 1 }}>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+              <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                Anterior
+              </span>
+            </button>
+
+            <div className="px-4 py-2 bg-[#f8f3ed] rounded-[8px]">
+              <span className="font-cera-pro font-bold text-[14px] text-black">
                 Página {page}
-              </Typography>
-            </Box>
-            <Button 
-              variant="outlined" 
+              </span>
+            </div>
+
+            <button
               onClick={() => setPage((prev) => prev + 1)}
-              sx={{
-                borderColor: '#e2e8f0',
-                '&:hover': {
-                  backgroundColor: '#f8fafc',
-                }
-              }}
+              disabled={pedidos.length < pageSize}
+              className="px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] disabled:bg-[#d2d2d2] disabled:cursor-not-allowed rounded-[8px] transition-colors"
             >
-              Próxima
-            </Button>
-          </Stack>
-        </CardContent>
-      </Card>
-    </Box>
+              <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                Próxima
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

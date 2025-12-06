@@ -8,6 +8,11 @@ export async function middleware(request: NextRequest) {
   
 
   // ===== PROTEÇÃO ADMIN =====
+  // Excluir página de login do admin da proteção
+  if (pathname === "/pedidos/login") {
+    return NextResponse.next();
+  }
+
   const adminPaths = ["/pedidos", "/api/pedidos"];
   const isAdminRoute = adminPaths.some((path) =>
     pathname.startsWith(path),
@@ -17,7 +22,7 @@ export async function middleware(request: NextRequest) {
     const adminToken = request.cookies.get("auth_token")?.value;
 
     if (!adminToken || adminToken !== "sktE)7381J1") {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/pedidos/login", request.url));
     }
   }
 
@@ -99,7 +104,5 @@ export const config = {
     "/minha-conta/:path*",
     "/conta/:path*",
     "/api/cliente/conta/:path*",
-    // Páginas de autenticação
-    "/login",
   ],
 };
