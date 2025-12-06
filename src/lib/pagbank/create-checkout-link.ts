@@ -57,7 +57,7 @@ export async function createPagBankCheckoutLink(
   const { pedidoId, items, customer, frete, descontos = 0 } = params;
 
   try {
-    const baseURL = getBaseURL({ STAGE: "PRODUCTION" });
+    const baseURL = getBaseURL();
 
     // Payload para API de Checkouts do PagSeguro
     const bodyCheckoutPagSeguro = {
