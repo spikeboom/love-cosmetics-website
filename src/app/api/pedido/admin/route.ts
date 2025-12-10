@@ -124,12 +124,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Formatar items para salvar no banco
+    // unit_amount é salvo em REAIS (não centavos) para consistência na exibição
     const itemsParaSalvar = items.map((item) => ({
       reference_id: item.documentId || String(item.id),
       name: item.nome,
       quantity: item.quantity,
       preco: item.preco,
-      unit_amount: Math.round(item.preco * 100),
+      unit_amount: item.preco,
       bling_number: item.bling_number || null,
       image_url: item.imagem || null,
     }));
