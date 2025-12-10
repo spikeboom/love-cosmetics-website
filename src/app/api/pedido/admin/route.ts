@@ -124,13 +124,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Formatar items para salvar no banco
-    // unit_amount é salvo em REAIS (não centavos) para consistência na exibição
+    // IMPORTANTE: Banco salva em REAIS, PagBank espera CENTAVOS
+    // A conversão para centavos é feita em formatItemsForCheckout()
     const itemsParaSalvar = items.map((item) => ({
       reference_id: item.documentId || String(item.id),
       name: item.nome,
       quantity: item.quantity,
       preco: item.preco,
-      unit_amount: item.preco,
+      unit_amount: item.preco, // Banco: REAIS
       bling_number: item.bling_number || null,
       image_url: item.imagem || null,
     }));

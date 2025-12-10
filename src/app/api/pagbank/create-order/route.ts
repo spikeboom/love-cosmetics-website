@@ -73,11 +73,12 @@ export async function POST(req: NextRequest) {
     };
 
     // Preparar itens do pedido
+    // IMPORTANTE: Banco salva em REAIS, PagBank espera CENTAVOS
     const items = (pedido.items as any[]).map((item: any) => ({
       reference_id: item.reference_id || item.id,
       name: item.name,
       quantity: item.quantity,
-      unit_amount: Math.round(item.unit_amount * 100), // Converter de REAIS para centavos
+      unit_amount: Math.round(item.unit_amount * 100), // PagBank: CENTAVOS (banco está em REAIS)
     }));
 
     // Calcular valor total em centavos (converter de REAIS)

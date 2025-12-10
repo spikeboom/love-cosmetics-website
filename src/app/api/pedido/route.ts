@@ -52,6 +52,9 @@ export async function POST(req: NextRequest) {
     const clienteSession = await getCurrentSession();
 
     // Cria o registro do pedido no banco (usando valores validados)
+    // IMPORTANTE: Banco salva em REAIS, PagBank espera CENTAVOS
+    // Os items vêm do frontend com unit_amount em REAIS (ver useCreateOrder.ts)
+    // A conversão para centavos é feita em /api/pagbank/create-order
     const pedido = await prisma.pedido.create({
       data: {
         nome: body.nome,
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest) {
         bairro: body.bairro,
         cidade: body.cidade,
         estado: body.estado,
-        items: body.items,
+        items: body.items, // unit_amount em REAIS
         cupons: body.cupons,
         descontos: descontosSeguro, // Valor calculado pelo servidor
         total_pedido: totalSeguro,  // Valor calculado pelo servidor

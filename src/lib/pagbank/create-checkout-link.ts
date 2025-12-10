@@ -174,6 +174,9 @@ export function formatCustomerForCheckout(data: {
 
 /**
  * Helper para formatar items para o checkout
+ *
+ * IMPORTANTE: PagBank espera valores em CENTAVOS
+ * O banco de dados salva em REAIS
  */
 export function formatItemsForCheckout(items: Array<{
   id: string;
@@ -185,6 +188,6 @@ export function formatItemsForCheckout(items: Array<{
     reference_id: item.id,
     name: item.nome,
     quantity: item.quantity,
-    unit_amount: Math.round(item.preco * 100), // Converter para centavos
+    unit_amount: Math.round(item.preco * 100), // PagBank: CENTAVOS (preco * 100)
   }));
 }
