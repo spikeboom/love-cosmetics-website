@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -93,6 +93,7 @@ export default function NovoPedidoPage() {
   const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Frete
   const [tipoFrete, setTipoFrete] = useState<"frenet" | "manual" | "gratis">("manual");
@@ -163,6 +164,31 @@ export default function NovoPedidoPage() {
       setProdutosFiltrados(produtos);
     }
   }, [buscaProduto, produtos]);
+
+  // Fechar dropdown ao clicar fora ou pressionar Esc
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showDropdown]);
 
   // Adicionar produto ao carrinho
   const adicionarProduto = useCallback((produto: Produto) => {
@@ -505,7 +531,7 @@ export default function NovoPedidoPage() {
                 </h2>
 
                 {/* Busca com Dropdown */}
-                <div className="relative mb-4">
+                <div ref={dropdownRef} className="relative mb-4">
                   <div className="flex gap-2">
                     <div className="flex-1 relative">
                       <input
@@ -592,14 +618,6 @@ export default function NovoPedidoPage() {
                     </div>
                   )}
                 </div>
-
-                {/* Fechar dropdown ao clicar fora */}
-                {showDropdown && (
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowDropdown(false)}
-                  />
-                )}
 
                 {/* Carrinho */}
                 {carrinho.length === 0 ? (

@@ -572,7 +572,9 @@ export default function PedidosPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [filterMode, setFilterMode] = useState<'hideTests' | 'showOnlyTests'>('hideTests');
+  const [apenasEfetivados, setApenasEfetivados] = useState(false);
   const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
   const pageSize = 10;
 
   const fetchPedidos = async (isRefresh = false) => {
@@ -584,7 +586,7 @@ export default function PedidosPage() {
 
     try {
       const response = await fetch(
-        `/api/pedidos?page=${page}&pageSize=${pageSize}&filterMode=${filterMode}`,
+        `/api/pedidos?page=${page}&pageSize=${pageSize}&filterMode=${filterMode}&apenasEfetivados=${apenasEfetivados}`,
       );
       if (!response.ok) {
         throw new Error("Erro ao buscar os pedidos.");
@@ -605,7 +607,102 @@ export default function PedidosPage() {
 
   useEffect(() => {
     fetchPedidos(false);
-  }, [page, filterMode]);
+  }, [page, filterMode, apenasEfetivados]);
+
+  const exportToExcel = async () => {
+    setExporting(true);
+    try {
+      // Buscar todos os pedidos sem paginação
+      const response = await fetch(
+        `/api/pedidos?page=1&pageSize=10000&filterMode=${filterMode}&apenasEfetivados=${apenasEfetivados}`,
+      );
+      if (!response.ok) throw new Error("Erro ao buscar pedidos");
+      const allPedidos: Pedido[] = await response.json();
+
+      // Preparar dados para CSV
+      const headers = [
+        "ID",
+        "Data",
+        "Nome",
+        "Email",
+        "Telefone",
+        "CPF",
+        "Endereço",
+        "Número",
+        "Complemento",
+        "Bairro",
+        "Cidade",
+        "Estado",
+        "CEP",
+        "Itens",
+        "Total Pedido",
+        "Frete",
+        "Total Final",
+        "Status Pagamento",
+        "Transportadora",
+        "Prazo Entrega",
+      ];
+
+      const rows = allPedidos.map((pedido) => {
+        const getPaymentStatus = () => {
+          if (pedido.pagamentos && pedido.pagamentos.length > 0) {
+            const charge = pedido.pagamentos[0]?.info?.charges?.[0];
+            return charge?.status || pedido.pagamentos[0].status || "N/A";
+          }
+          return pedido.status_pagamento || "N/A";
+        };
+
+        const itensResumo = (pedido.items || [])
+          .map((item) => `${item.name} (${item.quantity}x)`)
+          .join("; ");
+
+        return [
+          pedido.id,
+          new Date(pedido.createdAt).toLocaleString("pt-BR"),
+          `${pedido.nome} ${pedido.sobrenome}`,
+          pedido.email,
+          pedido.telefone,
+          pedido.cpf,
+          pedido.endereco,
+          pedido.numero,
+          pedido.complemento || "",
+          pedido.bairro,
+          pedido.cidade,
+          pedido.estado,
+          pedido.cep,
+          itensResumo,
+          pedido.total_pedido.toFixed(2),
+          pedido.frete_calculado.toFixed(2),
+          (pedido.total_pedido + pedido.frete_calculado).toFixed(2),
+          getPaymentStatus(),
+          pedido.transportadora_nome || "",
+          pedido.transportadora_prazo ? `${pedido.transportadora_prazo} dias` : "",
+        ];
+      });
+
+      // Criar CSV com BOM para UTF-8
+      const BOM = "\uFEFF";
+      const csvContent =
+        BOM +
+        [headers.join(";"), ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(";"))].join("\n");
+
+      // Download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `pedidos_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Erro ao exportar:", err);
+      alert("Erro ao exportar pedidos");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (initialLoading) {
     return (
@@ -720,6 +817,36 @@ export default function PedidosPage() {
                   {refreshing ? 'Atualizando...' : 'Atualizar'}
                 </span>
               </button>
+
+              <button
+                onClick={exportToExcel}
+                disabled={exporting || pedidos.length === 0}
+                className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] disabled:opacity-50 rounded-[8px] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#254333" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                  {exporting ? 'Exportando...' : 'Exportar Excel'}
+                </span>
+              </button>
+
+              <label className="flex items-center gap-2 px-4 py-2 bg-white border border-[#d2d2d2] rounded-[8px] cursor-pointer hover:bg-[#f8f3ed] transition-colors">
+                <input
+                  type="checkbox"
+                  checked={apenasEfetivados}
+                  onChange={(e) => {
+                    setApenasEfetivados(e.target.checked);
+                    setPage(1);
+                  }}
+                  className="w-4 h-4 accent-[#254333]"
+                />
+                <span className="font-cera-pro font-medium text-[14px] text-[#333333]">
+                  Apenas Pagos
+                </span>
+              </label>
 
               <div className="flex rounded-[8px] overflow-hidden border border-[#d2d2d2]">
                 <button

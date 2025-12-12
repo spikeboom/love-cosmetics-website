@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const filterMode = searchParams.get("filterMode") || "hideTests";
+    const apenasEfetivados = searchParams.get("apenasEfetivados") === "true";
 
     // Caso queira receber o JSON no corpo da requisição:
     // const { page = 1, pageSize = 10 } = await req.json();
@@ -15,22 +16,42 @@ export async function GET(req: NextRequest) {
     const offset = (page - 1) * pageSize;
 
     // Consulta raw que retorna os pedidos com os pagamentos agregados em um array
-    let whereClause = '';
+    const whereConditions: string[] = [];
+
     if (filterMode === 'hideTests') {
-      whereClause = `WHERE NOT (
+      whereConditions.push(`NOT (
         LOWER(p.email) LIKE '%teste%' OR
         LOWER(p.email) LIKE '%spikeboom%' OR
         LOWER(p.email) LIKE '%robertocruzneto%' OR
         LOWER(p.email) LIKE '%+%test%'
-      )`;
+      )`);
     } else if (filterMode === 'showOnlyTests') {
-      whereClause = `WHERE (
+      whereConditions.push(`(
         LOWER(p.email) LIKE '%teste%' OR
         LOWER(p.email) LIKE '%spikeboom%' OR
         LOWER(p.email) LIKE '%robertocruzneto%' OR
         LOWER(p.email) LIKE '%+%test%'
-      )`;
+      )`);
     }
+
+    // Filtro para pedidos efetivados (pagos)
+    if (apenasEfetivados) {
+      whereConditions.push(`(
+        p.status_pagamento = 'PAID' OR
+        EXISTS (
+          SELECT 1 FROM "StatusPagamento" sp
+          WHERE sp.info->>'reference_id' = p.id
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(sp.info->'charges') AS charge
+            WHERE charge->>'status' = 'PAID'
+          )
+        )
+      )`);
+    }
+
+    const whereClause = whereConditions.length > 0
+      ? `WHERE ${whereConditions.join(' AND ')}`
+      : '';
 
     const pedidosComPagamentos = await prisma.$queryRawUnsafe(`
       SELECT
