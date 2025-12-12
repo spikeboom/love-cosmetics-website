@@ -1,28 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-// Status de entrega disponíveis
-export const STATUS_ENTREGA = {
-  AGUARDANDO_PAGAMENTO: "Aguardando Pagamento",
-  PAGAMENTO_CONFIRMADO: "Pagamento Confirmado",
-  EM_SEPARACAO: "Em Separação",
-  EMBALADO: "Embalado",
-  ENVIADO: "Enviado",
-  EM_TRANSITO: "Em Trânsito",
-  SAIU_PARA_ENTREGA: "Saiu para Entrega",
-  ENTREGUE: "Entregue",
-  CANCELADO: "Cancelado",
-  DEVOLVIDO: "Devolvido",
-} as const;
-
-// Usuários permitidos
-export const USUARIOS_PERMITIDOS = [
-  "Adriano",
-  "Cassy",
-  "Paulo",
-  "Gerilza",
-  "Isabelle",
-] as const;
+import { STATUS_ENTREGA, USUARIOS_PERMITIDOS } from "@/app/(admin)/pedidos/constants/statusEntrega";
 
 // GET - Buscar histórico de status de um pedido
 export async function GET(
