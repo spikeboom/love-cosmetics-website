@@ -4,6 +4,11 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSnackbar } from "notistack";
+import {
+  StatusEntregaBadge,
+  StatusEntregaManager,
+  HistoricoStatusEntrega,
+} from "./components/StatusEntregaManager";
 
 interface Pagamento {
   id: string;
@@ -50,6 +55,8 @@ interface Pedido {
   notaFiscalGerada?: boolean;
   notaFiscalId?: string | null;
   notaFiscalErro?: string | null;
+  status_entrega: string;
+  status_pagamento?: string | null;
 }
 
 // Ícones SVG inline
@@ -128,6 +135,22 @@ const ReceiptIcon = () => (
   </svg>
 );
 
+const TruckIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="1" y="3" width="15" height="13" />
+    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+    <circle cx="5.5" cy="18.5" r="2.5" />
+    <circle cx="18.5" cy="18.5" r="2.5" />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
 function StatusBadge({ status }: { status: string }) {
   const statusMap: Record<string, { label: string; bgColor: string; textColor: string; borderColor: string }> = {
     'PAID': { label: 'Pago', bgColor: 'bg-[#F0F9F4]', textColor: 'text-[#009142]', borderColor: 'border-[#009142]' },
@@ -147,11 +170,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PedidoCard({ pedido, onNotaGerada }: { pedido: Pedido; onNotaGerada: () => void }) {
+function PedidoCard({ pedido, onNotaGerada, onStatusChange }: { pedido: Pedido; onNotaGerada: () => void; onStatusChange: () => void }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showContato, setShowContato] = useState(false);
   const [showPagamentos, setShowPagamentos] = useState(false);
+  const [showStatusEntrega, setShowStatusEntrega] = useState(false);
   const [generatingNota, setGeneratingNota] = useState(false);
+  const [historicoRefreshKey, setHistoricoRefreshKey] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
 
   const handleGerarNota = async () => {
@@ -207,6 +232,7 @@ function PedidoCard({ pedido, onNotaGerada }: { pedido: Pedido; onNotaGerada: ()
                 {pedido.nome} {pedido.sobrenome}
               </p>
               {mainStatus && <StatusBadge status={mainStatus} />}
+              <StatusEntregaBadge status={pedido.status_entrega || "AGUARDANDO_PAGAMENTO"} />
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span className="font-cera-pro font-light text-[12px] text-[#666666]">
@@ -324,6 +350,16 @@ function PedidoCard({ pedido, onNotaGerada }: { pedido: Pedido; onNotaGerada: ()
 
           {/* Ações */}
           <div className="p-4 lg:p-6 flex flex-wrap gap-3">
+            <button
+              onClick={() => setShowStatusEntrega(!showStatusEntrega)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] transition-colors"
+            >
+              <TruckIcon />
+              <span className="font-cera-pro font-medium text-[14px] text-white">
+                {showStatusEntrega ? "Ocultar" : "Gerenciar"} Entrega
+              </span>
+            </button>
+
             <button
               onClick={() => setShowContato(!showContato)}
               className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] rounded-[8px] transition-colors"
@@ -558,6 +594,38 @@ function PedidoCard({ pedido, onNotaGerada }: { pedido: Pedido; onNotaGerada: ()
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Status de Entrega */}
+          {showStatusEntrega && (
+            <div className="p-4 lg:p-6 border-t border-[#d2d2d2] bg-[#f8f3ed]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Alterar Status */}
+                <div>
+                  <h4 className="font-cera-pro font-bold text-[16px] text-black mb-4 flex items-center gap-2">
+                    <TruckIcon />
+                    Alterar Status de Entrega
+                  </h4>
+                  <StatusEntregaManager
+                    pedidoId={pedido.id}
+                    statusAtual={pedido.status_entrega || "AGUARDANDO_PAGAMENTO"}
+                    onStatusChange={() => {
+                      setHistoricoRefreshKey((k) => k + 1);
+                      onStatusChange();
+                    }}
+                  />
+                </div>
+
+                {/* Histórico */}
+                <div>
+                  <h4 className="font-cera-pro font-bold text-[16px] text-black mb-4 flex items-center gap-2">
+                    <ClockIcon />
+                    Histórico de Alterações
+                  </h4>
+                  <HistoricoStatusEntrega pedidoId={pedido.id} refreshKey={historicoRefreshKey} />
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -888,6 +956,7 @@ export default function PedidosPage() {
                 key={pedido.id}
                 pedido={pedido}
                 onNotaGerada={() => fetchPedidos(true)}
+                onStatusChange={() => fetchPedidos(true)}
               />
             ))
           )}

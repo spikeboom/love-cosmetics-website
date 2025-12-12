@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Pedido { 
+model Pedido {
   id                        String   @id @default(uuid())
   nome                      String
   sobrenome                 String
@@ -66,8 +66,34 @@ model Pedido {
   // Método de pagamento usado
   payment_method            String?  // "credit_card", "pix", "boleto"
 
+  // Status de entrega atual
+  status_entrega            String   @default("AGUARDANDO_PAGAMENTO")
+
   // Relação opcional com cliente
   pedidoCliente             PedidoCliente?
+
+  // Histórico de status de entrega
+  historicoStatusEntrega    HistoricoStatusEntrega[]
+}
+
+// ============================================
+// SISTEMA DE STATUS DE ENTREGA
+// ============================================
+
+model HistoricoStatusEntrega {
+  id            String   @id @default(uuid())
+  pedidoId      String
+  pedido        Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  statusAnterior String?  // Status anterior (null se for o primeiro)
+  statusNovo     String   // Novo status
+  alteradoPor    String   // Nome de quem alterou (Adriano, Cassy, Paulo, Gerilza, Isabelle)
+  observacao     String?  // Observação opcional
+
+  createdAt     DateTime @default(now())
+
+  @@index([pedidoId])
+  @@index([createdAt])
 }
 
 model StatusCheckout {
