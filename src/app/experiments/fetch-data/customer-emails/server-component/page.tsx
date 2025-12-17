@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ServerComponentPage() {
   // Server Component verdadeiro - async/await direto no servidor
   const clientes = await prisma.cliente.findMany({
