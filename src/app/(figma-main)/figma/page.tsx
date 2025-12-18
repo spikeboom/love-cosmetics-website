@@ -24,7 +24,7 @@ export default function FigmaIndexPage() {
     },
     {
       title: "Grupo VIP",
-      href: "/figma/vip",
+      href: "/vip",
       description: "Landing page do Grupo VIP WhatsApp",
     },
   ];
