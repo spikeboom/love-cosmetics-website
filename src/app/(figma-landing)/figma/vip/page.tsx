@@ -1,4 +1,5 @@
 import { fetchProdutosForDesign } from "@/modules/produto/domain";
+import { transformProdutosStrapi } from "@/utils/transform-produtos-strapi";
 import VIPLandingClient from "./VIPLandingClient";
 
 export const metadata = {
@@ -15,16 +16,14 @@ export const metadata = {
 
 // Produtos fallback caso o Strapi não retorne
 const produtosFallback = [
-  { nome: "Espuma Facial", descricao: "Limpeza suave e rotina diária", slug: "espuma-facial" },
-  { nome: "Sérum Facial", descricao: "Tratamento e performance", slug: "serum-facial" },
-  { nome: "Hidratante Facial", descricao: "Hidratação e sensorial premium", slug: "hidratante-facial" },
-  { nome: "Manteiga Corporal", descricao: "Hidratação profunda", slug: "manteiga-corporal" },
-  { nome: "Máscara de Argila", descricao: "Cuidado e renovação", slug: "mascara-de-argila" },
+  { nome: "Espuma Facial", descricao: "Limpeza suave para o rosto, removendo impurezas e preparando a pele para os próximos passos da rotina", imagem: "/new-home/produtos/produto-1.png", preco: 89.90, slug: "espuma-facial" },
+  { nome: "Sérum Facial", descricao: "Tratamento concentrado com ativos amazônicos para potencializar resultados e performance da pele", imagem: "/new-home/produtos/produto-2.png", preco: 119.90, slug: "serum-facial" },
+  { nome: "Hidratante Facial", descricao: "Hidratação profunda com textura leve, ideal para manter a pele nutrida e protegida durante o dia", imagem: "/new-home/produtos/produto-3.png", preco: 99.90, slug: "hidratante-facial" },
+  { nome: "Manteiga Corporal", descricao: "Hidratação intensa para o corpo com manteiga de cupuaçu e ativos da Amazônia", imagem: "/new-home/produtos/produto-1.png", preco: 79.90, slug: "manteiga-corporal" },
+  { nome: "Máscara de Argila", descricao: "Limpeza profunda e detox facial com argila amazônica, removendo toxinas e renovando a pele", imagem: "/new-home/produtos/produto-2.png", preco: 69.90, slug: "mascara-de-argila" },
 ];
 
 export default async function VIPLandingPage() {
-  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "https://strapi.lovecosmeticos.xyz";
-
   let produtos = produtosFallback;
 
   try {
@@ -32,33 +31,15 @@ export default async function VIPLandingPage() {
     const produtosStrapi = response?.data || [];
 
     if (produtosStrapi.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      produtos = produtosStrapi.map((produto: any) => {
-        // Pega a URL da imagem do Strapi
-        const imagemUrl =
-          produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url ||
-          produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.small?.url ||
-          produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url ||
-          produto.carouselImagensPrincipal?.[0]?.imagem?.url;
-
-        // Pega a primeira descrição disponível
-        const descricao =
-          produto.listaDescricao?.[0]?.descricao ||
-          produto.descricao_curta ||
-          "Skincare premium amazônico";
-
-        return {
-          nome: produto.nome || "Produto Lovè",
-          descricao: descricao,
-          imagem: imagemUrl ? `${baseURL}${imagemUrl}` : undefined,
-          preco: produto.preco || undefined,
-          slug: produto.slug || undefined,
-        };
+      produtos = transformProdutosStrapi({
+        produtosStrapi,
+        produtosMockados: produtosFallback,
+        limite: 5,
+        incluirSlug: true,
       });
     }
   } catch (error) {
     console.error("[VIP Page] Erro ao buscar produtos do Strapi:", error);
-    // Usa produtos fallback em caso de erro
   }
 
   return <VIPLandingClient produtos={produtos} />;

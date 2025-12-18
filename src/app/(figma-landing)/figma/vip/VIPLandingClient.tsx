@@ -346,9 +346,9 @@ export default function VIPLandingClient({ produtos }: VIPLandingClientProps) {
           {produtos.slice(0, 5).map((p, index) => (
             <div
               key={p.slug || index}
-              className="bg-white/80 border border-black/10 rounded-[18px] overflow-hidden shadow-[0_10px_22px_rgba(15,26,22,0.05)]"
+              className="bg-white border border-black/10 rounded-2xl overflow-hidden shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)]"
             >
-              <div className="h-[120px] bg-gradient-to-b from-[#254333]/10 to-transparent border-b border-black/10 relative overflow-hidden">
+              <div className="h-[160px] lg:h-[196px] bg-gradient-to-b from-[#254333]/10 to-transparent relative overflow-hidden">
                 {p.imagem ? (
                   <Image
                     src={p.imagem}
@@ -363,9 +363,9 @@ export default function VIPLandingClient({ produtos }: VIPLandingClientProps) {
                   </>
                 )}
               </div>
-              <div className="p-3">
-                <strong className="font-cera-pro font-bold text-sm text-black block">{p.nome}</strong>
-                <span className="font-cera-pro font-light text-xs text-[#5a6a64] mt-1 block">{p.descricao}</span>
+              <div className="p-4 flex flex-col gap-3">
+                <p className="font-cera-pro font-medium text-[16px] text-black leading-normal">{p.nome}</p>
+                <p className="font-cera-pro font-light text-[14px] text-black leading-normal line-clamp-3">{p.descricao}</p>
               </div>
             </div>
           ))}
