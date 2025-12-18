@@ -49,3 +49,5 @@ node_modules/
 
 /tmp_importante
 /plano_auth
+# claude code
+.claude/
