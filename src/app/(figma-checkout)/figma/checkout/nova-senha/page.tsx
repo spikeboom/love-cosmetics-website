@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ConfirmacaoStepper } from "../confirmacao/ConfirmacaoStepper";
+import { useMeuContexto } from "@/components/common/Context/context";
 
 function NovaSenhaContent() {
   const router = useRouter();
@@ -11,6 +12,7 @@ function NovaSenhaContent() {
   const pedidoId = searchParams.get("pedidoId");
   const cpf = searchParams.get("cpf");
   const token = searchParams.get("token");
+  const { refreshAuth } = useMeuContexto();
 
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -49,6 +51,9 @@ function NovaSenhaContent() {
       }
 
       console.log("Senha alterada para CPF:", cpf);
+
+      // Atualizar estado de auth no header
+      await refreshAuth();
       setSuccess(true);
 
       // Redirecionar apos 2 segundos
@@ -56,7 +61,7 @@ function NovaSenhaContent() {
         if (pedidoId) {
           router.push(`/figma/checkout/confirmacao?pedidoId=${pedidoId}`);
         } else {
-          router.push("/figma");
+          router.push("/figma/minha-conta/pedidos");
         }
       }, 2000);
 

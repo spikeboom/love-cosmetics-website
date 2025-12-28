@@ -1,13 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cadastroPosCheckoutSchema } from '@/lib/cliente/validation';
 import { hashPassword, createSession, setSessionCookie } from '@/lib/cliente/auth';
-import { cpfExists, createCliente, vincularPedidoCliente } from '@/lib/cliente/session';
+import { cpfExists, emailExists, createCliente, vincularPedidoCliente } from '@/lib/cliente/session';
 import { prisma } from '@/lib/prisma';
 import { ZodError } from 'zod';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Body da requisição inválido ou vazio' },
+        { status: 400 }
+      );
+    }
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json(
+        { error: 'Dados da requisição são obrigatórios' },
+        { status: 400 }
+      );
+    }
 
     // Validar dados com Zod
     const validatedData = cadastroPosCheckoutSchema.parse(body);
@@ -46,6 +61,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verificar se email já existe
+    if (await emailExists(pedido.email)) {
+      return NextResponse.json(
+        {
+          error: 'Email já cadastrado. Faça login com sua senha.',
+          emailExistente: true
+        },
+        { status: 400 }
+      );
+    }
+
     // Separar nome e sobrenome
     const nomeCompleto = pedido.nome;
     const sobrenome = pedido.sobrenome;
@@ -56,8 +82,8 @@ export async function POST(request: NextRequest) {
     // Criar cliente no banco com dados do pedido
     const cliente = await createCliente({
       email: pedido.email,
-      nome: nomeCompleto,
-      sobrenome: sobrenome,
+      nome: nomeCompleto || '',
+      sobrenome: sobrenome || '',
       passwordHash,
       cpf: pedido.cpf,
       telefone: pedido.telefone,
@@ -67,13 +93,13 @@ export async function POST(request: NextRequest) {
       receberWhatsapp: validatedData.receberComunicacoes,
       receberEmail: validatedData.receberComunicacoes,
       // Dados de endereço
-      cep: pedido.cep,
-      endereco: pedido.endereco,
-      numero: pedido.numero,
+      cep: pedido.cep || undefined,
+      endereco: pedido.endereco || undefined,
+      numero: pedido.numero || undefined,
       complemento: pedido.complemento || undefined,
-      bairro: pedido.bairro,
-      cidade: pedido.cidade,
-      estado: pedido.estado,
+      bairro: pedido.bairro || undefined,
+      cidade: pedido.cidade || undefined,
+      estado: pedido.estado || undefined,
     });
 
     // Vincular pedido ao cliente
@@ -175,12 +201,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Verificar se CPF já tem conta
+    // Verificar se CPF ou email já tem conta
     const cpfCadastrado = await cpfExists(pedido.cpf);
+    const emailCadastrado = await emailExists(pedido.email);
+
+    // Se CPF ou email já existem, o usuário deve fazer login
+    const contaExistente = cpfCadastrado || emailCadastrado;
 
     return NextResponse.json({
       pedidoVinculado: false,
-      cpfCadastrado,
+      cpfCadastrado: contaExistente, // true se CPF ou email já existe
       cpf: pedido.cpf, // CPF completo para fazer login
       cpfMascarado: pedido.cpf.replace(/(\d{3})\d{3}\d{3}(\d{2})/, '$1.***.***-$2'),
       nome: pedido.nome,

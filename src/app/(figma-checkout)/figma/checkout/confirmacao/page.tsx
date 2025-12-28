@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ConfirmacaoStepper } from "./ConfirmacaoStepper";
+import { useMeuContexto } from "@/components/common/Context/context";
 
 // Icone de verificado dourado
 function VerifiedIcon({ className }: { className?: string }) {
@@ -64,6 +65,7 @@ function ConfirmacaoContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pedidoId = searchParams.get("pedidoId");
+  const { refreshAuth } = useMeuContexto();
 
   const [pageStatus, setPageStatus] = useState<"loading" | "create_account" | "login" | "success" | "error">("loading");
   const [pedidoStatus, setPedidoStatus] = useState<PedidoStatus | null>(null);
@@ -161,7 +163,7 @@ function ConfirmacaoContent() {
       const result = await response.json();
 
       if (!response.ok) {
-        if (result.cpfExistente) {
+        if (result.cpfExistente || result.emailExistente) {
           setPageStatus("login");
           return;
         }
@@ -169,6 +171,8 @@ function ConfirmacaoContent() {
         return;
       }
 
+      // Atualizar estado de auth no header
+      await refreshAuth();
       setPageStatus("success");
       fetchPedidoDetalhes();
     } catch {
@@ -225,6 +229,8 @@ function ConfirmacaoContent() {
         console.error("Erro ao vincular pedido:", vincularResult.error);
       }
 
+      // Atualizar estado de auth no header
+      await refreshAuth();
       setPageStatus("success");
       fetchPedidoDetalhes();
     } catch {
