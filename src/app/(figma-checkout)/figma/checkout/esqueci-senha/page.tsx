@@ -68,10 +68,7 @@ function EsqueciSenhaContent() {
       // Em dev, mostrar código
       if (data._dev?.codigo) {
         setDevCode(data._dev.codigo);
-        console.log("[DEV] Código SMS:", data._dev.codigo);
       }
-
-      console.log("SMS enviado para:", data.telefoneMascarado);
     } catch (error) {
       console.error("Erro ao enviar SMS:", error);
       setError("Erro ao enviar SMS. Tente novamente.");

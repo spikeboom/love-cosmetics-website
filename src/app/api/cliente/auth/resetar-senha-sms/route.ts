@@ -45,8 +45,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log(`[Token Reset] Buscando token para cliente ${cliente.id}:`, tokenRegistro ? 'encontrado' : 'não encontrado');
-
     if (!tokenRegistro) {
       return NextResponse.json(
         { error: 'Token inválido ou expirado. Solicite um novo código.' },

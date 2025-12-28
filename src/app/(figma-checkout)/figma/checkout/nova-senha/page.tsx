@@ -50,8 +50,6 @@ function NovaSenhaContent() {
         return;
       }
 
-      console.log("Senha alterada para CPF:", cpf);
-
       // Atualizar estado de auth no header
       await refreshAuth();
       setSuccess(true);

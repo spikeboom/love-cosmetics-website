@@ -59,8 +59,6 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log(`[SMS Verify] Código verificado para ${cliente.telefone}`);
-
       } catch (twilioError: any) {
         console.error('[SMS Verify] Erro na verificação:', twilioError);
 
@@ -119,7 +117,6 @@ export async function POST(request: NextRequest) {
 
       // Código válido - remover do mapa
       codigosVerificacao.delete(cpf);
-      console.log(`[SMS DEV] Código verificado para CPF ${cpf}`);
     }
 
     // Gerar token de reset (válido por 10 minutos)
@@ -134,8 +131,6 @@ export async function POST(request: NextRequest) {
         expiresAt: tokenExpiresAt,
       }
     });
-
-    console.log(`[Token Reset] Criado para cliente ${cliente.id}, expira em ${tokenExpiresAt}`);
 
     return NextResponse.json({
       success: true,

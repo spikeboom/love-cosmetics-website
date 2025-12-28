@@ -68,8 +68,6 @@ export async function POST(request: NextRequest) {
             channel: 'sms'
           });
 
-        console.log(`[SMS Verify] Código enviado para ${mascararTelefone(cliente.telefone)}`);
-
         return NextResponse.json({
           success: true,
           message: 'Código enviado com sucesso',
