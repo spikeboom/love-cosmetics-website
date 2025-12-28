@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cadastroPosCheckoutSchema } from '@/lib/cliente/validation';
 import { hashPassword, createSession, setSessionCookie } from '@/lib/cliente/auth';
-import { cpfExists, emailExists, createCliente, vincularPedidoCliente } from '@/lib/cliente/session';
+import { cpfExists, createCliente, vincularPedidoCliente } from '@/lib/cliente/session';
 import { prisma } from '@/lib/prisma';
 import { ZodError } from 'zod';
 
@@ -56,17 +56,6 @@ export async function POST(request: NextRequest) {
         {
           error: 'CPF já cadastrado. Faça login com sua senha.',
           cpfExistente: true
-        },
-        { status: 400 }
-      );
-    }
-
-    // Verificar se email já existe
-    if (await emailExists(pedido.email)) {
-      return NextResponse.json(
-        {
-          error: 'Email já cadastrado. Faça login com sua senha.',
-          emailExistente: true
         },
         { status: 400 }
       );
@@ -201,17 +190,13 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Verificar se CPF ou email já tem conta
+    // Verificar se CPF já tem conta
     const cpfCadastrado = await cpfExists(pedido.cpf);
-    const emailCadastrado = await emailExists(pedido.email);
-
-    // Se CPF ou email já existem, o usuário deve fazer login
-    const contaExistente = cpfCadastrado || emailCadastrado;
 
     return NextResponse.json({
       pedidoVinculado: false,
-      cpfCadastrado: contaExistente, // true se CPF ou email já existe
-      cpf: pedido.cpf, // CPF completo para fazer login
+      cpfCadastrado,
+      cpf: pedido.cpf,
       cpfMascarado: pedido.cpf.replace(/(\d{3})\d{3}\d{3}(\d{2})/, '$1.***.***-$2'),
       nome: pedido.nome,
       email: pedido.email,

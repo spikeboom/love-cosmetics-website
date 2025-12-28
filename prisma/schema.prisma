@@ -113,7 +113,7 @@ model StatusPagamento {
 
 model Cliente {
   id              String    @id @default(uuid())
-  email           String    @unique
+  email           String
   nome            String
   sobrenome       String
   cpf             String?   @unique

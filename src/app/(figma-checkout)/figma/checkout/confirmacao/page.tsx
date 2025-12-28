@@ -163,7 +163,7 @@ function ConfirmacaoContent() {
       const result = await response.json();
 
       if (!response.ok) {
-        if (result.cpfExistente || result.emailExistente) {
+        if (result.cpfExistente) {
           setPageStatus("login");
           return;
         }
