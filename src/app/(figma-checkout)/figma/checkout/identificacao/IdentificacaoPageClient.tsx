@@ -24,19 +24,7 @@ export function IdentificacaoPageClient() {
     telefone: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
-
-  // Carregar dados salvos
-  useEffect(() => {
-    const saved = localStorage.getItem("checkoutIdentificacao");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setFormData(parsed);
-      } catch {
-        // Ignorar erro de parse
-      }
-    }
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -62,6 +50,57 @@ export function IdentificacaoPageClient() {
       .replace(/(\d{5})(\d)/, "$1-$2")
       .replace(/(-\d{4})\d+?$/, "$1");
   };
+
+  // Carregar dados: primeiro do usuário logado, depois do localStorage
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Tentar buscar dados do usuário logado
+        const response = await fetch("/api/cliente/auth/verificar", {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.cliente) {
+            const cliente = data.cliente;
+            // Formatar data de nascimento se existir
+            let dataNascimentoFormatada = "";
+            if (cliente.dataNascimento) {
+              const date = new Date(cliente.dataNascimento);
+              dataNascimentoFormatada = `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
+            }
+
+            setFormData({
+              cpf: cliente.cpf ? formatCPF(cliente.cpf) : "",
+              dataNascimento: dataNascimentoFormatada,
+              nome: `${cliente.nome || ""} ${cliente.sobrenome || ""}`.trim(),
+              email: cliente.email || "",
+              telefone: cliente.telefone ? formatPhone(cliente.telefone) : "",
+            });
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // Erro ao buscar usuário logado, continuar para localStorage
+      }
+
+      // Fallback: carregar do localStorage
+      const saved = localStorage.getItem("checkoutIdentificacao");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setFormData(parsed);
+        } catch {
+          // Ignorar erro de parse
+        }
+      }
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, []);
 
   const handleChange = (field: keyof FormData, value: string) => {
     let formattedValue = value;
@@ -113,6 +152,17 @@ export function IdentificacaoPageClient() {
       router.push("/figma/checkout/entrega");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white flex flex-col w-full flex-1">
+        <CheckoutStepper currentStep="identificacao" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-[#254333] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white flex flex-col w-full flex-1">

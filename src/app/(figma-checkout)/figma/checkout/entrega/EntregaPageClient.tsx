@@ -38,6 +38,7 @@ export function EntregaPageClient() {
     selectedFreightIndex: 0,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   // Verificar se o usuario passou pela identificacao e se frete foi calculado
   useEffect(() => {
@@ -54,22 +55,59 @@ export function EntregaPageClient() {
     }
   }, [router, freight.hasCalculated, freight.availableServices.length]);
 
-  // Carregar dados salvos do localStorage (exceto selectedFreightIndex que vem do Context)
+  // Carregar dados: primeiro do usuário logado, depois do localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("checkoutEntrega");
-    if (saved) {
+    const loadData = async () => {
       try {
-        const parsed = JSON.parse(saved);
-        // Nao sobrescrever selectedFreightIndex - esse vem do Context
-        const { selectedFreightIndex: _ignored, ...restData } = parsed;
-        setFormData(prev => ({
-          ...prev,
-          ...restData,
-        }));
+        // Tentar buscar dados do usuário logado
+        const response = await fetch("/api/cliente/auth/verificar", {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.cliente) {
+            const cliente = data.cliente;
+            // Se cliente tem endereço salvo, usar
+            if (cliente.cep) {
+              setFormData(prev => ({
+                ...prev,
+                cep: cliente.cep ? cliente.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : "",
+                rua: cliente.endereco || "",
+                numero: cliente.numero || "",
+                complemento: cliente.complemento || "",
+                bairro: cliente.bairro || "",
+                cidade: cliente.cidade || "",
+                estado: cliente.estado || "",
+              }));
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
       } catch {
-        // Ignorar erro
+        // Erro ao buscar usuário logado, continuar para localStorage
       }
-    }
+
+      // Fallback: carregar do localStorage
+      const saved = localStorage.getItem("checkoutEntrega");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Nao sobrescrever selectedFreightIndex - esse vem do Context
+          const { selectedFreightIndex: _ignored, ...restData } = parsed;
+          setFormData(prev => ({
+            ...prev,
+            ...restData,
+          }));
+        } catch {
+          // Ignorar erro
+        }
+      }
+      setIsLoading(false);
+    };
+
+    loadData();
   }, []);
 
   // Inicializar CEP e selectedFreightIndex do Context (tem prioridade)
@@ -171,6 +209,17 @@ export function EntregaPageClient() {
       router.push("/figma/checkout/pagamento");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white flex flex-col w-full flex-1">
+        <CheckoutStepper currentStep="entrega" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-[#254333] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white flex flex-col w-full flex-1">
