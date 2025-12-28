@@ -70,9 +70,9 @@ export const cadastroClienteSchema = z.object({
     .max(100, 'Senha muito longa'),
   
   passwordConfirm: z.string(),
-  
-  cpf: cpfSchema.optional().nullable(),
-  
+
+  cpf: cpfSchema, // CPF obrigatório (identificador único)
+
   telefone: telefoneSchema.optional().nullable(),
   
   data_nascimento: z.string()

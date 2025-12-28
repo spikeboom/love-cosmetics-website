@@ -127,10 +127,11 @@ export async function POST(req: NextRequest) {
     // Se não há cliente logado mas usuário quer criar conta
     else if (body.salvar_minhas_informacoes) {
       try {
-        // Verificar se já existe cliente com este email
-        const clienteExistente = await prisma.cliente.findUnique({
-          where: { email: body.email },
-        });
+        // Verificar se já existe cliente com este CPF
+        const cpfLimpo = body.cpf?.replace(/\D/g, '');
+        const clienteExistente = cpfLimpo ? await prisma.cliente.findUnique({
+          where: { cpf: cpfLimpo },
+        }) : null;
 
         
         if (!clienteExistente) {
