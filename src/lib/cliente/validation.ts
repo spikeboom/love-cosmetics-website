@@ -156,17 +156,44 @@ export const cadastroClienteSchema = z.object({
   path: ['passwordConfirm']
 });
 
-// Schema para login
+// Schema para login com email
 export const loginClienteSchema = z.object({
   email: z.string()
     .email('Email inválido')
     .toLowerCase()
     .trim(),
-  
+
   password: z.string()
     .min(1, 'Senha é obrigatória'),
-  
+
   remember: z.boolean().default(false)
+});
+
+// Schema para login com CPF
+export const loginCpfSchema = z.object({
+  cpf: cpfSchema,
+
+  password: z.string()
+    .min(1, 'Senha é obrigatória'),
+
+  remember: z.boolean().default(false)
+});
+
+// Schema para cadastro pós-checkout (criar conta após compra)
+export const cadastroPosCheckoutSchema = z.object({
+  pedidoId: z.string()
+    .min(1, 'ID do pedido é obrigatório'),
+
+  password: z.string()
+    .min(6, 'Senha deve ter pelo menos 6 caracteres')
+    .max(100, 'Senha muito longa'),
+
+  passwordConfirm: z.string(),
+
+  receberComunicacoes: z.boolean().default(false),
+}).refine(data => data.password === data.passwordConfirm, {
+  message: 'As senhas não coincidem',
+  path: ['passwordConfirm']
 });
 
 // Schema para atualização de dados pessoais
@@ -264,6 +291,8 @@ export const resetSenhaSchema = z.object({
 // Tipos TypeScript inferidos dos schemas
 export type CadastroClienteInput = z.infer<typeof cadastroClienteSchema>;
 export type LoginClienteInput = z.infer<typeof loginClienteSchema>;
+export type LoginCpfInput = z.infer<typeof loginCpfSchema>;
+export type CadastroPosCheckoutInput = z.infer<typeof cadastroPosCheckoutSchema>;
 export type AtualizarDadosInput = z.infer<typeof atualizarDadosSchema>;
 export type AtualizarEnderecoInput = z.infer<typeof atualizarEnderecoSchema>;
 export type AlterarSenhaInput = z.infer<typeof alterarSenhaSchema>;
