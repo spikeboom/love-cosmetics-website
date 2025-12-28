@@ -7,7 +7,7 @@ import { useMeuContexto } from "@/components/common/Context/context";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { qtdItemsCart } = useMeuContexto();
+  const { qtdItemsCart, isLoggedIn } = useMeuContexto();
 
   return (
     <header className="w-full flex flex-col items-start">
@@ -54,19 +54,24 @@ export function Header() {
 
         {/* Ações - Carrinho (mobile) / Entrar e Carrinho (desktop) */}
         <div className="flex lg:gap-[32px] gap-4 items-center">
-          {/* Entrar - Desktop only */}
-          <Link href="/login" className="hidden lg:flex gap-[4px] items-center">
+          {/* Entrar/Minha Conta - Desktop only */}
+          <Link
+            href={isLoggedIn ? "/figma/minha-conta/pedidos" : "/figma/entrar"}
+            className="hidden lg:flex gap-[4px] items-center"
+          >
             <div className="w-[21px] h-[21px] relative shrink-0">
               <Image
                 src="/new-home/header/person-icon.svg"
-                alt="Entrar"
+                alt={isLoggedIn ? "Minha Conta" : "Entrar"}
                 width={32}
                 height={32}
               />
             </div>
-            <p className="font-cera-pro font-bold text-[20px] text-white whitespace-nowrap leading-[normal]">
-              Entrar
-            </p>
+            {!isLoggedIn && (
+              <p className="font-cera-pro font-bold text-[20px] text-white whitespace-nowrap leading-[normal]">
+                Entrar
+              </p>
+            )}
           </Link>
 
           {/* Carrinho com badge */}
@@ -168,12 +173,14 @@ export function Header() {
           {/* Links Mobile */}
           <nav className="flex flex-col">
             <Link
-              href="/login"
+              href={isLoggedIn ? "/figma/minha-conta/pedidos" : "/figma/entrar"}
               className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
               <Image src="/new-home/header/person-icon.svg" alt="" width={20} height={20} />
-              <span className="font-cera-pro font-light text-base text-black">Entrar</span>
+              <span className="font-cera-pro font-light text-base text-black">
+                {isLoggedIn ? "Minha Conta" : "Entrar"}
+              </span>
             </Link>
 
             <Link

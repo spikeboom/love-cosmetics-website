@@ -27,6 +27,10 @@ export const MeuContextoProvider = ({ children }) => {
   const [cupons, setCupons] = useState([]);
   const [loadingAddItem, setLoadingAddItem] = useState(false);
 
+  // Estado de autenticação
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+
   // Usar sistema de notificações consolidado
   const { notify, closeSnackbar } = useNotifications();
   
@@ -124,6 +128,35 @@ export const MeuContextoProvider = ({ children }) => {
   const [firstRun, setFirstRun] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
 
+  // Função para verificar autenticação
+  const checkAuth = useCallback(async () => {
+    try {
+      const response = await fetch("/api/cliente/auth/verificar", {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.authenticated) {
+          setIsLoggedIn(true);
+          setUserName(data.cliente?.nome || "");
+          return true;
+        }
+      }
+      setIsLoggedIn(false);
+      setUserName("");
+      return false;
+    } catch {
+      setIsLoggedIn(false);
+      setUserName("");
+      return false;
+    }
+  }, []);
+
+  // Função para atualizar auth após login (chamada pela página de login)
+  const refreshAuth = useCallback(async () => {
+    await checkAuth();
+  }, [checkAuth]);
+
   useEffect(() => {
     // Usar StorageService para carregar dados
     const initialData = StorageService.initializeFromStorage();
@@ -131,7 +164,10 @@ export const MeuContextoProvider = ({ children }) => {
     setCupons(initialData.cupons);
     setFirstRun(true);
     setIsCartLoaded(true);
-  }, []);
+
+    // Verificar autenticação inicial
+    checkAuth();
+  }, [checkAuth]);
 
   // Usar função extraída para cálculos
   const qtdItemsCart = CartCalculations.getItemCount(cart);
@@ -173,6 +209,9 @@ export const MeuContextoProvider = ({ children }) => {
         cartValidation,
         refreshCartPrices,
         isCartLoaded,
+        isLoggedIn,
+        userName,
+        refreshAuth,
       }}
     >
       {children}

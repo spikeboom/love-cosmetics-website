@@ -60,7 +60,7 @@ export async function cleanupRateLimits(): Promise<void> {
 export async function findClienteByEmail(
   email: string,
 ): Promise<Cliente | null> {
-  return prisma.cliente.findUnique({
+  return prisma.cliente.findFirst({
     where: {
       email: email.toLowerCase(),
       ativo: true,
@@ -72,7 +72,7 @@ export async function findClienteByEmail(
 export async function findClienteByCPF(cpf: string): Promise<Cliente | null> {
   const cpfLimpo = cpf.replace(/\D/g, "");
 
-  return prisma.cliente.findUnique({
+  return prisma.cliente.findFirst({
     where: {
       cpf: cpfLimpo,
       ativo: true,

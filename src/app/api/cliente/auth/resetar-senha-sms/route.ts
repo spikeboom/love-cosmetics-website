@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hashPassword, createSession, setSessionCookie } from '@/lib/cliente/auth';
 import { findClienteByCPF, updateClientePassword } from '@/lib/cliente/session';
-import { tokensReset } from '@/lib/cliente/sms-storage';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,32 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar token
-    const registro = tokensReset.get(token);
-
-    if (!registro) {
-      return NextResponse.json(
-        { error: 'Token inválido ou expirado. Solicite um novo código.' },
-        { status: 400 }
-      );
-    }
-
-    if (registro.expiresAt < new Date()) {
-      tokensReset.delete(token);
-      return NextResponse.json(
-        { error: 'Token expirado. Solicite um novo código.' },
-        { status: 400 }
-      );
-    }
-
-    if (registro.cpf !== cpf) {
-      return NextResponse.json(
-        { error: 'Token não corresponde ao CPF informado' },
-        { status: 400 }
-      );
-    }
-
-    // Buscar cliente
+    // Buscar cliente primeiro para validar CPF
     const cliente = await findClienteByCPF(cpf);
 
     if (!cliente) {
@@ -58,14 +33,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validar token no banco de dados
+    const tokenRegistro = await prisma.tokenRecuperacao.findFirst({
+      where: {
+        token,
+        clienteId: cliente.id,
+        usado: false,
+        expiresAt: {
+          gt: new Date()
+        }
+      }
+    });
+
+    console.log(`[Token Reset] Buscando token para cliente ${cliente.id}:`, tokenRegistro ? 'encontrado' : 'não encontrado');
+
+    if (!tokenRegistro) {
+      return NextResponse.json(
+        { error: 'Token inválido ou expirado. Solicite um novo código.' },
+        { status: 400 }
+      );
+    }
+
     // Hash da nova senha
     const passwordHash = await hashPassword(novaSenha);
 
     // Atualizar senha (isso também invalida todas as sessões)
     await updateClientePassword(cliente.id, passwordHash);
 
-    // Invalidar token usado
-    tokensReset.delete(token);
+    // Marcar token como usado no banco de dados
+    await prisma.tokenRecuperacao.update({
+      where: { id: tokenRegistro.id },
+      data: { usado: true }
+    });
 
     // Criar nova sessão automaticamente
     const userAgent = request.headers.get('user-agent') || undefined;

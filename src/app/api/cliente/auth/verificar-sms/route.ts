@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findClienteByCPF } from '@/lib/cliente/session';
-import { codigosVerificacao, tokensReset } from '@/lib/cliente/sms-storage';
+import { codigosVerificacao } from '@/lib/cliente/sms-storage';
+import { prisma } from '@/lib/prisma';
 import twilio from 'twilio';
 import crypto from 'crypto';
 
@@ -125,10 +126,16 @@ export async function POST(request: NextRequest) {
     const token = crypto.randomBytes(32).toString('hex');
     const tokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    tokensReset.set(token, {
-      cpf,
-      expiresAt: tokenExpiresAt
+    // Salvar token no banco de dados
+    await prisma.tokenRecuperacao.create({
+      data: {
+        clienteId: cliente.id,
+        token,
+        expiresAt: tokenExpiresAt,
+      }
     });
+
+    console.log(`[Token Reset] Criado para cliente ${cliente.id}, expira em ${tokenExpiresAt}`);
 
     return NextResponse.json({
       success: true,
@@ -149,23 +156,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Exportar função para validar token de reset (usada pela rota de nova senha)
-export function validarTokenReset(token: string): { valido: boolean; cpf?: string; erro?: string } {
-  const registro = tokensReset.get(token);
-
-  if (!registro) {
-    return { valido: false, erro: 'Token inválido ou expirado' };
-  }
-
-  if (registro.expiresAt < new Date()) {
-    tokensReset.delete(token);
-    return { valido: false, erro: 'Token expirado' };
-  }
-
-  return { valido: true, cpf: registro.cpf };
-}
-
-// Função para invalidar token após uso
-export function invalidarTokenReset(token: string): void {
-  tokensReset.delete(token);
-}
