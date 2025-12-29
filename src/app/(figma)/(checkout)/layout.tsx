@@ -1,15 +1,14 @@
 import Script from "next/script";
-import { fontClasses } from "@/lib/fonts";
-import { CheckoutHeader } from "./CheckoutHeader";
-import { CheckoutFooter } from "./CheckoutFooter";
+import { CheckoutHeader } from "./figma/checkout/CheckoutHeader";
+import { CheckoutFooter } from "./figma/checkout/CheckoutFooter";
 
-export default function CheckoutLayout({
+export default function FigmaCheckoutLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className={`flex flex-col min-h-screen ${fontClasses}`}>
+    <div className="flex flex-col min-h-screen">
       {/* PagBank SDK */}
       <Script
         src="https://assets.pagseguro.com.br/checkout-sdk-js/rc/dist/browser/pagseguro.min.js"

@@ -3,7 +3,7 @@
 import { useCart } from "../cart";
 import { useCoupon } from "../coupon";
 import { useShipping } from "../shipping";
-import { useAuth } from "../auth";
+import { useAuth } from "../AuthContext";
 import { useCartTotals } from "../cart-totals";
 
 /**

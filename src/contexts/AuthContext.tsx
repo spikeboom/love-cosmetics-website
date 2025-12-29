@@ -16,9 +16,12 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isLoggedIn: boolean; // Alias para compatibilidade
+  userName: string; // Alias para compatibilidade
   login: (email: string, password: string, redirectTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  refreshAuth: () => Promise<void>; // Alias para compatibilidade
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -122,14 +125,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider 
+    <AuthContext.Provider
       value={{
         user,
         isLoading,
         isAuthenticated: !!user,
+        isLoggedIn: !!user, // Alias para compatibilidade
+        userName: user?.nome || '', // Alias para compatibilidade
         login,
         logout,
         checkAuth,
+        refreshAuth: checkAuth, // Alias para compatibilidade
       }}
     >
       {children}

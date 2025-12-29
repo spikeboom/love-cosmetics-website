@@ -8,7 +8,6 @@ import {
 } from "next/font/google";
 import Script from "next/script";
 import "./(global)/globals.css";
-import { MeuContextoProvider } from "@/components/common/Context/context";
 import { GoogleTagManager } from "@next/third-parties/google";
 import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
 import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
@@ -76,7 +75,7 @@ export default function RootLayout({
           <NotificationProvider>
             <UIContextProvider>
               <AuthProvider>
-                <MeuContextoProvider>{children}</MeuContextoProvider>
+                {children}
               </AuthProvider>
             </UIContextProvider>
           </NotificationProvider>

@@ -19,26 +19,12 @@ interface CartPageClientProps {
 
 export function CartPageClient({ produtos }: CartPageClientProps) {
   const router = useRouter();
-  // Contextos segmentados
-  const {
-    cart,
-    addQuantityProductToCart,
-    subtractQuantityProductToCart,
-    removeProductFromCart,
-    isCartLoaded,
-  } = useCart();
 
+  // Novos hooks segmentados
+  const { cart, addQuantityProductToCart, subtractQuantityProductToCart, removeProductFromCart, isCartLoaded } = useCart();
   const { cupons, handleAddCupom, handleCupom } = useCoupon();
   const { freightValue, hasCalculated } = useShipping();
-  const {
-    total,
-    descontos,
-    isValidating,
-    isValid,
-    produtosDesatualizados,
-    validateCart,
-    refreshCartPrices,
-  } = useCartTotals();
+  const { total, descontos, isValid, isValidating, validateCart, produtosDesatualizados, refreshCartPrices } = useCartTotals();
 
   // Validar carrinho ao carregar a página
   useEffect(() => {

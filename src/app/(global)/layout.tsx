@@ -3,6 +3,7 @@ import { Rodape } from "@/deprecated/components/layout/Footer/rodape";
 import { ModalMenu } from "@/deprecated/components/layout/Menu/menu";
 import { FloatingWhatsApp } from "@/deprecated/components/common/FloatingWhatsApp/FloatingWhatsApp";
 import { ModalCart } from "@/deprecated/components/cart/ModalCart/modal-cart";
+import { MeuContextoProvider } from "@/components/common/Context/context";
 
 export default function GlobalLayout({
   children,
@@ -10,7 +11,7 @@ export default function GlobalLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <MeuContextoProvider>
       <Cabecalho />
 
       {children}
@@ -20,10 +21,10 @@ export default function GlobalLayout({
       <div className="h-[100px] bg-[#333]"></div>
 
       <ModalMenu />
-      
+
       <ModalCart />
 
       <FloatingWhatsApp />
-    </>
+    </MeuContextoProvider>
   );
 }
