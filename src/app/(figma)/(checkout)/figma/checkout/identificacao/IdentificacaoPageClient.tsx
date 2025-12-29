@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { identificacaoSchema } from "@/lib/checkout/validation";
 import { validacoes } from "@/lib/checkout/validation";
+import { formatCPF, formatDateInput, formatTelefone } from "@/lib/formatters";
 
 interface FormData {
   cpf: string;
@@ -25,31 +26,6 @@ export function IdentificacaoPageClient() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isLoading, setIsLoading] = useState(true);
-
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-      .replace(/(-\d{2})\d+?$/, "$1");
-  };
-
-  const formatDate = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers
-      .replace(/(\d{2})(\d)/, "$1/$2")
-      .replace(/(\d{2})(\d)/, "$1/$2")
-      .replace(/(\d{4})\d+?$/, "$1");
-  };
-
-  const formatPhone = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers
-      .replace(/(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .replace(/(-\d{4})\d+?$/, "$1");
-  };
 
   // Carregar dados: primeiro do usuário logado, depois do localStorage
   useEffect(() => {
@@ -76,7 +52,7 @@ export function IdentificacaoPageClient() {
               dataNascimento: dataNascimentoFormatada,
               nome: `${cliente.nome || ""} ${cliente.sobrenome || ""}`.trim(),
               email: cliente.email || "",
-              telefone: cliente.telefone ? formatPhone(cliente.telefone) : "",
+              telefone: cliente.telefone ? formatTelefone(cliente.telefone) : "",
             });
             setIsLoading(false);
             return;
@@ -108,9 +84,9 @@ export function IdentificacaoPageClient() {
     if (field === "cpf") {
       formattedValue = formatCPF(value);
     } else if (field === "dataNascimento") {
-      formattedValue = formatDate(value);
+      formattedValue = formatDateInput(value);
     } else if (field === "telefone") {
-      formattedValue = formatPhone(value);
+      formattedValue = formatTelefone(value);
     }
 
     setFormData((prev) => ({ ...prev, [field]: formattedValue }));

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { VitrineSection } from "../../components/VitrineSection";
+import { VerifiedIcon, ArrowForwardIcon } from "@/components/figma-shared/icons";
+import { formatDate, formatDateTime, formatPrice } from "@/lib/formatters";
 
 // Tipos
 interface ProdutoImagem {
@@ -51,40 +53,10 @@ const STATUS_LABELS: Record<string, string> = {
   DEVOLVIDO: "Devolvido",
 };
 
-// Icones
-function ArrowForwardIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" fill="currentColor"/>
-    </svg>
-  );
-}
-
-function VerifiedIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.2 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z" fill="currentColor"/>
-    </svg>
-  );
-}
 
 
 // Componente de Card de Pedido
 function PedidoCard({ pedido }: { pedido: Pedido }) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("pt-BR");
-  };
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.toLocaleDateString("pt-BR")}, ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-  };
-
-  const formatPrice = (price: number) => {
-    return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  };
-
   const getStatusLabel = (status: string) => {
     return STATUS_LABELS[status] || status;
   };

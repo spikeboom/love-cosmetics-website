@@ -5,15 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ConfirmacaoStepper } from "./ConfirmacaoStepper";
 import { useAuth } from "@/contexts";
-
-// Icone de verificado dourado
-function VerifiedIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M23 12L20.56 9.22L20.9 5.54L17.29 4.72L15.4 1.54L12 3L8.6 1.54L6.71 4.72L3.1 5.53L3.44 9.21L1 12L3.44 14.78L3.1 18.47L6.71 19.29L8.6 22.47L12 21L15.4 22.46L17.29 19.28L20.9 18.46L20.56 14.78L23 12ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="#E7A63A"/>
-    </svg>
-  );
-}
+import { VerifiedIcon } from "@/components/figma-shared/icons";
+import { formatCurrency } from "@/lib/formatters";
 
 interface PedidoStatus {
   pedidoVinculado: boolean;
@@ -282,14 +275,6 @@ function ConfirmacaoContent() {
     );
   }
 
-  // Funcao auxiliar para formatar moeda
-  const formatarMoeda = (valor: number) => {
-    return valor.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).replace("R$", "R$ ");
-  };
-
   // Sucesso - Tela de Confirmacao Logada igual ao Figma
   if (pageStatus === "success") {
     return (
@@ -300,7 +285,7 @@ function ConfirmacaoContent() {
           <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
             {/* Banner de sucesso do pagamento */}
             <div className="bg-[#f8f3ed] rounded-[16px] h-[64px] p-4 flex gap-2 items-center">
-              <VerifiedIcon className="w-8 h-8 shrink-0" />
+              <VerifiedIcon className="w-8 h-8 shrink-0" variant="gold" />
               <div className="flex flex-col flex-1 gap-1">
                 <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#1d1b20]">
                   Pagamento aprovado!
@@ -320,7 +305,7 @@ function ConfirmacaoContent() {
                     Produtos
                   </p>
                   <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                    {pedidoDetalhes ? formatarMoeda(pedidoDetalhes.produtos.subtotal) : "-"}
+                    {pedidoDetalhes ? formatCurrency(pedidoDetalhes.produtos.subtotal) : "-"}
                   </p>
                 </div>
                 <div className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
@@ -339,7 +324,7 @@ function ConfirmacaoContent() {
                     Entrega
                   </p>
                   <p className={`font-cera-pro font-bold text-[18px] lg:text-[20px] ${pedidoDetalhes?.entrega.gratis ? "text-[#009142]" : "text-black"}`}>
-                    {pedidoDetalhes?.entrega.gratis ? "Gratis" : pedidoDetalhes ? formatarMoeda(pedidoDetalhes.entrega.valor) : "-"}
+                    {pedidoDetalhes?.entrega.gratis ? "Gratis" : pedidoDetalhes ? formatCurrency(pedidoDetalhes.entrega.valor) : "-"}
                   </p>
                 </div>
                 <p className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
@@ -357,7 +342,7 @@ function ConfirmacaoContent() {
                       Descontos
                     </p>
                     <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-                      - {formatarMoeda(pedidoDetalhes?.descontos ?? 0)}
+                      - {formatCurrency(pedidoDetalhes?.descontos ?? 0)}
                     </p>
                   </div>
                   <div className="bg-white h-px" />
@@ -370,7 +355,7 @@ function ConfirmacaoContent() {
                   Valor total
                 </p>
                 <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                  {pedidoDetalhes ? formatarMoeda(pedidoDetalhes.total) : "-"}
+                  {pedidoDetalhes ? formatCurrency(pedidoDetalhes.total) : "-"}
                 </p>
               </div>
             </div>
@@ -409,7 +394,7 @@ function ConfirmacaoContent() {
         <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           {/* Banner de sucesso do pagamento */}
           <div className="bg-[#f8f3ed] rounded-[16px] p-4 flex gap-2 items-center">
-            <VerifiedIcon className="w-8 h-8 shrink-0" />
+            <VerifiedIcon className="w-8 h-8 shrink-0" variant="gold" />
             <div className="flex flex-col gap-1">
               <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#1d1b20]">
                 Pagamento aprovado!

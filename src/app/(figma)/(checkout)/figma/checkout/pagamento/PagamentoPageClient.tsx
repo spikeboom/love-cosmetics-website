@@ -13,6 +13,7 @@ import {
   PagamentoPixReal,
   PagamentoCartaoReal,
 } from "./components";
+import { formatPrice } from "@/lib/formatters";
 
 export function PagamentoPageClient() {
   const router = useRouter();
@@ -65,13 +66,6 @@ export function PagamentoPageClient() {
   const subtotal = total - valorFrete + descontos; // Valor original dos produtos (sem desconto)
   const freteGratis = valorFrete === 0;
   const valorTotal = total; // Usar direto do Context
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(price);
-  };
 
   const enderecoCompleto = checkoutData.entrega
     ? `${checkoutData.entrega.rua}, ${

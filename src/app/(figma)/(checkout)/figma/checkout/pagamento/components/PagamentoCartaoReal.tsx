@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckoutStepper } from "../../CheckoutStepper";
 import { BotaoVoltar } from "./BotaoVoltar";
 import { usePagBankPayment } from "@/hooks/checkout";
+import { formatCardNumber, formatValidade, formatCVV } from "@/lib/formatters";
 
 interface PagamentoCartaoRealProps {
   pedidoId: string;
@@ -83,22 +84,6 @@ export function PagamentoCartaoReal({
     { valor: 3 as Parcelas, total: valorTotal / 3 },
   ];
 
-  const formatCardNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers
-      .replace(/(\d{4})(\d)/, "$1 $2")
-      .replace(/(\d{4})(\d)/, "$1 $2")
-      .replace(/(\d{4})(\d)/, "$1 $2")
-      .replace(/(\d{4})\d+?$/, "$1");
-  };
-
-  const formatValidade = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers
-      .replace(/(\d{2})(\d)/, "$1/$2")
-      .replace(/(\d{2})\d+?$/, "$1");
-  };
-
   const handleChange = (field: keyof CartaoFormData, value: string | number) => {
     let formattedValue = value;
 
@@ -107,7 +92,7 @@ export function PagamentoCartaoReal({
     } else if (field === "validade" && typeof value === "string") {
       formattedValue = formatValidade(value);
     } else if (field === "cvv" && typeof value === "string") {
-      formattedValue = value.replace(/\D/g, "").slice(0, 4);
+      formattedValue = formatCVV(value);
     }
 
     setCartaoData((prev) => ({ ...prev, [field]: formattedValue }));

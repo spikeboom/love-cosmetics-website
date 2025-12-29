@@ -6,6 +6,7 @@ import { CheckoutStepper } from "../CheckoutStepper";
 import { useViaCep } from "@/hooks/checkout";
 import { useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
+import { formatCEP } from "@/lib/formatters";
 
 interface FormData {
   cep: string;
@@ -133,11 +134,6 @@ export function EntregaPageClient() {
       }));
     }
   }, [endereco]);
-
-  const formatCEP = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    return numbers.replace(/(\d{5})(\d)/, "$1-$2").replace(/(-\d{3})\d+?$/, "$1");
-  };
 
   const handleChange = (field: keyof FormData, value: string | boolean) => {
     if (field === "cep" && typeof value === "string") {

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { VitrineSection } from "../../../components/VitrineSection";
+import { VerifiedIcon, PendingIcon, ChevronRightIcon } from "@/components/figma-shared/icons";
+import { formatDate, formatDateTime, formatPrice } from "@/lib/formatters";
 
 // Tipos
 interface HistoricoStatus {
@@ -62,32 +64,6 @@ const STATUS_FLOW = [
   { key: "ENTREGUE", label: "Entrega realizada" },
 ];
 
-// Icone de verificado
-function VerifiedIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82 1.89 3.2L12 21.04l3.4 1.46 1.89-3.2 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z" fill="currentColor"/>
-    </svg>
-  );
-}
-
-// Icone de pendente (circulo vazio)
-function PendingIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" fill="none"/>
-    </svg>
-  );
-}
-
-// Icone de chevron
-function ChevronRightIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/>
-    </svg>
-  );
-}
 
 // Interface para props
 interface DetalhesPedidoClientProps {
@@ -137,20 +113,6 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("pt-BR");
-  };
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.toLocaleDateString("pt-BR")}, ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
-  };
-
-  const formatPrice = (price: number) => {
-    return price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   };
 
   // Calcular totais

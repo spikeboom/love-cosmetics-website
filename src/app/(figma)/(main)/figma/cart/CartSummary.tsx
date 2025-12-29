@@ -2,6 +2,7 @@
 
 import { getTipoDesconto } from '@/utils/cart-calculations';
 import { OutdatedCartAlert } from '@/components/cart/OutdatedCartAlert';
+import { formatPrice } from '@/lib/formatters';
 
 interface CartSummaryProps {
   subtotal: number;
@@ -37,13 +38,6 @@ export function CartSummary({
 
   // Pode continuar se frete calculado E carrinho válido (ou ainda não validado)
   const canCheckout = freteCalculado && !isOutdated;
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price);
-  };
 
   return (
     <div className={`flex flex-col bg-white ${

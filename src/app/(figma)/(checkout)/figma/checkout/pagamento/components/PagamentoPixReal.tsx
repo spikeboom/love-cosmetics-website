@@ -8,6 +8,7 @@ import { BotaoVoltar } from "./BotaoVoltar";
 import { PagamentoResumo } from "./PagamentoResumo";
 import { ResumoProps } from "./types";
 import { usePagBankPayment } from "@/hooks/checkout";
+import { formatCountdown } from "@/lib/formatters";
 
 interface PagamentoPixRealProps {
   pedidoId: string;
@@ -115,12 +116,6 @@ export function PagamentoPixReal({
     return () => clearInterval(timer);
   }, [qrCodeData]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}m ${secs.toString().padStart(2, "0")}s`;
-  };
-
   const copyToClipboard = async () => {
     if (!qrCodeData?.text) return;
 
@@ -214,7 +209,7 @@ export function PagamentoPixReal({
                         <path d="M10 2H14" stroke="#E7A63A" strokeWidth="2" strokeLinecap="round"/>
                       </svg>
                       <span className="font-cera-pro font-bold text-[20px] text-[#254333]">
-                        {formatTime(timeLeft)}
+                        {formatCountdown(timeLeft)}
                       </span>
                     </div>
                   </div>
