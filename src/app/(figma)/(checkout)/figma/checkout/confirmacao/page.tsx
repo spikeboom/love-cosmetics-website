@@ -2,57 +2,16 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { ConfirmacaoStepper } from "./ConfirmacaoStepper";
 import { useAuth } from "@/contexts";
-import { VerifiedIcon } from "@/components/figma-shared/icons";
-import { formatCurrency } from "@/lib/formatters";
-
-interface PedidoStatus {
-  pedidoVinculado: boolean;
-  cpfCadastrado: boolean;
-  cpf: string;
-  cpfMascarado: string;
-  nome: string;
-  email: string;
-  statusPagamento: string;
-}
-
-interface PedidoDetalhes {
-  id: string;
-  cliente: {
-    nome: string;
-    sobrenome: string;
-    email: string;
-    telefone: string;
-    cpf: string;
-  };
-  endereco: {
-    completo: string;
-    cidade: string;
-    estado: string;
-    cep: string;
-  };
-  produtos: {
-    nomes: string[];
-    subtotal: number;
-  };
-  entrega: {
-    transportadora: string;
-    servico: string;
-    prazo: number;
-    valor: number;
-    gratis: boolean;
-  };
-  descontos: number;
-  total: number;
-  status: {
-    pagamento: string;
-    entrega: string;
-  };
-  metodoPagamento: string;
-  vinculado: boolean;
-}
+import {
+  LoadingState,
+  ErrorState,
+  SuccessState,
+  AccountForm,
+  PedidoStatus,
+  PedidoDetalhes,
+  PageStatus,
+} from "./components";
 
 function ConfirmacaoContent() {
   const router = useRouter();
@@ -60,7 +19,7 @@ function ConfirmacaoContent() {
   const pedidoId = searchParams.get("pedidoId");
   const { refreshAuth } = useAuth();
 
-  const [pageStatus, setPageStatus] = useState<"loading" | "create_account" | "login" | "success" | "error">("loading");
+  const [pageStatus, setPageStatus] = useState<PageStatus>("loading");
   const [pedidoStatus, setPedidoStatus] = useState<PedidoStatus | null>(null);
   const [pedidoDetalhes, setPedidoDetalhes] = useState<PedidoDetalhes | null>(null);
   const [password, setPassword] = useState("");
@@ -235,290 +194,35 @@ function ConfirmacaoContent() {
 
   // Loading
   if (pageStatus === "loading") {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#254333] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="font-cera-pro text-[16px] text-[#333333]">
-          Verificando pedido...
-        </p>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   // Erro
   if (pageStatus === "error") {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="max-w-md w-full text-center">
-          <div className="w-24 h-24 mx-auto mb-6 bg-red-500 rounded-full flex items-center justify-center">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </div>
-          <h1 className="font-cera-pro font-bold text-[28px] text-red-600 mb-4">
-            Algo deu errado
-          </h1>
-          <p className="font-cera-pro text-[16px] text-[#333333] mb-8">
-            Nao conseguimos encontrar seu pedido. Por favor, entre em contato com nosso suporte.
-          </p>
-          <Link
-            href="/figma"
-            className="inline-block w-full h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
-          >
-            <span className="font-cera-pro font-bold text-[20px] text-white">
-              Voltar para a loja
-            </span>
-          </Link>
-        </div>
-      </div>
-    );
+    return <ErrorState />;
   }
 
-  // Sucesso - Tela de Confirmacao Logada igual ao Figma
+  // Sucesso
   if (pageStatus === "success") {
-    return (
-      <div className="bg-white flex flex-col w-full flex-1">
-        <ConfirmacaoStepper currentStep="pagamento" />
-
-        <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
-          <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
-            {/* Banner de sucesso do pagamento */}
-            <div className="bg-[#f8f3ed] rounded-[16px] h-[64px] p-4 flex gap-2 items-center">
-              <VerifiedIcon className="w-8 h-8 shrink-0" variant="gold" />
-              <div className="flex flex-col flex-1 gap-1">
-                <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#1d1b20]">
-                  Pagamento aprovado!
-                </p>
-                <p className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#1d1b20]">
-                  Boas noticias, seu pagamento foi confirmado!
-                </p>
-              </div>
-            </div>
-
-            {/* Card com resumo do pedido */}
-            <div className="bg-[#f8f3ed] rounded-[8px] overflow-hidden">
-              {/* Produtos */}
-              <div className="p-4 flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                    Produtos
-                  </p>
-                  <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                    {pedidoDetalhes ? formatCurrency(pedidoDetalhes.produtos.subtotal) : "-"}
-                  </p>
-                </div>
-                <div className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
-                  {pedidoDetalhes?.produtos.nomes.map((nome, i) => (
-                    <p key={i}>{nome}</p>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white h-px" />
-
-              {/* Entrega */}
-              <div className="p-4 flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                    Entrega
-                  </p>
-                  <p className={`font-cera-pro font-bold text-[18px] lg:text-[20px] ${pedidoDetalhes?.entrega.gratis ? "text-[#009142]" : "text-black"}`}>
-                    {pedidoDetalhes?.entrega.gratis ? "Gratis" : pedidoDetalhes ? formatCurrency(pedidoDetalhes.entrega.valor) : "-"}
-                  </p>
-                </div>
-                <p className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
-                  {pedidoDetalhes?.endereco.completo}
-                </p>
-              </div>
-
-              <div className="bg-white h-px" />
-
-              {/* Descontos */}
-              {(pedidoDetalhes?.descontos ?? 0) > 0 && (
-                <>
-                  <div className="p-4 flex justify-between items-center">
-                    <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                      Descontos
-                    </p>
-                    <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-                      - {formatCurrency(pedidoDetalhes?.descontos ?? 0)}
-                    </p>
-                  </div>
-                  <div className="bg-white h-px" />
-                </>
-              )}
-
-              {/* Valor Total */}
-              <div className="p-4 flex justify-between items-center">
-                <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                  Valor total
-                </p>
-                <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                  {pedidoDetalhes ? formatCurrency(pedidoDetalhes.total) : "-"}
-                </p>
-              </div>
-            </div>
-
-            {/* Botoes */}
-            <div className="flex gap-4">
-              <Link
-                href="/figma/minha-conta/pedidos"
-                className="flex-1 h-[56px] lg:h-[64px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
-              >
-                <span className="font-cera-pro font-medium text-[16px] text-white">
-                  Ver meus pedidos
-                </span>
-              </Link>
-              <Link
-                href="/figma"
-                className="flex-1 h-[56px] lg:h-[64px] bg-[#d8f9e7] rounded-[8px] flex items-center justify-center hover:bg-[#c5f0d8] transition-colors"
-              >
-                <span className="font-cera-pro font-medium text-[16px] text-[#254333]">
-                  Ir para pagina inicial
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <SuccessState pedidoDetalhes={pedidoDetalhes} />;
   }
 
   // Formulario de criar conta ou login
   return (
-    <div className="bg-white flex flex-col w-full flex-1">
-      <ConfirmacaoStepper currentStep="senha" />
-
-      <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
-        <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
-          {/* Banner de sucesso do pagamento */}
-          <div className="bg-[#f8f3ed] rounded-[16px] p-4 flex gap-2 items-center">
-            <VerifiedIcon className="w-8 h-8 shrink-0" variant="gold" />
-            <div className="flex flex-col gap-1">
-              <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#1d1b20]">
-                Pagamento aprovado!
-              </p>
-              <p className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#1d1b20]">
-                Boas noticias, seu pagamento foi confirmado!
-              </p>
-            </div>
-          </div>
-
-          {/* Texto explicativo */}
-          <div className="flex flex-col gap-2">
-            <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#1d1b20]">
-              Acompanhe seu pedido
-            </p>
-            <p className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#1d1b20]">
-              {pageStatus === "login"
-                ? "Voce ja tem uma conta. Faca login para vincular este pedido e acompanhar o status."
-                : "Confirme seus dados para criar uma conta e acompanhar o status do seu pedido. E rapidinho!"}
-            </p>
-          </div>
-
-          {/* Formulario */}
-          <form onSubmit={pageStatus === "login" ? handleLogin : handleCreateAccount} className="flex flex-col gap-4 lg:gap-[16px]">
-            {/* Campo de senha */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <div className="flex justify-between items-center">
-                <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                  {pageStatus === "login" ? "Digite sua senha" : "Informe uma senha"}
-                </label>
-                {pageStatus === "login" && pedidoStatus?.cpf && (
-                  <Link
-                    href={`/figma/checkout/esqueci-senha?cpf=${pedidoStatus.cpf}${pedidoId ? `&pedidoId=${pedidoId}` : ""}`}
-                    className="font-cera-pro font-light text-[14px] text-[#254333] underline hover:text-[#1a2e24]"
-                  >
-                    Esqueci minha senha
-                  </Link>
-                )}
-              </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="********"
-                className="w-full h-[48px] px-4 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-[#333] placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]"
-              />
-            </div>
-
-            {/* Confirmar senha (apenas para criar conta) */}
-            {pageStatus === "create_account" && (
-              <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-                <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                  Confirme sua senha
-                </label>
-                <input
-                  type="password"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                  placeholder="********"
-                  className="w-full h-[48px] px-4 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-[#333] placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]"
-                />
-              </div>
-            )}
-
-            {/* Checkbox de comunicacoes (apenas para criar conta) */}
-            {pageStatus === "create_account" && (
-              <div className="flex gap-2 items-start py-2">
-                <button
-                  type="button"
-                  onClick={() => setReceberComunicacoes(!receberComunicacoes)}
-                  className={`shrink-0 w-[18px] h-[18px] border-2 border-[#333] rounded-sm flex items-center justify-center ${
-                    receberComunicacoes ? "bg-[#254333] border-[#254333]" : ""
-                  }`}
-                >
-                  {receberComunicacoes && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </button>
-                <div className="flex flex-col gap-1">
-                  <p className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#111]">
-                    Quero receber comunicacoes da Love
-                  </p>
-                  <p className="font-cera-pro font-light text-[10px] lg:text-[12px] text-[#111]">
-                    Aceito receber atualizacoes sobre meus pedidos e ofertas de acordo com o termo de consentimento
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Erro */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-[8px] p-3">
-                <p className="font-cera-pro text-[14px] text-red-600">{error}</p>
-              </div>
-            )}
-
-            {/* Botao */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full h-[60px] lg:h-[64px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <span className="font-cera-pro font-medium text-[16px] text-white">
-                  Continuar
-                </span>
-              )}
-            </button>
-
-            {/* Link para pular */}
-            <Link
-              href="/figma"
-              className="text-center font-cera-pro font-light text-[14px] text-[#666] underline hover:text-[#254333]"
-            >
-              Pular por enquanto
-            </Link>
-          </form>
-        </div>
-      </div>
-    </div>
+    <AccountForm
+      pageStatus={pageStatus}
+      pedidoStatus={pedidoStatus}
+      pedidoId={pedidoId}
+      password={password}
+      setPassword={setPassword}
+      passwordConfirm={passwordConfirm}
+      setPasswordConfirm={setPasswordConfirm}
+      receberComunicacoes={receberComunicacoes}
+      setReceberComunicacoes={setReceberComunicacoes}
+      error={error}
+      isSubmitting={isSubmitting}
+      onSubmit={pageStatus === "login" ? handleLogin : handleCreateAccount}
+    />
   );
 }
 

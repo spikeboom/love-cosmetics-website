@@ -1,130 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
-import { identificacaoSchema } from "@/lib/checkout/validation";
-import { validacoes } from "@/lib/checkout/validation";
-import { formatCPF, formatDateInput, formatTelefone } from "@/lib/formatters";
-
-interface FormData {
-  cpf: string;
-  dataNascimento: string;
-  nome: string;
-  email: string;
-  telefone: string;
-}
+import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
 
 export function IdentificacaoPageClient() {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>({
-    cpf: "",
-    dataNascimento: "",
-    nome: "",
-    email: "",
-    telefone: "",
-  });
-  const [errors, setErrors] = useState<Partial<FormData>>({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Carregar dados: primeiro do usuário logado, depois do localStorage
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Tentar buscar dados do usuário logado
-        const response = await fetch("/api/cliente/auth/verificar", {
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.authenticated && data.cliente) {
-            const cliente = data.cliente;
-            // Formatar data de nascimento se existir
-            let dataNascimentoFormatada = "";
-            if (cliente.dataNascimento) {
-              const date = new Date(cliente.dataNascimento);
-              dataNascimentoFormatada = `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
-            }
-
-            setFormData({
-              cpf: cliente.cpf ? formatCPF(cliente.cpf) : "",
-              dataNascimento: dataNascimentoFormatada,
-              nome: `${cliente.nome || ""} ${cliente.sobrenome || ""}`.trim(),
-              email: cliente.email || "",
-              telefone: cliente.telefone ? formatTelefone(cliente.telefone) : "",
-            });
-            setIsLoading(false);
-            return;
-          }
-        }
-      } catch {
-        // Erro ao buscar usuário logado, continuar para localStorage
-      }
-
-      // Fallback: carregar do localStorage
-      const saved = localStorage.getItem("checkoutIdentificacao");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setFormData(parsed);
-        } catch {
-          // Ignorar erro de parse
-        }
-      }
-      setIsLoading(false);
-    };
-
-    loadData();
-  }, []);
-
-  const handleChange = (field: keyof FormData, value: string) => {
-    let formattedValue = value;
-
-    if (field === "cpf") {
-      formattedValue = formatCPF(value);
-    } else if (field === "dataNascimento") {
-      formattedValue = formatDateInput(value);
-    } else if (field === "telefone") {
-      formattedValue = formatTelefone(value);
-    }
-
-    setFormData((prev) => ({ ...prev, [field]: formattedValue }));
-
-    // Limpar erro ao digitar
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const validateForm = () => {
-    const result = identificacaoSchema.safeParse(formData);
-
-    if (!result.success) {
-      const newErrors: Partial<FormData> = {};
-      result.error.errors.forEach((err) => {
-        const field = err.path[0] as keyof FormData;
-        newErrors[field] = err.message;
-      });
-      setErrors(newErrors);
-      return false;
-    }
-
-    // Validacao adicional de CPF com checksum
-    if (!validacoes.cpf(formData.cpf)) {
-      setErrors({ cpf: "CPF invalido" });
-      return false;
-    }
-
-    setErrors({});
-    return true;
-  };
+  const {
+    formData,
+    errors,
+    isLoading,
+    handleChange,
+    validateForm,
+    saveToStorage,
+  } = useIdentificacaoForm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      localStorage.setItem("checkoutIdentificacao", JSON.stringify(formData));
+      saveToStorage();
       router.push("/figma/checkout/entrega");
     }
   };
@@ -148,102 +43,56 @@ export function IdentificacaoPageClient() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
             {/* CPF */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Informe seu CPF *
-              </label>
-              <input
-                type="text"
-                value={formData.cpf}
-                onChange={(e) => handleChange("cpf", e.target.value)}
-                placeholder="000.000.000-00"
-                maxLength={14}
-                className={`w-full h-[48px] px-4 bg-white border ${
-                  errors.cpf ? "border-red-500" : "border-[#d2d2d2]"
-                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-              />
-              {errors.cpf && (
-                <span className="text-red-500 text-sm">{errors.cpf}</span>
-              )}
-            </div>
+            <FormField
+              label="Informe seu CPF *"
+              field="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              error={errors.cpf}
+              placeholder="000.000.000-00"
+              maxLength={14}
+            />
 
             {/* Data de nascimento */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Data de nascimento *
-              </label>
-              <input
-                type="text"
-                value={formData.dataNascimento}
-                onChange={(e) => handleChange("dataNascimento", e.target.value)}
-                placeholder="DD/MM/AAAA"
-                maxLength={10}
-                className={`w-full h-[48px] px-4 bg-white border ${
-                  errors.dataNascimento ? "border-red-500" : "border-[#d2d2d2]"
-                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-              />
-              {errors.dataNascimento && (
-                <span className="text-red-500 text-sm">{errors.dataNascimento}</span>
-              )}
-            </div>
+            <FormField
+              label="Data de nascimento *"
+              field="dataNascimento"
+              value={formData.dataNascimento}
+              onChange={handleChange}
+              error={errors.dataNascimento}
+              placeholder="DD/MM/AAAA"
+              maxLength={10}
+            />
 
             {/* Nome e sobrenome */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Nome e sobrenome *
-              </label>
-              <input
-                type="text"
-                value={formData.nome}
-                onChange={(e) => handleChange("nome", e.target.value)}
-                placeholder=""
-                className={`w-full h-[48px] px-4 bg-white border ${
-                  errors.nome ? "border-red-500" : "border-[#d2d2d2]"
-                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-              />
-              {errors.nome && (
-                <span className="text-red-500 text-sm">{errors.nome}</span>
-              )}
-            </div>
+            <FormField
+              label="Nome e sobrenome *"
+              field="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              error={errors.nome}
+            />
 
             {/* E-mail */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                E-mail *
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                placeholder=""
-                className={`w-full h-[48px] px-4 bg-white border ${
-                  errors.email ? "border-red-500" : "border-[#d2d2d2]"
-                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-              />
-              {errors.email && (
-                <span className="text-red-500 text-sm">{errors.email}</span>
-              )}
-            </div>
+            <FormField
+              label="E-mail *"
+              field="email"
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+              type="email"
+            />
 
             {/* Telefone */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Telefone *
-              </label>
-              <input
-                type="text"
-                value={formData.telefone}
-                onChange={(e) => handleChange("telefone", e.target.value)}
-                placeholder="(00) 00000-0000"
-                maxLength={15}
-                className={`w-full h-[48px] px-4 bg-white border ${
-                  errors.telefone ? "border-red-500" : "border-[#d2d2d2]"
-                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-              />
-              {errors.telefone && (
-                <span className="text-red-500 text-sm">{errors.telefone}</span>
-              )}
-            </div>
+            <FormField
+              label="Telefone *"
+              field="telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              error={errors.telefone}
+              placeholder="(00) 00000-0000"
+              maxLength={15}
+            />
           </div>
 
           {/* Botao Continuar */}
@@ -257,6 +106,50 @@ export function IdentificacaoPageClient() {
           </button>
         </form>
       </div>
+    </div>
+  );
+}
+
+// Componente auxiliar de campo de formulario
+interface FormFieldProps {
+  label: string;
+  field: keyof IdentificacaoFormData;
+  value: string;
+  onChange: (field: keyof IdentificacaoFormData, value: string) => void;
+  error?: string;
+  placeholder?: string;
+  maxLength?: number;
+  type?: string;
+}
+
+function FormField({
+  label,
+  field,
+  value,
+  onChange,
+  error,
+  placeholder = "",
+  maxLength,
+  type = "text",
+}: FormFieldProps) {
+  return (
+    <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+      <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(field, e.target.value)}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className={`w-full h-[48px] px-4 bg-white border ${
+          error ? "border-red-500" : "border-[#d2d2d2]"
+        } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
+      />
+      {error && (
+        <span className="text-red-500 text-sm">{error}</span>
+      )}
     </div>
   );
 }
