@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 
 interface IdentificacaoData {
   cpf: string;
@@ -43,7 +43,12 @@ export function useCreateOrder(): UseCreateOrderReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
-  const { cart, total, descontos, cupons, freight } = useMeuContexto();
+
+  // Novos hooks segmentados
+  const { cart } = useCart();
+  const { cupons } = useCoupon();
+  const { freightValue, getSelectedFreightData } = useShipping();
+  const { total, descontos } = useCartTotals();
 
   const clearError = useCallback(() => {
     setError(null);
@@ -102,8 +107,8 @@ export function useCreateOrder(): UseCreateOrderReturn {
       }));
 
       // Usar frete do Context (ja calculado corretamente)
-      const freteCalculado = freight.freightValue;
-      const freightData = freight.getSelectedFreightData?.() || {};
+      const freteCalculado = freightValue;
+      const freightData = getSelectedFreightData?.() || {};
 
       // Montar payload para API
       const payload = {
@@ -162,7 +167,7 @@ export function useCreateOrder(): UseCreateOrderReturn {
     } finally {
       setLoading(false);
     }
-  }, [cart, total, descontos, cupons, freight]);
+  }, [cart, total, descontos, cupons, freightValue, getSelectedFreightData]);
 
   return {
     loading,
