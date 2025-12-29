@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useViaCep } from "@/hooks/checkout";
-import { useMeuContexto } from "@/components/common/Context/context";
-import { FreightOptions } from "@/app/(figma-main)/figma/components/FreightOptions";
+import { useShipping } from "@/contexts";
+import { FreightOptions } from "@/components/figma-shared";
 
 interface FormData {
   cep: string;
@@ -23,7 +23,7 @@ interface FormData {
 export function EntregaPageClient() {
   const router = useRouter();
   const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
-  const { freight } = useMeuContexto();
+  const freight = useShipping();
 
   const [formData, setFormData] = useState<FormData>({
     cep: "",

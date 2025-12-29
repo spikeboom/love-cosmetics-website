@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import ProductGallery from '@/components/gallery/ProductGallery';
-import ProductModal from '@/components/gallery/ProductModal';
-import GalleryNavigation from '@/components/gallery/GalleryNavigation';
-import GallerySubHeader from '@/components/gallery/GallerySubHeader';
-import GalleryStats from '@/components/gallery/GalleryStats';
-import { type Categoria, type Subcategoria } from '@/components/gallery/categoryMapper';
+import ProductGallery from '@/deprecated/components/gallery/ProductGallery';
+import ProductModal from '@/deprecated/components/gallery/ProductModal';
+import GalleryNavigation from '@/deprecated/components/gallery/GalleryNavigation';
+import GallerySubHeader from '@/deprecated/components/gallery/GallerySubHeader';
+import GalleryStats from '@/deprecated/components/gallery/GalleryStats';
+import { type Categoria, type Subcategoria } from '@/deprecated/components/gallery/categoryMapper';
 import galleryData from '@/data/upload_urls_cache.json';
 
 interface ProductImage {

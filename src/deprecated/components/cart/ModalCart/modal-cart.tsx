@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import "./style.css";
-import { useModalCart } from "@/hooks/useModalCart";
+import { useModalCart } from "@/deprecated/hooks/useModalCart";
 import { CartHeader } from "./CartHeader";
 import { CartProductList } from "./CartProductList";
 import { EmptyCartMessage } from "./EmptyCartMessage";

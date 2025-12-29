@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ConfirmacaoStepper } from "../confirmacao/ConfirmacaoStepper";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useAuth } from "@/contexts";
 
 function NovaSenhaContent() {
   const router = useRouter();
@@ -12,7 +12,7 @@ function NovaSenhaContent() {
   const pedidoId = searchParams.get("pedidoId");
   const cpf = searchParams.get("cpf");
   const token = searchParams.get("token");
-  const { refreshAuth } = useMeuContexto();
+  const { refreshAuth } = useAuth();
 
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");

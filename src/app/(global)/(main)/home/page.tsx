@@ -2,8 +2,8 @@ import {
   fetchProdutosForHome_Kit,
   fetchProdutosForHome_NotKit,
 } from "@/modules/produto/domain";
-import { Product } from "@/components/common/HomeProduct/carousel-products";
-import { CarouselProducts } from "@/components/product/ProductCarousel/carousel-products";
+import { Product } from "@/deprecated/components/common/HomeProduct/carousel-products";
+import { CarouselProducts } from "@/deprecated/components/product/ProductCarousel/carousel-products";
 import { FormEmailGTM } from "./form-email";
 
 export const metadata = {

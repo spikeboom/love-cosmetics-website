@@ -34,7 +34,7 @@ import { FiSearch } from "react-icons/fi";
 import QuickLoginModal from "./QuickLoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { createCloseAction } from "@/utils/snackbar-helpers";
-import { useFreight } from "@/hooks/useFreight";
+import { useFreight } from "@/deprecated/hooks/useFreight";
 import EnderecoSelector from "./EnderecoSelector";
 import { OrderSummary } from "./OrderSummary";
 import { Grid } from "@mui/material";

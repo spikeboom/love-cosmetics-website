@@ -1,33 +1,33 @@
-import { Tabs } from "@/components/ui/Tabs";
-import { Duvidas } from "@/components/common/FAQ/duvidas";
-import { CarouselProducts } from "@/components/product/ProductCarousel/carousel-products";
-import { ListaAtivos } from "@/components/product/ActiveIngredients/lista-ativos";
-import { MaisLinks } from "@/components/common/MoreLinks/mais-links";
-import { Rodape } from "@/components/layout/Footer/rodape";
-import { AvaliacoesClientes } from "@/components/product/CustomerReviews/avaliacoes-clientes";
-import { CarouselImagensTop } from "@/components/product/ProductImageCarousel/carousel-imagens-top";
-import { Cabecalho } from "@/components/layout/Header/cabecalho";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs/breadcrumbs";
-import { ProductInfoTop } from "@/components/product/ProductInfoTop/product-info-top";
-import { ProductDescricao } from "@/components/product/ProductDescription/product-descricao";
+import { Tabs } from "@/deprecated/components/ui/Tabs";
+import { Duvidas } from "@/deprecated/components/common/FAQ/duvidas";
+import { CarouselProducts } from "@/deprecated/components/product/ProductCarousel/carousel-products";
+import { ListaAtivos } from "@/deprecated/components/product/ActiveIngredients/lista-ativos";
+import { MaisLinks } from "@/deprecated/components/common/MoreLinks/mais-links";
+import { Rodape } from "@/deprecated/components/layout/Footer/rodape";
+import { AvaliacoesClientes } from "@/deprecated/components/product/CustomerReviews/avaliacoes-clientes";
+import { CarouselImagensTop } from "@/deprecated/components/product/ProductImageCarousel/carousel-imagens-top";
+import { Cabecalho } from "@/deprecated/components/layout/Header/cabecalho";
+import { Breadcrumbs } from "@/deprecated/components/common/Breadcrumbs/breadcrumbs";
+import { ProductInfoTop } from "@/deprecated/components/product/ProductInfoTop/product-info-top";
+import { ProductDescricao } from "@/deprecated/components/product/ProductDescription/product-descricao";
 import {
   BarraFixaComprar,
   BotaoComprar,
-} from "@/components/cart/FixedBuyButton/botao-fixo-comprar";
-import { ComoUsarEssaFormula } from "@/components/product/HowToUse/como-usar-essa-formula";
-import { Adesivos } from "@/components/product/Stickers/adesivos";
-import { PagueCom } from "@/components/forms/PaymentMethods/pague-com";
-import { PontosDisponiveis } from "@/components/forms/AvailablePoints/pontos-disponiveis";
-import { ListaRedesSociais } from "@/components/common/SocialMedia/lista-resdes-sociais";
-import { CartoesAceitos } from "@/components/forms/AcceptedCards/cartoes-aceitos";
-import { CadastreSeuEmail } from "@/components/forms/EmailSignup/cadastre-seu-email";
+} from "@/deprecated/components/cart/FixedBuyButton/botao-fixo-comprar";
+import { ComoUsarEssaFormula } from "@/deprecated/components/product/HowToUse/como-usar-essa-formula";
+import { Adesivos } from "@/deprecated/components/product/Stickers/adesivos";
+import { PagueCom } from "@/deprecated/components/forms/PaymentMethods/pague-com";
+import { PontosDisponiveis } from "@/deprecated/components/forms/AvailablePoints/pontos-disponiveis";
+import { ListaRedesSociais } from "@/deprecated/components/common/SocialMedia/lista-resdes-sociais";
+import { CartoesAceitos } from "@/deprecated/components/forms/AcceptedCards/cartoes-aceitos";
+import { CadastreSeuEmail } from "@/deprecated/components/forms/EmailSignup/cadastre-seu-email";
 import {
   fetchProdutoBySlug,
   fetchProdutosForCarouselPDP,
 } from "@/modules/produto/domain";
 import { Metadata, ResolvingMetadata } from "next";
-import { AddToCart } from "@/components/cart/AddToCart/add-to-cart";
-import { ViewContentEvent } from "@/components/common/EventViewContent/event-view-content";
+import { AddToCart } from "@/deprecated/components/cart/AddToCart/add-to-cart";
+import { ViewContentEvent } from "@/deprecated/components/common/EventViewContent/event-view-content";
 
 type Props = {
   params: Promise<{ slug: string }>;

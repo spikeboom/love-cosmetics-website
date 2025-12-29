@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import { useMeuContexto } from "@/components/common/Context/context";
-import { FreightOptions } from "./FreightOptions";
+import { useCart, useShipping } from "@/contexts";
+import { FreightOptions } from "@/components/figma-shared";
 
 interface ShippingCalculatorProps {
   title?: string;
@@ -20,7 +20,7 @@ export function ShippingCalculator({
   inputFontSize = 'large',
   width = 'full',
 }: ShippingCalculatorProps) {
-  const { freight, cart } = useMeuContexto();
+  const { cart } = useCart();
   const {
     cep,
     setCep,
@@ -32,7 +32,7 @@ export function ShippingCalculator({
     setSelectedFreight,
     resetFreight,
     selectedServiceIndex,
-  } = freight;
+  } = useShipping();
 
   // Recalcular frete automaticamente quando o carrinho mudar
   useEffect(() => {

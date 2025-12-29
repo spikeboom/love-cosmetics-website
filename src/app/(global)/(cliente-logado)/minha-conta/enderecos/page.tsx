@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import EnderecosList from '@/components/cliente/EnderecosList';
-import EnderecoForm from '@/components/cliente/EnderecoForm';
+import EnderecosList from '@/deprecated/components/cliente/EnderecosList';
+import EnderecoForm from '@/deprecated/components/cliente/EnderecoForm';
 
 interface Endereco {
   id: string;

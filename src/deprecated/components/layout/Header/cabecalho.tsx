@@ -1,10 +1,10 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import IconCart from "@/components/layout/HeaderIcons/icon-cart";
-import IconHamburger from "@/components/layout/HeaderIcons/icon-hamburger";
-import IconLogin from "@/components/layout/HeaderIcons/icon-login";
-import IconSearch from "@/components/layout/HeaderIcons/icon-search";
+import IconCart from "@/deprecated/components/layout/HeaderIcons/icon-cart";
+import IconHamburger from "@/deprecated/components/layout/HeaderIcons/icon-hamburger";
+import IconLogin from "@/deprecated/components/layout/HeaderIcons/icon-login";
+import IconSearch from "@/deprecated/components/layout/HeaderIcons/icon-search";
 import "./styles.css";
 import { useMeuContexto } from "@/components/common/Context/context";
 import { useUI } from "@/core/ui/UIContext";

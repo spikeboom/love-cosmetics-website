@@ -11,7 +11,7 @@ import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
 import { ExpandableSection } from "../../components/ExpandableSection";
 import { calculateProductPrices } from "@/utils/calculate-prices";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useCart } from "@/contexts";
 import { useNotifications } from "@/core/notifications/NotificationContext";
 
 interface ProductPageClientProps {
@@ -22,7 +22,7 @@ interface ProductPageClientProps {
 export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
   const router = useRouter();
-  const { addProductToCart } = useMeuContexto();
+  const { addProductToCart } = useCart();
   const { notify } = useNotifications();
 
   // Calcula preços do produto

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { VitrineSection } from "../components/VitrineSection";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { ShippingCalculator } from "../components/ShippingCalculator";
@@ -19,29 +19,34 @@ interface CartPageClientProps {
 
 export function CartPageClient({ produtos }: CartPageClientProps) {
   const router = useRouter();
+  // Contextos segmentados
   const {
     cart,
-    total,
-    cupons,
-    descontos,
-    freight,
     addQuantityProductToCart,
     subtractQuantityProductToCart,
     removeProductFromCart,
-    handleAddCupom,
-    handleCupom,
-    cartValidation,
-    refreshCartPrices,
     isCartLoaded,
-  } = useMeuContexto();
+  } = useCart();
+
+  const { cupons, handleAddCupom, handleCupom } = useCoupon();
+  const { freightValue, hasCalculated } = useShipping();
+  const {
+    total,
+    descontos,
+    isValidating,
+    isValid,
+    produtosDesatualizados,
+    validateCart,
+    refreshCartPrices,
+  } = useCartTotals();
 
   // Validar carrinho ao carregar a página
   useEffect(() => {
     const cartItems = Object.keys(cart);
-    if (cartItems.length > 0 && cartValidation.isValid === null && !cartValidation.isValidating) {
-      cartValidation.validateCart(cart, cupons);
+    if (cartItems.length > 0 && isValid === null && !isValidating) {
+      validateCart(cart, cupons);
     }
-  }, [cart, cupons, cartValidation]);
+  }, [cart, cupons, isValid, isValidating, validateCart]);
 
   // Converter cart object para array
   const cartArray = Object.values(cart);
@@ -55,7 +60,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
   // Calcular subtotal dos produtos (valor original SEM desconto)
   // total = (produtos - descontos) + frete
   // produtos = total - frete + descontos
-  const subtotal = total - freight.freightValue + descontos;
+  const subtotal = total - freightValue + descontos;
 
   // Se carrinho vazio, mostrar mensagem
   if (isEmpty) {
@@ -117,15 +122,15 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
         <CartSummary
           subtotal={subtotal}
-          frete={freight.freightValue}
+          frete={freightValue}
           cupom={descontos}
           cupons={cupons}
           total={total}
           onCheckout={() => router.push('/figma/checkout')}
           isMobile={true}
-          freteCalculado={freight.hasCalculated}
-          isCartValid={cartValidation.isValid}
-          isValidating={cartValidation.isValidating}
+          freteCalculado={hasCalculated}
+          isCartValid={isValid}
+          isValidating={isValidating}
           onRefreshCart={refreshCartPrices}
         />
       </div>
@@ -145,7 +150,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                 onAdd={addQuantityProductToCart}
                 onSubtract={subtractQuantityProductToCart}
                 onRemove={removeProductFromCart}
-                produtosDesatualizados={cartValidation.produtosDesatualizados}
+                produtosDesatualizados={produtosDesatualizados}
               />
 
               {/* Frete */}
@@ -171,15 +176,15 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
             <div className="hidden md:block md:w-[30%] md:max-w-[447px]">
               <CartSummary
                 subtotal={subtotal}
-                frete={freight.freightValue}
+                frete={freightValue}
                 cupom={descontos}
                 cupons={cupons}
                 total={total}
                 onCheckout={() => router.push('/figma/checkout')}
                 isMobile={false}
-                freteCalculado={freight.hasCalculated}
-                isCartValid={cartValidation.isValid}
-                isValidating={cartValidation.isValidating}
+                freteCalculado={hasCalculated}
+                isCartValid={isValid}
+                isValidating={isValidating}
                 onRefreshCart={refreshCartPrices}
               />
             </div>

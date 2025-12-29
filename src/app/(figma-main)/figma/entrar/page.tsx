@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useAuth } from "@/contexts";
 
 // Funcao para formatar CPF
 function formatCPF(value: string): string {
@@ -16,7 +16,7 @@ function formatCPF(value: string): string {
 
 export default function EntrarPage() {
   const router = useRouter();
-  const { refreshAuth } = useMeuContexto();
+  const { refreshAuth } = useAuth();
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

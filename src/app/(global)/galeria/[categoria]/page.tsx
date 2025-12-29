@@ -1,8 +1,8 @@
 import React from 'react';
-import ProductGallery from '@/components/gallery/ProductGallery';
-import GalleryNavigation from '@/components/gallery/GalleryNavigation';
-import GalleryStats from '@/components/gallery/GalleryStats';
-import { categorias } from '@/components/gallery/categoryMapper';
+import ProductGallery from '@/deprecated/components/gallery/ProductGallery';
+import GalleryNavigation from '@/deprecated/components/gallery/GalleryNavigation';
+import GalleryStats from '@/deprecated/components/gallery/GalleryStats';
+import { categorias } from '@/deprecated/components/gallery/categoryMapper';
 import { notFound } from 'next/navigation';
 
 interface PageProps {

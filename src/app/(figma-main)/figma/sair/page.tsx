@@ -2,11 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useAuth } from "@/contexts";
 
 export default function SairPage() {
   const router = useRouter();
-  const { refreshAuth } = useMeuContexto();
+  const { refreshAuth } = useAuth();
 
   useEffect(() => {
     const logout = async () => {

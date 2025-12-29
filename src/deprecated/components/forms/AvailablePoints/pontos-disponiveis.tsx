@@ -1,4 +1,4 @@
-import IconPlus from "@/components/ui/Icons/icon-plus";
+import IconPlus from "@/deprecated/components/ui/Icons/icon-plus";
 
 export function PontosDisponiveis() {
   return (

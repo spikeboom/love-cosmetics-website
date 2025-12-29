@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { useCreateOrder } from "@/hooks/checkout";
 import {
   TelaAtual,
@@ -16,7 +16,10 @@ import {
 
 export function PagamentoPageClient() {
   const router = useRouter();
-  const { cart, total, descontos, cupons, freight, clearCart } = useMeuContexto();
+  const { cart, clearCart } = useCart();
+  const { cupons } = useCoupon();
+  const { freightValue } = useShipping();
+  const { total, descontos } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder } = useCreateOrder();
 
   // Códigos de erro que indicam carrinho desatualizado
@@ -58,7 +61,7 @@ export function PagamentoPageClient() {
   // O total do Context ja inclui desconto e frete
   // Para mostrar corretamente: Produtos (original) - Desconto + Frete = Total
   // Entao: Produtos = Total - Frete + Desconto
-  const valorFrete = freight.freightValue;
+  const valorFrete = freightValue;
   const subtotal = total - valorFrete + descontos; // Valor original dos produtos (sem desconto)
   const freteGratis = valorFrete === 0;
   const valorTotal = total; // Usar direto do Context

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useAuth } from "@/contexts";
 
 // Funcao para formatar CPF
 function formatCPF(value: string): string {
@@ -25,7 +25,7 @@ function formatPhone(value: string): string {
 
 export default function CadastrarPage() {
   const router = useRouter();
-  const { refreshAuth } = useMeuContexto();
+  const { refreshAuth } = useAuth();
 
   const [nome, setNome] = useState("");
   const [sobrenome, setSobrenome] = useState("");

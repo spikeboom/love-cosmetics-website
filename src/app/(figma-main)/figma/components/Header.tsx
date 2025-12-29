@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMeuContexto } from "@/components/common/Context/context";
+import { useCart, useAuth } from "@/contexts";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { qtdItemsCart, isLoggedIn } = useMeuContexto();
+  const { qtdItemsCart } = useCart();
+  const { isLoggedIn } = useAuth();
 
   return (
     <header className="w-full flex flex-col items-start">

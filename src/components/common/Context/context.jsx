@@ -16,8 +16,8 @@ import { processProdutosComOuSemCupom, processProdutosRevert } from "@/core/proc
 import { StorageService } from "@/core/storage/storage-service";
 import { CartCalculations } from "@/core/utils/cart-calculations";
 import { useNotifications } from "@/core/notifications/NotificationContext";
-import { useFreight } from "@/hooks/useFreight";
-import { useCartValidation } from "@/hooks/useCartValidation";
+import { useFreight } from "@/deprecated/hooks/useFreight";
+import { useCartValidation } from "@/deprecated/hooks/useCartValidation";
 
 const MeuContexto = createContext();
 

@@ -1,8 +1,8 @@
-import { Cabecalho } from "@/components/layout/Header/cabecalho";
-import { Rodape } from "@/components/layout/Footer/rodape";
-import { ModalMenu } from "@/components/layout/Menu/menu";
-import { FloatingWhatsApp } from "@/components/common/FloatingWhatsApp/FloatingWhatsApp";
-import { ModalCart } from "@/components/cart/ModalCart/modal-cart";
+import { Cabecalho } from "@/deprecated/components/layout/Header/cabecalho";
+import { Rodape } from "@/deprecated/components/layout/Footer/rodape";
+import { ModalMenu } from "@/deprecated/components/layout/Menu/menu";
+import { FloatingWhatsApp } from "@/deprecated/components/common/FloatingWhatsApp/FloatingWhatsApp";
+import { ModalCart } from "@/deprecated/components/cart/ModalCart/modal-cart";
 
 export default function GlobalLayout({
   children,

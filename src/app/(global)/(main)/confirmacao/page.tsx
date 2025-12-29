@@ -1,4 +1,4 @@
-import { ClearCart } from "@/components/cart/CleanCart/clean-cart";
+import { ClearCart } from "@/deprecated/components/cart/CleanCart/clean-cart";
 import Link from "next/link";
 
 export const metadata = {
