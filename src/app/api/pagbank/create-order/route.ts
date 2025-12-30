@@ -2,17 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/utils/logMessage";
 import type {
-  PagBankOrderRequest,
   PagBankOrderResponse,
   PagBankError,
-  PagBankPixOrderRequest,
 } from "@/types/pagbank";
+import {
+  buildCardOrderRequest,
+  buildCustomerFromPedido,
+  buildItemsFromPedido,
+  buildOrderUpdateData,
+  buildPixOrderRequest,
+  buildShippingFromPedido,
+  buildTotalAmount,
+  createPagBankOrder,
+  extractChargeResponseData,
+  extractPixResponseData,
+  resolveNotificationUrls,
+} from "@/lib/pagbank/create-order";
 
 const logMessage = createLogger();
 
 /**
  * Cria um pedido no PagBank usando a API Orders (Checkout Transparente)
- * Suporta pagamento com cartão de crédito e PIX
+ * Suporta pagamento com cartAœo de crAcdito e PIX
  */
 export async function POST(req: NextRequest) {
   try {
@@ -20,8 +31,8 @@ export async function POST(req: NextRequest) {
     const {
       pedidoId,
       paymentMethod, // "credit_card" ou "pix"
-      encryptedCard, // apenas para cartão
-      installments = 1, // número de parcelas
+      encryptedCard, // apenas para cartAœo
+      installments = 1, // nA§mero de parcelas
     } = body;
 
     // Buscar pedido no banco de dados
@@ -31,12 +42,12 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { error: "Pedido não encontrado" },
+        { error: "Pedido nAœo encontrado" },
         { status: 404 }
       );
     }
 
-    // Verificar se o pedido já foi pago
+    // Verificar se o pedido jA­ foi pago
     if (pedido.status_pagamento === "PAID" || pedido.status_pagamento === "AUTHORIZED") {
       logMessage("Tentativa de pagamento duplicado", {
         pedidoId,
@@ -45,169 +56,96 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         {
-          error: "Este pedido já foi pago",
-          details: "Não é possível criar um novo pagamento para um pedido já pago",
+          error: "Este pedido jA­ foi pago",
+          details: "NAœo Ac possA-vel criar um novo pagamento para um pedido jA­ pago",
           status: pedido.status_pagamento,
         },
         { status: 400 }
       );
     }
 
-    // Preparar dados do cliente
-    const cleanedPhone = pedido.telefone.replace(/\D/g, "");
-    const cleanedCPF = pedido.cpf.replace(/\D/g, "");
-    const cleanedCEP = pedido.cep.replace(/\D/g, "");
+    const customer = buildCustomerFromPedido(pedido);
+    const items = buildItemsFromPedido(pedido);
+    const totalAmount = buildTotalAmount(pedido);
+    const shipping = buildShippingFromPedido(pedido);
 
-    const customer = {
-      name: `${pedido.nome} ${pedido.sobrenome}`,
-      email: pedido.email,
-      tax_id: cleanedCPF,
-      phones: [
-        {
-          country: "55",
-          area: cleanedPhone.substring(0, 2),
-          number: cleanedPhone.substring(2),
-          type: "MOBILE" as const,
-        },
-      ],
-    };
-
-    // Preparar itens do pedido
-    // IMPORTANTE: Banco salva em REAIS, PagBank espera CENTAVOS
-    const items = (pedido.items as any[]).map((item: any) => ({
-      reference_id: item.reference_id || item.id,
-      name: item.name,
-      quantity: item.quantity,
-      unit_amount: Math.round(item.unit_amount * 100), // PagBank: CENTAVOS (banco está em REAIS)
-    }));
-
-    // Calcular valor total em centavos (converter de REAIS)
-    const totalAmount = Math.round((pedido.total_pedido + (pedido.frete_calculado || 0)) * 100);
-
-    // Preparar endereço de entrega
-    const shipping = {
-      address: {
-        street: pedido.endereco,
-        number: pedido.numero,
-        complement: pedido.complemento || undefined,
-        locality: pedido.bairro,
-        city: pedido.cidade,
-        region_code: pedido.estado,
-        country: "BRA" as const,
-        postal_code: cleanedCEP,
-      },
-    };
-
-    // URLs de notificação
+    // URLs de notificaAAœo
     // Prioridade: NGROK_URL (dev local) > BASE_URL_PRODUCTION > fallback
-    const baseUrl =
-      process.env.NGROK_URL ||
-      process.env.BASE_URL_PRODUCTION ||
-      "https://www.lovecosmetics.com.br";
-    const notification_urls = [`${baseUrl}/api/pagbank/webhook`];
+    const { baseUrl, notificationUrls } = resolveNotificationUrls();
 
-    logMessage("URL de notificação configurada", {
+    logMessage("URL de notificaAAœo configurada", {
       baseUrl,
-      notification_url: notification_urls[0],
+      notification_url: notificationUrls[0],
     });
 
-    let requestBody: PagBankOrderRequest | PagBankPixOrderRequest;
+    let requestBody;
     let endpoint: string;
 
     if (paymentMethod === "pix") {
       // ======= PAGAMENTO COM PIX =======
-      requestBody = {
-        reference_id: pedidoId,
+      requestBody = buildPixOrderRequest({
+        pedidoId,
         customer,
         items,
-        qr_codes: [
-          {
-            amount: {
-              value: Math.round(totalAmount),
-              currency: "BRL",
-            },
-            // Expiracao em 15 minutos (alinhado com timer do frontend)
-            expiration_date: new Date(
-              Date.now() + 15 * 60 * 1000
-            ).toISOString(),
-          },
-        ],
-        notification_urls,
-      };
+        totalAmount,
+        notificationUrls,
+      });
 
       endpoint = "/orders";
     } else if (paymentMethod === "credit_card") {
-      // ======= PAGAMENTO COM CARTÃO =======
+      // ======= PAGAMENTO COM CARTAŸO =======
       if (!encryptedCard) {
         return NextResponse.json(
-          { error: "Cartão criptografado não fornecido" },
+          { error: "CartAœo criptografado nAœo fornecido" },
           { status: 400 }
         );
       }
 
-      requestBody = {
-        reference_id: pedidoId,
+      requestBody = buildCardOrderRequest({
+        pedidoId,
         customer,
         items,
         shipping,
-        charges: [
-          {
-            reference_id: `charge-${pedidoId}`,
-            description: `Pedido Love Cosmetics #${pedidoId}`,
-            amount: {
-              value: Math.round(totalAmount),
-              currency: "BRL",
-            },
-            payment_method: {
-              type: "CREDIT_CARD",
-              installments,
-              capture: true, // captura automática
-              card: {
-                encrypted: encryptedCard,
-              },
-            },
-          },
-        ],
-        notification_urls,
-      };
+        totalAmount,
+        encryptedCard,
+        installments,
+        notificationUrls,
+      });
 
       endpoint = "/orders";
     } else {
       return NextResponse.json(
-        { error: "Método de pagamento inválido" },
+        { error: "MActodo de pagamento invA­lido" },
         { status: 400 }
       );
     }
 
-    // Fazer requisição para PagBank
+    // Fazer requisiAAœo para PagBank
     const pagBankUrl = process.env.PAGBANK_API_URL || "https://sandbox.api.pagseguro.com";
     const token = process.env.PAGBANK_TOKEN_SANDBOX;
 
     if (!token) {
-      logMessage("Token do PagBank não configurado", { error: "PAGBANK_TOKEN_SANDBOX não encontrado" });
+      logMessage("Token do PagBank nAœo configurado", { error: "PAGBANK_TOKEN_SANDBOX nAœo encontrado" });
       return NextResponse.json(
-        { error: "Configuração de pagamento inválida" },
+        { error: "ConfiguraAAœo de pagamento invA­lida" },
         { status: 500 }
       );
     }
 
-    logMessage("Enviando requisição para PagBank", {
+    logMessage("Enviando requisiAAœo para PagBank", {
       endpoint,
       paymentMethod,
       pedidoId,
     });
 
-    const response = await fetch(`${pagBankUrl}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(requestBody),
+    const response = await createPagBankOrder({
+      pagBankUrl,
+      endpoint,
+      token,
+      requestBody,
     });
 
-    const responseData: PagBankOrderResponse | PagBankError =
-      await response.json();
+    const responseData: PagBankOrderResponse | PagBankError = response.data;
 
     if (!response.ok) {
       logMessage("Erro na API PagBank", {
@@ -237,38 +175,10 @@ export async function POST(req: NextRequest) {
     logMessage("Resposta PagBank", orderResponse);
 
     // Atualizar pedido no banco de dados
-    const updateData: any = {
-      pagbank_order_id: orderResponse.id,
-    };
-
-    if (paymentMethod === "pix") {
-      // Para PIX, armazenar QR Code
-      const qrCode = orderResponse.qr_codes?.[0];
-      if (qrCode) {
-        updateData.pix_qr_code = qrCode.text;
-        updateData.pix_qr_code_url = qrCode.links.find(
-          (l) => l.rel === "QRCODE.PNG"
-        )?.href;
-        updateData.pix_expiration = qrCode.expiration_date;
-        updateData.status_pagamento = "AWAITING_PAYMENT";
-      }
-    } else {
-      // Para cartão, verificar status da cobrança
-      const charge = orderResponse.charges?.[0];
-      if (charge) {
-        updateData.pagbank_charge_id = charge.id;
-        updateData.status_pagamento = charge.status;
-
-        // Armazenar informações do cartão (últimos dígitos, bandeira, etc)
-        if (charge.payment_method.card) {
-          updateData.payment_card_info = JSON.stringify({
-            brand: charge.payment_method.card.brand,
-            last_digits: charge.payment_method.card.last_digits,
-            first_digits: charge.payment_method.card.first_digits,
-          });
-        }
-      }
-    }
+    const updateData = buildOrderUpdateData({
+      orderResponse,
+      paymentMethod,
+    });
 
     await prisma.pedido.update({
       where: { id: pedidoId },
@@ -277,30 +187,29 @@ export async function POST(req: NextRequest) {
 
     // Retornar resposta apropriada
     if (paymentMethod === "pix") {
+      const qrCode = extractPixResponseData(orderResponse);
       return NextResponse.json({
         success: true,
         orderId: orderResponse.id,
         paymentMethod: "pix",
         qrCode: {
-          text: orderResponse.qr_codes?.[0]?.text,
-          imageUrl: orderResponse.qr_codes?.[0]?.links.find(
-            (l) => l.rel === "QRCODE.PNG"
-          )?.href,
-          expirationDate: orderResponse.qr_codes?.[0]?.expiration_date,
+          text: qrCode.text,
+          imageUrl: qrCode.imageUrl,
+          expirationDate: qrCode.expirationDate,
         },
       });
     } else {
-      const charge = orderResponse.charges?.[0];
+      const charge = extractChargeResponseData(orderResponse);
       return NextResponse.json({
         success: true,
         orderId: orderResponse.id,
-        chargeId: charge?.id,
+        chargeId: charge.chargeId,
         paymentMethod: "credit_card",
-        status: charge?.status,
+        status: charge.status,
         message:
-          charge?.status === "PAID" || charge?.status === "AUTHORIZED"
+          charge.status === "PAID" || charge.status === "AUTHORIZED"
             ? "Pagamento aprovado!"
-            : "Pagamento em análise",
+            : "Pagamento em anA­lise",
       });
     }
   } catch (error) {
