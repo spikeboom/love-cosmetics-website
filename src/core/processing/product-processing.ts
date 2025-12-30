@@ -26,6 +26,8 @@ export function processProdutosRevert(rawData: any) {
     return {
       ...p,
       ...backupWithoutQuantity,
+      cupom_applied: null,
+      cupom_applied_codigo: null,
       backup: p?.backup,
     };
   });

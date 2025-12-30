@@ -33,8 +33,9 @@ export const CartProvider = ({ children, cupons = [] }: CartProviderProps) => {
   }, []);
 
   const addProductToCart = useCallback((product: CartProduct) => {
-    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons, addProductEvent);
-  }, [cart, cupons]);
+    const cuponsAtuais = StorageService.loadCoupons();
+    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cuponsAtuais, addProductEvent);
+  }, [cart]);
 
   const addQuantityProductToCart = useCallback(({ product }: { product: CartProduct }) => {
     addQuantityProductToCartUtil({ product }, cart, setCart, addProductEvent);

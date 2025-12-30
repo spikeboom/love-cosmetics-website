@@ -18,7 +18,7 @@ import { formatPrice } from "@/lib/formatters";
 export function PagamentoPageClient() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
-  const { cupons } = useCoupon();
+  const { cupons, clearCupons } = useCoupon();
   const { freightValue } = useShipping();
   const { total, descontos } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder } = useCreateOrder();
@@ -112,6 +112,7 @@ export function PagamentoPageClient() {
   const handlePaymentSuccess = () => {
     // Limpar carrinho do Context (estado em memoria)
     clearCart();
+    clearCupons();
 
     // Limpar dados de pagamento do localStorage
     // Manter identificacao e entrega para proximas compras
