@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // ============================================================
-    // VALIDAAØAŸO DE SEGURANAØA - Previne manipulaAAœo de preAos
+    // VALIDAÇÃO DE SEGURANÇA - Previne manipulação de preços
     // ============================================================
     const validationResult = await validateOrder(
       body.items,
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (!validationResult.valid) {
-      logMessage("ValidaAAœo do pedido falhou - carrinho desatualizado ou valores divergentes", {
+      logMessage("Validação do pedido falhou - carrinho desatualizado ou valores divergentes", {
         error: validationResult.error,
         code: validationResult.code,
         email: body.email,
@@ -50,20 +50,20 @@ export async function POST(req: NextRequest) {
     const totalSeguro = validationResult.calculatedTotal;
     const descontosSeguro = validationResult.calculatedDescontos;
 
-    // Verificar se hA­ cliente logado
+    // Verificar se há cliente logado
     const clienteSession = await getCurrentSession();
 
     // Cria o registro do pedido no banco (usando valores validados)
     // IMPORTANTE: Banco salva em REAIS, PagBank espera CENTAVOS
-    // Os items vA¦m do frontend com unit_amount em REAIS (ver useCreateOrder.ts)
-    // A conversAœo para centavos Ac feita em /api/pagbank/create-order
+    // Os items vêm do frontend com unit_amount em REAIS (ver useCreateOrder.ts)
+    // A conversão para centavos é feita em /api/pagbank/create-order
     const pedido = await createPedidoFromBody({
       body,
       totalSeguro,
       descontosSeguro,
     });
 
-    // VariA­vel para armazenar cliente (logado ou recAcm criado)
+    // Variável para armazenar cliente (logado ou recém criado)
     let clienteParaVincular = clienteSession?.id || null;
     let contaCriada = false;
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
       clienteParaVincular = clienteSession.id;
     }
-    // Se nAœo hA­ cliente logado mas usuA­rio quer criar conta
+    // Se não há cliente logado mas usuário quer criar conta
     else if (body.salvar_minhas_informacoes) {
       const userAgent = req.headers.get("user-agent") || undefined;
       const forwarded = req.headers.get("x-forwarded-for");
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     // ============================================================
     // CHECKOUT TRANSPARENTE
-    // O pagamento serA­ processado na pA­gina /checkout/pagamento
+    // O pagamento será processado na página /checkout/pagamento
     // usando a nova API Orders do PagBank
     // ============================================================
 
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       {
         message: "Pedido criado com sucesso",
         id: pedido.id,
-        // InformaAAæes adicionais sobre conta criada
+        // Informações adicionais sobre conta criada
         contaCriada: contaCriada,
         clienteVinculado: !!clienteParaVincular,
       },

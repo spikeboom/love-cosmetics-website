@@ -23,7 +23,7 @@ const logMessage = createLogger();
 
 /**
  * Cria um pedido no PagBank usando a API Orders (Checkout Transparente)
- * Suporta pagamento com cartAœo de crAcdito e PIX
+ * Suporta pagamento com cartão de crédito e PIX
  */
 export async function POST(req: NextRequest) {
   try {
@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
     const {
       pedidoId,
       paymentMethod, // "credit_card" ou "pix"
-      encryptedCard, // apenas para cartAœo
-      installments = 1, // nA§mero de parcelas
+      encryptedCard, // apenas para cartão
+      installments = 1, // número de parcelas
     } = body;
 
     // Buscar pedido no banco de dados
@@ -42,12 +42,12 @@ export async function POST(req: NextRequest) {
 
     if (!pedido) {
       return NextResponse.json(
-        { error: "Pedido nAœo encontrado" },
+        { error: "Pedido não encontrado" },
         { status: 404 }
       );
     }
 
-    // Verificar se o pedido jA­ foi pago
+    // Verificar se o pedido já foi pago
     if (pedido.status_pagamento === "PAID" || pedido.status_pagamento === "AUTHORIZED") {
       logMessage("Tentativa de pagamento duplicado", {
         pedidoId,
@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         {
-          error: "Este pedido jA­ foi pago",
-          details: "NAœo Ac possA-vel criar um novo pagamento para um pedido jA­ pago",
+          error: "Este pedido já foi pago",
+          details: "Não é possível criar um novo pagamento para um pedido já pago",
           status: pedido.status_pagamento,
         },
         { status: 400 }
@@ -69,11 +69,11 @@ export async function POST(req: NextRequest) {
     const totalAmount = buildTotalAmount(pedido);
     const shipping = buildShippingFromPedido(pedido);
 
-    // URLs de notificaAAœo
+    // URLs de notificação
     // Prioridade: NGROK_URL (dev local) > BASE_URL_PRODUCTION > fallback
     const { baseUrl, notificationUrls } = resolveNotificationUrls();
 
-    logMessage("URL de notificaAAœo configurada", {
+    logMessage("URL de notificação configurada", {
       baseUrl,
       notification_url: notificationUrls[0],
     });
@@ -93,10 +93,10 @@ export async function POST(req: NextRequest) {
 
       endpoint = "/orders";
     } else if (paymentMethod === "credit_card") {
-      // ======= PAGAMENTO COM CARTAŸO =======
+      // ======= PAGAMENTO COM CARTÃO =======
       if (!encryptedCard) {
         return NextResponse.json(
-          { error: "CartAœo criptografado nAœo fornecido" },
+          { error: "Cartão criptografado não fornecido" },
           { status: 400 }
         );
       }
@@ -115,24 +115,24 @@ export async function POST(req: NextRequest) {
       endpoint = "/orders";
     } else {
       return NextResponse.json(
-        { error: "MActodo de pagamento invA­lido" },
+        { error: "Método de pagamento inválido" },
         { status: 400 }
       );
     }
 
-    // Fazer requisiAAœo para PagBank
+    // Fazer requisição para PagBank
     const pagBankUrl = process.env.PAGBANK_API_URL || "https://sandbox.api.pagseguro.com";
     const token = process.env.PAGBANK_TOKEN_SANDBOX;
 
     if (!token) {
-      logMessage("Token do PagBank nAœo configurado", { error: "PAGBANK_TOKEN_SANDBOX nAœo encontrado" });
+      logMessage("Token do PagBank não configurado", { error: "PAGBANK_TOKEN_SANDBOX não encontrado" });
       return NextResponse.json(
-        { error: "ConfiguraAAœo de pagamento invA­lida" },
+        { error: "Configuração de pagamento inválida" },
         { status: 500 }
       );
     }
 
-    logMessage("Enviando requisiAAœo para PagBank", {
+    logMessage("Enviando requisição para PagBank", {
       endpoint,
       paymentMethod,
       pedidoId,
@@ -209,7 +209,7 @@ export async function POST(req: NextRequest) {
         message:
           charge.status === "PAID" || charge.status === "AUTHORIZED"
             ? "Pagamento aprovado!"
-            : "Pagamento em anA­lise",
+            : "Pagamento em análise",
       });
     }
   } catch (error) {

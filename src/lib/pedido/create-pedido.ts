@@ -168,7 +168,7 @@ export async function createAccountForOrderIfRequested({
       errorResponse: {
         status: 409,
         body: {
-          error: "Este email jA­ possui uma conta. FaAa login para continuar a compra ou use outro email.",
+          error: "Este email já possui uma conta. Faça login para continuar a compra ou use outro email.",
           code: "EMAIL_ALREADY_EXISTS",
         },
       },
