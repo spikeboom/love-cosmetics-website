@@ -2,6 +2,9 @@ import type {
   PagBankOrderRequest,
   PagBankOrderResponse,
   PagBankPixOrderRequest,
+  PagBankCustomer,
+  PagBankItem,
+  PagBankShipping,
 } from "@/types/pagbank";
 
 export function buildCustomerFromPedido(pedido: any) {
@@ -73,8 +76,8 @@ export function buildPixOrderRequest({
   notificationUrls,
 }: {
   pedidoId: string;
-  customer: Record<string, unknown>;
-  items: Array<Record<string, unknown>>;
+  customer: PagBankCustomer;
+  items: PagBankItem[];
   totalAmount: number;
   notificationUrls: string[];
 }): PagBankPixOrderRequest {
@@ -106,9 +109,9 @@ export function buildCardOrderRequest({
   notificationUrls,
 }: {
   pedidoId: string;
-  customer: Record<string, unknown>;
-  items: Array<Record<string, unknown>>;
-  shipping: Record<string, unknown>;
+  customer: PagBankCustomer;
+  items: PagBankItem[];
+  shipping: PagBankShipping;
   totalAmount: number;
   encryptedCard: string;
   installments: number;
