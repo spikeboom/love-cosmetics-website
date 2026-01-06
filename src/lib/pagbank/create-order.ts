@@ -2,6 +2,7 @@ import type {
   PagBankOrderRequest,
   PagBankOrderResponse,
   PagBankPixOrderRequest,
+  PagBankChargeRequest,
   PagBankCustomer,
   PagBankItem,
   PagBankShipping,
@@ -136,10 +137,58 @@ export function buildCardOrderRequest({
           capture: true,
           card: {
             encrypted: encryptedCard,
+            store: false,
+          },
+          holder: {
+            name: customer.name,
+            tax_id: customer.tax_id,
           },
         },
       },
     ],
+    notification_urls: notificationUrls,
+  };
+}
+
+/**
+ * Constrói payload para o endpoint /charges (usado para cartão de crédito)
+ * O endpoint /orders com charges estava dando erro 500 no sandbox
+ */
+export function buildCardChargeRequest({
+  pedidoId,
+  customer,
+  totalAmount,
+  encryptedCard,
+  installments,
+  notificationUrls,
+}: {
+  pedidoId: string;
+  customer: PagBankCustomer;
+  totalAmount: number;
+  encryptedCard: string;
+  installments: number;
+  notificationUrls: string[];
+}): PagBankChargeRequest {
+  return {
+    reference_id: pedidoId,
+    description: `Pedido Love Cosmetics #${pedidoId}`,
+    amount: {
+      value: Math.round(totalAmount),
+      currency: "BRL",
+    },
+    payment_method: {
+      type: "CREDIT_CARD",
+      installments,
+      capture: true,
+      card: {
+        encrypted: encryptedCard,
+        store: false,
+      },
+      holder: {
+        name: customer.name,
+        tax_id: customer.tax_id,
+      },
+    },
     notification_urls: notificationUrls,
   };
 }
@@ -153,18 +202,50 @@ export async function createPagBankOrder({
   pagBankUrl: string;
   endpoint: string;
   token: string;
-  requestBody: PagBankOrderRequest | PagBankPixOrderRequest;
+  requestBody: PagBankOrderRequest | PagBankPixOrderRequest | PagBankChargeRequest;
 }): Promise<{ ok: boolean; status: number; data: any }> {
-  const response = await fetch(`${pagBankUrl}${endpoint}`, {
+  const url = `${pagBankUrl}${endpoint}`;
+  const bodyJson = JSON.stringify(requestBody);
+
+  // Log do request para debug
+  console.log(JSON.stringify({
+    message: "PagBank Request Debug",
+    url,
+    tokenPrefix: token?.substring(0, 8) + "...",
+    bodyLength: bodyJson.length,
+    requestBody: requestBody,
+  }));
+
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(requestBody),
+    body: bodyJson,
   });
 
-  const data = await response.json();
+  // Tenta ler o corpo da resposta como texto primeiro
+  const responseText = await response.text();
+
+  // Log da resposta
+  console.log(JSON.stringify({
+    message: "PagBank Response Debug",
+    status: response.status,
+    statusText: response.statusText,
+    responseLength: responseText.length,
+    responseBody: responseText.substring(0, 1000),
+  }));
+
+  let data;
+  try {
+    data = responseText ? JSON.parse(responseText) : null;
+  } catch {
+    data = {
+      rawResponse: responseText,
+      parseError: "Resposta não é JSON válido"
+    };
+  }
 
   return {
     ok: response.ok,

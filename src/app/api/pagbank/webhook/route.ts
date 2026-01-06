@@ -67,18 +67,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Atualizar status do pedido baseado na cobranca
+    // Webhook de /charges: dados direto no body (body.status, body.paid_at)
+    // Webhook de /orders: dados em body.charges[0]
     const charge = body.charges?.[0];
+    const isChargeWebhook = !charge && (body as any).status;
 
-    if (charge) {
+    // Determinar status e paid_at baseado no tipo de webhook
+    const chargeStatus = charge?.status || (body as any).status;
+    const chargePaidAt = charge?.paid_at || (body as any).paid_at;
+
+    if (chargeStatus) {
       const updateData: any = {
-        status_pagamento: charge.status,
+        status_pagamento: chargeStatus,
       };
 
       logMessage("Atualizando status do pedido", {
         pedidoId: pedido.id,
         oldStatus: pedido.status_pagamento,
-        newStatus: charge.status,
-        paid_at: charge.paid_at,
+        newStatus: chargeStatus,
+        paid_at: chargePaidAt,
+        webhookType: isChargeWebhook ? "/charges" : "/orders",
       });
 
       await prisma.pedido.update({
@@ -88,14 +96,22 @@ export async function POST(req: NextRequest) {
 
       logMessage("Status do pedido atualizado com sucesso", {
         pedidoId: pedido.id,
-        status: charge.status,
+        status: chargeStatus,
       });
 
       // Se o pagamento foi confirmado (PAID), enviar evento para GTM
-      if (charge.status === "PAID") {
+      if (chargeStatus === "PAID") {
+        // Para /charges, criar objeto charge compatível com GTM
+        const chargeForGtm = charge || {
+          id: body.id,
+          status: (body as any).status,
+          paid_at: (body as any).paid_at,
+          amount: (body as any).amount,
+        };
+
         const gtmPayload = await buildGtmPurchasePayload({
           body,
-          charge,
+          charge: chargeForGtm,
           pedido,
         });
 

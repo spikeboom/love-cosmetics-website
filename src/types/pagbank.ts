@@ -53,6 +53,11 @@ export interface PagBankCreditCardPayment {
   capture: boolean; // true para captura automática
   card: {
     encrypted: string; // cartão criptografado pelo SDK no frontend
+    store?: boolean; // salvar cartão para uso futuro (default: false)
+  };
+  holder: {
+    name: string; // nome do titular do cartão
+    tax_id: string; // CPF do titular sem formatação
   };
 }
 
@@ -87,6 +92,15 @@ export interface PagBankPixOrderRequest {
     amount: PagBankAmount;
     expiration_date?: string; // ISO 8601 format
   }>;
+  notification_urls: string[];
+}
+
+// Para pagamento com cartão via /charges endpoint
+export interface PagBankChargeRequest {
+  reference_id: string;
+  description: string;
+  amount: PagBankAmount;
+  payment_method: PagBankCreditCardPayment;
   notification_urls: string[];
 }
 

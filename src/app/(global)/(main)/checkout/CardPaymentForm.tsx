@@ -63,11 +63,16 @@ export default function CardPaymentForm({
     return formatted.substring(0, 19); // Limita a 16 dígitos + 3 espaços
   };
 
-  // Formatar validade (MM/YYYY)
+  // Formatar validade (MM/AA) - exibe só 2 dígitos do ano mas armazena 4
   const formatExpiry = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
     if (cleaned.length >= 2) {
-      return `${cleaned.substring(0, 2)}/${cleaned.substring(2, 6)}`;
+      // Exibir apenas os últimos 2 dígitos do ano para o usuário
+      const month = cleaned.substring(0, 2);
+      const year = cleaned.substring(2);
+      // Se ano tem 4 dígitos, mostrar só os últimos 2
+      const displayYear = year.length === 4 ? year.substring(2) : year;
+      return `${month}/${displayYear}`;
     }
     return cleaned;
   };
@@ -88,12 +93,17 @@ export default function CardPaymentForm({
     // Extrair mês (primeiros 2 dígitos)
     let month = value.substring(0, 2);
 
-    // Extrair ano (próximos 4 dígitos)
+    // Extrair ano (próximos 2 ou 4 dígitos)
     let year = value.substring(2, 6);
 
     // Garantir que mês tenha padding de zeros
     if (month.length === 1 && parseInt(month) > 1) {
       month = "0" + month;
+    }
+
+    // Converter ano de 2 dígitos para 4 dígitos (PagBank requer YYYY)
+    if (year.length === 2) {
+      year = "20" + year;
     }
 
     setCardData({
@@ -420,7 +430,7 @@ export default function CardPaymentForm({
                 `${cardData.expMonth}${cardData.expYear}`
               )}
               onChange={handleExpiryChange}
-              placeholder="MM/AAAA"
+              placeholder="MM/AA"
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
               required
               disabled={loading}

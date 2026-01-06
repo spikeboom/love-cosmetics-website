@@ -6,12 +6,11 @@ import type {
   PagBankError,
 } from "@/types/pagbank";
 import {
-  buildCardOrderRequest,
+  buildCardChargeRequest,
   buildCustomerFromPedido,
   buildItemsFromPedido,
   buildOrderUpdateData,
   buildPixOrderRequest,
-  buildShippingFromPedido,
   buildTotalAmount,
   createPagBankOrder,
   extractChargeResponseData,
@@ -67,7 +66,6 @@ export async function POST(req: NextRequest) {
     const customer = buildCustomerFromPedido(pedido);
     const items = buildItemsFromPedido(pedido);
     const totalAmount = buildTotalAmount(pedido);
-    const shipping = buildShippingFromPedido(pedido);
 
     // URLs de notificação
     // Prioridade: NGROK_URL (dev local) > BASE_URL_PRODUCTION > fallback
@@ -83,6 +81,7 @@ export async function POST(req: NextRequest) {
 
     if (paymentMethod === "pix") {
       // ======= PAGAMENTO COM PIX =======
+      // PIX usa o endpoint /orders
       requestBody = buildPixOrderRequest({
         pedidoId,
         customer,
@@ -94,6 +93,7 @@ export async function POST(req: NextRequest) {
       endpoint = "/orders";
     } else if (paymentMethod === "credit_card") {
       // ======= PAGAMENTO COM CARTÃO =======
+      // Cartão usa o endpoint /charges (o /orders com charges dá erro 500 no sandbox)
       if (!encryptedCard) {
         return NextResponse.json(
           { error: "Cartão criptografado não fornecido" },
@@ -101,18 +101,16 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      requestBody = buildCardOrderRequest({
+      requestBody = buildCardChargeRequest({
         pedidoId,
         customer,
-        items,
-        shipping,
         totalAmount,
         encryptedCard,
         installments,
         notificationUrls,
       });
 
-      endpoint = "/orders";
+      endpoint = "/charges";
     } else {
       return NextResponse.json(
         { error: "Método de pagamento inválido" },
@@ -171,22 +169,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const orderResponse = responseData as PagBankOrderResponse;
-    logMessage("Resposta PagBank", orderResponse);
-
-    // Atualizar pedido no banco de dados
-    const updateData = buildOrderUpdateData({
-      orderResponse,
-      paymentMethod,
-    });
-
-    await prisma.pedido.update({
-      where: { id: pedidoId },
-      data: updateData,
-    });
+    logMessage("Resposta PagBank", responseData);
 
     // Retornar resposta apropriada
     if (paymentMethod === "pix") {
+      const orderResponse = responseData as PagBankOrderResponse;
+
+      // Atualizar pedido no banco de dados
+      const updateData = buildOrderUpdateData({
+        orderResponse,
+        paymentMethod,
+      });
+
+      await prisma.pedido.update({
+        where: { id: pedidoId },
+        data: updateData,
+      });
+
       const qrCode = extractPixResponseData(orderResponse);
       return NextResponse.json({
         success: true,
@@ -199,21 +198,42 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      const charge = extractChargeResponseData(orderResponse);
+      // Resposta do /charges é direta (não tem array charges[])
+      const chargeResponse = responseData as any;
+
+      // Atualizar pedido no banco de dados
+      await prisma.pedido.update({
+        where: { id: pedidoId },
+        data: {
+          pagbank_charge_id: chargeResponse.id,
+          status_pagamento: chargeResponse.status,
+          payment_card_info: chargeResponse.payment_method?.card
+            ? JSON.stringify({
+                brand: chargeResponse.payment_method.card.brand,
+                last_digits: chargeResponse.payment_method.card.last_digits,
+                first_digits: chargeResponse.payment_method.card.first_digits,
+              })
+            : undefined,
+        },
+      });
+
       return NextResponse.json({
         success: true,
-        orderId: orderResponse.id,
-        chargeId: charge.chargeId,
+        orderId: chargeResponse.id, // Para /charges, o ID é o charge ID
+        chargeId: chargeResponse.id,
         paymentMethod: "credit_card",
-        status: charge.status,
+        status: chargeResponse.status,
         message:
-          charge.status === "PAID" || charge.status === "AUTHORIZED"
+          chargeResponse.status === "PAID" || chargeResponse.status === "AUTHORIZED"
             ? "Pagamento aprovado!"
             : "Pagamento em análise",
       });
     }
   } catch (error) {
-    logMessage("Erro ao processar pagamento", error);
+    const errorDetails = error instanceof Error
+      ? { message: error.message, stack: error.stack, name: error.name }
+      : error;
+    logMessage("Erro ao processar pagamento", errorDetails);
     return NextResponse.json(
       {
         error: "Erro ao processar pagamento",

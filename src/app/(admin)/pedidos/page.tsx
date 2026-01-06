@@ -204,8 +204,11 @@ function PedidoCard({ pedido, onNotaGerada, onStatusChange }: { pedido: Pedido; 
 
   const getMainPaymentStatus = () => {
     if (!pedido.pagamentos || pedido.pagamentos.length === 0) return null;
-    const charge = pedido.pagamentos[0]?.info?.charges?.[0];
-    return charge?.status || pedido.pagamentos[0].status;
+    const info = pedido.pagamentos[0]?.info;
+    // Webhook /charges: status direto no info
+    // Webhook /orders: status em info.charges[0].status
+    const charge = info?.charges?.[0];
+    return charge?.status || info?.status || pedido.pagamentos[0].status;
   };
 
   const mainStatus = getMainPaymentStatus();
@@ -529,8 +532,12 @@ function PedidoCard({ pedido, onNotaGerada, onStatusChange }: { pedido: Pedido; 
               {pedido.pagamentos?.length ? (
                 <div className="space-y-3">
                   {pedido.pagamentos.map((pagamento, pIdx) => {
-                    const charge = pagamento?.info?.charges?.[0];
-                    const status = charge?.status || pagamento.status;
+                    const info = pagamento?.info;
+                    // Webhook /charges: dados direto no info
+                    // Webhook /orders: dados em info.charges[0]
+                    const charge = info?.charges?.[0];
+                    const paymentData = charge || info;
+                    const status = paymentData?.status || pagamento.status;
 
                     return (
                       <div
@@ -544,41 +551,73 @@ function PedidoCard({ pedido, onNotaGerada, onStatusChange }: { pedido: Pedido; 
                           <StatusBadge status={status} />
                         </div>
 
-                        {charge && (
+                        {paymentData && (
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <span className="font-cera-pro font-light text-[12px] text-[#666666]">
-                                ID: {charge.id?.slice(-12)}
+                                ID: {paymentData.id?.slice(-12)}
                               </span>
-                              <span className="font-cera-pro font-bold text-[16px] text-[#009142]">
-                                {(charge.amount.value / 100).toLocaleString("pt-BR", {
-                                  style: "currency",
-                                  currency: charge.amount.currency,
-                                })}
-                              </span>
+                              {paymentData.amount && (
+                                <span className="font-cera-pro font-bold text-[16px] text-[#009142]">
+                                  {(paymentData.amount.value / 100).toLocaleString("pt-BR", {
+                                    style: "currency",
+                                    currency: paymentData.amount.currency,
+                                  })}
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center gap-4 text-[12px]">
                               <span className="font-cera-pro font-light text-[#333333]">
-                                <strong>Método:</strong> {charge.payment_method?.type ?? "N/A"}
+                                <strong>Método:</strong> {paymentData.payment_method?.type ?? "N/A"}
                               </span>
                               <span className="font-cera-pro font-light text-[#333333]">
-                                <strong>Parcelas:</strong> {charge.payment_method?.installments ?? "N/A"}
+                                <strong>Parcelas:</strong> {paymentData.payment_method?.installments ?? "N/A"}
                               </span>
                             </div>
 
-                            {charge.payment_method?.pix && (
+                            {/* Dados do Cartão */}
+                            {paymentData.payment_method?.card && (
+                              <div className="mt-3 pt-3 border-t border-[#d2d2d2]">
+                                <p className="font-cera-pro font-medium text-[12px] text-[#254333] mb-2">
+                                  Dados do Cartão
+                                </p>
+                                <p className="font-cera-pro font-light text-[12px] text-[#333333]">
+                                  Bandeira: {paymentData.payment_method.card.brand?.toUpperCase() || "N/A"}
+                                </p>
+                                <p className="font-cera-pro font-light text-[12px] text-[#333333]">
+                                  Final: **** {paymentData.payment_method.card.last_digits || "N/A"}
+                                </p>
+                                {paymentData.payment_method.card.holder?.name && (
+                                  <p className="font-cera-pro font-light text-[12px] text-[#333333]">
+                                    Titular: {paymentData.payment_method.card.holder.name}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Dados PIX */}
+                            {paymentData.payment_method?.pix && (
                               <div className="mt-3 pt-3 border-t border-[#d2d2d2]">
                                 <p className="font-cera-pro font-medium text-[12px] text-[#254333] mb-2">
                                   Dados PIX
                                 </p>
                                 <p className="font-cera-pro font-light text-[12px] text-[#333333]">
-                                  End to End: {charge.payment_method.pix.end_to_end_id || "N/A"}
+                                  End to End: {paymentData.payment_method.pix.end_to_end_id || "N/A"}
                                 </p>
-                                {charge.payment_method.pix.holder && (
+                                {paymentData.payment_method.pix.holder && (
                                   <p className="font-cera-pro font-light text-[12px] text-[#333333]">
-                                    Titular: {charge.payment_method.pix.holder.name} ({charge.payment_method.pix.holder.tax_id})
+                                    Titular: {paymentData.payment_method.pix.holder.name} ({paymentData.payment_method.pix.holder.tax_id})
                                   </p>
                                 )}
+                              </div>
+                            )}
+
+                            {/* Data de pagamento */}
+                            {paymentData.paid_at && (
+                              <div className="mt-2">
+                                <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                                  Pago em: {new Date(paymentData.paid_at).toLocaleString("pt-BR")}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -714,8 +753,9 @@ export default function PedidosPage() {
       const rows = allPedidos.map((pedido) => {
         const getPaymentStatus = () => {
           if (pedido.pagamentos && pedido.pagamentos.length > 0) {
-            const charge = pedido.pagamentos[0]?.info?.charges?.[0];
-            return charge?.status || pedido.pagamentos[0].status || "N/A";
+            const info = pedido.pagamentos[0]?.info;
+            const charge = info?.charges?.[0];
+            return charge?.status || info?.status || pedido.pagamentos[0].status || "N/A";
           }
           return pedido.status_pagamento || "N/A";
         };

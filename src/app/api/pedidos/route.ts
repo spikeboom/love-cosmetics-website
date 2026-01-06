@@ -62,19 +62,25 @@ export async function GET(req: NextRequest) {
               'id', sp.id,
               'info', sp.info,
               'status', CASE
-                          WHEN agg.total_charges = agg.total_paid THEN 'Pagamento Completo'
-                          WHEN agg.total_paid > 0 THEN 'Pagamento Parcial'
-                          ELSE 'Falha no Pagamento'
+                          -- Webhook de /charges: status direto no body (sp.info->>'status')
+                          WHEN sp.info->>'status' = 'PAID' THEN 'Pagamento Completo'
+                          WHEN sp.info->>'status' IN ('AUTHORIZED', 'IN_ANALYSIS') THEN 'Pagamento Parcial'
+                          WHEN sp.info->>'status' IS NOT NULL AND sp.info->>'status' NOT IN ('PAID', 'AUTHORIZED', 'IN_ANALYSIS') THEN 'Falha no Pagamento'
+                          -- Webhook de /orders: status dentro do array charges[]
+                          WHEN agg.total_charges > 0 AND agg.total_charges = agg.total_paid THEN 'Pagamento Completo'
+                          WHEN agg.total_charges > 0 AND agg.total_paid > 0 THEN 'Pagamento Parcial'
+                          WHEN agg.total_charges > 0 THEN 'Falha no Pagamento'
+                          ELSE 'Status Desconhecido'
                         END
             )
           )
           FROM "StatusPagamento" sp
           LEFT JOIN LATERAL (
-            SELECT 
+            SELECT
               COUNT(*) AS total_charges,
               SUM(CASE WHEN charge->>'status' = 'PAID' THEN 1 ELSE 0 END) AS total_paid
             FROM (
-              SELECT jsonb_array_elements(sp.info->'charges') AS charge
+              SELECT jsonb_array_elements(COALESCE(sp.info->'charges', '[]'::jsonb)) AS charge
             ) sub
           ) agg ON true
           WHERE sp.info->>'reference_id' = p.id
