@@ -106,8 +106,9 @@ function buildTransporteData(orderData: OrderData) {
 
   // Adiciona valor do frete se disponível
   // Campo "frete" conforme schema oficial da API v3 do Bling
+  // Arredondar para 2 casas decimais para evitar problemas de floating point
   if (orderData.frete_calculado && orderData.frete_calculado > 0) {
-    transporte.frete = orderData.frete_calculado;
+    transporte.frete = Math.round(orderData.frete_calculado * 100) / 100;
   }
 
   // Adiciona volume básico (quantidade)
@@ -162,7 +163,11 @@ export async function createInvoice(
 
     // Monta os itens da nota fiscal
     const items = produtosComTributacao.map(({ item, tributacao }) => {
-      const unitValue = (item.unit_amount ? item.unit_amount / 100 : item.preco) || item.value;
+      // IMPORTANTE: Os valores do banco estão em REAIS (não em centavos)
+      // Usar preco ou unit_amount diretamente, sem divisão por 100
+      // Arredondar para 2 casas decimais para evitar problemas de floating point
+      const rawValue = item.preco || item.unit_amount || item.value;
+      const unitValue = Math.round(rawValue * 100) / 100;
 
       const itemNF: any = {
         codigo: String(item.bling_number),
@@ -184,9 +189,9 @@ export async function createInvoice(
         itemNF.cest = tributacao.cest;
       }
 
-      // Adiciona desconto se houver
+      // Adiciona desconto se houver (arredondado para 2 casas decimais)
       if (item.discount && item.discount > 0) {
-        itemNF.desconto = item.discount;
+        itemNF.desconto = Math.round(item.discount * 100) / 100;
       }
 
       return itemNF;
