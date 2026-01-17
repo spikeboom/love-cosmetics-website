@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
 
 interface FilterMenuItem {
   id?: string;
@@ -20,9 +20,61 @@ interface SearchFiltersProps {
   onFilterChange?: (sectionTitle: string, itemLabel: string) => void;
 }
 
-export function SearchFilters({ sections, onFilterChange }: SearchFiltersProps) {
+function FilterIcon() {
   return (
-    <div className="flex flex-col gap-[10px] items-start w-[220px]">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 6H21M7 12H17M10 18H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function SearchFilters({ sections, onFilterChange }: SearchFiltersProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile Filter Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="lg:hidden flex items-center gap-[8px] px-[16px] py-[12px] bg-[#f8f3ed] rounded-[8px] font-cera-pro font-medium text-[14px] text-black"
+      >
+        <FilterIcon />
+        Filtros
+      </button>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Filter Content - Desktop sidebar / Mobile drawer */}
+      <div className={`
+        lg:flex lg:flex-col lg:gap-[10px] lg:items-start lg:w-[220px] lg:relative lg:bg-transparent
+        ${isOpen
+          ? 'fixed inset-y-0 left-0 w-[280px] bg-white z-50 overflow-y-auto flex flex-col'
+          : 'hidden lg:flex'
+        }
+      `}>
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between p-[16px] border-b border-[#f8f3ed]">
+          <span className="font-cera-pro font-bold text-[20px] text-black">Filtros</span>
+          <button onClick={() => setIsOpen(false)} className="p-[4px]">
+            <CloseIcon />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-[10px] items-start w-full lg:w-[220px] p-[16px] lg:p-0">
       {sections.map((section, sectionIndex) => (
         <div
           key={sectionIndex}
@@ -85,6 +137,8 @@ export function SearchFilters({ sections, onFilterChange }: SearchFiltersProps) 
           )}
         </div>
       ))}
-    </div>
+        </div>
+      </div>
+    </>
   );
 }

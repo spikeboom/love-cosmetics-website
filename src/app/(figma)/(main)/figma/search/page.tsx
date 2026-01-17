@@ -249,9 +249,9 @@ export default function SearchPage() {
       <Breadcrumbs items={breadcrumbItems} />
 
       {/* Title Section */}
-      <div className="box-border flex flex-col gap-[16px] items-start p-[16px] w-full bg-white">
+      <div className="box-border flex flex-col gap-[12px] sm:gap-[16px] items-start p-[16px] w-full bg-white">
         <div className="flex flex-col justify-center leading-[0]">
-          <p className="font-cera-pro font-bold text-[32px] text-black leading-normal">
+          <p className="font-cera-pro font-bold text-[24px] sm:text-[32px] text-black leading-normal">
             Manteiga
           </p>
         </div>
@@ -261,7 +261,7 @@ export default function SearchPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex gap-[16px] items-start p-[16px] w-full bg-white">
+      <div className="flex flex-col lg:flex-row gap-[16px] items-start p-[16px] w-full bg-white">
         {/* Sidebar Filters */}
         <SearchFilters
           sections={filterSections}
@@ -269,7 +269,7 @@ export default function SearchPage() {
         />
 
         {/* Product Grid */}
-        <div className="flex-1">
+        <div className="flex-1 w-full">
           <ProductGrid produtos={mockProdutos} paginaPorPagina={12} />
         </div>
       </div>

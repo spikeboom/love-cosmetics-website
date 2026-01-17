@@ -49,7 +49,7 @@ export function ProductGrid({
       {/* Grid de Produtos */}
       <div className="w-full">
         {/* Linhas do grid */}
-        <div className="grid grid-cols-3 gap-[16px] w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
           {produtosPagina.map((produto, index) => (
             <CardProduto
               key={index}
@@ -71,7 +71,7 @@ export function ProductGrid({
       </div>
 
       {/* Paginação */}
-      <div className="flex gap-[8px] items-center justify-center h-[32px] mt-[8px]">
+      <div className="flex gap-[4px] sm:gap-[8px] items-center justify-center h-[32px] mt-[8px] flex-wrap">
         {/* Botão Anterior */}
         <button
           onClick={handlePaginaAnterior}
@@ -95,20 +95,34 @@ export function ProductGrid({
           </svg>
         </button>
 
-        {/* Números de página */}
-        {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
-          <button
-            key={pagina}
-            onClick={() => handlePaginaEspecifica(pagina)}
-            className={`w-[32px] h-[32px] flex items-center justify-center rounded-[4px] font-cera-pro font-light text-[14px] transition-colors ${
-              paginaAtual === pagina
-                ? "bg-[#ba7900] text-white"
-                : "border border-[#d2d2d2] text-black hover:bg-[#f8f3ed]"
-            }`}
-          >
-            {pagina}
-          </button>
-        ))}
+        {/* Números de página - limitados em mobile */}
+        {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+          .filter((pagina) => {
+            // Em mobile, mostrar apenas páginas próximas à atual
+            const distancia = Math.abs(pagina - paginaAtual);
+            return distancia <= 1 || pagina === 1 || pagina === totalPaginas;
+          })
+          .map((pagina, index, arr) => {
+            // Adicionar "..." entre páginas não consecutivas
+            const showEllipsis = index > 0 && pagina - arr[index - 1] > 1;
+            return (
+              <div key={pagina} className="flex gap-[4px] sm:gap-[8px] items-center">
+                {showEllipsis && (
+                  <span className="w-[24px] sm:w-[32px] text-center font-cera-pro text-[14px] text-[#333]">...</span>
+                )}
+                <button
+                  onClick={() => handlePaginaEspecifica(pagina)}
+                  className={`w-[32px] h-[32px] flex items-center justify-center rounded-[4px] font-cera-pro font-light text-[14px] transition-colors ${
+                    paginaAtual === pagina
+                      ? "bg-[#ba7900] text-white"
+                      : "border border-[#d2d2d2] text-black hover:bg-[#f8f3ed]"
+                  }`}
+                >
+                  {pagina}
+                </button>
+              </div>
+            );
+          })}
 
         {/* Botão Próximo */}
         <button
