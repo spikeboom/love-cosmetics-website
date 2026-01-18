@@ -28,19 +28,8 @@ export function Header({ produtos = [] }: HeaderProps) {
     <header className="w-full flex flex-col items-start">
       {/* Top bar - verde escuro com logo, busca e ações */}
       <div className="bg-[#254333] w-full lg:h-[120px] h-[64px] flex items-center justify-between lg:px-[32px] px-4 py-0 relative">
-        {/* Menu hamburguer - Mobile */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="lg:hidden w-6 h-6 flex flex-col justify-center gap-1"
-          aria-label="Menu"
-        >
-          <span className={`w-full h-0.5 bg-white transition-transform ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-          <span className={`w-full h-0.5 bg-white transition-opacity ${isMenuOpen ? 'opacity-0' : ''}`} />
-          <span className={`w-full h-0.5 bg-white transition-transform ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
-        </button>
-
         {/* Logo */}
-        <Link href="/figma/design" className="relative lg:w-[130px] lg:h-[104px] w-[80px] h-[64px]">
+        <Link href="/figma/design" className="relative lg:w-[130px] lg:h-[104px] w-[50px] h-[40px] shrink-0">
           <Image
             src="/new-home/header/logo.png"
             alt="Lové Cosméticos"
@@ -50,13 +39,16 @@ export function Header({ produtos = [] }: HeaderProps) {
           />
         </Link>
 
-        {/* Busca central - Desktop only */}
+        {/* Busca - Mobile (inline) e Desktop (centralizada) */}
+        <div className="lg:hidden flex-1 mx-3">
+          <SearchBar produtos={produtos} mobile />
+        </div>
         <div className="hidden lg:block absolute left-[431px] top-[45px]">
           <SearchBar produtos={produtos} />
         </div>
 
-        {/* Ações - Carrinho (mobile) / Entrar e Carrinho (desktop) */}
-        <div className="flex lg:gap-[32px] gap-4 items-center">
+        {/* Ações - Menu/Carrinho (mobile) / Entrar e Carrinho (desktop) */}
+        <div className="flex lg:gap-[32px] gap-3 items-center shrink-0">
           {/* Entrar/Minha Conta - Desktop only */}
           <Link
             href={isLoggedIn ? "/figma/minha-conta/pedidos" : "/figma/entrar"}
@@ -105,6 +97,17 @@ export function Header({ produtos = [] }: HeaderProps) {
               </div>
             )}
           </div>
+
+          {/* Menu hamburguer - Mobile */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden w-6 h-6 flex flex-col justify-center gap-1"
+            aria-label="Menu"
+          >
+            <span className={`w-full h-0.5 bg-white transition-transform ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
+            <span className={`w-full h-0.5 bg-white transition-opacity ${isMenuOpen ? 'opacity-0' : ''}`} />
+            <span className={`w-full h-0.5 bg-white transition-transform ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          </button>
         </div>
       </div>
 
@@ -142,11 +145,6 @@ export function Header({ produtos = [] }: HeaderProps) {
       {/* Menu Mobile - Dropdown */}
       {isMenuOpen && (
         <div className="lg:hidden bg-white w-full border-t border-gray-200">
-          {/* Busca Mobile */}
-          <div className="p-4 border-b border-gray-200">
-            <SearchBar produtos={produtos} mobile />
-          </div>
-
           {/* Links Mobile */}
           <nav className="flex flex-col">
             <Link
