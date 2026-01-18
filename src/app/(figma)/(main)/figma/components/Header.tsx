@@ -6,8 +6,20 @@ import Link from "next/link";
 import { useCart } from "@/contexts";
 import { useAuth } from "@/contexts/AuthContext";
 import { Gift, Sparkles, LayoutGrid, BookOpen } from "lucide-react";
+import { SearchBar } from "./SearchBar";
 
-export function Header() {
+interface Produto {
+  id: number;
+  slug: string;
+  nome: string;
+  imagem: string;
+}
+
+interface HeaderProps {
+  produtos?: Produto[];
+}
+
+export function Header({ produtos = [] }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { qtdItemsCart } = useCart();
   const { isLoggedIn } = useAuth();
@@ -39,20 +51,8 @@ export function Header() {
         </Link>
 
         {/* Busca central - Desktop only */}
-        <div className="hidden lg:block absolute left-[431px] top-[45px] w-[550px]">
-          <div className="bg-white flex gap-[5px] items-center p-[8px] rounded-[16px]">
-            <div className="w-[16px] h-[16px] shrink-0">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="5" stroke="#000000" strokeWidth="1.5"/>
-                <path d="M11 11L14 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Creme|"
-              className="flex-1 font-cera-pro font-light text-[12px] text-[#000000] outline-none bg-transparent"
-            />
-          </div>
+        <div className="hidden lg:block absolute left-[431px] top-[45px]">
+          <SearchBar produtos={produtos} />
         </div>
 
         {/* Ações - Carrinho (mobile) / Entrar e Carrinho (desktop) */}
@@ -144,19 +144,7 @@ export function Header() {
         <div className="lg:hidden bg-white w-full border-t border-gray-200">
           {/* Busca Mobile */}
           <div className="p-4 border-b border-gray-200">
-            <div className="bg-gray-100 flex gap-2 items-center p-3 rounded-lg">
-              <div className="w-4 h-4 shrink-0">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="7" cy="7" r="5" stroke="#000000" strokeWidth="1.5"/>
-                  <path d="M11 11L14 14" stroke="#000000" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Buscar produtos..."
-                className="flex-1 font-cera-pro font-light text-sm text-black outline-none bg-transparent"
-              />
-            </div>
+            <SearchBar produtos={produtos} mobile />
           </div>
 
           {/* Links Mobile */}

@@ -216,7 +216,7 @@ export function CardProduto({
 
         {/* 47:3838 - Descrição */}
         <p
-          className="font-cera-pro font-light text-[14px] text-black leading-[100%] tracking-[0px] h-[48px] overflow-hidden text-ellipsis relative shrink-0 w-full"
+          className="font-cera-pro font-light text-[14px] text-black leading-[100%] tracking-[0px] overflow-hidden text-ellipsis relative shrink-0 w-full"
           data-node-id="47:3838"
         >
           {descricao}

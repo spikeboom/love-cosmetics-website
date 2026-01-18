@@ -9,6 +9,7 @@ import {
   Pagination,
   NewsletterSection,
 } from "./components";
+import { CertificadosSection } from "../components/CertificadosSection";
 
 const breadcrumbItems = [
   { label: "lovecosmetics.com.br", href: "/" },
@@ -96,6 +97,9 @@ export default function ExperimentoPage() {
           <Pagination currentPage={2} totalPages={10} />
         </div>
       </div>
+
+      {/* Certificados */}
+      <CertificadosSection />
 
       {/* Section 5 */}
       <NewsletterSection />

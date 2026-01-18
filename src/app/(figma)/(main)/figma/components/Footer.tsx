@@ -2,28 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
-  const linksColumn1 = [
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
+  const linksALove = [
+    { label: "Sobre a Lovè", href: "/figma/sobre" },
   ];
 
-  const linksColumn2 = [
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
+  const linksProdutos = [
+    { label: "Todos os Produtos", href: "/figma/experimento?q=" },
+    { label: "Rotina de Skincare", href: "/figma/experimento?q=rotina+skincare" },
+    { label: "Kits", href: "/figma/experimento?q=kit" },
   ];
 
-  const linksColumn3 = [
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
-    "Link interno SEO",
+  const linksAjuda = [
+    { label: "Fale Conosco", href: "/figma/fale-conosco" },
   ];
 
   return (
@@ -32,30 +22,52 @@ export function Footer() {
       <div className="w-full max-w-[1440px] flex flex-col gap-6 lg:gap-8 items-center py-6 lg:px-12 px-0 lg:px-4">
         {/* Links - Mobile: 2 colunas lado a lado, Desktop: 3 colunas + Logo */}
         <div className="w-full flex lg:flex-row flex-col gap-8 items-start justify-center">
-          {/* Mobile: 2 colunas lado a lado */}
+          {/* Mobile: 3 colunas lado a lado */}
           <div className="lg:hidden flex items-start justify-between w-full max-w-[360px] mx-auto px-4">
-            {/* Coluna 1 - menor */}
-            <div className="flex flex-col gap-4 items-start">
-              {linksColumn1.map((link, index) => (
+            {/* Coluna 1 - A Lovè */}
+            <div className="flex flex-col gap-3 items-start">
+              <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none">
+                A Lovè
+              </span>
+              {linksALove.map((link, index) => (
                 <Link
                   key={index}
-                  href="#"
-                  className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline whitespace-nowrap"
+                  href={link.href}
+                  className="font-cera-pro font-light text-[13px] text-white leading-none hover:underline whitespace-nowrap"
                 >
-                  {link}
+                  {link.label}
                 </Link>
               ))}
             </div>
 
-            {/* Coluna 2 - maior */}
-            <div className="flex flex-col gap-4 items-start">
-              {linksColumn2.map((link, index) => (
+            {/* Coluna 2 - Produtos */}
+            <div className="flex flex-col gap-3 items-start">
+              <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none">
+                Produtos
+              </span>
+              {linksProdutos.map((link, index) => (
                 <Link
                   key={index}
-                  href="#"
-                  className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline whitespace-nowrap"
+                  href={link.href}
+                  className="font-cera-pro font-light text-[13px] text-white leading-none hover:underline whitespace-nowrap"
                 >
-                  {link}
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Coluna 3 - Ajuda */}
+            <div className="flex flex-col gap-3 items-start">
+              <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none">
+                Ajuda
+              </span>
+              {linksAjuda.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  className="font-cera-pro font-light text-[13px] text-white leading-none hover:underline whitespace-nowrap"
+                >
+                  {link.label}
                 </Link>
               ))}
             </div>
@@ -63,41 +75,50 @@ export function Footer() {
 
           {/* Desktop: 3 colunas + Logo */}
           <div className="hidden lg:flex gap-8 items-start justify-center w-full">
-            {/* Coluna 1 */}
+            {/* Coluna 1 - A Lovè */}
             <div className="flex-1 flex flex-col gap-4 items-start py-2 min-h-0 min-w-0">
-              {linksColumn1.map((link, index) => (
+              <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none mb-1">
+                A Lovè
+              </span>
+              {linksALove.map((link, index) => (
                 <Link
                   key={index}
-                  href="#"
+                  href={link.href}
                   className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline"
                 >
-                  {link}
+                  {link.label}
                 </Link>
               ))}
             </div>
 
-            {/* Coluna 2 */}
+            {/* Coluna 2 - Produtos */}
             <div className="flex-1 flex flex-col gap-4 items-start py-2 min-h-0 min-w-0">
-              {linksColumn2.map((link, index) => (
+              <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none mb-1">
+                Produtos
+              </span>
+              {linksProdutos.map((link, index) => (
                 <Link
                   key={index}
-                  href="#"
+                  href={link.href}
                   className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline"
                 >
-                  {link}
+                  {link.label}
                 </Link>
               ))}
             </div>
 
-            {/* Coluna 3 */}
+            {/* Coluna 3 - Ajuda */}
             <div className="flex-1 flex flex-col gap-4 items-start py-2 min-h-0 min-w-0">
-              {linksColumn3.map((link, index) => (
+              <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none mb-1">
+                Ajuda
+              </span>
+              {linksAjuda.map((link, index) => (
                 <Link
                   key={index}
-                  href="#"
+                  href={link.href}
                   className="font-cera-pro font-light text-[14px] text-white leading-none hover:underline"
                 >
-                  {link}
+                  {link.label}
                 </Link>
               ))}
             </div>

@@ -1,26 +1,31 @@
 import Image from "next/image";
 
 interface CertificadoCardProps {
-  icon: string;
+  icon?: string;
+  emoji?: string;
   titulo: string;
   subtitulo: string;
   imagemFundo?: string;
 }
 
-function CertificadoCard({ icon, titulo, subtitulo, imagemFundo }: CertificadoCardProps) {
+function CertificadoCard({ icon, emoji, titulo, subtitulo, imagemFundo }: CertificadoCardProps) {
   return (
     <div className="relative flex items-center lg:w-[380px] w-full h-[64px] bg-white rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] overflow-hidden">
       {/* Texto e Ícone */}
       <div className="flex-1 flex items-center gap-2 h-full p-4">
         {/* Ícone */}
         <div className="lg:w-8 lg:h-8 w-6 h-6 shrink-0 flex items-center justify-center">
-          <Image
-            src={`/new-home/icons/${icon}.svg`}
-            alt=""
-            width={32}
-            height={32}
-            className="w-full h-full"
-          />
+          {emoji ? (
+            <span className="text-2xl">{emoji}</span>
+          ) : icon ? (
+            <Image
+              src={`/new-home/icons/${icon}.svg`}
+              alt=""
+              width={32}
+              height={32}
+              className="w-full h-full"
+            />
+          ) : null}
         </div>
 
         {/* Textos */}
@@ -67,10 +72,9 @@ export function CertificadosSection() {
           imagemFundo="/new-home/certificados/cert-ssl.png"
         />
         <CertificadoCard
-          icon="verified"
-          titulo="Certificado"
-          subtitulo="Pela Anvisa"
-          imagemFundo="/new-home/certificados/cert-anvisa.png"
+          emoji="🐰"
+          titulo="Cruelty Free"
+          subtitulo="Nao testamos em animais"
         />
       </div>
 
@@ -89,10 +93,9 @@ export function CertificadosSection() {
           imagemFundo="/new-home/certificados/cert-ssl.png"
         />
         <CertificadoCard
-          icon="verified"
-          titulo="Certificado"
-          subtitulo="Pela Anvisa"
-          imagemFundo="/new-home/certificados/cert-anvisa.png"
+          emoji="🐰"
+          titulo="Cruelty Free"
+          subtitulo="Nao testamos em animais"
         />
       </div>
     </section>
