@@ -321,3 +321,90 @@ export const fetchProdutosForDesign = async (): Promise<any> => {
 
   return processProdutosNothing(await response.json());
 };
+
+/**
+ * Busca produtos por query string ou lista de termos
+ * @param q - Query string para busca (ex: "kit", "rotina-essencial")
+ * @param termos - Lista de termos para busca OR (ex: ["espuma", "hidratante", "sérum"])
+ */
+export const fetchProdutosForSearch = async ({
+  q,
+  termos
+}: {
+  q?: string;
+  termos?: string[];
+}): Promise<any> => {
+  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+
+  // Monta os filtros baseado na query de busca
+  const buildFilters = () => {
+    // Filtro base: produtos visíveis (não escondidos)
+    const baseFilter = {
+      $or: [
+        { backgroundFlags: { $notContainsi: "hide" } },
+        { backgroundFlags: { $null: true } },
+      ],
+    };
+
+    // Se tem lista de termos, usa ela (busca OR)
+    if (termos && termos.length > 0) {
+      return {
+        $or: termos.map(termo => ({ nome: { $containsi: termo } })),
+      };
+    }
+
+    // Se não tem query, retorna todos os produtos visíveis
+    if (!q || q.trim() === "") {
+      return baseFilter;
+    }
+
+    // Busca especial para "Rotina Essencial Lové"
+    // Produtos específicos: Kit Uso Diário + Manteiga Corporal + Máscara de Argila
+    if (q.toLowerCase().includes("rotina-essencial") || q.toLowerCase().includes("rotina essencial")) {
+      return {
+        $or: [
+          { nome: { $containsi: "kit uso diário" } },
+          { nome: { $containsi: "kit uso diario" } },
+          { nome: { $containsi: "manteiga corporal" } },
+          { nome: { $containsi: "máscara de argila" } },
+          { nome: { $containsi: "mascara de argila" } },
+        ],
+      };
+    }
+
+    // Busca por termo simples (apenas no nome)
+    return {
+      nome: { $containsi: q },
+    };
+  };
+
+  const filters = buildFilters();
+
+  const query = qs.stringify(
+    {
+      sort: "updatedAt:desc",
+      filters,
+      populate: COMMON_POPULATE_ITEMS,
+    },
+    { encodeValuesOnly: true },
+  );
+
+  const endpoint = `${baseURL}/api/produtos?${query}`;
+
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Failed to fetch produtos for search. Status:", response.status, "Error:", errorText);
+    throw new Error("Failed to fetch produtos for search");
+  }
+
+  return processProdutosNothing(await response.json());
+};

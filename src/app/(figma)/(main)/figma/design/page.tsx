@@ -2,16 +2,43 @@ import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { CategoriasSection } from "../components/CategoriasSection";
 import { VitrineSection } from "../components/VitrineSection";
-import { MaisVendidosSection } from "../components/MaisVendidosSection";
-import { fetchProdutosForDesign } from "@/modules/produto/domain";
+import { fetchProdutosForSearch } from "@/modules/produto/domain";
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
   description: "Hidratação profunda, alívio das inflamações e rachaduras com produtos naturais e sustentáveis",
 };
 
+// Função para ordenar produtos por lista de termos
+function ordenarProdutos(produtos: any[], ordem: string[]) {
+  return [...produtos].sort((a, b) => {
+    const nomeA = a.nome?.toLowerCase() || "";
+    const nomeB = b.nome?.toLowerCase() || "";
+    const indexA = ordem.findIndex(termo => nomeA.includes(termo.toLowerCase()));
+    const indexB = ordem.findIndex(termo => nomeB.includes(termo.toLowerCase()));
+    // Se não encontrou, coloca no final
+    const posA = indexA === -1 ? 999 : indexA;
+    const posB = indexB === -1 ? 999 : indexB;
+    return posA - posB;
+  });
+}
+
 export default async function FigmaHomePage() {
-  const { data: produtos } = await fetchProdutosForDesign();
+  // Vitrine 1 - Produtos em Destaque: Espuma, Hidratante e Sérum
+  const { data: produtosDestaque } = await fetchProdutosForSearch({
+    termos: ["espuma", "hidratante", "sérum", "serum"]
+  });
+  const destaquesOrdenados = ordenarProdutos(produtosDestaque || [], ["espuma", "hidratante", "sérum", "serum"]);
+
+  // Vitrine 2 - Tecnologia & Amazônia: Espuma e Manteiga
+  const { data: produtosTecnologia } = await fetchProdutosForSearch({
+    termos: ["espuma", "manteiga"]
+  });
+
+  // Vitrine 3 - Rotina Essencial Lové: Kit Uso Diário + Manteiga + Máscara
+  const { data: produtosRotina } = await fetchProdutosForSearch({
+    q: "rotina-essencial"
+  });
 
   return (
     <div className="w-full max-w-[1440px] mx-auto">
@@ -23,46 +50,38 @@ export default async function FigmaHomePage() {
         <CertificadosSection />
       </div>
 
-      {/* Section 6 - Primeira vitrine de produtos com mini banners - Full width */}
+      {/* Vitrine 1 - Produtos em Destaque */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <VitrineSection
-          titulo="Section title"
+          titulo="Produtos em Destaque"
           subtitulo="Hidratação profunda, alívio das inflamações e rachaduras"
           backgroundColor="cream"
-          tipo="mini-banner"
-          produtos={produtos}
+          tipo="produto-completo"
+          produtos={destaquesOrdenados}
         />
       </div>
 
-      {/* Section 7 - Segunda vitrine de produtos com mini banners */}
+      {/* Vitrine 2 - Tecnologia & Amazônia */}
       <VitrineSection
-        titulo="Parceiro"
-        subtitulo="Hidratação profunda, alívio das inflamações e rachaduras"
+        titulo="Tecnologia & Amazônia"
+        subtitulo="Ciência e natureza unidos para sua pele"
         backgroundColor="white"
-        tipo="mini-banner"
-        showIconeTitulo={true}
-        produtos={produtos}
+        tipo="produto-completo"
+        produtos={produtosTecnologia || []}
       />
 
       {/* Seção de categorias */}
       <CategoriasSection />
 
-      {/* Vitrine de produtos completa com navegação */}
+      {/* Vitrine 3 - Rotina Essencial Lové */}
       <VitrineSection
-        titulo="Vitrine de produtos"
-        subtitulo="2 linhas"
+        titulo="Rotina Essencial Lové"
+        subtitulo="Tudo que você precisa para uma rotina completa"
         backgroundColor="white"
         showNavigation={true}
         tipo="produto-completo"
-        produtos={produtos}
+        produtos={produtosRotina || []}
       />
-
-      {/* Mais vendidos - Full width cream */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)] bg-[#f8f3ed]">
-        <div className="w-full max-w-[1440px] mx-auto">
-          <MaisVendidosSection produtos={produtos} />
-        </div>
-      </div>
     </div>
   );
 }

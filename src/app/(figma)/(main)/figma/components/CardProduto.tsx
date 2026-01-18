@@ -123,62 +123,59 @@ export function CardProduto({
           </p>
         )}
 
-        {/* Price and Rating - lateralizados */}
-        <div className="flex items-center justify-between w-full">
-          {/* Price Info */}
-          <div className="content-stretch flex flex-col gap-[1px] items-start leading-[1] text-nowrap whitespace-pre relative shrink-0">
-            {precoOriginal && (
-              <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid">
-                R$ {precoOriginal.toFixed(2)}
-              </p>
-            )}
-            <div className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full">
-              <p className="font-cera-pro font-bold text-[20px] text-black">
-                R$ {preco.toFixed(2)}
-              </p>
-              {desconto && (
-                <p className="font-cera-pro font-light text-[14px] text-[#009142]">
-                  {desconto}
-                </p>
-              )}
-            </div>
-            {parcelas && (
-              <p className="font-cera-pro font-light text-[12px] text-[#333333]">
-                {parcelas}
+        {/* Price Info */}
+        <div className="content-stretch flex flex-col gap-[1px] items-start leading-[1] text-nowrap whitespace-pre relative shrink-0">
+          {precoOriginal && (
+            <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid">
+              R$ {precoOriginal.toFixed(2)}
+            </p>
+          )}
+          <div className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full">
+            <p className="font-cera-pro font-bold text-[20px] text-black">
+              R$ {preco.toFixed(2)}
+            </p>
+            {desconto && (
+              <p className="font-cera-pro font-light text-[14px] text-[#009142]">
+                {desconto}
               </p>
             )}
           </div>
+          {parcelas && (
+            <p className="font-cera-pro font-light text-[12px] text-[#333333]">
+              {parcelas}
+            </p>
+          )}
+        </div>
 
-          {/* Star Rating - lateralizado à direita */}
-          <div className="content-stretch flex items-center shrink-0">
-            <div className="content-stretch flex gap-[2px] items-start">
-              <div className="content-stretch flex h-[12px] items-center">
-                {[...Array(5)].map((_, i) => {
-                  const filled = i < Math.floor(rating);
-                  const half = i < rating && i >= Math.floor(rating);
+        {/* Star Rating - abaixo do preço */}
+        <div className="content-stretch flex items-center shrink-0">
+          <div className="content-stretch flex gap-[2px] items-start">
+            <div className="content-stretch flex h-[12px] items-center">
+              {[...Array(5)].map((_, i) => {
+                const filled = i < Math.floor(rating);
+                const half = i < rating && i >= Math.floor(rating);
 
-                  return (
-                    <div key={i} className="flex flex-col items-start shrink-0">
-                      <div className="w-[24px] h-[24px] flex items-center justify-center">
-                        <svg width="24" height="24" viewBox="0 0 16 16" fill="none">
-                          <path
-                            d="M8 2L9.5 6.5L14 7L10.5 10L11.5 14.5L8 12L4.5 14.5L5.5 10L2 7L6.5 6.5L8 2Z"
-                            fill={filled ? "#F5B100" : half ? "url(#half)" : "#E0E0E0"}
-                          />
-                          {half && (
-                            <defs>
-                              <linearGradient id="half">
-                                <stop offset="50%" stopColor="#F5B100" />
-                                <stop offset="50%" stopColor="#E0E0E0" />
-                              </linearGradient>
-                            </defs>
-                          )}
-                        </svg>
-                      </div>
+                return (
+                  <div key={i} className="flex flex-col items-start shrink-0">
+                    <div className="w-[24px] h-[24px] flex items-center justify-center">
+                      <svg width="24" height="24" viewBox="0 0 16 16" fill="none">
+                        <path
+                          d="M8 2L9.5 6.5L14 7L10.5 10L11.5 14.5L8 12L4.5 14.5L5.5 10L2 7L6.5 6.5L8 2Z"
+                          fill={filled ? "#F5B100" : half ? "url(#half)" : "#E0E0E0"}
+                        />
+                        {half && (
+                          <defs>
+                            <linearGradient id="half">
+                              <stop offset="50%" stopColor="#F5B100" />
+                              <stop offset="50%" stopColor="#E0E0E0" />
+                            </linearGradient>
+                          </defs>
+                        )}
+                      </svg>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

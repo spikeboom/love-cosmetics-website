@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/contexts";
 import { useAuth } from "@/contexts/AuthContext";
+import { Gift, Sparkles, LayoutGrid, BookOpen } from "lucide-react";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -108,44 +109,30 @@ export function Header() {
       </div>
 
       {/* Menu de navegação - Desktop */}
-      <nav className="hidden lg:flex bg-white w-full items-start justify-between px-[32px] py-[16px]">
-        <Link href="/kits" className="flex gap-[8px] items-center">
-          <Image src="/new-home/header/person.svg" alt="" width={24} height={24} />
+      <nav className="hidden lg:flex bg-white w-full items-center justify-center gap-16 px-[32px] py-[16px]">
+        <Link href="/figma/search?q=kit" className="flex gap-[8px] items-center hover:opacity-70 transition-opacity">
+          <Gift size={24} strokeWidth={1.5} className="text-[#7c5c3e]" />
           <span className="font-cera-pro font-light text-[20px] text-[#000000] whitespace-nowrap leading-[normal]">
             Kits
           </span>
         </Link>
 
-        <Link href="/rotina-diaria" className="flex gap-[8px] items-center">
-          <Image src="/new-home/header/box.svg" alt="" width={24} height={24} />
+        <Link href="/figma/search?q=rotina-essencial" className="flex gap-[8px] items-center hover:opacity-70 transition-opacity">
+          <Sparkles size={24} strokeWidth={1.5} className="text-[#7c5c3e]" />
           <span className="font-cera-pro font-light text-[20px] text-[#000000] whitespace-nowrap leading-[normal]">
-            Rotina diária
+            Rotina Essencial Lové
           </span>
         </Link>
 
-        <Link href="/corporal" className="flex gap-[8px] items-center">
-          <Image src="/new-home/header/routine.svg" alt="" width={24} height={24} />
+        <Link href="/figma/search" className="flex gap-[8px] items-center hover:opacity-70 transition-opacity">
+          <LayoutGrid size={24} strokeWidth={1.5} className="text-[#7c5c3e]" />
           <span className="font-cera-pro font-light text-[20px] text-[#000000] whitespace-nowrap leading-[normal]">
-            Corporal
+            Todos os Produtos
           </span>
         </Link>
 
-        <Link href="/argila" className="flex gap-[8px] items-center">
-          <Image src="/new-home/header/corporal.svg" alt="" width={24} height={24} />
-          <span className="font-cera-pro font-light text-[20px] text-[#000000] whitespace-nowrap leading-[normal]">
-            Argila
-          </span>
-        </Link>
-
-        <Link href="/promocoes" className="flex gap-[8px] items-center">
-          <Image src="/new-home/header/waves.svg" alt="" width={24} height={24} />
-          <span className="font-cera-pro font-light text-[20px] text-[#000000] whitespace-nowrap leading-[normal]">
-            Promoções
-          </span>
-        </Link>
-
-        <Link href="/nossa-historia" className="flex gap-[8px] items-center">
-          <Image src="/new-home/header/promocoes.svg" alt="" width={24} height={24} />
+        <Link href="/figma/quem-somos" className="flex gap-[8px] items-center hover:opacity-70 transition-opacity">
+          <BookOpen size={24} strokeWidth={1.5} className="text-[#7c5c3e]" />
           <span className="font-cera-pro font-light text-[20px] text-[#000000] whitespace-nowrap leading-[normal]">
             Conheça nossa história
           </span>
@@ -186,56 +173,38 @@ export function Header() {
             </Link>
 
             <Link
-              href="/kits"
+              href="/figma/search?q=kit"
               className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Image src="/new-home/header/person.svg" alt="" width={20} height={20} />
+              <Gift size={20} strokeWidth={1.5} className="text-[#7c5c3e]" />
               <span className="font-cera-pro font-light text-base text-black">Kits</span>
             </Link>
 
             <Link
-              href="/rotina-diaria"
+              href="/figma/search?q=rotina-essencial"
               className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Image src="/new-home/header/box.svg" alt="" width={20} height={20} />
-              <span className="font-cera-pro font-light text-base text-black">Rotina diária</span>
+              <Sparkles size={20} strokeWidth={1.5} className="text-[#7c5c3e]" />
+              <span className="font-cera-pro font-light text-base text-black">Rotina Essencial Lové</span>
             </Link>
 
             <Link
-              href="/corporal"
+              href="/figma/search"
               className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Image src="/new-home/header/routine.svg" alt="" width={20} height={20} />
-              <span className="font-cera-pro font-light text-base text-black">Corporal</span>
+              <LayoutGrid size={20} strokeWidth={1.5} className="text-[#7c5c3e]" />
+              <span className="font-cera-pro font-light text-base text-black">Todos os Produtos</span>
             </Link>
 
             <Link
-              href="/argila"
-              className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Image src="/new-home/header/corporal.svg" alt="" width={20} height={20} />
-              <span className="font-cera-pro font-light text-base text-black">Argila</span>
-            </Link>
-
-            <Link
-              href="/promocoes"
-              className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Image src="/new-home/header/waves.svg" alt="" width={20} height={20} />
-              <span className="font-cera-pro font-light text-base text-black">Promoções</span>
-            </Link>
-
-            <Link
-              href="/nossa-historia"
+              href="/figma/quem-somos"
               className="flex gap-3 items-center px-4 py-3 active:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Image src="/new-home/header/promocoes.svg" alt="" width={20} height={20} />
+              <BookOpen size={20} strokeWidth={1.5} className="text-[#7c5c3e]" />
               <span className="font-cera-pro font-light text-base text-black">Conheça nossa história</span>
             </Link>
           </nav>

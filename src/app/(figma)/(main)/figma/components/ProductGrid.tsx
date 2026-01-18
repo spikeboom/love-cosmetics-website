@@ -4,6 +4,8 @@ import { useState } from "react";
 import { CardProduto } from "./CardProduto";
 
 interface Produto {
+  id?: number;
+  slug?: string;
   imagem: string;
   nome: string;
   descricao?: string;
@@ -52,7 +54,7 @@ export function ProductGrid({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
           {produtosPagina.map((produto, index) => (
             <CardProduto
-              key={index}
+              key={produto.id || index}
               imagem={produto.imagem}
               nome={produto.nome}
               descricao={produto.descricao}
@@ -65,6 +67,7 @@ export function ProductGrid({
               ranking={produto.ranking}
               tipo="produto-completo"
               fullWidth={true}
+              slug={produto.slug}
             />
           ))}
         </div>
