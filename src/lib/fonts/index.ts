@@ -20,22 +20,37 @@ import localFont from "next/font/local";
 export const ceraPro = localFont({
   src: [
     {
-      path: "../../../public/fonts/cera-pro-sv/Cera Pro Light.otf",
+      path: "../../../public/fonts/downloaded/CeraPro-Thin.ttf",
+      weight: "100",
+      style: "normal",
+    },
+    {
+      path: "../../../public/fonts/downloaded/CeraPro-Light.ttf",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../../../public/fonts/cera-pro-sv/Cera Pro Medium.otf",
+      path: "../../../public/fonts/downloaded/CeraPro-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../../public/fonts/downloaded/CeraPRO-Medium.ttf",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../../../public/fonts/cera-pro-sv/Cera Pro Bold.otf",
+      path: "../../../public/fonts/downloaded/Cera Pro Bold.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../../../public/fonts/downloaded/Cera Pro Bold.ttf",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../../public/fonts/cera-pro-sv/Cera Pro Black.otf",
+      path: "../../../public/fonts/downloaded/CeraPRO-Black.ttf",
       weight: "900",
       style: "normal",
     },
