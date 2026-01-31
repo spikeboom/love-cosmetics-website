@@ -47,8 +47,10 @@ export function transformProdutosStrapi({
       desconto = `${percentualDesconto}% OFF`;
     }
 
-    // Pega a primeira descrição disponível da listaDescricao
-    const descricao = produto.listaDescricao?.[0]?.descricao || produtosMockados[index % produtosMockados.length]?.descricao;
+    // Pega descrição de várias fontes possíveis (prioriza descricaoResumida)
+    const descricao = produto.descricaoResumida
+      || produto.listaDescricao?.[0]?.descricao
+      || produtosMockados[index % produtosMockados.length]?.descricao;
 
     // Calcula o valor de cada parcela (3x sem juros)
     const valorParcela = preco > 0 ? (preco / 3).toFixed(2).replace('.', ',') : null;

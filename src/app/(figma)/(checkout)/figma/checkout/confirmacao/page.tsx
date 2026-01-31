@@ -43,7 +43,7 @@ function ConfirmacaoContent() {
 
   useEffect(() => {
     if (!pedidoId) {
-      router.push("/figma");
+      router.push("/figma/design");
       return;
     }
 

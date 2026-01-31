@@ -288,7 +288,7 @@ export function PagamentoPixReal({
               {/* Botoes: Ir para pagina inicial + Ja realizei o Pix */}
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
                 <button
-                  onClick={() => router.push("/figma")}
+                  onClick={() => router.push("/figma/design")}
                   className="flex-1 h-[60px] bg-[#d8f9e7] rounded-[8px] flex items-center justify-center hover:bg-[#c5f0da] transition-colors"
                 >
                   <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-[#254333]">

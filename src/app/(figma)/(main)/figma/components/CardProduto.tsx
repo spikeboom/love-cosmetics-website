@@ -67,8 +67,8 @@ export function CardProduto({
     // Card de produto completo (para vitrines e mais vendidos)
     <div className={`bg-white box-border content-stretch flex flex-col gap-[16px] items-start pb-[16px] pt-0 px-0 relative rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] ${fullWidth ? "w-full" : "w-full lg:w-[230px]"}`}>
       {/* Imagem e Tag */}
-      <div className="content-stretch flex gap-[10px] items-start justify-center max-h-[312px] relative shrink-0 w-full">
-        <div className="basis-0 grow h-[196px] min-h-px min-w-px relative rounded-tl-[16px] rounded-tr-[16px] shrink-0 overflow-hidden">
+      <div className="content-stretch flex gap-[10px] items-start justify-center relative shrink-0 w-full">
+        <div className="w-full aspect-[4/3] relative rounded-tl-[16px] rounded-tr-[16px] overflow-hidden">
           <Image
             src={imagem}
             alt={nome}
@@ -92,7 +92,7 @@ export function CardProduto({
 
         {/* Tag de últimas unidades */}
         {ultimasUnidades && (
-          <div className="absolute content-stretch flex flex-col gap-[10px] items-center left-1/2 top-[163px] w-[90%] max-w-[214px] translate-x-[-50%]">
+          <div className="absolute content-stretch flex flex-col gap-[10px] items-center left-1/2 bottom-[8px] w-[90%] max-w-[214px] translate-x-[-50%]">
             <div className="bg-[#f8f3ed] box-border content-stretch flex gap-[4px] items-center justify-center px-[16px] py-[4px] relative rounded-[4px] shrink-0 w-full">
               <div className="relative shrink-0 size-[16px]">
                 <Image
@@ -118,7 +118,7 @@ export function CardProduto({
         </p>
 
         {descricao && (
-          <p className="font-cera-pro font-light text-[14px] text-black leading-[1] w-full h-full overflow-hidden text-ellipsis">
+          <p className="font-cera-pro font-light text-[14px] text-black leading-[1.4] w-full overflow-hidden line-clamp-3">
             {descricao}
           </p>
         )}

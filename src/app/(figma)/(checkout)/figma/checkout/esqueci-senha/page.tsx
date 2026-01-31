@@ -99,7 +99,7 @@ function EsqueciSenhaContent() {
 
       // Redirecionar após 2 segundos
       setTimeout(() => {
-        router.push(pedidoId ? `/figma/checkout/confirmacao?pedidoId=${pedidoId}` : "/figma");
+        router.push(pedidoId ? `/figma/checkout/confirmacao?pedidoId=${pedidoId}` : "/figma/design");
       }, 2000);
 
     } catch (error) {
