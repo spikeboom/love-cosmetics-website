@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 
 interface BannerSlide {
@@ -48,6 +48,29 @@ const TRANSITION_DURATION = 500;
 export function BannerPrincipal() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50;
+
+    if (Math.abs(diff) > minSwipeDistance) {
+      if (diff > 0) {
+        handleNext();
+      } else {
+        handlePrevious();
+      }
+    }
+  };
 
   const handlePrevious = () => {
     if (isTransitioning) return;
@@ -71,7 +94,12 @@ export function BannerPrincipal() {
       {/* Layout Mobile */}
       <div className="lg:hidden">
         {/* Imagem mobile */}
-        <div className="relative w-full h-[234px] overflow-hidden">
+        <div
+          className="relative w-full h-[234px] overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div
             style={{
               transform: `translateX(${slideOffset}%)`,
