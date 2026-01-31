@@ -3,6 +3,9 @@ import { getCurrentSession } from '@/lib/cliente/auth';
 import { getClientePedidos, getClienteCupons } from '@/lib/cliente/session';
 import { prisma } from '@/lib/prisma';
 
+// Garantir que a rota não seja cacheada
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Verificar sessão atual
@@ -72,7 +75,7 @@ export async function GET(request: NextRequest) {
       };
     }
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       authenticated: true,
       cliente: {
         ...cliente,
@@ -89,6 +92,13 @@ export async function GET(request: NextRequest) {
       },
       stats
     });
+
+    // Evitar qualquer tipo de cache
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
     
   } catch (error) {
     console.error('Erro ao verificar sessão:', error);
