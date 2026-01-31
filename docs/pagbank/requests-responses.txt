@@ -1,0 +1,69 @@
+=== PIX - REQUEST ===
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "pedido-123",
+  "customer": {
+    "name": "Maria Silva",
+    "email": "maria@email.com",
+    "tax_id": "12345678900",
+    "phones": [{"country": "55", "area": "11", "number": "999999999", "type": "MOBILE"}]
+  },
+  "items": [{"reference_id": "SKU001", "name": "Produto Teste", "quantity": 1, "unit_amount": 5000}],
+  "qr_codes": [{"amount": {"value": 5000, "currency": "BRL"}, "expiration_date": "2025-01-20T12:00:00Z"}],
+  "notification_urls": ["https://seusite.com.br/api/pagbank/webhook"]
+}
+
+=== PIX - RESPONSE ===
+{
+  "id": "ORDE_XXX",
+  "reference_id": "pedido-123",
+  "qr_codes": [{
+    "id": "QRCO_XXX",
+    "text": "00020126580014br.gov.bcb.pix...",
+    "links": [{"rel": "QRCODE.PNG", "href": "https://..."}],
+    "expiration_date": "2025-01-20T12:00:00Z"
+  }]
+}
+
+=== CARTAO CREDITO - REQUEST ===
+POST https://sandbox.api.pagseguro.com/charges
+
+{
+  "reference_id": "pedido-123",
+  "description": "Pedido Love Cosmetics #123",
+  "amount": {"value": 5000, "currency": "BRL"},
+  "payment_method": {
+    "type": "CREDIT_CARD",
+    "installments": 1,
+    "capture": true,
+    "card": {"encrypted": "ENCRYPTED_CARD_DATA"},
+    "holder": {"name": "Maria Silva", "tax_id": "12345678900"}
+  },
+  "notification_urls": ["https://seusite.com.br/api/pagbank/webhook"]
+}
+
+=== CARTAO CREDITO - RESPONSE ===
+{
+  "id": "CHAR_XXX",
+  "reference_id": "pedido-123",
+  "status": "PAID",
+  "amount": {"value": 5000, "currency": "BRL"},
+  "payment_method": {
+    "type": "CREDIT_CARD",
+    "card": {"brand": "visa", "last_digits": "1111", "first_digits": "411111"}
+  }
+}
+
+=== WEBHOOK NOTIFICATION - REQUEST (recebido do PagBank) ===
+POST https://seusite.com.br/api/pagbank/webhook
+
+{
+  "id": "ORDE_XXX",
+  "reference_id": "pedido-123",
+  "charges": [{
+    "id": "CHAR_XXX",
+    "status": "PAID",
+    "amount": {"value": 5000, "currency": "BRL"}
+  }]
+}
