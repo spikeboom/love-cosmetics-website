@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/contexts";
@@ -23,6 +23,31 @@ export function Header({ produtos = [] }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { qtdItemsCart } = useCart();
   const { isLoggedIn } = useAuth();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Fechar menu ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside as EventListener);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside as EventListener);
+    };
+  }, [isMenuOpen]);
 
   return (
     <header className="w-full flex flex-col items-start">
@@ -100,6 +125,7 @@ export function Header({ produtos = [] }: HeaderProps) {
 
           {/* Menu hamburguer - Mobile */}
           <button
+            ref={menuButtonRef}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="lg:hidden w-6 h-6 flex flex-col justify-center gap-1"
             aria-label="Menu"
@@ -144,7 +170,7 @@ export function Header({ produtos = [] }: HeaderProps) {
 
       {/* Menu Mobile - Dropdown */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white w-full border-t border-gray-200">
+        <div ref={menuRef} className="lg:hidden bg-white w-full border-t border-gray-200">
           {/* Links Mobile */}
           <nav className="flex flex-col">
             <Link

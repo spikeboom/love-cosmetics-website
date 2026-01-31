@@ -7,9 +7,9 @@ export function Footer() {
   ];
 
   const linksProdutos = [
-    { label: "Todos os Produtos", href: "/figma/experimento?q=" },
-    { label: "Rotina de Skincare", href: "/figma/experimento?q=rotina+skincare" },
-    { label: "Kits", href: "/figma/experimento?q=kit" },
+    { label: "Todos os Produtos", href: "/figma/search" },
+    { label: "Rotina de Skincare", href: "/figma/search?q=rotina-essencial" },
+    { label: "Kits", href: "/figma/search?q=kit" },
   ];
 
   const linksAjuda = [
@@ -144,7 +144,7 @@ export function Footer() {
                     height={32}
                   />
                 </Link>
-                <Link href="#" className="w-8 h-8">
+                <Link href="https://www.instagram.com/cosmeticoslove_" target="_blank" className="w-8 h-8">
                   <Image
                     src="/new-home/social/instagram.svg"
                     alt="Instagram"
@@ -152,7 +152,7 @@ export function Footer() {
                     height={32}
                   />
                 </Link>
-                <Link href="#" className="w-8 h-8">
+                <Link href="https://wa.me/5592981918872" target="_blank" className="w-8 h-8">
                   <Image
                     src="/new-home/social/whatsapp.svg"
                     alt="WhatsApp"
@@ -160,7 +160,7 @@ export function Footer() {
                     height={32}
                   />
                 </Link>
-                <Link href="#" className="w-8 h-8">
+                <Link href="https://www.tiktok.com/@cosmeticoslove_" target="_blank" className="w-8 h-8">
                   <Image
                     src="/new-home/social/tiktok.svg"
                     alt="TikTok"
@@ -197,7 +197,7 @@ export function Footer() {
                 height={32}
               />
             </Link>
-            <Link href="#" className="w-8 h-8">
+            <Link href="https://www.instagram.com/cosmeticoslove_" target="_blank" className="w-8 h-8">
               <Image
                 src="/new-home/social/instagram.svg"
                 alt="Instagram"
@@ -205,7 +205,7 @@ export function Footer() {
                 height={32}
               />
             </Link>
-            <Link href="#" className="w-8 h-8">
+            <Link href="https://wa.me/5592981918872" target="_blank" className="w-8 h-8">
               <Image
                 src="/new-home/social/whatsapp.svg"
                 alt="WhatsApp"
@@ -213,7 +213,7 @@ export function Footer() {
                 height={32}
               />
             </Link>
-            <Link href="#" className="w-8 h-8">
+            <Link href="https://www.tiktok.com/@cosmeticoslove_" target="_blank" className="w-8 h-8">
               <Image
                 src="/new-home/social/tiktok.svg"
                 alt="TikTok"
@@ -227,13 +227,13 @@ export function Footer() {
         {/* Copyright */}
         <div className="px-4 w-full">
           <p className="font-cera-pro font-light text-[12px] text-[#f2f2f2] text-center leading-[22px] w-full lg:hidden">
-            2025 Lovè. Todos os direitos reservados.<br />
+            2026 Lovè. Todos os direitos reservados.<br />
             Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM<br />
             CEP: 69083-040<br />
             CNPJ: 42.609.440.0001-90
           </p>
           <p className="hidden lg:block font-cera-pro font-light text-[12px] text-[#f2f2f2] text-center leading-[22px] w-full">
-            2025 Lovè. Todos os direitos reservados. Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM CEP: 69083-040 CNPJ: 42.609.440.0001-90
+            2026 Lovè. Todos os direitos reservados. Rua Benjamim Benchimol, 125 - Conjunto Petro - Manaus/AM CEP: 69083-040 CNPJ: 42.609.440.0001-90
           </p>
         </div>
       </div>
