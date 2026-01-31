@@ -63,7 +63,8 @@ export function transformProdutosStrapi({
       precoOriginal: precoOriginal || produtosMockados[index % produtosMockados.length]?.precoOriginal,
       parcelas: parcelasTexto,
       rating: produtosMockados[index % produtosMockados.length]?.rating,
-      ultimasUnidades: produtosMockados[index % produtosMockados.length]?.ultimasUnidades,
+      // Últimas unidades apenas para Sérum e Espuma
+      ultimasUnidades: /s[ée]rum|espuma/i.test(produto.nome || ''),
     };
 
     // Adiciona slug se solicitado

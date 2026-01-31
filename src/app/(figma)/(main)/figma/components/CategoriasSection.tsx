@@ -46,7 +46,7 @@ export function CategoriasSection() {
     },
     {
       nome: "Conheça nossa história",
-      href: "/figma/quem-somos",
+      href: "/figma/sobre",
       imagem: "/new-home/categorias/cat-rotina.png"
     },
   ];

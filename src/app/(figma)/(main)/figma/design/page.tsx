@@ -1,6 +1,5 @@
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CertificadosSection } from "../components/CertificadosSection";
-import { CategoriasSection } from "../components/CategoriasSection";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 
@@ -24,16 +23,17 @@ function ordenarProdutos(produtos: any[], ordem: string[]) {
 }
 
 export default async function FigmaHomePage() {
-  // Vitrine 1 - Produtos em Destaque: Espuma, Hidratante e Sérum
+  // Vitrine 1 - Produtos em Destaque: Espuma, Sérum, Hidratante
   const { data: produtosDestaque } = await fetchProdutosForSearch({
-    termos: ["espuma", "hidratante", "sérum", "serum"]
+    termos: ["espuma", "sérum", "serum", "hidratante"]
   });
-  const destaquesOrdenados = ordenarProdutos(produtosDestaque || [], ["espuma", "hidratante", "sérum", "serum"]);
+  const destaquesOrdenados = ordenarProdutos(produtosDestaque || [], ["espuma", "sérum", "serum", "hidratante"]);
 
   // Vitrine 2 - Tecnologia & Amazônia: Espuma e Manteiga
   const { data: produtosTecnologia } = await fetchProdutosForSearch({
     termos: ["espuma", "manteiga"]
   });
+  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["espuma", "manteiga"]);
 
   // Vitrine 3 - Rotina Essencial Lové: Kit Uso Diário + Manteiga + Máscara
   const { data: produtosRotina } = await fetchProdutosForSearch({
@@ -67,11 +67,8 @@ export default async function FigmaHomePage() {
         subtitulo="Ciência e natureza unidos para sua pele"
         backgroundColor="white"
         tipo="produto-completo"
-        produtos={produtosTecnologia || []}
+        produtos={tecnologiaOrdenados}
       />
-
-      {/* Seção de categorias */}
-      <CategoriasSection />
 
       {/* Vitrine 3 - Rotina Essencial Lové */}
       <VitrineSection

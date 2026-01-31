@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { CardProduto } from "./CardProduto";
 import { transformProdutosStrapi } from "@/utils/transform-produtos-strapi";
@@ -194,13 +195,13 @@ export function VitrineSection({
       {/* Ver todos */}
       {showVerTodos && (
         <div className="flex flex-col gap-2 lg:items-center items-start justify-center px-4 w-full">
-          <div className="flex gap-2.5 lg:items-center items-start lg:justify-center justify-start">
+          <Link href="/figma/search" className="flex gap-2.5 lg:items-center items-start lg:justify-center justify-start hover:opacity-70 transition-opacity">
             <div className="flex flex-col justify-center leading-[0]">
               <p className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-black underline decoration-solid [text-underline-position:from-font] leading-normal whitespace-pre">
                 Ver todos produtos
               </p>
             </div>
-          </div>
+          </Link>
         </div>
       )}
     </section>

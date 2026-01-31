@@ -95,7 +95,7 @@ export function BarraAvisoExemplo() {
     <div className="bg-[#f8f3ed] w-full border-t-[1px] border-[#ba7900]">
       <div className="flex gap-2 items-center justify-center py-2 lg:py-[10px] px-4 lg:px-[123px]">
         <p className="font-cera-pro font-light text-xs lg:text-[16px] text-[#333333] text-center leading-normal">
-          Ciência e natureza da Amazônia
+          Ciência da Amazônia na sua pele
         </p>
         <Image
           src="/new-home/header/eco.svg"
