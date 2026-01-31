@@ -5,6 +5,7 @@ interface BotaoVoltarProps {
 export function BotaoVoltar({ onClick }: BotaoVoltarProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="flex items-center gap-2 text-[#254333] hover:opacity-80 transition-opacity self-start"
     >

@@ -73,6 +73,7 @@ export async function linkPedidoToLoggedCliente({
         cidade: body.cidade,
         estado: body.estado,
         telefone: body.telefone,
+        dataNascimento: body.data_nascimento ? new Date(body.data_nascimento) : undefined,
         receberWhatsapp: body.aceito_receber_whatsapp,
       },
     });
@@ -118,6 +119,7 @@ export async function createAccountForOrderIfRequested({
           sobrenome: body.sobrenome,
           cpf: body.cpf,
           telefone: body.telefone,
+          dataNascimento: body.data_nascimento ? new Date(body.data_nascimento) : null,
           passwordHash: senhaHash,
           cep: body.cep,
           endereco: body.endereco,

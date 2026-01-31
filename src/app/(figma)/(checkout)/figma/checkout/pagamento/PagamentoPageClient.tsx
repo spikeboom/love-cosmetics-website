@@ -209,6 +209,10 @@ export function PagamentoPageClient() {
     );
   }
 
+  const voltarParaEntrega = () => {
+    router.push("/figma/checkout/entrega");
+  };
+
   // Tela de selecao de metodo de pagamento
   return (
     <PagamentoSelecao
@@ -216,6 +220,7 @@ export function PagamentoPageClient() {
       formatPrice={formatPrice}
       onSelecionarPix={handleSelecionarPix}
       onSelecionarCartao={handleSelecionarCartao}
+      onVoltar={voltarParaEntrega}
       resumoProps={resumoProps}
     />
   );

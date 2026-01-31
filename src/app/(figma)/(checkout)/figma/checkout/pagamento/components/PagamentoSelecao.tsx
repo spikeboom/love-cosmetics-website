@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckoutStepper } from "../../CheckoutStepper";
+import { BotaoVoltar } from "./BotaoVoltar";
 import { PagamentoResumo } from "./PagamentoResumo";
 import { ResumoProps } from "./types";
 
@@ -9,6 +10,7 @@ interface PagamentoSelecaoProps {
   formatPrice: (price: number) => string;
   onSelecionarPix: () => void;
   onSelecionarCartao: () => void;
+  onVoltar: () => void;
   resumoProps: ResumoProps;
 }
 
@@ -17,6 +19,7 @@ export function PagamentoSelecao({
   formatPrice,
   onSelecionarPix,
   onSelecionarCartao,
+  onVoltar,
   resumoProps,
 }: PagamentoSelecaoProps) {
   return (
@@ -25,6 +28,8 @@ export function PagamentoSelecao({
 
       <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
         <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
+          <BotaoVoltar onClick={onVoltar} />
+
           <PagamentoResumo {...resumoProps} />
 
           {/* Secao de Pagamento */}

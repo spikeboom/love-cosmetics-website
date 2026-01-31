@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
+import { BotaoVoltar } from "../pagamento/components/BotaoVoltar";
 import { useViaCep } from "@/hooks/checkout";
 import { useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
@@ -70,16 +71,18 @@ export function EntregaPageClient() {
           if (data.authenticated && data.cliente) {
             const cliente = data.cliente;
             // Se cliente tem endereço salvo, usar
-            if (cliente.cep) {
+            // A API retorna endereco como objeto: { cep, endereco, numero, ... }
+            const enderecoData = cliente.endereco;
+            if (enderecoData && typeof enderecoData === "object" && enderecoData.cep) {
               setFormData(prev => ({
                 ...prev,
-                cep: cliente.cep ? cliente.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : "",
-                rua: cliente.endereco || "",
-                numero: cliente.numero || "",
-                complemento: cliente.complemento || "",
-                bairro: cliente.bairro || "",
-                cidade: cliente.cidade || "",
-                estado: cliente.estado || "",
+                cep: enderecoData.cep ? enderecoData.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : "",
+                rua: enderecoData.endereco || "",
+                numero: enderecoData.numero || "",
+                complemento: enderecoData.complemento || "",
+                bairro: enderecoData.bairro || "",
+                cidade: enderecoData.cidade || "",
+                estado: enderecoData.estado || "",
               }));
               setIsLoading(false);
               return;
@@ -217,12 +220,18 @@ export function EntregaPageClient() {
     );
   }
 
+  const handleVoltar = () => {
+    router.push("/figma/checkout/identificacao");
+  };
+
   return (
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="entrega" />
 
       <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
+          <BotaoVoltar onClick={handleVoltar} />
+
           <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
             {/* CEP */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
