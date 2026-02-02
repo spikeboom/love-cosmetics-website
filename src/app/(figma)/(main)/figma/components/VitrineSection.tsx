@@ -138,6 +138,7 @@ export function VitrineSection({
             {produtos.map((produto, index) => (
               <SwiperSlide key={index} style={{ width: 'calc((100vw - 2rem) / 1.3)' }}>
                 <CardProduto
+                  id={produto.id}
                   tipo={tipo}
                   imagem={produto.imagem}
                   nome={produto.nome}
@@ -150,6 +151,12 @@ export function VitrineSection({
                   slug={produto.slug}
                   ranking={showRanking ? index + 1 : undefined}
                   rating={produto.rating}
+                  preco_de={produto.preco_de}
+                  bling_number={produto.bling_number}
+                  peso_gramas={produto.peso_gramas}
+                  altura={produto.altura}
+                  largura={produto.largura}
+                  comprimento={produto.comprimento}
                 />
               </SwiperSlide>
             ))}
@@ -162,6 +169,7 @@ export function VitrineSection({
             {produtos.map((produto, index) => (
               <CardProduto
                 key={index}
+                id={produto.id}
                 tipo={tipo}
                 imagem={produto.imagem}
                 nome={produto.nome}
@@ -174,6 +182,12 @@ export function VitrineSection({
                 slug={produto.slug}
                 ranking={showRanking ? index + 1 : undefined}
                 rating={produto.rating}
+                preco_de={produto.preco_de}
+                bling_number={produto.bling_number}
+                peso_gramas={produto.peso_gramas}
+                altura={produto.altura}
+                largura={produto.largura}
+                comprimento={produto.comprimento}
               />
             ))}
           </div>

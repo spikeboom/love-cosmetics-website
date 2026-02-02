@@ -57,6 +57,7 @@ export function transformProdutosStrapi({
     const parcelasTexto = valorParcela ? `3x R$${valorParcela} sem juros` : produtosMockados[index % produtosMockados.length]?.parcelas;
 
     const produtoTransformado: any = {
+      id: produto.id?.toString() || `mock-${index}`,
       imagem: imagemUrl ? `${baseURL}${imagemUrl}` : produtosMockados[index % produtosMockados.length]?.imagem,
       nome: produto.nome || produtosMockados[index % produtosMockados.length]?.nome,
       descricao: descricao,
@@ -67,6 +68,13 @@ export function transformProdutosStrapi({
       rating: produtosMockados[index % produtosMockados.length]?.rating,
       // Últimas unidades apenas para Sérum e Espuma
       ultimasUnidades: /s[ée]rum|espuma/i.test(produto.nome || ''),
+      // Campos extras para o carrinho
+      preco_de: precoOriginal,
+      bling_number: produto.bling_number,
+      peso_gramas: produto.peso_gramas,
+      altura: produto.altura,
+      largura: produto.largura,
+      comprimento: produto.comprimento,
     };
 
     // Adiciona slug se solicitado

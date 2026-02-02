@@ -7,7 +7,7 @@ import { ProductGrid } from "../components/ProductGrid";
 import { CertificadosSection } from "../components/CertificadosSection";
 
 interface Produto {
-  id: number;
+  id: string;
   slug: string;
   imagem: string;
   nome: string;
@@ -18,6 +18,13 @@ interface Produto {
   parcelas?: string;
   rating?: number;
   ultimasUnidades?: boolean;
+  // Campos extras para o carrinho
+  preco_de?: number;
+  bling_number?: string;
+  peso_gramas?: number;
+  altura?: number;
+  largura?: number;
+  comprimento?: number;
 }
 
 interface SearchPageClientProps {

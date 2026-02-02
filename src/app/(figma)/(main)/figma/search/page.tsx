@@ -48,7 +48,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       || produto.carouselImagensPrincipal?.[0]?.imagem?.url;
 
     return {
-      id: produto.id,
+      id: produto.id?.toString(),
       slug: produto.slug,
       imagem: imagemUrl
         ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${imagemUrl}`
@@ -61,6 +61,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       parcelas,
       rating: produto.rating || 4.5,
       ultimasUnidades,
+      // Campos extras para o carrinho
+      preco_de: precoOriginal,
+      bling_number: produto.bling_number,
+      peso_gramas: produto.peso_gramas,
+      altura: produto.altura,
+      largura: produto.largura,
+      comprimento: produto.comprimento,
     };
   }) || [];
 

@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/contexts";
+import { useNotifications } from "@/core/notifications/NotificationContext";
 
 interface CardProdutoProps {
+  id?: string;
   imagem: string;
   nome: string;
   descricao?: string;
@@ -15,9 +20,17 @@ interface CardProdutoProps {
   ranking?: number;
   fullWidth?: boolean;
   slug?: string;
+  // Campos extras para o carrinho
+  preco_de?: number;
+  bling_number?: string;
+  peso_gramas?: number;
+  altura?: number;
+  largura?: number;
+  comprimento?: number;
 }
 
 export function CardProduto({
+  id,
   imagem,
   nome,
   descricao,
@@ -31,7 +44,42 @@ export function CardProduto({
   ranking,
   fullWidth = false,
   slug,
+  preco_de,
+  bling_number,
+  peso_gramas,
+  altura,
+  largura,
+  comprimento,
 }: CardProdutoProps) {
+  const { addProductToCart } = useCart();
+  const { notify } = useNotifications();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!id) {
+      notify("Erro ao adicionar produto", { variant: "error" });
+      return;
+    }
+
+    addProductToCart({
+      id,
+      nome,
+      preco,
+      quantity: 1,
+      slug,
+      preco_de: preco_de || precoOriginal,
+      bling_number,
+      peso_gramas,
+      altura,
+      largura,
+      comprimento,
+    });
+
+    notify("Produto adicionado ao carrinho!", { variant: "success" });
+  };
+
   const cardContent = tipo === "mini-banner" ? (
     <div className="bg-white flex flex-col gap-4 items-start pb-4 pt-0 px-0 rounded-2xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] w-full lg:w-[230px]">
       {/* Imagem */}
@@ -179,6 +227,21 @@ export function CardProduto({
             </div>
           </div>
         </div>
+
+        {/* Botão Comprar */}
+        {id && (
+          <button
+            onClick={handleAddToCart}
+            className="w-full py-[12px] px-[16px] bg-[#254333] hover:bg-[#1a3025] text-white font-cera-pro font-medium text-[14px] rounded-[8px] transition-all duration-200 flex items-center justify-center gap-[8px]"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Comprar
+          </button>
+        )}
       </div>
     </div>
   );

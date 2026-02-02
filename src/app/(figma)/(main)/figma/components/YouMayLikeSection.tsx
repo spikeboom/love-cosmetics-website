@@ -166,6 +166,7 @@ export function YouMayLikeSection({
             {produtos.map((produto) => (
               <div key={produto.id} className="flex-shrink-0 w-[230px]">
                 <CardProduto
+                  id={produto.id}
                   imagem={produto.imagem}
                   nome={produto.nome}
                   descricao={produto.descricao}
@@ -177,6 +178,12 @@ export function YouMayLikeSection({
                   ultimasUnidades={produto.ultimasUnidades}
                   tipo="produto-completo"
                   slug={produto.slug}
+                  preco_de={produto.preco_de}
+                  bling_number={produto.bling_number}
+                  peso_gramas={produto.peso_gramas}
+                  altura={produto.altura}
+                  largura={produto.largura}
+                  comprimento={produto.comprimento}
                 />
               </div>
             ))}
@@ -198,6 +205,7 @@ export function YouMayLikeSection({
           {produtos.map((produto) => (
             <div key={produto.id} className="flex-shrink-0 w-[230px]">
               <CardProduto
+                id={produto.id}
                 imagem={produto.imagem}
                 nome={produto.nome}
                 descricao={produto.descricao}
@@ -209,6 +217,12 @@ export function YouMayLikeSection({
                 ultimasUnidades={produto.ultimasUnidades}
                 tipo="produto-completo"
                 slug={produto.slug}
+                preco_de={produto.preco_de}
+                bling_number={produto.bling_number}
+                peso_gramas={produto.peso_gramas}
+                altura={produto.altura}
+                largura={produto.largura}
+                comprimento={produto.comprimento}
               />
             </div>
           ))}

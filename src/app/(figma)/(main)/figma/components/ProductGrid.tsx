@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CardProduto } from "./CardProduto";
 
 interface Produto {
-  id?: number;
+  id?: string;
   slug?: string;
   imagem: string;
   nome: string;
@@ -16,6 +16,13 @@ interface Produto {
   rating?: number;
   ultimasUnidades?: boolean;
   ranking?: number;
+  // Campos extras para o carrinho
+  preco_de?: number;
+  bling_number?: string;
+  peso_gramas?: number;
+  altura?: number;
+  largura?: number;
+  comprimento?: number;
 }
 
 interface ProductGridProps {
@@ -55,6 +62,7 @@ export function ProductGrid({
           {produtosPagina.map((produto, index) => (
             <CardProduto
               key={produto.id || index}
+              id={produto.id}
               imagem={produto.imagem}
               nome={produto.nome}
               descricao={produto.descricao}
@@ -68,6 +76,12 @@ export function ProductGrid({
               tipo="produto-completo"
               fullWidth={true}
               slug={produto.slug}
+              preco_de={produto.preco_de}
+              bling_number={produto.bling_number}
+              peso_gramas={produto.peso_gramas}
+              altura={produto.altura}
+              largura={produto.largura}
+              comprimento={produto.comprimento}
             />
           ))}
         </div>
