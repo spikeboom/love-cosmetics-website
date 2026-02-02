@@ -23,22 +23,23 @@ function ordenarProdutos(produtos: any[], ordem: string[]) {
 }
 
 export default async function FigmaHomePage() {
-  // Vitrine 1 - Produtos em Destaque: Espuma, Sérum, Hidratante
-  const { data: produtosDestaque } = await fetchProdutosForSearch({
+  // Vitrine 1 - Comece sua rotina Lovè: Espuma, Sérum, Hidratante
+  const { data: produtosRotina } = await fetchProdutosForSearch({
     termos: ["espuma", "sérum", "serum", "hidratante"]
   });
-  const destaquesOrdenados = ordenarProdutos(produtosDestaque || [], ["espuma", "sérum", "serum", "hidratante"]);
+  const rotinaOrdenados = ordenarProdutos(produtosRotina || [], ["espuma", "sérum", "serum", "hidratante"]);
 
-  // Vitrine 2 - Tecnologia & Amazônia: Espuma e Manteiga
+  // Vitrine 2 - Kits Lovè: Kit Uso Diário, Kit Full Lovè
+  const { data: produtosKits } = await fetchProdutosForSearch({
+    termos: ["kit"]
+  });
+  const kitsOrdenados = ordenarProdutos(produtosKits || [], ["kit uso diário", "kit full"]);
+
+  // Vitrine 3 - Tecnologia & Amazônia: Máscara de Argila, Manteiga Corporal
   const { data: produtosTecnologia } = await fetchProdutosForSearch({
-    termos: ["espuma", "manteiga"]
+    termos: ["máscara", "mascara", "manteiga"]
   });
-  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["espuma", "manteiga"]);
-
-  // Vitrine 3 - Rotina Essencial Lové: Kit Uso Diário + Manteiga + Máscara
-  const { data: produtosRotina } = await fetchProdutosForSearch({
-    q: "rotina-essencial"
-  });
+  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["máscara", "mascara", "manteiga"]);
 
   return (
     <div className="w-full max-w-[1440px] mx-auto">
@@ -50,34 +51,33 @@ export default async function FigmaHomePage() {
         <CertificadosSection />
       </div>
 
-      {/* Vitrine 1 - Produtos em Destaque */}
+      {/* Vitrine 1 - Comece sua rotina Lovè */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <VitrineSection
-          titulo="Produtos em Destaque"
-          subtitulo="Hidratação profunda, alívio das inflamações e rachaduras"
+          titulo="Comece a sua rotina Lovè"
+          subtitulo="Três passos para uma pele equilibrada, saudável e inteligente."
           backgroundColor="cream"
           tipo="produto-completo"
-          produtos={destaquesOrdenados}
+          produtos={rotinaOrdenados}
         />
       </div>
 
-      {/* Vitrine 2 - Tecnologia & Amazônia */}
+      {/* Vitrine 2 - Kits Lovè */}
       <VitrineSection
-        titulo="Tecnologia & Amazônia"
-        subtitulo="Ciência e natureza unidos para sua pele"
+        titulo="Kits Lovè"
+        subtitulo="Rotinas completas com mais benefícios e melhor custo."
         backgroundColor="white"
         tipo="produto-completo"
-        produtos={tecnologiaOrdenados}
+        produtos={kitsOrdenados}
       />
 
-      {/* Vitrine 3 - Rotina Essencial Lové */}
+      {/* Vitrine 3 - Tecnologia & Amazônia */}
       <VitrineSection
-        titulo="Rotina Essencial Lové"
-        subtitulo="Tudo que você precisa para uma rotina completa"
+        titulo="Tecnologia & Amazônia"
         backgroundColor="white"
         showNavigation={true}
         tipo="produto-completo"
-        produtos={produtosRotina || []}
+        produtos={tecnologiaOrdenados}
       />
     </div>
   );
