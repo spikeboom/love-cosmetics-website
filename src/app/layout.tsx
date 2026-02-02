@@ -7,7 +7,7 @@ import {
   Playfair_Display,
 } from "next/font/google";
 import Script from "next/script";
-import "./(global)/globals.css";
+import "./_global/globals.css";
 import { GoogleTagManager } from "@next/third-parties/google";
 import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
 import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
