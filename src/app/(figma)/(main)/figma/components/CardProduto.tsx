@@ -75,6 +75,7 @@ export function CardProduto({
       altura,
       largura,
       comprimento,
+      imagem,
     });
 
     notify("Produto adicionado ao carrinho!", { variant: "success" });

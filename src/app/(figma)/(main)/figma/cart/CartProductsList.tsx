@@ -51,7 +51,12 @@ export function CartProductsList({
   const desatualizadosMap = new Map(
     produtosDesatualizados.map(p => [p.id, p])
   );
-  const getImageUrl = (produto: Product) => {
+  const getImageUrl = (produto: any) => {
+    // Primeiro tenta usar imagem direta (do CardProduto)
+    if (produto.imagem) {
+      return produto.imagem;
+    }
+    // Fallback para carouselImagensPrincipal (do ProductPageClient)
     const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
     const imagemUrl =
       produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url ||
