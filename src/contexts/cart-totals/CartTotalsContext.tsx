@@ -29,6 +29,7 @@ export const CartTotalsProvider = ({
 }: CartTotalsProviderProps) => {
   const [total, setTotal] = useState(0);
   const [descontos, setDescontos] = useState(0);
+  const [subtotalOriginal, setSubtotalOriginal] = useState(0);
   const [firstRun, setFirstRun] = useState(false);
 
   const { notify } = useNotifications();
@@ -43,6 +44,32 @@ export const CartTotalsProvider = ({
   useEffect(() => {
     calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom, freightValue);
   }, [cart, cupons, freightValue, firstRun, handleAddCupom]);
+
+  // Calcular subtotal original (soma dos preco_de riscados)
+  useEffect(() => {
+    const cartArray = Object.values(cart);
+    const subtotal = cartArray.reduce((acc: number, item: any) => {
+      // Mesma lógica do CartProductsList para determinar o preco_de
+      const temCupomAplicado = !!item.cupom_applied || !!item.backup?.preco;
+      const precoAtual = item.preco;
+      const precoAntesDosCupom = item.backup?.preco ?? item.preco;
+
+      let precoOriginal: number;
+      if (temCupomAplicado) {
+        precoOriginal = item.backup?.preco_de ?? item.preco_de ?? precoAntesDosCupom;
+        if (precoOriginal <= precoAtual) {
+          precoOriginal = precoAtual;
+        }
+      } else {
+        precoOriginal = item.preco_de && item.preco_de > precoAtual
+          ? item.preco_de
+          : precoAtual;
+      }
+
+      return acc + (precoOriginal * (item.quantity || 1));
+    }, 0);
+    setSubtotalOriginal(subtotal);
+  }, [cart]);
 
   // Função para atualizar preços do carrinho com valores atuais do Strapi
   const refreshCartPrices = useCallback(async (): Promise<boolean> => {
@@ -108,6 +135,7 @@ export const CartTotalsProvider = ({
   const value: CartTotalsContextType = {
     total,
     descontos,
+    subtotalOriginal,
     isValidating: cartValidation.isValidating,
     isValid: cartValidation.isValid,
     produtosDesatualizados: cartValidation.produtosDesatualizados,

@@ -93,22 +93,64 @@ export function useCreateOrder(): UseCreateOrderReturn {
 
       // Preparar items do carrinho
       // Usar documentId (estável no Strapi v5) em vez de id (muda ao publicar)
-      const items = Object.entries(cart).map(([id, product]: [string, any]) => ({
-        reference_id: product.documentId || id,
-        name: product.nome,
-        quantity: product.quantity,
-        preco: product.preco,
-        unit_amount: product.preco, // Salvar em REAIS no banco
-        image_url: product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
-          ? process.env.NEXT_PUBLIC_STRAPI_URL +
-            product.carouselImagensPrincipal[0].imagem.formats.medium.url
-          : undefined,
-        bling_number: product.bling_number,
-      }));
+      const items = Object.entries(cart).map(([id, product]: [string, any]) => {
+        // Calcular campos de apresentação (mesma lógica do CartProductsList)
+        const temCupomAplicado = !!product.cupom_applied || !!product.backup?.preco;
+        const precoAtual = product.preco;
+        const precoAntesDosCupom = product.backup?.preco ?? product.preco;
+
+        // Preço original (preco_de) - o valor riscado
+        let precoDeApresentacao: number | undefined;
+        if (temCupomAplicado) {
+          precoDeApresentacao = product.backup?.preco_de ?? product.preco_de ?? precoAntesDosCupom;
+          if (precoDeApresentacao && precoDeApresentacao <= precoAtual) {
+            precoDeApresentacao = undefined;
+          }
+        } else {
+          precoDeApresentacao = product.preco_de && product.preco_de > precoAtual
+            ? product.preco_de
+            : undefined;
+        }
+
+        // Calcular % OFF acumulado (arredondado para cima)
+        const descontoPercentualApresentacao =
+          precoDeApresentacao && precoDeApresentacao > precoAtual
+            ? Math.ceil(((precoDeApresentacao - precoAtual) / precoDeApresentacao) * 100)
+            : undefined;
+
+        // Imagem do produto
+        const imagemUrl = product.imagem ||
+          (product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
+            ? process.env.NEXT_PUBLIC_STRAPI_URL + product.carouselImagensPrincipal[0].imagem.formats.medium.url
+            : undefined);
+
+        return {
+          reference_id: product.documentId || id,
+          name: product.nome,
+          quantity: product.quantity,
+          preco: product.preco,
+          unit_amount: product.preco, // Salvar em REAIS no banco
+          image_url: product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
+            ? process.env.NEXT_PUBLIC_STRAPI_URL +
+              product.carouselImagensPrincipal[0].imagem.formats.medium.url
+            : undefined,
+          bling_number: product.bling_number,
+          // Campos novos para apresentação (não afetam cálculos)
+          preco_de: precoDeApresentacao,
+          desconto_percentual: descontoPercentualApresentacao,
+          imagem: imagemUrl,
+        };
+      });
 
       // Usar frete do Context (ja calculado corretamente)
       const freteCalculado = freightValue;
       const freightData = getSelectedFreightData?.() || {};
+
+      // Calcular subtotal para apresentação (soma dos preco_de ou preco se não existir)
+      const subtotalProdutos = items.reduce((acc, item) => {
+        const precoBase = item.preco_de ?? item.preco;
+        return acc + (precoBase * item.quantity);
+      }, 0);
 
       // Montar payload para API
       const payload = {
@@ -137,6 +179,8 @@ export function useCreateOrder(): UseCreateOrderReturn {
         transportadora_nome: freightData.transportadora_nome || null,
         transportadora_servico: freightData.transportadora_servico || null,
         transportadora_prazo: freightData.transportadora_prazo || null,
+        // Campo novo para apresentação
+        subtotal_produtos: subtotalProdutos,
       };
 
       // Chamar API

@@ -33,6 +33,7 @@ model Pedido {
   descontos                 Float @default(0)
   total_pedido              Float @default(0)
   frete_calculado           Float @default(15)
+  subtotal_produtos         Float?  // Soma dos preços originais (preco_de) para apresentação
   transportadora_nome       String? // Nome da transportadora (ex: "Correios")
   transportadora_servico    String? // Serviço (ex: "Sedex", "PAC")
   transportadora_prazo      Int?    // Prazo em dias úteis

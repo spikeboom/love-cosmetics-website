@@ -8,6 +8,15 @@ export interface PedidoStatus {
   statusPagamento: string;
 }
 
+export interface ProdutoItem {
+  name: string;
+  quantity: number;
+  preco: number;
+  preco_de?: number;
+  desconto_percentual?: number;
+  imagem?: string;
+}
+
 export interface PedidoDetalhes {
   id: string;
   cliente: {
@@ -26,6 +35,7 @@ export interface PedidoDetalhes {
   produtos: {
     nomes: string[];
     subtotal: number;
+    items: ProdutoItem[];
   };
   entrega: {
     transportadora: string;

@@ -37,6 +37,7 @@ export async function GET(
         total_pedido: true,
         descontos: true,
         frete_calculado: true,
+        subtotal_produtos: true,
         transportadora_nome: true,
         transportadora_servico: true,
         transportadora_prazo: true,
@@ -59,12 +60,13 @@ export async function GET(
       );
     }
 
-    // Calcular subtotal dos produtos (sem frete e sem descontos)
-    const subtotalProdutos = pedido.items.reduce((acc: number, item: unknown) => {
-      const typedItem = item as { quantity?: number; preco?: number; unit_amount?: number; price?: number };
+    // Usar subtotal_produtos salvo no banco (soma dos preco_de para apresentação)
+    // Se não existir, calcular fallback dos preços atuais
+    const subtotalProdutos = pedido.subtotal_produtos ?? pedido.items.reduce((acc: number, item: unknown) => {
+      const typedItem = item as { quantity?: number; preco?: number; unit_amount?: number; price?: number; preco_de?: number };
       const quantidade = typedItem.quantity || 1;
-      // Tentar diferentes campos de preço: preco, unit_amount, price
-      const preco = typedItem.preco || typedItem.unit_amount || typedItem.price || 0;
+      // Usar preco_de (preço original) se disponível, senão usar preço atual
+      const preco = typedItem.preco_de || typedItem.preco || typedItem.unit_amount || typedItem.price || 0;
       return acc + (preco * quantidade);
     }, 0);
 
@@ -82,6 +84,30 @@ export async function GET(
       const nome = typedItem.name || typedItem.productName || typedItem.title || 'Produto';
       const quantidade = typedItem.quantity || 1;
       return quantidade > 1 ? `${nome} (x${quantidade})` : nome;
+    });
+
+    // Formatar items completos para apresentação detalhada
+    const itemsFormatados = pedido.items.map((item: unknown) => {
+      const typedItem = item as {
+        name?: string;
+        productName?: string;
+        title?: string;
+        quantity?: number;
+        preco?: number;
+        unit_amount?: number;
+        preco_de?: number;
+        desconto_percentual?: number;
+        imagem?: string;
+        image_url?: string;
+      };
+      return {
+        name: typedItem.name || typedItem.productName || typedItem.title || 'Produto',
+        quantity: typedItem.quantity || 1,
+        preco: typedItem.preco || typedItem.unit_amount || 0,
+        preco_de: typedItem.preco_de,
+        desconto_percentual: typedItem.desconto_percentual,
+        imagem: typedItem.imagem || typedItem.image_url,
+      };
     });
 
     return NextResponse.json({
@@ -102,6 +128,7 @@ export async function GET(
       produtos: {
         nomes: produtosNomes,
         subtotal: subtotalProdutos,
+        items: itemsFormatados,
       },
       entrega: {
         transportadora: pedido.transportadora_nome,

@@ -40,9 +40,32 @@ export function SuccessState({ pedidoDetalhes }: SuccessStateProps) {
                   {pedidoDetalhes ? formatCurrency(pedidoDetalhes.produtos.subtotal) : "-"}
                 </p>
               </div>
-              <div className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
-                {pedidoDetalhes?.produtos.nomes.map((nome, i) => (
-                  <p key={i}>{nome}</p>
+              <div className="flex flex-col gap-2">
+                {pedidoDetalhes?.produtos.items?.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
+                        {item.name} {item.quantity > 1 && `(x${item.quantity})`}
+                      </span>
+                      {item.desconto_percentual && (
+                        <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
+                          {item.desconto_percentual}% OFF
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.preco_de && item.preco_de > item.preco && (
+                        <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
+                          {formatCurrency(item.preco_de * item.quantity)}
+                        </span>
+                      )}
+                      <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#111]">
+                        {formatCurrency(item.preco * item.quantity)}
+                      </span>
+                    </div>
+                  </div>
+                )) || pedidoDetalhes?.produtos.nomes.map((nome, i) => (
+                  <p key={i} className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">{nome}</p>
                 ))}
               </div>
             </div>

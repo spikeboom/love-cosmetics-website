@@ -166,27 +166,49 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {pedido.items.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-[#f8f3ed] rounded-[8px] p-3"
-                  >
-                    <p className="font-cera-pro font-medium text-[14px] text-black line-clamp-2 mb-2">
-                      {item.name}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="font-cera-pro font-light text-[12px] text-[#666666]">
-                        Qtd: {item.quantity}
-                      </span>
-                      <span className="font-cera-pro font-bold text-[14px] text-[#254333]">
-                        {item.unit_amount.toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        })}
-                      </span>
+                {pedido.items.map((item, idx) => {
+                  const precoAtual = item.preco || item.unit_amount;
+                  const temDesconto = item.preco_de && item.preco_de > precoAtual;
+
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-[#f8f3ed] rounded-[8px] p-3"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className="font-cera-pro font-medium text-[14px] text-black line-clamp-2">
+                          {item.name}
+                        </p>
+                        {item.desconto_percentual && (
+                          <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0">
+                            {item.desconto_percentual}% OFF
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                          Qtd: {item.quantity}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {temDesconto && (
+                            <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
+                              {item.preco_de!.toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </span>
+                          )}
+                          <span className="font-cera-pro font-bold text-[14px] text-[#254333]">
+                            {precoAtual.toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Cupons */}

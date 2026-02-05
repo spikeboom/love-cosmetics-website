@@ -8,8 +8,13 @@ export interface Item {
   name: string;
   quantity: number;
   image_url: string;
+  imagem?: string;
   unit_amount: number;
   reference_id: string;
+  // Campos de apresentação (salvos no momento do pedido)
+  preco?: number;
+  preco_de?: number;
+  desconto_percentual?: number;
 }
 
 export interface Pedido {
@@ -30,6 +35,8 @@ export interface Pedido {
   estado: string;
   total_pedido: number;
   frete_calculado: number;
+  subtotal_produtos?: number | null;
+  descontos?: number | null;
   transportadora_nome?: string | null;
   transportadora_servico?: string | null;
   transportadora_prazo?: number | null;

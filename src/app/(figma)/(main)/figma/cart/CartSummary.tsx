@@ -84,13 +84,13 @@ export function CartSummary({
             </p>
           </div>
 
-          {/* Cupom - Desconto (positivo) ou Acréscimo (negativo) */}
+          {/* Descontos (positivo) ou Acréscimo (negativo) */}
           {cupom !== 0 && (
             <div className={`flex justify-between items-center self-stretch ${isMobile ? 'gap-8' : 'gap-8'}`}>
               <p className={`font-cera-pro font-light leading-[1.257] text-[#111111] ${
                 isMobile ? 'text-[14px]' : 'text-xl'
               }`}>
-                {cupom > 0 ? 'Cupom' : 'Acréscimo'}{tipoDesconto && <span className="text-[#666666] text-[12px] ml-1">({tipoDesconto})</span>}
+                {cupom > 0 ? 'Descontos' : 'Acréscimo'}
               </p>
               <p className={`font-cera-pro font-light leading-[1.257] ${
                 cupom > 0 ? 'text-[#009142]' : 'text-[#B3261E]'

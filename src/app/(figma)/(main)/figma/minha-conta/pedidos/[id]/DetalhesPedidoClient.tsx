@@ -19,12 +19,17 @@ interface ProdutoItem {
   image_url: string;
   quantity: number;
   preco: number;
+  // Campos de apresentação (salvos no momento do pedido)
+  preco_de?: number;
+  desconto_percentual?: number;
 }
 
 interface Pedido {
   id: string;
   total: number;
   frete: number;
+  subtotal_produtos?: number;
+  descontos?: number;
   status: string;
   statusEntrega: string;
   historicoStatus: HistoricoStatus[];
@@ -115,14 +120,23 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
     }
   };
 
-  // Calcular totais
+  // Calcular totais - usa subtotal_produtos salvo (soma dos preco_de originais)
   const calcularTotalProdutos = () => {
     if (!pedido) return 0;
-    return pedido.items.reduce((acc, item) => acc + (item.preco * item.quantity), 0);
+    // Usar subtotal_produtos salvo se disponível (soma dos preco_de para apresentação)
+    if (pedido.subtotal_produtos) return pedido.subtotal_produtos;
+    // Fallback: calcular dos items (usando preco_de se disponível)
+    return pedido.items.reduce((acc, item) => {
+      const precoBase = item.preco_de ?? item.preco;
+      return acc + (precoBase * item.quantity);
+    }, 0);
   };
 
   const calcularDescontos = () => {
     if (!pedido) return 0;
+    // Usar descontos salvos se disponível
+    if (pedido.descontos) return pedido.descontos;
+    // Fallback: calcular
     const totalProdutos = calcularTotalProdutos();
     const totalComFrete = totalProdutos + (pedido.frete || 0);
     return totalComFrete - pedido.total;
@@ -274,11 +288,30 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
                     {formatPrice(totalProdutos)}
                   </span>
                 </div>
-                <div className="font-cera-pro font-light text-[14px] text-[#111]">
+                <div className="flex flex-col gap-2">
                   {pedido.items.map((item, index) => (
-                    <p key={index} className="mb-0">
-                      {item.name}
-                    </p>
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-cera-pro font-light text-[14px] text-[#111]">
+                          {item.name} {item.quantity > 1 && `(x${item.quantity})`}
+                        </span>
+                        {item.desconto_percentual && (
+                          <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
+                            {item.desconto_percentual}% OFF
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {item.preco_de && item.preco_de > item.preco && (
+                          <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
+                            {formatPrice(item.preco_de * item.quantity)}
+                          </span>
+                        )}
+                        <span className="font-cera-pro font-medium text-[14px] text-[#111]">
+                          {formatPrice(item.preco * item.quantity)}
+                        </span>
+                      </div>
+                    </div>
                   ))}
                 </div>
                 <Link

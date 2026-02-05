@@ -87,16 +87,22 @@ export async function GET(
     const items = (pedido.items || []) as Array<{
       name?: string;
       image_url?: string;
+      imagem?: string;
       quantity?: number;
       preco?: number;
       unit_amount?: number;
+      preco_de?: number;
+      desconto_percentual?: number;
     }>;
 
     const itemsFormatados = items.map((item) => ({
       name: item.name || 'Produto',
-      image_url: item.image_url || '',
+      image_url: item.imagem || item.image_url || '',
       quantity: item.quantity || 1,
       preco: item.preco || item.unit_amount || 0,
+      // Campos de apresentação (salvos no momento do pedido)
+      preco_de: item.preco_de,
+      desconto_percentual: item.desconto_percentual,
     }));
 
     // Formatar histórico de status
@@ -125,10 +131,19 @@ export async function GET(
       });
     }
 
+    // Calcular subtotal para apresentação (soma dos preco_de originais)
+    // Usa subtotal_produtos salvo se disponível, senão calcula
+    const subtotalProdutos = pedido.subtotal_produtos ?? itemsFormatados.reduce((acc, item) => {
+      const precoBase = item.preco_de ?? item.preco;
+      return acc + (precoBase * item.quantity);
+    }, 0);
+
     const pedidoFormatado = {
       id: pedido.id,
       total: pedido.total_pedido,
       frete: pedido.frete_calculado,
+      subtotal_produtos: subtotalProdutos,
+      descontos: pedido.descontos,
       status,
       statusEntrega: pedido.status_entrega,
       historicoStatus,
