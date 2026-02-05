@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchProdutosComFallback, fetchAndValidateCupom, PRICE_TOLERANCE } from "@/lib/strapi";
-import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
+import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 
 interface CartItem {
   id: string;
@@ -116,12 +116,13 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      const precoLista = produtoReal.preco;
-      const kitPricing = applyKitDiscountFromListPrice({
-        listPrice: precoLista,
+      // Preço do Strapi já é o preço final (com desconto do kit aplicado)
+      const precoStrapi = produtoReal.preco;
+      const kitPricing = applyKitDiscountFromFinalPrice({
+        finalPrice: precoStrapi,
         product: { nome: produtoReal.nome },
       });
-      const precoAtual = kitPricing?.preco ?? precoLista;
+      const precoAtual = kitPricing?.preco ?? precoStrapi;
       const precoAtualComCupom = precoAtual * multiplicador - diminuir;
 
       if (Math.abs(precoAtualComCupom - item.preco) > PRICE_TOLERANCE) {

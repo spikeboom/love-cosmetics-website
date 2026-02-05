@@ -32,68 +32,17 @@ export function VitrineSection({
   produtos: produtosStrapi = [],
   showRanking = false,
 }: VitrineSectionProps) {
-  // Dados mockados para fallback quando não houver produtos do Strapi
-  const produtosMockados = [
-    {
-      imagem: "/new-home/produtos/produto-1.png",
-      nome: "Manteiga Corporal",
-      descricao: "Hidratação profunda, alívio das inflamações e rachaduras",
-      preco: 99.99,
-      precoOriginal: 129.99,
-      parcelas: "3x R$33,33 sem juros",
-      ultimasUnidades: false,
-      rating: 4.5,
-    },
-    {
-      imagem: "/new-home/produtos/produto-2.png",
-      nome: "Máscara de Argila",
-      descricao: "Hidratação profunda, alívio das inflamações e rachaduras",
-      preco: 89.99,
-      precoOriginal: 105.99,
-      parcelas: "3x R$29,99 sem juros",
-      ultimasUnidades: true,
-      rating: 4.0,
-    },
-    {
-      imagem: "/new-home/produtos/produto-3.png",
-      nome: "Sérum Facial",
-      descricao: "Hidratação profunda, alívio das inflamações e rachaduras",
-      preco: 119.99,
-      precoOriginal: 140.99,
-      parcelas: "3x R$39,99 sem juros",
-      ultimasUnidades: true,
-      rating: 4.5,
-    },
-    {
-      imagem: "/new-home/produtos/produto-2.png",
-      nome: "Máscara de Argila",
-      descricao: "Hidratação profunda, alívio das inflamações e rachaduras",
-      preco: 89.99,
-      precoOriginal: 105.99,
-      parcelas: "3x R$29,99 sem juros",
-      ultimasUnidades: true,
-      rating: 3.5,
-    },
-    {
-      imagem: "/new-home/produtos/produto-1.png",
-      nome: "Manteiga Corporal",
-      descricao: "Hidratação profunda, alívio das inflamações e rachaduras",
-      preco: 99.99,
-      precoOriginal: 129.99,
-      parcelas: "3x R$33,33 sem juros",
-      ultimasUnidades: true,
-      rating: 5.0,
-    },
-  ];
-
   const produtos = transformProdutosStrapi({
     produtosStrapi,
-    produtosMockados,
     limite: 5,
     incluirSlug: true,
   });
 
   const bgColor = backgroundColor === "white" ? "bg-white" : "bg-[#f8f3ed]";
+
+  if (produtos.length === 0) {
+    return null;
+  }
 
   return (
     <section className={`${bgColor} w-full flex flex-col gap-4 items-start py-8 px-0`}>
@@ -131,7 +80,7 @@ export function VitrineSection({
             className="!px-4 !pb-2"
           >
             {produtos.map((produto, index) => (
-              <SwiperSlide key={index} style={{ width: 'calc((100vw - 2rem) / 1.3)' }}>
+              <SwiperSlide key={produto.id || index} style={{ width: 'calc((100vw - 2rem) / 1.3)' }}>
                 <CardProduto
                   id={produto.id}
                   tipo={tipo}
@@ -163,7 +112,7 @@ export function VitrineSection({
           <div className="flex gap-8 items-start justify-center px-4 w-full">
             {produtos.map((produto, index) => (
               <CardProduto
-                key={index}
+                key={produto.id || index}
                 id={produto.id}
                 tipo={tipo}
                 imagem={produto.imagem}

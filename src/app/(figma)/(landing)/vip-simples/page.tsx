@@ -14,17 +14,8 @@ export const metadata = {
   },
 };
 
-// Produtos fallback caso o Strapi não retorne
-const produtosFallback = [
-  { nome: "Espuma Facial", descricao: "Limpeza suave para o rosto", imagem: "/new-home/produtos/produto-1.png", preco: 89.90, slug: "espuma-facial" },
-  { nome: "Sérum Facial", descricao: "Tratamento concentrado com ativos amazônicos", imagem: "/new-home/produtos/produto-2.png", preco: 119.90, slug: "serum-facial" },
-  { nome: "Hidratante Facial", descricao: "Hidratação profunda com textura leve", imagem: "/new-home/produtos/produto-3.png", preco: 99.90, slug: "hidratante-facial" },
-  { nome: "Manteiga Corporal", descricao: "Hidratação intensa para o corpo", imagem: "/new-home/produtos/produto-1.png", preco: 79.90, slug: "manteiga-corporal" },
-  { nome: "Máscara de Argila", descricao: "Limpeza profunda e detox facial", imagem: "/new-home/produtos/produto-2.png", preco: 69.90, slug: "mascara-de-argila" },
-];
-
 export default async function VIPSimplesPage() {
-  let produtos = produtosFallback;
+  let produtos: any[] = [];
 
   try {
     const response = await fetchProdutosForDesign();
@@ -33,7 +24,6 @@ export default async function VIPSimplesPage() {
     if (produtosStrapi.length > 0) {
       produtos = transformProdutosStrapi({
         produtosStrapi,
-        produtosMockados: produtosFallback,
         limite: 5,
         incluirSlug: true,
       });

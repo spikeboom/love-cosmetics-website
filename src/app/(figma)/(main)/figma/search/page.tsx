@@ -1,6 +1,6 @@
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { SearchPageClient } from "./SearchPageClient";
-import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
+import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 
 export const metadata = {
   title: "Lové Cosméticos - Busca de Produtos",
@@ -22,8 +22,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const precoStrapi = produto.preco || 0;
     const precoOriginalStrapi = produto.preco_de || undefined;
 
-    const kitPricing = applyKitDiscountFromListPrice({
-      listPrice: precoStrapi,
+    const kitPricing = applyKitDiscountFromFinalPrice({
+      finalPrice: precoStrapi,
       product: { nome: produto.nome, slug: produto.slug },
     });
 

@@ -2,53 +2,37 @@
  * Transforma produtos do Strapi para o formato esperado pelos componentes
  */
 
-import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
-
-interface ProdutoMockado {
-  imagem: string;
-  nome: string;
-  descricao?: string;
-  desconto?: string;
-  preco: number;
-  precoOriginal?: number;
-  parcelas?: string;
-  rating?: number;
-  ultimasUnidades?: boolean;
-  slug?: string;
-}
+import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 
 interface TransformProdutosOptions {
   produtosStrapi: any[];
-  produtosMockados: ProdutoMockado[];
   limite?: number;
   incluirSlug?: boolean;
 }
 
 export function transformProdutosStrapi({
   produtosStrapi,
-  produtosMockados,
   limite = 5,
   incluirSlug = true,
 }: TransformProdutosOptions) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
-  // Transforma produtos do Strapi para o formato esperado
-  const produtosTransformados = produtosStrapi.slice(0, limite).map((produto: any, index: number) => {
+  return produtosStrapi.slice(0, limite).map((produto: any) => {
     const imagemUrl = produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
       || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
 
-    // Preço vindo do Strapi
+    // Preço vindo do Strapi (já é o preço final)
     const precoStrapi = produto.preco || 0;
     // Preço original (de) vindo do Strapi (quando existe promoção real no cadastro)
     const precoOriginalStrapi = produto.preco_de || null;
 
-    // Hard-code de kits (opção A: Strapi `preco` do kit é o preço de lista)
-    const kitPricing = applyKitDiscountFromListPrice({
-      listPrice: precoStrapi,
+    // Preço do Strapi já é o preço final - calcula preco_de a partir do desconto do kit
+    const kitPricing = applyKitDiscountFromFinalPrice({
+      finalPrice: precoStrapi,
       product: { nome: produto.nome, slug: produto.slug },
     });
 
-    // Preço efetivo (sem cupom) e "preço de" para exibição
+    // Preço efetivo e "preço de" para exibição
     const preco = kitPricing?.preco ?? precoStrapi;
     const precoOriginal = kitPricing?.preco_de ?? precoOriginalStrapi;
 
@@ -61,25 +45,23 @@ export function transformProdutosStrapi({
       desconto = `${percentualDesconto}% OFF`;
     }
 
-    // Pega descrição de várias fontes possíveis (prioriza descricaoResumida)
-    const descricao = produto.descricaoResumida
-      || produto.listaDescricao?.[0]?.descricao
-      || produtosMockados[index % produtosMockados.length]?.descricao;
+    // Pega descrição do Strapi
+    const descricao = produto.descricaoResumida || produto.listaDescricao?.[0]?.descricao || null;
 
     // Calcula o valor de cada parcela (3x sem juros)
     const valorParcela = preco > 0 ? (preco / 3).toFixed(2).replace('.', ',') : null;
-    const parcelasTexto = valorParcela ? `3x R$${valorParcela} sem juros` : produtosMockados[index % produtosMockados.length]?.parcelas;
+    const parcelas = valorParcela ? `3x R$${valorParcela} sem juros` : null;
 
     const produtoTransformado: any = {
-      id: produto.id?.toString() || `mock-${index}`,
-      imagem: imagemUrl ? `${baseURL}${imagemUrl}` : produtosMockados[index % produtosMockados.length]?.imagem,
-      nome: produto.nome || produtosMockados[index % produtosMockados.length]?.nome,
-      descricao: descricao,
-      desconto: desconto || produtosMockados[index % produtosMockados.length]?.desconto,
-      preco: preco || produtosMockados[index % produtosMockados.length]?.preco,
-      precoOriginal: precoOriginal || produtosMockados[index % produtosMockados.length]?.precoOriginal,
-      parcelas: parcelasTexto,
-      rating: produtosMockados[index % produtosMockados.length]?.rating,
+      id: produto.id?.toString(),
+      imagem: imagemUrl ? `${baseURL}${imagemUrl}` : "/new-home/produtos/produto-1.png",
+      nome: produto.nome || "Produto",
+      descricao,
+      desconto,
+      preco,
+      precoOriginal,
+      parcelas,
+      rating: produto.nota > 0 ? produto.nota : 4.5,
       // Últimas unidades apenas para Sérum e Espuma
       ultimasUnidades: /s[ée]rum|espuma/i.test(produto.nome || ''),
       // Campos extras para o carrinho
@@ -91,14 +73,10 @@ export function transformProdutosStrapi({
       comprimento: produto.comprimento,
     };
 
-    // Adiciona slug se solicitado
     if (incluirSlug) {
       produtoTransformado.slug = produto.slug || null;
     }
 
     return produtoTransformado;
   });
-
-  // Se não houver produtos do Strapi, usa os mockados
-  return produtosTransformados.length > 0 ? produtosTransformados : produtosMockados;
 }

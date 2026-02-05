@@ -2,7 +2,7 @@
  * Calcula informações de preço a partir dos dados do produto
  */
 
-import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
+import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 
 interface PriceCalculationResult {
   preco: number;
@@ -18,9 +18,9 @@ export function calculateProductPrices(
   precoOriginal?: number | null,
   product?: { nome?: string | null; slug?: string | null }
 ): PriceCalculationResult {
-  // Hard-code de kits (opção A: Strapi `preco` do kit é o preço de lista)
-  const kitPricing = applyKitDiscountFromListPrice({
-    listPrice: preco,
+  // Preço do Strapi já é o preço final - calcula preco_de a partir do desconto
+  const kitPricing = applyKitDiscountFromFinalPrice({
+    finalPrice: preco,
     product: product ?? {},
   });
 

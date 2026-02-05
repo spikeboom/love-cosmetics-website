@@ -82,35 +82,7 @@ export function CartProductsList({
             ? Math.round(((precoAntigo - basePriceForDiscount) / precoAntigo) * 100)
             : undefined;
 
-        // Tags mockadas alternando entre produtos
-        const tagsMock: Array<{
-          texto: string;
-          icon?: string;
-          tipo?: 'alerta' | 'sucesso';
-        }> = index === 0
-          ? [
-              {
-                texto: 'Últimas unidades',
-                icon: '/new-home/icons/alert.svg',
-                tipo: 'alerta' as const,
-              },
-              {
-                texto: 'Frete grátis',
-                icon: '/new-home/icons/verified-red.svg',
-                tipo: 'sucesso' as const,
-              },
-            ]
-          : index === 1
-          ? [
-              {
-                texto: 'Mais vendido',
-                icon: '/new-home/icons/verified-red.svg',
-                tipo: 'sucesso' as const,
-              },
-            ]
-          : [];
-
-        const tags = produto.tags || tagsMock;
+        const tags = produto.tags || [];
 
         // Verificar se produto está desatualizado
         const produtoDesatualizado = desatualizadosMap.get(String(produto.id));

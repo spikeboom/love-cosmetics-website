@@ -4,119 +4,24 @@ import { useState } from "react";
 import { CardProduto } from "./CardProduto";
 import { transformProdutosStrapi } from "@/utils/transform-produtos-strapi";
 
-interface Produto {
-  id: string;
-  imagem: string;
-  nome: string;
-  descricao?: string;
-  precoOriginal?: number;
-  preco: number;
-  desconto?: string;
-  parcelas?: string;
-  rating?: number;
-  ultimasUnidades?: boolean;
-}
-
 interface YouMayLikeSectionProps {
-  produtos?: any[]; // Produtos vindos do Strapi
+  produtos?: any[];
   titulo?: string;
 }
-
-const produtosPadrao: Produto[] = [
-  {
-    id: "1",
-    imagem: "/new-home/produtos/produto-pdp.png",
-    nome: "Manteiga Corporal Lové Cosméticos",
-    descricao: "Hidratação profunda",
-    precoOriginal: 129.99,
-    preco: 99.99,
-    parcelas: "3x R$33,33 sem juros",
-    rating: 4.5,
-    ultimasUnidades: true,
-  },
-  {
-    id: "2",
-    imagem: "/new-home/produtos/produto-pdp.png",
-    nome: "Manteiga Corporal Lové Cosméticos",
-    descricao: "Hidratação profunda",
-    precoOriginal: 129.99,
-    preco: 99.99,
-    parcelas: "3x R$33,33 sem juros",
-    rating: 4.5,
-    ultimasUnidades: true,
-  },
-  {
-    id: "3",
-    imagem: "/new-home/produtos/produto-pdp.png",
-    nome: "Manteiga Corporal Lové Cosméticos",
-    descricao: "Hidratação profunda",
-    precoOriginal: 129.99,
-    preco: 99.99,
-    parcelas: "3x R$33,33 sem juros",
-    rating: 4.5,
-    ultimasUnidades: true,
-  },
-  {
-    id: "4",
-    imagem: "/new-home/produtos/produto-pdp.png",
-    nome: "Manteiga Corporal Lové Cosméticos",
-    descricao: "Hidratação profunda",
-    precoOriginal: 129.99,
-    preco: 99.99,
-    parcelas: "3x R$33,33 sem juros",
-    rating: 4.5,
-    ultimasUnidades: true,
-  },
-  {
-    id: "5",
-    imagem: "/new-home/produtos/produto-pdp.png",
-    nome: "Manteiga Corporal Lové Cosméticos",
-    descricao: "Hidratação profunda",
-    precoOriginal: 129.99,
-    preco: 99.99,
-    parcelas: "3x R$33,33 sem juros",
-    rating: 4.5,
-    ultimasUnidades: true,
-  },
-];
 
 export function YouMayLikeSection({
   produtos: produtosStrapi = [],
   titulo = "Você pode gostar",
 }: YouMayLikeSectionProps) {
-  // Converte produtosPadrao para formato compatível com mockados
-  const produtosMockados = produtosPadrao.map((p) => ({
-    imagem: p.imagem,
-    nome: p.nome,
-    descricao: p.descricao,
-    desconto: p.desconto,
-    preco: p.preco,
-    precoOriginal: p.precoOriginal,
-    parcelas: p.parcelas,
-    rating: p.rating,
-    ultimasUnidades: p.ultimasUnidades,
-  }));
-
-  // Transforma produtos do Strapi e adiciona id
-  const produtosTransformados = transformProdutosStrapi({
+  const produtos = transformProdutosStrapi({
     produtosStrapi,
-    produtosMockados,
     limite: 10,
     incluirSlug: true,
   });
 
-  const produtos = produtosTransformados.length > 0
-    ? produtosTransformados.map((p, index) => ({
-        ...p,
-        id: produtosStrapi[index]?.id?.toString() || `${index + 1}`,
-        slug: p.slug,
-      }))
-    : produtosPadrao;
-
   const [currentPosition, setCurrentPosition] = useState(0);
-  const cardWidth = 230; // w-[230px]
-  const gap = 32; // gap-[32px]
-  const containerPadding = 16; // px-[16px]
+  const cardWidth = 230;
+  const gap = 32;
   const maxScroll = Math.max(0, (produtos.length - 4) * (cardWidth + gap));
 
   const handlePrevious = () => {
@@ -127,9 +32,13 @@ export function YouMayLikeSection({
     setCurrentPosition((prev) => Math.min(maxScroll, prev + (cardWidth + gap)));
   };
 
+  if (produtos.length === 0) {
+    return null;
+  }
+
   return (
     <div className="bg-white flex flex-col gap-[16px] items-center px-0 py-[24px] md:py-[32px] w-full">
-      {/* Title header - Frame 7053 */}
+      {/* Title header */}
       <div className="flex flex-col gap-[16px] items-start md:items-center justify-center px-[16px] py-0 w-full">
         <div className="flex gap-[10px] items-center justify-center">
           <p className="font-cera-pro font-bold text-[24px] text-black leading-[normal] text-nowrap">
@@ -138,7 +47,6 @@ export function YouMayLikeSection({
         </div>
       </div>
 
-      {/* Cards Container with Arrows - Frame 7059 */}
       {/* Desktop: Cards with arrows navigation */}
       <div className="hidden md:flex relative w-full max-w-[1440px] mx-auto items-center justify-center gap-[24px] py-[8px]">
         {/* Left Arrow */}
@@ -151,7 +59,6 @@ export function YouMayLikeSection({
 
         {/* Overflow container for cards */}
         <div className="flex-1 overflow-hidden py-[4px]">
-          {/* Scrollable Cards */}
           <div
             className="flex gap-[32px] items-start transition-transform duration-300 ease-in-out pl-[4px] pr-[4px]"
             style={{

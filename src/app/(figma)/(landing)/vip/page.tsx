@@ -14,17 +14,8 @@ export const metadata = {
   },
 };
 
-// Produtos fallback caso o Strapi não retorne
-const produtosFallback = [
-  { nome: "Espuma Facial", descricao: "Limpeza suave para o rosto, removendo impurezas e preparando a pele para os próximos passos da rotina", imagem: "/new-home/produtos/produto-1.png", preco: 89.90, slug: "espuma-facial" },
-  { nome: "Sérum Facial", descricao: "Tratamento concentrado com ativos amazônicos para potencializar resultados e performance da pele", imagem: "/new-home/produtos/produto-2.png", preco: 119.90, slug: "serum-facial" },
-  { nome: "Hidratante Facial", descricao: "Hidratação profunda com textura leve, ideal para manter a pele nutrida e protegida durante o dia", imagem: "/new-home/produtos/produto-3.png", preco: 99.90, slug: "hidratante-facial" },
-  { nome: "Manteiga Corporal", descricao: "Hidratação intensa para o corpo com manteiga de cupuaçu e ativos da Amazônia", imagem: "/new-home/produtos/produto-1.png", preco: 79.90, slug: "manteiga-corporal" },
-  { nome: "Máscara de Argila", descricao: "Limpeza profunda e detox facial com argila amazônica, removendo toxinas e renovando a pele", imagem: "/new-home/produtos/produto-2.png", preco: 69.90, slug: "mascara-de-argila" },
-];
-
 export default async function VIPLandingPage() {
-  let produtos = produtosFallback;
+  let produtos: any[] = [];
 
   try {
     const response = await fetchProdutosForDesign();
@@ -33,7 +24,6 @@ export default async function VIPLandingPage() {
     if (produtosStrapi.length > 0) {
       produtos = transformProdutosStrapi({
         produtosStrapi,
-        produtosMockados: produtosFallback,
         limite: 5,
         incluirSlug: true,
       });
