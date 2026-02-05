@@ -34,7 +34,7 @@ export function SuccessState({ pedidoDetalhes }: SuccessStateProps) {
             <div className="p-4 flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                  Produtos
+                  Produtos <span className="font-light text-[12px] text-[#666666]">(sem descontos)</span>
                 </p>
                 <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                   {pedidoDetalhes ? formatCurrency(pedidoDetalhes.produtos.subtotal) : "-"}
@@ -89,20 +89,29 @@ export function SuccessState({ pedidoDetalhes }: SuccessStateProps) {
 
             <div className="bg-white h-px" />
 
-            {/* Descontos */}
-            {(pedidoDetalhes?.descontos ?? 0) > 0 && (
-              <>
-                <div className="p-4 flex justify-between items-center">
-                  <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                    Descontos
-                  </p>
-                  <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-                    - {formatCurrency(pedidoDetalhes?.descontos ?? 0)}
-                  </p>
-                </div>
-                <div className="bg-white h-px" />
-              </>
-            )}
+            {/* Descontos - mesma lógica do cart: subtotal - (total - frete) */}
+            {(() => {
+              const subtotal = pedidoDetalhes?.produtos.subtotal ?? 0;
+              const total = pedidoDetalhes?.total ?? 0;
+              const frete = pedidoDetalhes?.entrega.valor ?? 0;
+              const descontosAcumulados = subtotal - (total - frete);
+
+              if (descontosAcumulados <= 0) return null;
+
+              return (
+                <>
+                  <div className="p-4 flex justify-between items-center">
+                    <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
+                      Descontos
+                    </p>
+                    <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
+                      - {formatCurrency(descontosAcumulados)}
+                    </p>
+                  </div>
+                  <div className="bg-white h-px" />
+                </>
+              );
+            })()}
 
             {/* Valor Total */}
             <div className="p-4 flex justify-between items-center">

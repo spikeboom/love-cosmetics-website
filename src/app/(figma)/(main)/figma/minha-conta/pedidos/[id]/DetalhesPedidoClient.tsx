@@ -134,12 +134,9 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
 
   const calcularDescontos = () => {
     if (!pedido) return 0;
-    // Usar descontos salvos se disponível
-    if (pedido.descontos) return pedido.descontos;
-    // Fallback: calcular
+    // Mesma lógica do cart: subtotal - (total - frete)
     const totalProdutos = calcularTotalProdutos();
-    const totalComFrete = totalProdutos + (pedido.frete || 0);
-    return totalComFrete - pedido.total;
+    return totalProdutos - (pedido.total - (pedido.frete || 0));
   };
 
   // Obter método de pagamento
@@ -282,34 +279,46 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
               <div className="flex flex-col gap-[16px] border-b border-white pb-[16px]">
                 <div className="flex items-center justify-between">
                   <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                    Produtos
+                    Produtos <span className="font-light text-[12px] text-[#666666]">(sem descontos)</span>
                   </span>
                   <span className="font-cera-pro font-medium text-[16px] text-black">
                     {formatPrice(totalProdutos)}
                   </span>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   {pedido.items.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-cera-pro font-light text-[14px] text-[#111]">
-                          {item.name} {item.quantity > 1 && `(x${item.quantity})`}
-                        </span>
-                        {item.desconto_percentual && (
-                          <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
-                            {item.desconto_percentual}% OFF
+                    <div key={index} className="flex items-start gap-3">
+                      {/* Imagem do produto */}
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-12 h-12 object-cover rounded-md flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex flex-1 flex-col gap-1 min-w-0">
+                        {/* Nome e badge */}
+                        <div className="flex items-center gap-2">
+                          <span className="font-cera-pro font-light text-[14px] text-[#111]">
+                            {item.name} {item.quantity > 1 && `(x${item.quantity})`}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {item.preco_de && item.preco_de > item.preco && (
-                          <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
-                            {formatPrice(item.preco_de * item.quantity)}
+                          {item.desconto_percentual && (
+                            <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0">
+                              {item.desconto_percentual}% OFF
+                            </span>
+                          )}
+                        </div>
+                        {/* Preços */}
+                        <div className="flex items-center gap-2">
+                          {item.preco_de && item.preco_de > item.preco && (
+                            <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
+                              {formatPrice(item.preco_de * item.quantity)}
+                            </span>
+                          )}
+                          <span className="font-cera-pro font-medium text-[14px] text-[#111]">
+                            {formatPrice(item.preco * item.quantity)}
                           </span>
-                        )}
-                        <span className="font-cera-pro font-medium text-[14px] text-[#111]">
-                          {formatPrice(item.preco * item.quantity)}
-                        </span>
+                        </div>
                       </div>
                     </div>
                   ))}

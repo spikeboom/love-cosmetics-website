@@ -20,7 +20,7 @@ export function PagamentoPageClient() {
   const { cart, clearCart } = useCart();
   const { cupons, clearCupons } = useCoupon();
   const { freightValue } = useShipping();
-  const { total, descontos } = useCartTotals();
+  const { total, descontos, subtotalOriginal } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder } = useCreateOrder();
 
   // Códigos de erro que indicam carrinho desatualizado
@@ -59,11 +59,12 @@ export function PagamentoPageClient() {
   // Calculos de valores - usar valores do Context diretamente
   const cartArray = Object.values(cart);
 
-  // O total do Context ja inclui desconto e frete
-  // Para mostrar corretamente: Produtos (original) - Desconto + Frete = Total
-  // Entao: Produtos = Total - Frete + Desconto
+  // Mesma lógica do /cart:
+  // subtotalOriginal = soma dos preco_de (preços originais riscados)
+  // descontosAcumulados = subtotalOriginal - (total - frete)
   const valorFrete = freightValue;
-  const subtotal = total - valorFrete + descontos; // Valor original dos produtos (sem desconto)
+  const subtotal = subtotalOriginal; // Soma dos preços originais (preco_de)
+  const descontosAcumulados = subtotalOriginal - (total - valorFrete);
   const freteGratis = valorFrete === 0;
   const valorTotal = total; // Usar direto do Context
 
@@ -132,7 +133,7 @@ export function PagamentoPageClient() {
     subtotal,
     freteGratis,
     valorFrete,
-    descontos,
+    descontos: descontosAcumulados,
     cupons,
     valorTotal,
     enderecoCompleto,

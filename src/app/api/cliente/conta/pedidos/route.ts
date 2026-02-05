@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
         const items = (pedido.items || []) as Array<{
           name?: string;
           image_url?: string;
+          imagem?: string;
           quantity?: number;
           preco?: number;
           unit_amount?: number;
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
 
         const produtosImagens = items.map((item) => ({
           name: item.name || 'Produto',
-          image_url: item.image_url || '',
+          image_url: item.imagem || item.image_url || '',
           quantity: item.quantity || 1,
         }));
 

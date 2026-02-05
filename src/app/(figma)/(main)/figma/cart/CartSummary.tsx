@@ -61,7 +61,7 @@ export function CartSummary({
             <p className={`flex-1 font-cera-pro font-light leading-[1.257] text-[#111111] ${
               isMobile ? 'text-[14px]' : 'text-xl'
             }`}>
-              Produtos
+              Produtos <span className="text-[12px] text-[#666666]">(sem descontos)</span>
             </p>
             <p className={`font-cera-pro font-light leading-[1.257] text-right text-[#111111] ${
               isMobile ? 'text-[14px]' : 'text-xl'
