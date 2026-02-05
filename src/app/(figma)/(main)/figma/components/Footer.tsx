@@ -136,7 +136,7 @@ export function Footer() {
 
               {/* Ícones de Redes Sociais */}
               <div className="flex gap-4 items-center">
-                <Link href="#" className="w-8 h-8">
+                <Link href="https://www.facebook.com/share/19KNHKWYTS/?mibextid=wwXIfr" target="_blank" className="w-8 h-8">
                   <Image
                     src="/new-home/social/facebook.svg"
                     alt="Facebook"
@@ -160,7 +160,7 @@ export function Footer() {
                     height={32}
                   />
                 </Link>
-                <Link href="https://www.tiktok.com/@cosmeticoslove_" target="_blank" className="w-8 h-8">
+                <Link href="https://www.tiktok.com/@lov.cosmticos?_r=1&_t=ZS-93cHPfNpydx" target="_blank" className="w-8 h-8">
                   <Image
                     src="/new-home/social/tiktok.svg"
                     alt="TikTok"
@@ -189,7 +189,7 @@ export function Footer() {
 
           {/* Ícones de Redes Sociais */}
           <div className="flex gap-4 items-center">
-            <Link href="#" className="w-8 h-8">
+            <Link href="https://www.facebook.com/share/19KNHKWYTS/?mibextid=wwXIfr" target="_blank" className="w-8 h-8">
               <Image
                 src="/new-home/social/facebook.svg"
                 alt="Facebook"
@@ -213,7 +213,7 @@ export function Footer() {
                 height={32}
               />
             </Link>
-            <Link href="https://www.tiktok.com/@cosmeticoslove_" target="_blank" className="w-8 h-8">
+            <Link href="https://www.tiktok.com/@lov.cosmticos?_r=1&_t=ZS-93cHPfNpydx" target="_blank" className="w-8 h-8">
               <Image
                 src="/new-home/social/tiktok.svg"
                 alt="TikTok"
