@@ -30,17 +30,18 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
   // Calcula precos do produto
   const priceInfo = calculateProductPrices(
     produto?.preco || 99.99,
-    produto?.preco_de
+    produto?.preco_de,
+    { nome: produto?.nome, slug: produto?.slug },
   );
 
   // Prepara dados do produto para o carrinho
   const getProductData = () => ({
     id: produto.id.toString(),
     nome: produto.nome,
-    preco: produto.preco,
+    preco: priceInfo.preco,
     quantity: 1,
     slug: produto.slug,
-    preco_de: produto.preco_de,
+    preco_de: priceInfo.precoOriginal ?? undefined,
     tag_desconto_1: produto.tag_desconto_1,
     tag_desconto_2: produto.tag_desconto_2,
     carouselImagensPrincipal: produto.carouselImagensPrincipal,
@@ -134,16 +135,20 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               {/* Price & Rating */}
               <div className="flex items-center justify-between w-full">
                 <div className="flex flex-col gap-[8px] items-start leading-[normal] text-nowrap whitespace-pre relative shrink-0">
-                  <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid leading-[normal] relative shrink-0">
-                    R$ 129,99
-                  </p>
+                  {priceInfo.precoOriginalFormatado && (
+                    <p className="font-cera-pro font-light text-[12px] text-[#333333] line-through decoration-solid leading-[normal] relative shrink-0">
+                      R$ {priceInfo.precoOriginalFormatado}
+                    </p>
+                  )}
                   <div className="flex gap-[8px] items-center relative shrink-0 w-full">
                     <p className="font-cera-pro font-bold text-[32px] text-black leading-[0px] relative shrink-0">
                       R$ {priceInfo.precoFormatado}
                     </p>
-                    <p className="font-cera-pro font-light text-[20px] text-[#009142] leading-[normal] relative shrink-0">
-                      40% OFF
-                    </p>
+                    {priceInfo.desconto && (
+                      <p className="font-cera-pro font-light text-[20px] text-[#009142] leading-[normal] relative shrink-0">
+                        {priceInfo.desconto}
+                      </p>
+                    )}
                   </div>
                   <p className="font-cera-pro font-light text-[12px] text-[#333333] leading-[normal] relative shrink-0">
                     {priceInfo.parcelas}
@@ -190,7 +195,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
       <FloatingProductCTA
         precoDe={priceInfo.precoOriginal ?? undefined}
         preco={priceInfo.preco}
-        desconto={priceInfo.desconto || "40% OFF"}
+        desconto={priceInfo.desconto ?? undefined}
         parcelas={priceInfo.parcelas}
         onBuy={handleBuy}
       />

@@ -63,7 +63,7 @@ export function CardProduto({
   descricao = "A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras, fortalece a barreira da pele e proporciona maciez imediata. Ideal para peles ressecadas, sensíveis ou com tatuagens.",
   precoOriginal = "R$ 129,99",
   preco = "R$ 99,99",
-  desconto = "40% OFF",
+  desconto,
   parcelas = "3x R$33,33 sem juros",
   rating = 3.5,
   ultimasUnidades = true,

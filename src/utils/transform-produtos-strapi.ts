@@ -2,6 +2,8 @@
  * Transforma produtos do Strapi para o formato esperado pelos componentes
  */
 
+import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
+
 interface ProdutoMockado {
   imagem: string;
   nome: string;
@@ -35,14 +37,26 @@ export function transformProdutosStrapi({
     const imagemUrl = produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
       || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
 
-    // Preço final (com desconto) vindo do Strapi
-    const preco = produto.preco || 0;
-    // Preço original (de) vindo do Strapi
-    const precoOriginal = produto.preco_de || null;
+    // Preço vindo do Strapi
+    const precoStrapi = produto.preco || 0;
+    // Preço original (de) vindo do Strapi (quando existe promoção real no cadastro)
+    const precoOriginalStrapi = produto.preco_de || null;
+
+    // Hard-code de kits (opção A: Strapi `preco` do kit é o preço de lista)
+    const kitPricing = applyKitDiscountFromListPrice({
+      listPrice: precoStrapi,
+      product: { nome: produto.nome, slug: produto.slug },
+    });
+
+    // Preço efetivo (sem cupom) e "preço de" para exibição
+    const preco = kitPricing?.preco ?? precoStrapi;
+    const precoOriginal = kitPricing?.preco_de ?? precoOriginalStrapi;
 
     // Calcula o desconto baseado no preço final e preço original
     let desconto = null;
-    if (preco && precoOriginal && precoOriginal > preco) {
+    if (kitPricing) {
+      desconto = kitPricing.desconto;
+    } else if (preco && precoOriginal && precoOriginal > preco) {
       const percentualDesconto = Math.round(((precoOriginal - preco) / precoOriginal) * 100);
       desconto = `${percentualDesconto}% OFF`;
     }

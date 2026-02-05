@@ -68,7 +68,8 @@ export const CartTotalsProvider = ({
     for (const produtoAtualizado of result.produtosAtualizados) {
       const cartItem = newCart[produtoAtualizado.id];
       if (cartItem) {
-        const novoPreco = result.cuponsDesatualizados.length > 0
+        const cupomFoiRemovido = result.cuponsDesatualizados.length > 0;
+        const novoPreco = cupomFoiRemovido
           ? produtoAtualizado.precoAtual
           : produtoAtualizado.precoComCupom;
 
@@ -76,8 +77,10 @@ export const CartTotalsProvider = ({
           newCart[produtoAtualizado.id] = {
             ...cartItem,
             preco: novoPreco,
-            preco_de: produtoAtualizado.precoAtual,
             documentId: produtoAtualizado.documentId,
+            ...(cupomFoiRemovido
+              ? { cupom_applied: null, cupom_applied_codigo: null, backup: {} }
+              : {}),
           };
           houveAtualizacao = true;
         }

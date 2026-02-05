@@ -2,6 +2,8 @@
  * Calcula informações de preço a partir dos dados do produto
  */
 
+import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
+
 interface PriceCalculationResult {
   preco: number;
   precoOriginal: number | null;
@@ -13,32 +15,44 @@ interface PriceCalculationResult {
 
 export function calculateProductPrices(
   preco: number,
-  precoOriginal?: number | null
+  precoOriginal?: number | null,
+  product?: { nome?: string | null; slug?: string | null }
 ): PriceCalculationResult {
+  // Hard-code de kits (opção A: Strapi `preco` do kit é o preço de lista)
+  const kitPricing = applyKitDiscountFromListPrice({
+    listPrice: preco,
+    product: product ?? {},
+  });
+
+  const precoFinal = kitPricing?.preco ?? preco;
+
   // Preço original (de) - se não fornecido, usa null
-  const precoOriginalValue = precoOriginal && precoOriginal > preco ? precoOriginal : null;
+  const precoOriginalValue =
+    kitPricing?.preco_de ?? (precoOriginal && precoOriginal > precoFinal ? precoOriginal : null);
 
   // Calcula o desconto baseado no preço final e preço original
   let desconto = null;
-  if (preco && precoOriginalValue && precoOriginalValue > preco) {
+  if (kitPricing) {
+    desconto = kitPricing.desconto;
+  } else if (precoFinal && precoOriginalValue && precoOriginalValue > precoFinal) {
     const percentualDesconto = Math.round(
-      ((precoOriginalValue - preco) / precoOriginalValue) * 100
+      ((precoOriginalValue - precoFinal) / precoOriginalValue) * 100
     );
     desconto = `${percentualDesconto}% OFF`;
   }
 
   // Calcula o valor de cada parcela (3x sem juros)
-  const valorParcela = preco > 0 ? (preco / 3).toFixed(2).replace(".", ",") : "0,00";
+  const valorParcela = precoFinal > 0 ? (precoFinal / 3).toFixed(2).replace(".", ",") : "0,00";
   const parcelas = `3x R$${valorParcela} sem juros`;
 
   // Formata preços para exibição
-  const precoFormatado = preco.toFixed(2).replace(".", ",");
+  const precoFormatado = precoFinal.toFixed(2).replace(".", ",");
   const precoOriginalFormatado = precoOriginalValue
     ? precoOriginalValue.toFixed(2).replace(".", ",")
     : null;
 
   return {
-    preco,
+    preco: precoFinal,
     precoOriginal: precoOriginalValue,
     desconto,
     parcelas,

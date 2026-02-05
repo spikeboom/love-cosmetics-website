@@ -67,9 +67,20 @@ export function CartProductsList({
   return (
     <div className="flex flex-col gap-6">
       {produtos.map((produto, index) => {
-        // Mock data para demonstração quando não vem do Strapi
-        const precoAntigo = produto.precoAntigo || produto.preco * 1.4; // 40% de desconto
-        const descontoPercentual = produto.descontoPercentual || 40;
+        // Preço base para calcular o %OFF (não deve variar quando cupom está aplicado)
+        // - Sem cupom: base = produto.preco
+        // - Com cupom: base = backup.preco (preço antes do cupom, já com desconto do kit se existir)
+        const basePriceForDiscount = produto.backup?.preco ?? produto.preco;
+
+        const precoAntigo =
+          produto.preco_de && produto.preco_de > basePriceForDiscount
+            ? produto.preco_de
+            : undefined;
+
+        const descontoPercentual =
+          precoAntigo && basePriceForDiscount > 0
+            ? Math.round(((precoAntigo - basePriceForDiscount) / precoAntigo) * 100)
+            : undefined;
 
         // Tags mockadas alternando entre produtos
         const tagsMock: Array<{

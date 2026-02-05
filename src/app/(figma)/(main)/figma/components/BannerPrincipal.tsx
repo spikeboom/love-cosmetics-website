@@ -8,7 +8,7 @@ interface BannerSlide {
   image: string;
   imageMobile?: string;
   title: string;
-  discount: string;
+  discount?: string;
   description: string;
   cta: string;
 }
@@ -19,7 +19,6 @@ const bannerSlides: BannerSlide[] = [
     image: "/new-home/banner/banner-produto.png",
     imageMobile: "/new-home/banner/banner-produto-mobile.png",
     title: "Manteiga Corporal",
-    discount: "40% OFF",
     description: "Hidratação profunda, alívio das inflamações e rachaduras",
     cta: "Comprar",
   },
@@ -28,7 +27,6 @@ const bannerSlides: BannerSlide[] = [
     image: "/new-home/banner/banner-produto.png",
     imageMobile: "/new-home/banner/banner-produto-mobile.png",
     title: "Manteiga Corporal",
-    discount: "40% OFF",
     description: "Hidratação profunda, alívio das inflamações e rachaduras",
     cta: "Comprar",
   },
@@ -37,7 +35,6 @@ const bannerSlides: BannerSlide[] = [
     image: "/new-home/banner/banner-produto.png",
     imageMobile: "/new-home/banner/banner-produto-mobile.png",
     title: "Manteiga Corporal",
-    discount: "40% OFF",
     description: "Hidratação profunda, alívio das inflamações e rachaduras",
     cta: "Comprar",
   },
@@ -143,9 +140,11 @@ export function BannerPrincipal() {
 
           {/* Texto mobile */}
           <div className="flex flex-col gap-4">
-            <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
-              {slide.discount}
-            </p>
+            {slide.discount && (
+              <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
+                {slide.discount}
+              </p>
+            )}
             <p className="font-times font-bold text-[32px] text-black leading-none">
               {slide.title}
             </p>
@@ -193,9 +192,11 @@ export function BannerPrincipal() {
           className="absolute top-[97px] left-[720px] w-[600px] bg-white/75 backdrop-blur-sm p-8 flex flex-col gap-8">
           {/* Texto */}
           <div className="flex flex-col gap-8">
-            <p className="font-cera-pro font-bold text-[32px] text-[#254333] leading-none">
-              {slide.discount}
-            </p>
+            {slide.discount && (
+              <p className="font-cera-pro font-bold text-[32px] text-[#254333] leading-none">
+                {slide.discount}
+              </p>
+            )}
             <p className="font-times font-bold text-[60px] text-black leading-none whitespace-pre">
               {slide.title}
             </p>

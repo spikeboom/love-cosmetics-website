@@ -1,5 +1,6 @@
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { SearchPageClient } from "./SearchPageClient";
+import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
 
 export const metadata = {
   title: "Lové Cosméticos - Busca de Produtos",
@@ -18,11 +19,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   // Mapeia os produtos do Strapi para o formato esperado pelo componente
   const produtosMapeados = produtos?.map((produto: any) => {
-    const preco = produto.preco || 0;
-    const precoOriginal = produto.preco_de || undefined;
+    const precoStrapi = produto.preco || 0;
+    const precoOriginalStrapi = produto.preco_de || undefined;
+
+    const kitPricing = applyKitDiscountFromListPrice({
+      listPrice: precoStrapi,
+      product: { nome: produto.nome, slug: produto.slug },
+    });
+
+    const preco = kitPricing?.preco ?? precoStrapi;
+    const precoOriginal = kitPricing?.preco_de ?? precoOriginalStrapi;
 
     // Calcula desconto se houver preço original
-    let desconto = produto.tag_desconto_1;
+    let desconto = kitPricing?.desconto ?? produto.tag_desconto_1;
     if (!desconto && preco && precoOriginal && precoOriginal > preco) {
       const percentualDesconto = Math.round(((precoOriginal - preco) / precoOriginal) * 100);
       desconto = `${percentualDesconto}% OFF`;

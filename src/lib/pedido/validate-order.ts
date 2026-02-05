@@ -1,4 +1,5 @@
 import { fetchProdutosComFallback, fetchAndValidateCupom, PRICE_TOLERANCE } from "@/lib/strapi";
+import { applyKitDiscountFromListPrice } from "@/core/pricing/kits";
 
 interface OrderItem {
   reference_id: string;
@@ -98,7 +99,12 @@ export async function validateOrder(
         };
       }
 
-      const precoOriginal = produtoReal.preco;
+      const precoLista = produtoReal.preco;
+      const kitPricing = applyKitDiscountFromListPrice({
+        listPrice: precoLista,
+        product: { nome: produtoReal.nome },
+      });
+      const precoOriginal = kitPricing?.preco ?? precoLista; // base sem cupom (já com desconto do kit, se existir)
       const precoComCupom = precoOriginal * multiplicador - diminuir;
       const precoEnviado = item.preco;
 

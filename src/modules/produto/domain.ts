@@ -52,9 +52,13 @@ export async function processProdutos(rawData: any, cupom?: string) {
 
       const multiplicar = dataCookie?.[0]?.multiplacar || 1;
       const diminuir = dataCookie?.[0]?.diminuir || 0;
-      const preco_de = dataLog?.preco_de || dataLog?.preco || 0;
-      const preco_modificado = dataLog?.preco * multiplicar - diminuir || 0;
-      const preco_desconto = preco_de - preco_modificado;
+
+      // Cupom deve aplicar em cima do preço atual do item (que já pode incluir desconto próprio do kit)
+      const precoBaseSemCupom = dataLog?.preco || 0;
+      const preco_modificado = precoBaseSemCupom * multiplicar - diminuir || 0;
+
+      // Tag de desconto representa apenas o efeito do cupom (sem misturar com preco_de / promo do Strapi)
+      const preco_desconto = precoBaseSemCupom - preco_modificado;
 
       return {
         ...dataLog,
@@ -62,7 +66,8 @@ export async function processProdutos(rawData: any, cupom?: string) {
         // tag_desconto_1_modified
         cupom_applied: dataCookie?.[0]?.multiplacar || null,
         cupom_applied_codigo: dataCookie?.[0]?.codigo || null,
-        preco_de: preco_de || 0,
+        // `preco_de` é apenas visual (preço riscado). Não deve ser sobrescrito pelo cupom.
+        preco_de: dataLog?.preco_de,
         preco: preco_modificado || 0,
         tag_desconto_1: `${preco_desconto >= 0 ? "-" : "+"}R$ ${formatPrice(Math.abs(preco_desconto))}`,
         ...(dataLog?.tag_desconto_2

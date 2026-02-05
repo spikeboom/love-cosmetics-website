@@ -1,6 +1,7 @@
 import { createLogger } from "@/utils/logMessage";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/cliente/auth";
+import { prisma } from "@/lib/prisma";
 import {
   createAccountForOrderIfRequested,
   createPedidoFromBody,
@@ -49,6 +50,39 @@ export async function POST(req: NextRequest) {
     // Usar valores calculados pelo servidor (mais seguro)
     const totalSeguro = validationResult.calculatedTotal;
     const descontosSeguro = validationResult.calculatedDescontos;
+
+    // ============================================================
+    // REGRA DE NEGÓCIO - Cupom de primeira compra
+    // ============================================================
+    const PRIMEIRA_COMPRA_CUPOM = "BEMVINDOLOVE15";
+    const cuponsBody: string[] = Array.isArray(body.cupons) ? body.cupons : [];
+    const hasPrimeiraCompraCupom = cuponsBody.some(
+      (c) => String(c).toUpperCase().trim() === PRIMEIRA_COMPRA_CUPOM
+    );
+
+    if (hasPrimeiraCompraCupom) {
+      const cpfLimpo = String(body.cpf || "").replace(/\D/g, "");
+      const emailLimpo = String(body.email || "").toLowerCase().trim();
+
+      // Se já existe compra confirmada para este CPF ou email, bloquear.
+      const pedidoPago = await prisma.pedido.findFirst({
+        where: {
+          status_pagamento: { in: ["PAID", "AUTHORIZED"] },
+          OR: [{ cpf: cpfLimpo }, { email: emailLimpo }],
+        },
+        select: { id: true },
+      });
+
+      if (pedidoPago) {
+        return NextResponse.json(
+          {
+            error: `Cupom "${PRIMEIRA_COMPRA_CUPOM}" válido apenas na primeira compra.`,
+            code: "COUPON_FIRST_PURCHASE_ONLY",
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     // Verificar se há cliente logado
     const clienteSession = await getCurrentSession();

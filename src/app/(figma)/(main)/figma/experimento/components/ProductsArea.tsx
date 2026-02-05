@@ -12,7 +12,6 @@ const mockProdutos = [
     descricao: "A manteiga corporal hidrata profundamente, alivia inflamações e rachaduras, fortalece a barreira da pele e proporciona maciez imediata. Ideal para peles ressecadas.",
     precoOriginal: "R$ 129,99",
     preco: "R$ 99,99",
-    desconto: "40% OFF",
     parcelas: "3x R$33,33 sem juros",
     rating: 3.5,
     ultimasUnidades: true,
@@ -23,7 +22,6 @@ const mockProdutos = [
     descricao: "Formulação enriquecida com manteigas naturais e óleos essenciais. Proporciona hidratação duradoura e deixa a pele macia.",
     precoOriginal: "R$ 105,99",
     preco: "R$ 89,99",
-    desconto: "15% OFF",
     parcelas: "3x R$29,99 sem juros",
     rating: 4,
     ultimasUnidades: false,
@@ -34,7 +32,6 @@ const mockProdutos = [
     descricao: "Com ingredientes ativos da Amazônia que regeneram a pele. Reduz inflamações, alivia coceira e proporciona conforto imediato.",
     precoOriginal: "R$ 140,99",
     preco: "R$ 119,99",
-    desconto: "15% OFF",
     parcelas: "3x R$39,99 sem juros",
     rating: 5,
     ultimasUnidades: true,
@@ -59,7 +56,6 @@ export function ProductsArea({ columns = 3, rows = 4 }: ProductsAreaProps) {
             descricao={produto.descricao}
             precoOriginal={produto.precoOriginal}
             preco={produto.preco}
-            desconto={produto.desconto}
             parcelas={produto.parcelas}
             rating={produto.rating}
             ultimasUnidades={produto.ultimasUnidades}
