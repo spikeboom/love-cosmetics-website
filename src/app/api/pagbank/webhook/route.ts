@@ -5,6 +5,7 @@ import type { PagBankWebhookNotification } from "@/types/pagbank";
 import { buildGtmPurchasePayload, sendGtmPurchaseEvent } from "@/lib/pagbank/gtm";
 import { fetchPagBankOrder } from "@/lib/pagbank/orders";
 import { validateWebhookSignature } from "@/lib/pagbank/signature";
+import { logWebhookReceived } from "@/lib/pagbank/pagbank-audit-logger";
 
 const logMessage = createLogger();
 
@@ -38,6 +39,9 @@ export async function POST(req: NextRequest) {
 
     // Parsear JSON apos validacao
     const body: PagBankWebhookNotification = JSON.parse(rawBody);
+
+    // [PAGBANK-AUDIT-LOG] Log do webhook para validação PagBank
+    logWebhookReceived(body);
 
     logMessage("Webhook PagBank recebido (assinatura valida)", {
       id: body.id,

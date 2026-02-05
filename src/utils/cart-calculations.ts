@@ -33,17 +33,25 @@ export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, s
     (sum: number, { preco, quantity }: any) => sum + preco * quantity,
     0,
   );
-  const baseTotalPrecoDe = items.reduce(
-    (sum: number, { preco_de, preco, quantity }: any) => sum + (preco_de || preco) * quantity,
-    0,
-  );
 
   // Ensure coupons is an array
   const validCupons = Array.isArray(cupons) ? cupons : [];
 
-  // Desconto = preco_de (original) - preco (já com cupom aplicado no processProdutos)
-  // NÃO aplicar cupom novamente aqui para evitar desconto duplicado
-  const descontoAplicado = baseTotalPrecoDe - baseTotal;
+  // Desconto só existe se houver cupom aplicado
+  // Sem cupom: desconto = 0
+  // Com cupom: desconto = preço original (backup) - preço com cupom
+  // NOTA: preco_de do Strapi é apenas para exibição visual (preço riscado), não para cálculo de desconto
+  const descontoAplicado = validCupons.length > 0
+    ? items.reduce((sum: number, item: any) => {
+        // Só conta desconto se o produto tem cupom aplicado
+        if (item.cupom_applied_codigo) {
+          const precoOriginal = item.backup?.preco || item.preco;
+          const precoComCupom = item.preco;
+          return sum + (precoOriginal - precoComCupom) * item.quantity;
+        }
+        return sum;
+      }, 0)
+    : 0;
   setDescontos(descontoAplicado);
 
   // Persist state

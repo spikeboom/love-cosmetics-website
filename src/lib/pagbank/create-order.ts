@@ -7,6 +7,10 @@ import type {
   PagBankItem,
   PagBankShipping,
 } from "@/types/pagbank";
+import {
+  logPagBankRequest,
+  logPagBankResponse,
+} from "./pagbank-audit-logger";
 
 export function buildCustomerFromPedido(pedido: any) {
   const cleanedPhone = pedido.telefone.replace(/\D/g, "");
@@ -207,6 +211,17 @@ export async function createPagBankOrder({
   const url = `${pagBankUrl}${endpoint}`;
   const bodyJson = JSON.stringify(requestBody);
 
+  // Determina o tipo de pagamento para o log de auditoria
+  const tipoPagamento = endpoint === "/orders" ? "PIX" : "CARTAO";
+
+  // [PAGBANK-AUDIT-LOG] Log do request para validação PagBank
+  logPagBankRequest({
+    tipo: tipoPagamento,
+    url,
+    method: "POST",
+    body: requestBody,
+  });
+
   // Log do request para debug
   console.log(JSON.stringify({
     message: "PagBank Request Debug",
@@ -246,6 +261,13 @@ export async function createPagBankOrder({
       parseError: "Resposta não é JSON válido"
     };
   }
+
+  // [PAGBANK-AUDIT-LOG] Log do response para validação PagBank
+  logPagBankResponse({
+    tipo: tipoPagamento,
+    status: response.status,
+    body: data,
+  });
 
   return {
     ok: response.ok,

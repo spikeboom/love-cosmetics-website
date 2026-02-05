@@ -54,7 +54,7 @@ export function Header({ produtos = [] }: HeaderProps) {
       {/* Top bar - verde escuro com logo, busca e ações */}
       <div className="bg-[#254333] w-full lg:h-[120px] h-[64px] flex items-center justify-between lg:px-[32px] px-4 py-0 relative">
         {/* Logo */}
-        <Link href="/figma/design" className="relative lg:w-[130px] lg:h-[104px] w-[50px] h-[40px] shrink-0">
+        <Link href="/figma/design" className="relative lg:w-[120px] lg:h-[67px] w-[60px] h-[34px] shrink-0">
           <Image
             src="/new-home/header/logo.png"
             alt="Lové Cosméticos"
