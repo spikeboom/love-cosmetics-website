@@ -24,7 +24,12 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1016
+                }
+            ]
         },
         {
             "id": 267,
@@ -50,7 +55,12 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1017
+                }
+            ]
         },
         {
             "id": 268,
@@ -76,7 +86,12 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1018
+                }
+            ]
         },
         {
             "id": 269,
@@ -102,7 +117,12 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1019
+                }
+            ]
         },
         {
             "id": 270,
@@ -128,7 +148,12 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1020
+                }
+            ]
         },
         {
             "id": 271,
@@ -154,7 +179,12 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1021
+                }
+            ]
         },
         {
             "id": 281,
@@ -180,7 +210,18 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1068
+                },
+                {
+                    "id": 1069
+                },
+                {
+                    "id": 1070
+                }
+            ]
         },
         {
             "id": 282,
@@ -206,7 +247,18 @@
             "altura": null,
             "largura": null,
             "comprimento": null,
-            "peso_gramas": null
+            "peso_gramas": null,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1071
+                },
+                {
+                    "id": 1072
+                },
+                {
+                    "id": 1073
+                }
+            ]
         },
         {
             "id": 290,
@@ -232,7 +284,27 @@
             "altura": 5.5,
             "largura": 7,
             "comprimento": 7,
-            "peso_gramas": 164
+            "peso_gramas": 164,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1108
+                },
+                {
+                    "id": 1109
+                },
+                {
+                    "id": 1110
+                },
+                {
+                    "id": 1111
+                },
+                {
+                    "id": 1112
+                },
+                {
+                    "id": 1113
+                }
+            ]
         },
         {
             "id": 291,
@@ -258,7 +330,21 @@
             "altura": 3.7,
             "largura": 6.5,
             "comprimento": 6.5,
-            "peso_gramas": 73.8
+            "peso_gramas": 73.8,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1114
+                },
+                {
+                    "id": 1115
+                },
+                {
+                    "id": 1116
+                },
+                {
+                    "id": 1117
+                }
+            ]
         },
         {
             "id": 309,
@@ -284,7 +370,24 @@
             "altura": 10.5,
             "largura": 3.5,
             "comprimento": 3.5,
-            "peso_gramas": 79.9
+            "peso_gramas": 79.9,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1202
+                },
+                {
+                    "id": 1203
+                },
+                {
+                    "id": 1204
+                },
+                {
+                    "id": 1205
+                },
+                {
+                    "id": 1206
+                }
+            ]
         },
         {
             "id": 314,
@@ -310,7 +413,21 @@
             "altura": 5.5,
             "largura": 7,
             "comprimento": 7,
-            "peso_gramas": 150.3
+            "peso_gramas": 150.3,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1223
+                },
+                {
+                    "id": 1224
+                },
+                {
+                    "id": 1225
+                },
+                {
+                    "id": 1226
+                }
+            ]
         },
         {
             "id": 315,
@@ -336,7 +453,27 @@
             "altura": 21.5,
             "largura": 5,
             "comprimento": 5,
-            "peso_gramas": 178
+            "peso_gramas": 178,
+            "carouselImagensPrincipal": [
+                {
+                    "id": 1228
+                },
+                {
+                    "id": 1229
+                },
+                {
+                    "id": 1230
+                },
+                {
+                    "id": 1231
+                },
+                {
+                    "id": 1232
+                },
+                {
+                    "id": 1233
+                }
+            ]
         }
     ],
     "meta": {

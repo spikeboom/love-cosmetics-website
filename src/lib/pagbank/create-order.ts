@@ -41,7 +41,8 @@ export function buildItemsFromPedido(pedido: any) {
 }
 
 export function buildTotalAmount(pedido: any) {
-  return Math.round((pedido.total_pedido + (pedido.frete_calculado || 0)) * 100);
+  // total_pedido já inclui o frete (calculado em validate-order.ts linha 162)
+  return Math.round(pedido.total_pedido * 100);
 }
 
 export function buildShippingFromPedido(pedido: any) {
