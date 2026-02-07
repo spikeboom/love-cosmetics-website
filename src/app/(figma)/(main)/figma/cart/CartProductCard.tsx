@@ -183,9 +183,7 @@ export function CartProductCard({
                     <div className="flex items-center justify-center gap-[6px]">
                       {discountBadges.length > 0 ? (
                         discountBadges.map((badge, i) => (
-                          <span key={i} className={`font-cera-pro text-xs font-light leading-none ${
-                            badge.type === 'cupom' ? 'text-[#b3261e]' : 'text-[#009142]'
-                          }`}>
+                          <span key={i} className="font-cera-pro text-xs font-light leading-none text-[#009142]">
                             {badge.label}
                           </span>
                         ))
@@ -241,9 +239,7 @@ export function CartProductCard({
                   <div className="flex items-center justify-center gap-[6px]">
                     {discountBadges.length > 0 ? (
                       discountBadges.map((badge, i) => (
-                        <span key={i} className={`font-cera-pro text-xs font-light leading-none ${
-                          badge.type === 'cupom' ? 'text-[#b3261e]' : 'text-[#009142]'
-                        }`}>
+                        <span key={i} className="font-cera-pro text-xs font-light leading-none text-[#009142]">
                           {badge.label}
                         </span>
                       ))

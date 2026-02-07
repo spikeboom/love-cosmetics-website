@@ -245,9 +245,7 @@ export function ResumoCompraCard({
                       {item.nome || item.name} {qty > 1 && `(x${qty})`}
                     </span>
                     {badges.map((badge, i) => (
-                      <span key={i} className={`text-white text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                        badge.type === 'cupom' ? 'bg-[#254333]' : 'bg-[#b3261e]'
-                      }`}>
+                      <span key={i} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#009142]">
                         {badge.label}
                       </span>
                     ))}
@@ -441,9 +439,7 @@ export function ResumoCompraCard({
                         {item.name || item.nome} {qty > 1 && `(x${qty})`}
                       </span>
                       {badges.map((badge, bi) => (
-                        <span key={bi} className={`text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${
-                          badge.type === 'cupom' ? 'bg-[#254333]' : 'bg-[#b3261e]'
-                        }`}>
+                        <span key={bi} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 bg-[#009142]">
                           {badge.label}
                         </span>
                       ))}

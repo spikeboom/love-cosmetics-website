@@ -54,6 +54,7 @@ export function PagamentoCartaoReal({
   });
   const [errors, setErrors] = useState<Partial<Record<keyof CartaoFormData, string>>>({});
   const [showTestCards, setShowTestCards] = useState(false);
+  const [simulatingPayment, setSimulatingPayment] = useState(false);
 
   // Cartoes de teste do PagBank Sandbox
   const testCards = [
@@ -76,6 +77,27 @@ export function PagamentoCartaoReal({
       nome: "TESTE SANDBOX",
     }));
     setShowTestCards(false);
+  };
+
+  const handleSimulatePayment = async () => {
+    setSimulatingPayment(true);
+    try {
+      const res = await fetch("/api/dev/simulate-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pedidoId, paymentMethod: "credit_card" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        onSuccess();
+      } else {
+        onError(data.error || "Erro ao simular pagamento");
+      }
+    } catch {
+      onError("Erro ao simular pagamento");
+    } finally {
+      setSimulatingPayment(false);
+    }
   };
 
   const parcelas = [
@@ -187,12 +209,22 @@ export function PagamentoCartaoReal({
                 <h2 className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                   Adicionar cartao de credito
                 </h2>
-                <button
-                  onClick={() => setShowTestCards(!showTestCards)}
-                  className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showTestCards ? "Fechar" : "Sandbox"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleSimulatePayment}
+                    disabled={simulatingPayment || loading || checkingPayment}
+                    className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                  >
+                    {simulatingPayment ? "Simulando..." : "Simular Pagamento"}
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button
+                    onClick={() => setShowTestCards(!showTestCards)}
+                    className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showTestCards ? "Fechar" : "Sandbox"}
+                  </button>
+                </div>
               </div>
 
               {/* Cartoes de Teste (Sandbox) */}

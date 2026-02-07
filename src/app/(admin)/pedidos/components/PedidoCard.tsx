@@ -188,9 +188,7 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                         </p>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           {badges.map((badge, i) => (
-                            <span key={i} className={`text-white text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                              badge.type === 'cupom' ? 'bg-[#254333]' : 'bg-[#b3261e]'
-                            }`}>
+                            <span key={i} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#009142]">
                               {badge.label}
                             </span>
                           ))}

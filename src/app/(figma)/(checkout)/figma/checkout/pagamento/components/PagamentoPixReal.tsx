@@ -45,6 +45,7 @@ export function PagamentoPixReal({
   const [verifyingManually, setVerifyingManually] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [pollingEnabled, setPollingEnabled] = useState(true);
+  const [simulatingPayment, setSimulatingPayment] = useState(false);
   const pixGeneratedRef = useRef(false);
 
   const orderIdRef = useRef<string | null>(null);
@@ -154,6 +155,27 @@ export function PagamentoPixReal({
       setTimeout(() => setVerifyMessage(null), 3000);
     } finally {
       setVerifyingManually(false);
+    }
+  };
+
+  const handleSimulatePixPayment = async () => {
+    setSimulatingPayment(true);
+    try {
+      const res = await fetch("/api/dev/simulate-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pedidoId, paymentMethod: "pix" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        onSuccess();
+      } else {
+        onError(data.error || "Erro ao simular pagamento PIX");
+      }
+    } catch {
+      onError("Erro ao simular pagamento PIX");
+    } finally {
+      setSimulatingPayment(false);
     }
   };
 
@@ -340,6 +362,22 @@ export function PagamentoPixReal({
                   />
                 </button>
               </div>
+
+              {/* Simular Pagamento PIX (Sandbox) */}
+              <button
+                onClick={handleSimulatePixPayment}
+                disabled={simulatingPayment}
+                className="w-full p-3 bg-gray-100 rounded-[8px] text-[14px] text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+              >
+                {simulatingPayment ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    Simulando pagamento PIX...
+                  </span>
+                ) : (
+                  "Simular pagamento PIX"
+                )}
+              </button>
 
               {/* Resumo */}
               <PagamentoResumo {...resumoProps} />
