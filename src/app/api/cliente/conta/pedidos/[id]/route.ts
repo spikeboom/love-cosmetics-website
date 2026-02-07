@@ -144,6 +144,8 @@ export async function GET(
       frete: pedido.frete_calculado,
       subtotal_produtos: subtotalProdutos,
       descontos: pedido.descontos,
+      cupom_valor: pedido.cupom_valor ?? null,
+      cupom_descricao: pedido.cupom_descricao ?? null,
       status,
       statusEntrega: pedido.status_entrega,
       historicoStatus,

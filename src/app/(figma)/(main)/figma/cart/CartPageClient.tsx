@@ -24,7 +24,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
   const { cart, addQuantityProductToCart, subtractQuantityProductToCart, removeProductFromCart, isCartLoaded } = useCart();
   const { cupons, handleAddCupom, handleCupom } = useCoupon();
   const { freightValue, hasCalculated } = useShipping();
-  const { total, descontos, subtotalOriginal, isValid, isValidating, validateCart, produtosDesatualizados, refreshCartPrices } = useCartTotals();
+  const { total, isValid, isValidating, validateCart, produtosDesatualizados, refreshCartPrices } = useCartTotals();
 
   // Validar carrinho ao carregar a página
   useEffect(() => {
@@ -42,14 +42,6 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
   if (!isCartLoaded) {
     return <CartLoadingSkeleton />;
   }
-
-  // subtotalOriginal = soma dos preco_de (preços originais riscados)
-  // Calculado no contexto CartTotals
-
-  // Descontos acumulados = diferença entre preço original e preço final dos produtos
-  // (total - frete) = valor que vai pagar pelos produtos
-  // descontosAcumulados = subtotalOriginal - (total - frete)
-  const descontosAcumulados = subtotalOriginal - (total - freightValue);
 
   // Se carrinho vazio, mostrar mensagem
   if (isEmpty) {
@@ -110,9 +102,8 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
       {/* Mobile: Resumo Fixo no Bottom (Bottom Sheet) - Hidden no Desktop */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
         <CartSummary
-          subtotal={subtotalOriginal}
+          cartItems={cartArray}
           frete={freightValue}
-          cupom={descontosAcumulados}
           cupons={cupons}
           total={total}
           onCheckout={() => router.push('/figma/checkout')}
@@ -136,6 +127,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
               {/* Lista de Produtos */}
               <CartProductsList
                 produtos={cartArray}
+                cupons={cupons}
                 onAdd={addQuantityProductToCart}
                 onSubtract={subtractQuantityProductToCart}
                 onRemove={removeProductFromCart}
@@ -164,9 +156,8 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
             {/* Coluna Direita - Resumo (Hidden no Mobile) */}
             <div className="hidden md:block md:w-[30%] md:max-w-[447px]">
               <CartSummary
-                subtotal={subtotalOriginal}
+                cartItems={cartArray}
                 frete={freightValue}
-                cupom={descontosAcumulados}
                 cupons={cupons}
                 total={total}
                 onCheckout={() => router.push('/figma/checkout')}

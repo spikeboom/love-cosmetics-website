@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import type { DiscountBadge } from '@/core/pricing/resumo-compra';
 
 interface CartProductCardProps {
   produto: any;
@@ -9,6 +10,7 @@ interface CartProductCardProps {
   preco: number;
   precoAntigo?: number;
   descontoPercentual?: number;
+  discountBadges?: DiscountBadge[];
   onAdd: () => void;
   onSubtract: () => void;
   onRemove: () => void;
@@ -28,6 +30,7 @@ export function CartProductCard({
   preco,
   precoAntigo,
   descontoPercentual,
+  discountBadges = [],
   onAdd,
   onSubtract,
   onRemove,
@@ -176,13 +179,21 @@ export function CartProductCard({
 
                 {/* Preço - Desktop */}
                 <div className="flex flex-col items-end gap-[2px]">
-                  {(precoAntigo || descontoPercentual) && (
-                    <div className="flex items-center justify-center gap-[10px]">
-                      {descontoPercentual && (
+                  {(precoAntigo || discountBadges.length > 0 || descontoPercentual) && (
+                    <div className="flex items-center justify-center gap-[6px]">
+                      {discountBadges.length > 0 ? (
+                        discountBadges.map((badge, i) => (
+                          <span key={i} className={`font-cera-pro text-xs font-light leading-none ${
+                            badge.type === 'cupom' ? 'text-[#b3261e]' : 'text-[#009142]'
+                          }`}>
+                            {badge.label}
+                          </span>
+                        ))
+                      ) : descontoPercentual ? (
                         <span className="font-cera-pro text-xs font-light text-[#009142] leading-none">
                           {descontoPercentual}% OFF
                         </span>
-                      )}
+                      ) : null}
                       {precoAntigoFormatado && (
                         <span className="font-cera-pro text-xs font-light text-[#333333] line-through leading-none">
                           {precoAntigoFormatado}
@@ -226,13 +237,21 @@ export function CartProductCard({
 
               {/* Preço - Mobile */}
               <div className="flex flex-col items-end gap-[2px] h-full">
-                {(precoAntigo || descontoPercentual) && (
-                  <div className="flex items-center justify-center gap-[10px]">
-                    {descontoPercentual && (
+                {(precoAntigo || discountBadges.length > 0 || descontoPercentual) && (
+                  <div className="flex items-center justify-center gap-[6px]">
+                    {discountBadges.length > 0 ? (
+                      discountBadges.map((badge, i) => (
+                        <span key={i} className={`font-cera-pro text-xs font-light leading-none ${
+                          badge.type === 'cupom' ? 'text-[#b3261e]' : 'text-[#009142]'
+                        }`}>
+                          {badge.label}
+                        </span>
+                      ))
+                    ) : descontoPercentual ? (
                       <span className="font-cera-pro text-xs font-light text-[#009142] leading-none">
                         {descontoPercentual}% OFF
                       </span>
-                    )}
+                    ) : null}
                     {precoAntigoFormatado && (
                       <span className="font-cera-pro text-xs font-light text-[#333333] line-through leading-none">
                         {precoAntigoFormatado}

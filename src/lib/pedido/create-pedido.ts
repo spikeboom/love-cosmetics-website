@@ -34,6 +34,8 @@ export async function createPedidoFromBody({
       total_pedido: totalSeguro,
       frete_calculado: body.frete_calculado,
       subtotal_produtos: body.subtotal_produtos,
+      cupom_valor: body.cupom_valor ?? null,
+      cupom_descricao: body.cupom_descricao ?? null,
       transportadora_nome: body.transportadora_nome,
       transportadora_servico: body.transportadora_servico,
       transportadora_prazo: body.transportadora_prazo ? parseInt(String(body.transportadora_prazo)) : null,

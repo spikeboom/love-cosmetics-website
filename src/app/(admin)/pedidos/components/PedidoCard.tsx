@@ -22,6 +22,7 @@ import {
   ClockIcon,
   SpinnerIcon,
 } from "./Icons";
+import { calculatePedidoResumoCompra, getOrderItemDiscountBadges } from "@/core/pricing/resumo-compra";
 
 interface PedidoCardProps {
   pedido: Pedido;
@@ -170,6 +171,12 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                   const precoAtual = item.preco || item.unit_amount;
                   const temDesconto = item.preco_de && item.preco_de > precoAtual;
 
+                  // Badges individuais de desconto (kit + cupom separados)
+                  const badges = getOrderItemDiscountBadges(
+                    { ...item, preco: precoAtual },
+                    pedido.cupom_descricao,
+                  );
+
                   return (
                     <div
                       key={idx}
@@ -179,11 +186,15 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                         <p className="font-cera-pro font-medium text-[14px] text-black line-clamp-2">
                           {item.name}
                         </p>
-                        {item.desconto_percentual && (
-                          <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0">
-                            {item.desconto_percentual}% OFF
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {badges.map((badge, i) => (
+                            <span key={i} className={`text-white text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                              badge.type === 'cupom' ? 'bg-[#254333]' : 'bg-[#b3261e]'
+                            }`}>
+                              {badge.label}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="font-cera-pro font-light text-[12px] text-[#666666]">
@@ -230,6 +241,71 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                 </div>
               )}
             </div>
+
+            {/* Resumo do Pedido */}
+            {(() => {
+              const resumo = calculatePedidoResumoCompra({
+                items: pedido.items.map(i => ({
+                  preco: i.preco || i.unit_amount,
+                  preco_de: i.preco_de,
+                  quantity: i.quantity,
+                })),
+                subtotal_produtos: pedido.subtotal_produtos,
+                total_pedido: pedido.total_pedido,
+                frete_calculado: pedido.frete_calculado,
+                cupom_valor: pedido.cupom_valor,
+              });
+              const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+              return (
+                <div className="p-4 lg:p-6 border-b border-[#d2d2d2]">
+                  <div className="flex items-center gap-2 mb-4">
+                    <ReceiptIcon />
+                    <h3 className="font-cera-pro font-bold text-[16px] lg:text-[18px] text-black">
+                      Resumo do Pedido
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <div className="bg-[#f8f3ed] rounded-[8px] p-3">
+                      <p className="font-cera-pro font-light text-[12px] text-[#666666]">Produtos (De)</p>
+                      <p className="font-cera-pro font-bold text-[14px] text-black">{fmt(resumo.produtosDe)}</p>
+                    </div>
+                    <div className="bg-[#f8f3ed] rounded-[8px] p-3">
+                      <p className="font-cera-pro font-light text-[12px] text-[#666666]">Produtos (Por)</p>
+                      <p className="font-cera-pro font-bold text-[14px] text-black">{fmt(resumo.produtosFinal)}</p>
+                    </div>
+                    <div className="bg-[#f8f3ed] rounded-[8px] p-3">
+                      <p className="font-cera-pro font-light text-[12px] text-[#666666]">Frete</p>
+                      <p className="font-cera-pro font-bold text-[14px] text-black">{fmt(pedido.frete_calculado)}</p>
+                    </div>
+                    {resumo.descontoSite > 0 && (
+                      <div className="bg-[#F0F9F4] rounded-[8px] p-3 border border-[#009142]">
+                        <p className="font-cera-pro font-light text-[12px] text-[#009142]">Descontos (site)</p>
+                        <p className="font-cera-pro font-bold text-[14px] text-[#009142]">-{fmt(resumo.descontoSite)}</p>
+                      </div>
+                    )}
+                    {resumo.descontoCupom > 0 && (
+                      <div className="bg-[#F0F9F4] rounded-[8px] p-3 border border-[#009142]">
+                        <p className="font-cera-pro font-light text-[12px] text-[#009142]">
+                          Cupom{pedido.cupom_descricao ? ` (${pedido.cupom_descricao})` : ''}
+                        </p>
+                        <p className="font-cera-pro font-bold text-[14px] text-[#009142]">-{fmt(resumo.descontoCupom)}</p>
+                      </div>
+                    )}
+                    {resumo.totalEconomizado > 0 && (
+                      <div className="bg-[#d8f9e7] rounded-[8px] p-3">
+                        <p className="font-cera-pro font-light text-[12px] text-[#254333]">Total Economizado</p>
+                        <p className="font-cera-pro font-bold text-[14px] text-[#254333]">{fmt(resumo.totalEconomizado)}</p>
+                      </div>
+                    )}
+                    <div className="bg-[#254333] rounded-[8px] p-3">
+                      <p className="font-cera-pro font-light text-[12px] text-white">Total</p>
+                      <p className="font-cera-pro font-bold text-[14px] text-white">{fmt(pedido.total_pedido)}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Acoes */}
             <div className="p-4 lg:p-6 flex flex-wrap gap-3">

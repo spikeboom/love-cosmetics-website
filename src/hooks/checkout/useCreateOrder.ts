@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
+import { calculateCartResumoCompra } from "@/core/pricing/resumo-compra";
+import { getTipoDesconto } from "@/utils/cart-calculations";
 
 interface IdentificacaoData {
   cpf: string;
@@ -152,6 +154,10 @@ export function useCreateOrder(): UseCreateOrderReturn {
         return acc + (precoBase * item.quantity);
       }, 0);
 
+      // Calcular dados do cupom para persistir
+      const resumoCompra = calculateCartResumoCompra(Object.values(cart));
+      const cupomDescricao = cupons?.length > 0 ? getTipoDesconto(cupons) : null;
+
       // Montar payload para API
       const payload = {
         nome,
@@ -179,8 +185,10 @@ export function useCreateOrder(): UseCreateOrderReturn {
         transportadora_nome: freightData.transportadora_nome || null,
         transportadora_servico: freightData.transportadora_servico || null,
         transportadora_prazo: freightData.transportadora_prazo || null,
-        // Campo novo para apresentação
+        // Campos para apresentação
         subtotal_produtos: subtotalProdutos,
+        cupom_valor: resumoCompra.descontoCupom > 0 ? resumoCompra.descontoCupom : null,
+        cupom_descricao: cupomDescricao || null,
       };
 
       // Chamar API

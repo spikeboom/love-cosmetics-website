@@ -37,6 +37,8 @@ export interface Pedido {
   frete_calculado: number;
   subtotal_produtos?: number | null;
   descontos?: number | null;
+  cupom_valor?: number | null;
+  cupom_descricao?: string | null;
   transportadora_nome?: string | null;
   transportadora_servico?: string | null;
   transportadora_prazo?: number | null;

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { VitrineSection } from "../../../components/VitrineSection";
 import { VerifiedIcon, PendingIcon, ChevronRightIcon } from "@/components/figma-shared/icons";
 import { formatDate, formatDateTime, formatPrice } from "@/lib/formatters";
+import { ResumoCompraCard } from "@/components/checkout/ResumoCompraCard";
 
 // Tipos
 interface HistoricoStatus {
@@ -30,6 +31,8 @@ interface Pedido {
   frete: number;
   subtotal_produtos?: number;
   descontos?: number;
+  cupom_valor?: number | null;
+  cupom_descricao?: string | null;
   status: string;
   statusEntrega: string;
   historicoStatus: HistoricoStatus[];
@@ -120,25 +123,6 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
     }
   };
 
-  // Calcular totais - usa subtotal_produtos salvo (soma dos preco_de originais)
-  const calcularTotalProdutos = () => {
-    if (!pedido) return 0;
-    // Usar subtotal_produtos salvo se disponível (soma dos preco_de para apresentação)
-    if (pedido.subtotal_produtos) return pedido.subtotal_produtos;
-    // Fallback: calcular dos items (usando preco_de se disponível)
-    return pedido.items.reduce((acc, item) => {
-      const precoBase = item.preco_de ?? item.preco;
-      return acc + (precoBase * item.quantity);
-    }, 0);
-  };
-
-  const calcularDescontos = () => {
-    if (!pedido) return 0;
-    // Mesma lógica do cart: subtotal - (total - frete)
-    const totalProdutos = calcularTotalProdutos();
-    return totalProdutos - (pedido.total - (pedido.frete || 0));
-  };
-
   // Obter método de pagamento
   const getMetodoPagamento = () => {
     if (!pedido || !pedido.pagamentos || pedido.pagamentos.length === 0) return "Pix";
@@ -178,9 +162,6 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
       </div>
     );
   }
-
-  const totalProdutos = calcularTotalProdutos();
-  const descontos = calcularDescontos();
 
   return (
     <div className="bg-white min-h-screen">
@@ -264,106 +245,24 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
             </div>
 
             {/* Coluna direita - Resumo do pedido */}
-            <div className="w-full lg:w-[380px] bg-[#f8f3ed] rounded-[8px] p-[16px] flex flex-col gap-[16px]">
-              {/* Data do pedido */}
-              <div className="flex items-center justify-between border-b border-white pb-[16px]">
-                <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                  Data do pedido
-                </span>
-                <span className="font-cera-pro font-medium text-[16px] text-black">
-                  {formatDate(pedido.createdAt)}
-                </span>
-              </div>
+            <div className="w-full lg:w-[380px] flex flex-col gap-4">
+              <ResumoCompraCard
+                mode="order"
+                pedido={{
+                  items: pedido.items,
+                  subtotal_produtos: pedido.subtotal_produtos,
+                  total: pedido.total,
+                  frete: pedido.frete,
+                  cupom_valor: pedido.cupom_valor,
+                  cupom_descricao: pedido.cupom_descricao,
+                }}
+                frete={pedido.frete}
+                dataPedido={formatDate(pedido.createdAt)}
+                metodoPagamento={getMetodoPagamento()}
+                cupomDescricao={pedido.cupom_descricao ?? undefined}
+              />
 
-              {/* Produtos */}
-              <div className="flex flex-col gap-[16px] border-b border-white pb-[16px]">
-                <div className="flex items-center justify-between">
-                  <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                    Produtos <span className="font-light text-[12px] text-[#666666]">(sem descontos)</span>
-                  </span>
-                  <span className="font-cera-pro font-medium text-[16px] text-black">
-                    {formatPrice(totalProdutos)}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-3">
-                  {pedido.items.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      {/* Imagem do produto */}
-                      {item.image_url && (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-12 h-12 object-cover rounded-md flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex flex-1 flex-col gap-1 min-w-0">
-                        {/* Nome e badge */}
-                        <div className="flex items-center gap-2">
-                          <span className="font-cera-pro font-light text-[14px] text-[#111]">
-                            {item.name} {item.quantity > 1 && `(x${item.quantity})`}
-                          </span>
-                          {item.desconto_percentual && (
-                            <span className="bg-[#b3261e] text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0">
-                              {item.desconto_percentual}% OFF
-                            </span>
-                          )}
-                        </div>
-                        {/* Preços */}
-                        <div className="flex items-center gap-2">
-                          {item.preco_de && item.preco_de > item.preco && (
-                            <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
-                              {formatPrice(item.preco_de * item.quantity)}
-                            </span>
-                          )}
-                          <span className="font-cera-pro font-medium text-[14px] text-[#111]">
-                            {formatPrice(item.preco * item.quantity)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/figma/cart"
-                  className="font-cera-pro font-light text-[14px] text-[#254333] underline hover:text-[#1a2e24]"
-                >
-                  Comprar novamente
-                </Link>
-              </div>
-
-              {/* Entrega */}
-              <div className="flex items-center justify-between border-b border-white pb-[16px]">
-                <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                  Entrega
-                </span>
-                <span className={`font-cera-pro font-medium text-[16px] ${pedido.frete === 0 ? "text-[#009142]" : "text-black"}`}>
-                  {pedido.frete === 0 ? "Grátis" : formatPrice(pedido.frete)}
-                </span>
-              </div>
-
-              {/* Descontos */}
-              {descontos > 0 && (
-                <div className="flex items-center justify-between border-b border-white pb-[16px]">
-                  <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                    Descontos
-                  </span>
-                  <span className="font-cera-pro font-medium text-[16px] text-[#009142]">
-                    - {formatPrice(descontos)}
-                  </span>
-                </div>
-              )}
-
-              {/* Total / Pagamento */}
-              <div className="flex items-center justify-between pt-[16px]">
-                <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                  Pagamento {getMetodoPagamento()}
-                </span>
-                <span className="font-cera-pro font-medium text-[16px] text-black">
-                  {formatPrice(pedido.total)}
-                </span>
-              </div>
-
-              {/* Botão comprar novamente */}
+              {/* Botao comprar novamente */}
               <Link
                 href="/figma/cart"
                 className="w-full h-[48px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"

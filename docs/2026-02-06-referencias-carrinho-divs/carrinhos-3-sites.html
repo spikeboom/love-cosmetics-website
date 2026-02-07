@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Referências de carrinho (3 sites) — div sobre div</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 16px;
+        color: #111;
+      }
+      .screens {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      .screen {
+        width: 360px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .section {
+        border-top: 1px solid #eee;
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .muted {
+        opacity: 0.7;
+      }
+      .strike {
+        text-decoration: line-through;
+      }
+      .btn {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="screens" data-source="Image #1">
+      <div class="screen" data-site="(tela 1) carrinho vermelho — New Balance (vendido e entregue por)">
+        <div class="row">
+          <div>Topo (barra vermelha)</div>
+          <div class="muted">ícones: logo, entrega, pagamento, confirmação, cadeado</div>
+        </div>
+
+        <div class="section">
+          <div class="muted">Produto (miniatura de tênis)</div>
+          <div>Tamanho: 40</div>
+          <div>Cor: azul escuro</div>
+          <div>Vendido e Entregue por: New Balance</div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div class="muted">ação: remover (ícone lixeira)</div>
+            <div class="muted">quantidade</div>
+            <div class="muted">ação: aumentar (ícone +)</div>
+          </div>
+          <div class="row">
+            <div class="muted"></div>
+            <div>1</div>
+            <div class="muted"></div>
+          </div>
+          <div class="row">
+            <div class="muted"></div>
+            <div class="muted strike">R$ 549,99</div>
+            <div></div>
+          </div>
+          <div class="row">
+            <div class="muted"></div>
+            <div>R$ 349,99</div>
+            <div class="muted"></div>
+          </div>
+          <div class="row">
+            <div class="muted"></div>
+            <div class="muted">ou R$ 314,99 no Pix</div>
+            <div class="muted"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="btn row">
+            <div>Compartilhar carrinho</div>
+            <div class="muted">ícone: WhatsApp</div>
+          </div>
+          <div class="btn row" style="margin-top: 8px">
+            <div>Copiar link</div>
+            <div class="muted">ícone: copiar</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div>Calcule o frete</div>
+          <div class="row" style="margin-top: 8px">
+            <div>CEP: 69077-580</div>
+            <div class="btn">Calcular</div>
+          </div>
+          <div class="muted" style="margin-top: 6px">Não sei meu CEP</div>
+        </div>
+
+        <div class="section">
+          <div>Cupom de desconto</div>
+          <div class="row" style="margin-top: 8px">
+            <div class="muted">Digite o cupom</div>
+            <div class="btn">Adicionar</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div>Produtos</div>
+            <div>R$ 1.149,98</div>
+          </div>
+          <div class="row muted">
+            <div>Desconto em produtos</div>
+            <div>-R$ 440,00</div>
+          </div>
+          <div class="row muted">
+            <div>Desconto no Pix</div>
+            <div>-R$ 53,00</div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>Total</div>
+            <div>
+              <div>R$ 656,98</div>
+              <div class="muted">no Pix</div>
+            </div>
+          </div>
+          <div class="muted" style="margin-top: 8px">ou R$ 709,98 em 10x de R$ 70,99 sem juros</div>
+          <div class="btn" style="margin-top: 10px; text-align: center">Continuar</div>
+          <div class="muted" style="margin-top: 10px; text-align: center">Relatar problema</div>
+        </div>
+      </div>
+
+      <div class="screen" data-site="(tela 2) carrinho roxo — Resumo do pedido">
+        <div>Resumo do pedido</div>
+
+        <div class="section">
+          <div class="row">
+            <div>1</div>
+            <div>
+              <div>Bastão Antiatrito</div>
+            </div>
+            <div>R$ 79,90</div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>1</div>
+            <div>
+              <div>Protetor Solar Bastão</div>
+              <div class="muted">Anti oleosidade</div>
+            </div>
+            <div>R$ 99,90</div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>1</div>
+            <div>
+              <div>Pochete Sallve Laranja</div>
+              <div class="muted">(-R$ 69,90)</div>
+            </div>
+            <div>
+              <div class="muted strike">R$ 69,90</div>
+              <div>GRÁTIS</div>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>1</div>
+            <div>
+              <div>Bastão Antiolheiras</div>
+              <div class="muted">Antioxidante</div>
+            </div>
+            <div>R$ 99,90</div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>1</div>
+            <div>
+              <div>Sérum Antiolheiras</div>
+            </div>
+            <div>R$ 99,90</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div class="muted">Insira um cupom</div>
+            <div class="btn muted">Aplicar</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div>Subtotal · 5 itens</div>
+            <div>R$ 379,60</div>
+          </div>
+          <div class="row">
+            <div>Frete</div>
+            <div>GRÁTIS</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div>Total</div>
+            <div>BRL R$ 379,60</div>
+          </div>
+          <div class="row muted" style="margin-top: 6px">
+            <div>ECONOMIA TOTAL</div>
+            <div>R$ 69,90</div>
+          </div>
+          <div class="btn" style="margin-top: 10px; text-align: center">Pagar agora</div>
+        </div>
+
+        <div class="section">
+          <div>Leve também</div>
+        </div>
+      </div>
+
+      <div class="screen" data-site="(tela 3) carrinho laranja — natura">
+        <div class="row">
+          <div class="muted">ícones: menu, favoritos</div>
+          <div>natura (logo)</div>
+          <div class="muted">ícones: perfil, sacola</div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div class="muted">campo de busca</div>
+            <div>o que está buscando hoje?</div>
+            <div class="muted">ícone: lupa</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div>Luna Nuit 75 ml</div>
+            <div class="muted">ação: remover (ícone lixeira)</div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>quantidade: 1</div>
+            <div>
+              <div class="muted strike">R$ 185,90</div>
+              <div>R$ 124,90</div>
+            </div>
+            <div class="muted">-33%</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div>simular frete</div>
+          <div class="muted">informar CEP</div>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <div class="muted">ocultar resumo</div>
+            <div class="muted">ícone: seta</div>
+          </div>
+          <div style="margin-top: 10px">resumo do pedido</div>
+          <div class="row" style="margin-top: 10px">
+            <div>1 produto</div>
+            <div>R$ 185,90</div>
+          </div>
+          <div class="row muted">
+            <div>descontos</div>
+            <div>-R$ 61,00</div>
+          </div>
+          <div class="row">
+            <div>subtotal</div>
+            <div>R$ 124,90</div>
+          </div>
+          <div class="row">
+            <div>entrega</div>
+            <div class="muted">ícone: info</div>
+          </div>
+          <div class="row" style="margin-top: 10px">
+            <div>total</div>
+            <div>R$ 124,90</div>
+          </div>
+          <div class="muted" style="margin-top: 6px">ou até 4x de R$ 31,23 sem juros no cartão</div>
+          <div class="btn" style="margin-top: 10px; text-align: center">finalizar compra</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

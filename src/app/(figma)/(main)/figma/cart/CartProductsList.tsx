@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { CartProductCard } from './CartProductCard';
+import { getItemDiscountBadges } from '@/core/pricing/resumo-compra';
 
 interface Product {
   id: string;
@@ -34,6 +35,7 @@ interface ProdutoDesatualizado {
 
 interface CartProductsListProps {
   produtos: any[];
+  cupons?: any[];
   onAdd: (data: { product: any }) => void;
   onSubtract: (data: { product: any }) => void;
   onRemove: (data: { product: any }) => void;
@@ -42,6 +44,7 @@ interface CartProductsListProps {
 
 export function CartProductsList({
   produtos,
+  cupons = [],
   onAdd,
   onSubtract,
   onRemove,
@@ -96,11 +99,8 @@ export function CartProductsList({
             : undefined;
         }
 
-        // Calcular % OFF acumulado (total de economia em relação ao preco_de original)
-        const descontoPercentual =
-          precoAntigo && precoAntigo > precoAtual
-            ? Math.ceil(((precoAntigo - precoAtual) / precoAntigo) * 100)
-            : undefined;
+        // Badges individuais de desconto (kit + cupom separados)
+        const discountBadges = getItemDiscountBadges(produto, cupons);
 
         const tags = produto.tags || [];
 
@@ -116,7 +116,7 @@ export function CartProductsList({
             nome={produto.nome}
             preco={produto.preco}
             precoAntigo={precoAntigo}
-            descontoPercentual={descontoPercentual}
+            discountBadges={discountBadges}
             tags={tags}
             onAdd={() => onAdd({ product: produto })}
             onSubtract={() => onSubtract({ product: produto })}
