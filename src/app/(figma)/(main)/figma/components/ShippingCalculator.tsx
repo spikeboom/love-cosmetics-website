@@ -32,6 +32,7 @@ export function ShippingCalculator({
     setSelectedFreight,
     resetFreight,
     selectedServiceIndex,
+    addressLabel,
   } = useShipping();
 
   // Recalcular frete automaticamente quando o carrinho mudar
@@ -135,6 +136,22 @@ export function ShippingCalculator({
           </div>
         </button>
       </div>
+
+      {/* Endereço resumido - logo abaixo do input */}
+      {addressLabel && hasCalculated && !error && (
+        <div className="flex items-start gap-[6px] w-full -mt-[8px]">
+          <Image
+            src="/new-home/icons/location.svg"
+            alt="Localização"
+            width={16}
+            height={16}
+            className="w-4 h-4 flex-shrink-0 mt-[1px]"
+          />
+          <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.4]">
+            {addressLabel}
+          </p>
+        </div>
+      )}
 
       {/* Mensagem de Erro */}
       {error && (

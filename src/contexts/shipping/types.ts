@@ -15,6 +15,7 @@ export interface ShippingState {
   hasCalculated: boolean;
   availableServices: FreightService[];
   selectedServiceIndex: number;
+  addressLabel: string | null;
 }
 
 export interface ShippingOperations {

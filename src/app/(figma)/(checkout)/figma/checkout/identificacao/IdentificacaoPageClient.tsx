@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
+import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 
 export function IdentificacaoPageClient() {
   const router = useRouter();
@@ -10,16 +11,19 @@ export function IdentificacaoPageClient() {
     formData,
     errors,
     isLoading,
+    isLoggedIn,
     handleChange,
     validateForm,
     saveToStorage,
   } = useIdentificacaoForm();
+  const { syncToServer } = useCheckoutSync();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
       saveToStorage();
+      syncToServer({ identificacao: formData });
       router.push("/figma/checkout/entrega");
     }
   };
@@ -51,6 +55,7 @@ export function IdentificacaoPageClient() {
               error={errors.cpf}
               placeholder="000.000.000-00"
               maxLength={14}
+              disabled={isLoggedIn}
             />
 
             {/* Data de nascimento */}
@@ -81,6 +86,7 @@ export function IdentificacaoPageClient() {
               onChange={handleChange}
               error={errors.email}
               type="email"
+              disabled={isLoggedIn}
             />
 
             {/* Telefone */}
@@ -120,6 +126,7 @@ interface FormFieldProps {
   placeholder?: string;
   maxLength?: number;
   type?: string;
+  disabled?: boolean;
 }
 
 function FormField({
@@ -131,6 +138,7 @@ function FormField({
   placeholder = "",
   maxLength,
   type = "text",
+  disabled = false,
 }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
@@ -143,9 +151,12 @@ function FormField({
         onChange={(e) => onChange(field, e.target.value)}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={`w-full h-[48px] px-4 bg-white border ${
+        disabled={disabled}
+        className={`w-full h-[48px] px-4 border ${
           error ? "border-red-500" : "border-[#d2d2d2]"
-        } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
+        } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333] ${
+          disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"
+        }`}
       />
       {error && (
         <span className="text-red-500 text-sm">{error}</span>

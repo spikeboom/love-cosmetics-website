@@ -23,6 +23,7 @@ export function useIdentificacaoForm() {
   });
   const [errors, setErrors] = useState<Partial<IdentificacaoFormData>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Carregar dados: primeiro do usuario logado, depois do localStorage
   useEffect(() => {
@@ -51,6 +52,7 @@ export function useIdentificacaoForm() {
               email: cliente.email || "",
               telefone: cliente.telefone ? formatTelefone(cliente.telefone) : "",
             });
+            setIsLoggedIn(true);
             setIsLoading(false);
             return;
           }
@@ -132,6 +134,7 @@ export function useIdentificacaoForm() {
     formData,
     errors,
     isLoading,
+    isLoggedIn,
     handleChange,
     validateForm,
     saveToStorage,

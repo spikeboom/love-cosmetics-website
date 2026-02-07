@@ -23,6 +23,7 @@ export const ShippingProvider = ({ children }: ShippingProviderProps) => {
     hasCalculated: freight.hasCalculated,
     availableServices: freight.availableServices,
     selectedServiceIndex: freight.selectedServiceIndex,
+    addressLabel: freight.addressLabel,
     setCep: freight.setCep,
     calculateFreight: freight.calculateFreight,
     clearError: freight.clearError,

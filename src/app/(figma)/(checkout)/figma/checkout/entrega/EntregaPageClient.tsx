@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { BotaoVoltar } from "../pagamento/components/BotaoVoltar";
 import { useViaCep } from "@/hooks/checkout";
+import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 import { formatCEP } from "@/lib/formatters";
@@ -25,6 +26,7 @@ interface FormData {
 export function EntregaPageClient() {
   const router = useRouter();
   const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
+  const { syncToServer } = useCheckoutSync();
   const freight = useShipping();
 
   const [formData, setFormData] = useState<FormData>({
@@ -205,6 +207,7 @@ export function EntregaPageClient() {
 
     if (validateForm()) {
       localStorage.setItem("checkoutEntrega", JSON.stringify(formData));
+      syncToServer({ entrega: formData });
       router.push("/figma/checkout/pagamento");
     }
   };

@@ -29,6 +29,7 @@ interface UseFreightReturn {
     transportadora_prazo: number | null;
   };
   selectedServiceIndex: number;
+  addressLabel: string | null;
 }
 
 const STORAGE_KEY = 'love_cosmetics_last_cep';
@@ -50,6 +51,7 @@ export function useFreight(): UseFreightReturn {
     serviceCode: string;
   }>>([]);
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
+  const [addressLabel, setAddressLabel] = useState<string | null>(null);
 
   // Carregar dados salvos do localStorage
   useEffect(() => {
@@ -68,6 +70,7 @@ export function useFreight(): UseFreightReturn {
         setAvailableServices(data.availableServices || []);
         setSelectedServiceIndex(data.selectedServiceIndex || 0);
         setHasCalculated(data.hasCalculated || false);
+        setAddressLabel(data.addressLabel || null);
       } catch (error) {
         console.error('Erro ao carregar dados de frete:', error);
       }
@@ -88,11 +91,12 @@ export function useFreight(): UseFreightReturn {
         deliveryTime,
         availableServices,
         selectedServiceIndex,
-        hasCalculated
+        hasCalculated,
+        addressLabel
       };
       localStorage.setItem(FREIGHT_DATA_KEY, JSON.stringify(freightData));
     }
-  }, [freightValue, deliveryTime, availableServices, selectedServiceIndex, hasCalculated]);
+  }, [freightValue, deliveryTime, availableServices, selectedServiceIndex, hasCalculated, addressLabel]);
 
   const calculateFreightInternal = useCallback(async (cepValue: string, cartItems?: CartProduct[]) => {
     if (!FreightService.isValidCep(cepValue)) {
@@ -148,6 +152,28 @@ export function useFreight(): UseFreightReturn {
         setAvailableServices(result.services);
         setSelectedServiceIndex(newSelectedIndex);
         setHasCalculated(true);
+
+        // Buscar endereço resumido via ViaCEP
+        const cleanCepValue = cepValue.replace(/\D/g, '');
+        try {
+          const viaCepRes = await fetch(`https://viacep.com.br/ws/${cleanCepValue}/json/`);
+          const viaCepData = await viaCepRes.json();
+          if (!viaCepData.erro) {
+            const parts: string[] = [];
+            if (viaCepData.logradouro) parts.push(viaCepData.logradouro);
+            if (viaCepData.bairro) parts.push(viaCepData.bairro);
+            // "Rua X – Bairro, Cidade – UF"
+            let label = '';
+            if (parts.length > 0) {
+              label = `${parts.join(' – ')}, ${viaCepData.localidade} – ${viaCepData.uf}`;
+            } else {
+              label = `${viaCepData.localidade} – ${viaCepData.uf}`;
+            }
+            setAddressLabel(label);
+          }
+        } catch {
+          // Falha silenciosa - endereço resumido é informativo apenas
+        }
       } else {
         setError(result.error);
         // Usar valor padrão em caso de erro
@@ -187,6 +213,7 @@ export function useFreight(): UseFreightReturn {
     setHasCalculated(false);
     setError(null);
     setSelectedServiceIndex(0);
+    setAddressLabel(null);
   }, []);
 
   const getSelectedFreightData = useCallback(() => {
@@ -244,5 +271,6 @@ export function useFreight(): UseFreightReturn {
     resetFreight,
     getSelectedFreightData,
     selectedServiceIndex,
+    addressLabel,
   };
 }
