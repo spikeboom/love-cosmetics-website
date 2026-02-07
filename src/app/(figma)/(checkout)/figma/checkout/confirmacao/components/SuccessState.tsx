@@ -23,9 +23,21 @@ export function SuccessState({ pedidoDetalhes }: SuccessStateProps) {
     subtotal_produtos: pedidoDetalhes.produtos.subtotal,
     total_pedido: pedidoDetalhes.total,
     frete_calculado: pedidoDetalhes.entrega.valor,
-    cupom_valor: null as number | null,
-    cupom_descricao: null as string | null,
+    cupom_valor: pedidoDetalhes.cupom_valor,
+    cupom_descricao: pedidoDetalhes.cupom_descricao,
   } : null;
+
+  // Montar label de pagamento com parcelas
+  const getMetodoPagamentoLabel = () => {
+    if (!pedidoDetalhes) return undefined;
+    const metodo = pedidoDetalhes.metodoPagamento;
+    if (metodo === "credit_card") {
+      const parcelas = pedidoDetalhes.parcelas;
+      if (parcelas && parcelas > 1) return `Cartao ${parcelas}x`;
+      return "Cartao";
+    }
+    return "Pix";
+  };
 
   return (
     <div className="bg-white flex flex-col w-full flex-1">
@@ -54,6 +66,8 @@ export function SuccessState({ pedidoDetalhes }: SuccessStateProps) {
               frete={pedidoDetalhes?.entrega.valor ?? 0}
               freteGratis={pedidoDetalhes?.entrega.gratis}
               enderecoCompleto={pedidoDetalhes?.endereco.completo}
+              cupomDescricao={pedidoDetalhes?.cupom_descricao ?? undefined}
+              metodoPagamento={getMetodoPagamentoLabel()}
             />
           )}
 

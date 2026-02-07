@@ -44,6 +44,10 @@ export async function GET(
         status_pagamento: true,
         status_entrega: true,
         payment_method: true,
+        payment_card_info: true,
+        cupons: true,
+        cupom_valor: true,
+        cupom_descricao: true,
         createdAt: true,
         pedidoCliente: {
           select: {
@@ -144,6 +148,15 @@ export async function GET(
         entrega: pedido.status_entrega,
       },
       metodoPagamento: pedido.payment_method,
+      parcelas: pedido.payment_card_info ? (() => {
+        try {
+          const info = JSON.parse(pedido.payment_card_info);
+          return info.installments ?? null;
+        } catch { return null; }
+      })() : null,
+      cupons: pedido.cupons || [],
+      cupom_valor: pedido.cupom_valor ?? null,
+      cupom_descricao: pedido.cupom_descricao ?? null,
       vinculado: !!pedido.pedidoCliente,
       criadoEm: pedido.createdAt,
     });

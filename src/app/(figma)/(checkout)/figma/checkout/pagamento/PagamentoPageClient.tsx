@@ -18,14 +18,18 @@ import { formatPrice } from "@/lib/formatters";
 export function PagamentoPageClient() {
   const router = useRouter();
   const { cart, clearCart } = useCart();
-  const { cupons, clearCupons } = useCoupon();
+  const { cupons, clearCupons, handleCupom } = useCoupon();
   const { freightValue } = useShipping();
   const { total, descontos, subtotalOriginal } = useCartTotals();
-  const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder } = useCreateOrder();
+  const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder, clearError } = useCreateOrder();
 
   // Códigos de erro que indicam carrinho desatualizado
   const cartOutdatedCodes = ["PRICE_MISMATCH", "DISCOUNT_MISMATCH", "TOTAL_MISMATCH", "PRODUCT_NOT_FOUND"];
   const isCartOutdated = orderErrorCode && cartOutdatedCodes.includes(orderErrorCode);
+
+  // Códigos de erro relacionados a cupom
+  const couponErrorCodes = ["COUPON_FIRST_PURCHASE_ONLY", "INVALID_COUPON"];
+  const isCouponError = orderErrorCode && couponErrorCodes.includes(orderErrorCode);
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
   const [telaAtual, setTelaAtual] = useState<TelaAtual>("selecao");
@@ -94,7 +98,8 @@ export function PagamentoPageClient() {
       setFormaPagamento(metodo);
       setTelaAtual(metodo);
     } else {
-      alert(result.error || "Erro ao criar pedido");
+      // Erro será exibido pela tela de erro (orderError state)
+      // Não precisa de alert - a UI de erro já trata isso
     }
   };
 
@@ -154,28 +159,58 @@ export function PagamentoPageClient() {
     );
   }
 
+  // Remover cupom e voltar para tela de pagamento
+  const handleRemoverCupom = () => {
+    if (cupons.length > 0) {
+      // handleCupom faz toggle: se já está na lista, remove e reverte preços do carrinho
+      cupons.forEach((cupom: any) => handleCupom(cupom));
+    }
+    clearError();
+  };
+
   // Erro ao criar pedido
   if (orderError && !pedidoId) {
     return (
       <div className="bg-white flex flex-col w-full flex-1 items-center justify-center min-h-[400px] px-4">
-        <div className={`${isCartOutdated ? 'bg-[#FFF3CD] border-[#FFE69C]' : 'bg-red-50 border-red-200'} border rounded-[8px] p-6 text-center max-w-md`}>
-          <p className={`font-cera-pro font-bold text-[18px] ${isCartOutdated ? 'text-[#856404]' : 'text-red-600'} mb-2`}>
-            {isCartOutdated ? 'Carrinho desatualizado' : 'Erro ao criar pedido'}
+        <div className={`${isCartOutdated ? 'bg-[#FFF3CD] border-[#FFE69C]' : isCouponError ? 'bg-[#FFF3CD] border-[#FFE69C]' : 'bg-red-50 border-red-200'} border rounded-[8px] p-6 text-center max-w-md`}>
+          <p className={`font-cera-pro font-bold text-[18px] ${isCartOutdated || isCouponError ? 'text-[#856404]' : 'text-red-600'} mb-2`}>
+            {isCartOutdated ? 'Carrinho desatualizado' : isCouponError ? 'Cupom indisponível' : 'Erro ao criar pedido'}
           </p>
-          <p className={`font-cera-pro text-[14px] ${isCartOutdated ? 'text-[#856404]' : 'text-red-500'} mb-4`}>{orderError}</p>
-          <button
-            onClick={() => {
-              if (isCartOutdated) {
-                router.push("/figma/cart");
-                window.location.href = "/figma/cart";
-              } else {
-                router.push("/figma/checkout/entrega");
-              }
-            }}
-            className={`px-6 py-2 ${isCartOutdated ? 'bg-[#856404]' : 'bg-[#254333]'} text-white rounded-[8px] font-cera-pro`}
-          >
-            {isCartOutdated ? 'Voltar ao carrinho' : 'Voltar'}
-          </button>
+          <p className={`font-cera-pro text-[14px] ${isCartOutdated || isCouponError ? 'text-[#856404]' : 'text-red-500'} mb-4`}>{orderError}</p>
+
+          {isCouponError ? (
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleRemoverCupom}
+                className="px-6 py-2 bg-[#254333] text-white rounded-[8px] font-cera-pro"
+              >
+                Retirar cupom e continuar
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/figma/cart");
+                  window.location.href = "/figma/cart";
+                }}
+                className="px-6 py-2 bg-white text-[#856404] border border-[#856404] rounded-[8px] font-cera-pro"
+              >
+                Voltar ao carrinho
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                if (isCartOutdated) {
+                  router.push("/figma/cart");
+                  window.location.href = "/figma/cart";
+                } else {
+                  router.push("/figma/checkout/entrega");
+                }
+              }}
+              className={`px-6 py-2 ${isCartOutdated ? 'bg-[#856404]' : 'bg-[#254333]'} text-white rounded-[8px] font-cera-pro`}
+            >
+              {isCartOutdated ? 'Voltar ao carrinho' : 'Voltar'}
+            </button>
+          )}
         </div>
       </div>
     );

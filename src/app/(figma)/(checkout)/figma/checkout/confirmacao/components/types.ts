@@ -51,6 +51,10 @@ export interface PedidoDetalhes {
     entrega: string;
   };
   metodoPagamento: string;
+  parcelas: number | null;
+  cupons: string[];
+  cupom_valor: number | null;
+  cupom_descricao: string | null;
   vinculado: boolean;
 }
 

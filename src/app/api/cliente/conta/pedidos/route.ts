@@ -117,6 +117,15 @@ export async function GET(request: NextRequest) {
         // Pegar último status do histórico ou usar status_entrega do pedido
         const ultimoHistorico = pedido.historicoStatusEntrega[0];
 
+        // Extrair parcelas do payment_card_info
+        let parcelas: number | null = null;
+        if (pedido.payment_card_info) {
+          try {
+            const cardInfo = JSON.parse(pedido.payment_card_info);
+            parcelas = cardInfo.installments ?? null;
+          } catch { /* ignore */ }
+        }
+
         return {
           id: pedido.id,
           total: pedido.total_pedido,
@@ -134,6 +143,8 @@ export async function GET(request: NextRequest) {
           produtosImagens,
           cupons: pedido.cupons || [],
           createdAt: pedido.createdAt,
+          payment_method: pedido.payment_method ?? null,
+          parcelas,
           endereco: {
             cep: pedido.cep,
             endereco: pedido.endereco,

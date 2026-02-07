@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { pedidoId, paymentMethod } = await req.json();
+    const { pedidoId, paymentMethod, installments = 1 } = await req.json();
 
     if (!pedidoId || !paymentMethod) {
       return NextResponse.json(
@@ -57,6 +57,9 @@ export async function POST(req: NextRequest) {
         status_pagamento: "PAID",
         payment_method: paymentMethod,
         pagbank_order_id: simulatedOrderId,
+        payment_card_info: paymentMethod === "credit_card"
+          ? JSON.stringify({ installments, simulated: true })
+          : undefined,
       },
     });
 
@@ -67,6 +70,7 @@ export async function POST(req: NextRequest) {
           type: "SIMULATED_PAYMENT",
           pedidoId,
           paymentMethod,
+          installments,
           simulatedOrderId,
           previousStatus: pedido.status_pagamento,
           timestamp: new Date().toISOString(),

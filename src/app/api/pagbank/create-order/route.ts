@@ -212,6 +212,7 @@ export async function POST(req: NextRequest) {
                 brand: chargeResponse.payment_method.card.brand,
                 last_digits: chargeResponse.payment_method.card.last_digits,
                 first_digits: chargeResponse.payment_method.card.first_digits,
+                installments: installments,
               })
             : undefined,
         },

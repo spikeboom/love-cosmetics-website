@@ -33,6 +33,8 @@ export interface Pedido {
   } | null;
   produtosImagens: ProdutoImagem[];
   createdAt: string;
+  payment_method: string | null;
+  parcelas: number | null;
 }
 
 // Constantes de status
@@ -61,6 +63,10 @@ export function PedidoCard({ pedido }: PedidoCardProps) {
   const isEntregue = pedido.statusEntrega === "ENTREGUE";
   const isCancelado = pedido.statusEntrega === "CANCELADO";
 
+  // Info de parcelas
+  const isCartaoCredito = pedido.payment_method === "credit_card";
+  const parcelas = pedido.parcelas;
+
   return (
     <div className="bg-white rounded-[8px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] overflow-hidden w-full">
       <div className="p-[16px] flex flex-col gap-[16px]">
@@ -73,6 +79,9 @@ export function PedidoCard({ pedido }: PedidoCardProps) {
             </p>
             <p className="font-cera-pro font-light text-[20px] text-black">
               {formatDate(pedido.createdAt)} | Valor total: {formatPrice(pedido.total)}
+              {isCartaoCredito && parcelas && parcelas > 1 && (
+                <span className="text-[16px] text-[#666]"> ({parcelas}x de {formatPrice(pedido.total / parcelas)})</span>
+              )}
             </p>
           </div>
 

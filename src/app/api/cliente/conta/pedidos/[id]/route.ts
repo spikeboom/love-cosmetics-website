@@ -138,6 +138,15 @@ export async function GET(
       return acc + (precoBase * item.quantity);
     }, 0);
 
+    // Extrair parcelas do payment_card_info
+    let parcelas: number | null = null;
+    if (pedido.payment_card_info) {
+      try {
+        const cardInfo = JSON.parse(pedido.payment_card_info);
+        parcelas = cardInfo.installments ?? null;
+      } catch { /* ignore */ }
+    }
+
     const pedidoFormatado = {
       id: pedido.id,
       total: pedido.total_pedido,
@@ -152,6 +161,8 @@ export async function GET(
       items: itemsFormatados,
       cupons: pedido.cupons || [],
       createdAt: pedido.createdAt,
+      payment_method: pedido.payment_method ?? null,
+      parcelas,
       endereco: {
         cep: pedido.cep,
         endereco: pedido.endereco,

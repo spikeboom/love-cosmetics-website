@@ -48,12 +48,15 @@ interface Pedido {
     cidade: string;
     estado: string;
   };
+  payment_method: string | null;
+  parcelas: number | null;
   pagamentos: Array<{
     info: {
       charges?: Array<{
         status: string;
         payment_method?: {
           type: string;
+          installments?: number;
         };
       }>;
     };
@@ -123,14 +126,15 @@ export function DetalhesPedidoClient({ produtos }: DetalhesPedidoClientProps) {
     }
   };
 
-  // Obter método de pagamento
+  // Obter método de pagamento com parcelas
   const getMetodoPagamento = () => {
-    if (!pedido || !pedido.pagamentos || pedido.pagamentos.length === 0) return "Pix";
-    const pagamento = pedido.pagamentos[0];
-    const tipo = pagamento?.info?.charges?.[0]?.payment_method?.type;
-    if (tipo === "CREDIT_CARD") return "Cartão de Crédito";
-    if (tipo === "DEBIT_CARD") return "Cartão de Débito";
-    if (tipo === "BOLETO") return "Boleto";
+    if (!pedido) return "Pix";
+    const metodo = pedido.payment_method;
+    if (metodo === "credit_card") {
+      const parcelas = pedido.parcelas;
+      if (parcelas && parcelas > 1) return `Cartao ${parcelas}x`;
+      return "Cartao";
+    }
     return "Pix";
   };
 

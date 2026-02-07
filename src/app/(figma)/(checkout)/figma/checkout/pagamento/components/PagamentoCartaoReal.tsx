@@ -85,7 +85,7 @@ export function PagamentoCartaoReal({
       const res = await fetch("/api/dev/simulate-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pedidoId, paymentMethod: "credit_card" }),
+        body: JSON.stringify({ pedidoId, paymentMethod: "credit_card", installments: cartaoData.parcelas }),
       });
       const data = await res.json();
       if (data.success) {
