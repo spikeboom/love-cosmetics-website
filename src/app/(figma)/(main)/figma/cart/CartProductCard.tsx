@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import type { DiscountBadge } from '@/core/pricing/resumo-compra';
 
 interface CartProductCardProps {
@@ -122,7 +123,10 @@ export function CartProductCard({
 
         <div className="flex gap-4 self-stretch">
           {/* Imagem */}
-          <div className="h-[80px] w-[80px] rounded-lg bg-[#F8F3ED] overflow-hidden flex items-center justify-center shrink-0">
+          <Link
+            href={produto.slug ? `/figma/product/${produto.slug}` : '#'}
+            className="h-[80px] w-[80px] rounded-lg bg-[#F8F3ED] overflow-hidden flex items-center justify-center shrink-0"
+          >
             {imagem ? (
               <Image
                 src={imagem}
@@ -135,7 +139,7 @@ export function CartProductCard({
             ) : (
               <div className="w-full h-full bg-[#F8F3ED]" />
             )}
-          </div>
+          </Link>
 
           {/* Resumo do item */}
           <div className="flex flex-1 flex-col gap-4 self-stretch">

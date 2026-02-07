@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
@@ -19,9 +19,8 @@ interface ProductPageClientProps {
 
 export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const router = useRouter();
   const { addProductToCart } = useCart();
-  const { notify } = useNotifications();
+  const { enqueueSnackbar } = useNotifications();
   const { handleShare } = useShareProduct({ productName: produto?.nome || "Produto" });
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -52,14 +51,28 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
     peso_gramas: produto.peso_gramas,
   });
 
+  const productThumb = produto?.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url
+    || produto?.carouselImagensPrincipal?.[0]?.imagem?.url;
+  const productImageUrl = productThumb ? `${baseURL}${productThumb}` : "/new-home/produtos/produto-pdp.png";
+
+  const showAddedToCartToast = () => {
+    enqueueSnackbar("", {
+      variant: "addedToCart",
+      productName: produto?.nome || "Produto",
+      productImage: productImageUrl,
+      productPrice: priceInfo.preco,
+      autoHideDuration: 4000,
+    } as any);
+  };
+
   const handleAddToCart = () => {
     addProductToCart(getProductData());
-    notify("Produto adicionado ao carrinho!", { variant: "success" });
+    showAddedToCartToast();
   };
 
   const handleBuy = () => {
     addProductToCart(getProductData());
-    router.push("/figma/cart");
+    showAddedToCartToast();
   };
 
   // Processa imagens do produto
@@ -257,10 +270,17 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 function ProductDescription({ produto }: { produto: any }) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
   return (
-    <div className="flex flex-col gap-[10px] items-start w-full">
-      <div className="bg-white flex flex-col gap-[8px] items-start w-full">
-        <div className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal] text-justify">
+    <div className="flex flex-col items-start w-full">
+      <div className="relative w-full">
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ maxHeight: isCollapsed ? '72px' : '600px' }}
+        >
+          <div className="bg-white flex flex-col gap-[8px] items-start w-full">
+            <div className="font-cera-pro font-light text-[16px] text-[#111111] leading-[normal] text-justify">
           {produto?.descricaoResumida && (
             <p className="mb-[8px]">{produto.descricaoResumida}</p>
           )}
@@ -296,8 +316,37 @@ function ProductDescription({ produto }: { produto: any }) {
               </ul>
             </>
           )}
+            </div>
+          </div>
         </div>
+
+        {/* Gradient fade when collapsed */}
+        {isCollapsed && (
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[40px] pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' }}
+          />
+        )}
       </div>
+
+      {/* Toggle button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="flex items-center gap-[4px] mt-[8px] cursor-pointer"
+      >
+        <span className="font-cera-pro font-light text-[14px] text-[#666666] underline">
+          {isCollapsed ? 'Ver mais' : 'Ver menos'}
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`}
+        >
+          <path d="M6 9L12 15L18 9" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
     </div>
   );
 }

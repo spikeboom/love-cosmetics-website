@@ -52,7 +52,7 @@ export function CardProduto({
   comprimento,
 }: CardProdutoProps) {
   const { addProductToCart } = useCart();
-  const { notify } = useNotifications();
+  const { notify, enqueueSnackbar } = useNotifications();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -78,7 +78,13 @@ export function CardProduto({
       imagem,
     });
 
-    notify("Produto adicionado ao carrinho!", { variant: "success" });
+    enqueueSnackbar("", {
+      variant: "addedToCart",
+      productName: nome,
+      productImage: imagem,
+      productPrice: preco,
+      autoHideDuration: 4000,
+    } as any);
   };
 
   const cardContent = tipo === "mini-banner" ? (

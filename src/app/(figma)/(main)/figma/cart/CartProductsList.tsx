@@ -138,18 +138,6 @@ export function CartProductsList({
             className="h-4 w-4"
           />
           <p className="font-cera-pro text-sm font-light leading-[1.257] text-[#B3261E]">
-            Frete grátis para compras acima de R$ 99,99
-          </p>
-        </div>
-        <div className="flex items-center gap-1">
-          <Image
-            src="/new-home/icons/verified-red.svg"
-            alt=""
-            width={16}
-            height={16}
-            className="h-4 w-4"
-          />
-          <p className="font-cera-pro text-sm font-light leading-[1.257] text-[#B3261E]">
             10% de desconto pagando no pix
           </p>
         </div>

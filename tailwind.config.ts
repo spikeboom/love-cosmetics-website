@@ -13,6 +13,17 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      keyframes: {
+        "slide-up-toast": {
+          "0%": { opacity: "0", transform: "translateY(80px)" },
+          "45%": { opacity: "1", transform: "translateY(-20vh)" },
+          "75%": { opacity: "1", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "slide-up-toast": "slide-up-toast 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
+      },
       fontFamily: {
         lato: ["var(--font-lato)", ...fontFamily.sans],
         poppins: ["var(--font-poppins)", ...fontFamily.sans],
