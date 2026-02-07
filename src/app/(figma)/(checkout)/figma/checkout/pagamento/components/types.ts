@@ -41,4 +41,6 @@ export interface ResumoProps {
   formatPrice: (price: number) => string;
   onAlterarProdutos: () => void;
   onAlterarEntrega: () => void;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }

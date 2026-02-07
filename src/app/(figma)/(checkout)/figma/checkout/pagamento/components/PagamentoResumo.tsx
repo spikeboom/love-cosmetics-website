@@ -13,6 +13,8 @@ export function PagamentoResumo({
   formatPrice,
   onAlterarProdutos,
   onAlterarEntrega,
+  collapsible,
+  defaultCollapsed,
 }: ResumoProps) {
   return (
     <ResumoCompraCard
@@ -24,6 +26,8 @@ export function PagamentoResumo({
       cupons={cupons}
       onAlterarProdutos={onAlterarProdutos}
       onAlterarEntrega={onAlterarEntrega}
+      collapsible={collapsible}
+      defaultCollapsed={defaultCollapsed}
     />
   );
 }

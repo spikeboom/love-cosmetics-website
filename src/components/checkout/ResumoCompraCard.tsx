@@ -31,6 +31,10 @@ interface ResumoCompraCardProps {
   // Payment-specific
   onAlterarProdutos?: () => void;
   onAlterarEntrega?: () => void;
+
+  // Collapsible - mostra fade+chevron para expandir/recolher detalhes
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }
 
 export function ResumoCompraCard({
@@ -52,8 +56,11 @@ export function ResumoCompraCard({
   isMobile = false,
   onAlterarProdutos,
   onAlterarEntrega,
+  collapsible = false,
+  defaultCollapsed = true,
 }: ResumoCompraCardProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isDetailCollapsed, setIsDetailCollapsed] = useState(defaultCollapsed);
 
   // Calcular resumo de acordo com o mode
   const resumo = mode === 'order' && pedido
@@ -200,8 +207,9 @@ export function ResumoCompraCard({
 
   // ========== MODE: PAYMENT ==========
   if (mode === 'payment') {
-    const content = (
-      <div className="bg-[#f8f3ed] rounded-[8px] w-full">
+    // Conteúdo detalhado (produtos individuais, entrega, cupom)
+    const detailContent = (
+      <>
         {/* Produtos */}
         <div className="p-4 flex flex-col gap-4">
           <div className="flex items-center justify-between w-full">
@@ -317,10 +325,12 @@ export function ResumoCompraCard({
             </div>
           </>
         )}
+      </>
+    );
 
+    const totalSection = (
+      <>
         <div className="bg-white h-px w-full" />
-
-        {/* Valor Total */}
         <div className="p-4 flex items-center justify-between">
           <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111111]">
             Valor total
@@ -329,12 +339,55 @@ export function ResumoCompraCard({
             {formatPrice(resumo.produtosFinal + frete)}
           </span>
         </div>
+      </>
+    );
+
+    const fullContent = (
+      <div className="bg-[#f8f3ed] rounded-[8px] w-full">
+        {collapsible ? (
+          <>
+            {/* Collapsible detail area */}
+            <div className="relative">
+              <div
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+                style={{ maxHeight: isDetailCollapsed ? '140px' : '2000px' }}
+              >
+                {detailContent}
+              </div>
+              {/* Gradient fade overlay */}
+              {isDetailCollapsed && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-[48px] pointer-events-none"
+                  style={{ background: 'linear-gradient(to bottom, rgba(248,243,237,0), rgba(248,243,237,1))' }}
+                />
+              )}
+            </div>
+            {/* Chevron toggle */}
+            <button
+              onClick={() => setIsDetailCollapsed(!isDetailCollapsed)}
+              className="w-full flex items-center justify-center py-2 hover:bg-[#f0ebe4] transition-colors"
+            >
+              <svg
+                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                className={`transition-transform duration-300 ${isDetailCollapsed ? '' : 'rotate-180'}`}
+              >
+                <path d="M6 9L12 15L18 9" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {totalSection}
+          </>
+        ) : (
+          <>
+            {detailContent}
+            {totalSection}
+          </>
+        )}
       </div>
     );
 
     return (
       <div className="flex flex-col gap-4">
-        {/* Mobile: expand/collapse */}
+        {/* Mobile: expand/collapse (comportamento original) */}
         <div className="lg:hidden">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -355,12 +408,12 @@ export function ResumoCompraCard({
               </svg>
             </div>
           </button>
-          {!isCollapsed && content}
+          {!isCollapsed && fullContent}
         </div>
 
         {/* Desktop: always visible */}
         <div className="hidden lg:block">
-          {content}
+          {fullContent}
         </div>
 
         {/* Tag economia */}
@@ -379,135 +432,180 @@ export function ResumoCompraCard({
   }
 
   // ========== MODE: ORDER ==========
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-[#f8f3ed] rounded-[8px] overflow-hidden">
-        {/* Data do pedido */}
-        {dataPedido && (
-          <>
-            <div className="p-4 flex items-center justify-between">
-              <span className="font-cera-pro font-medium text-[16px] text-[#111]">
-                Data do pedido
-              </span>
-              <span className="font-cera-pro font-medium text-[16px] text-black">
-                {dataPedido}
-              </span>
-            </div>
-            <div className="bg-white h-px" />
-          </>
-        )}
-
-        {/* Produtos */}
-        <div className="p-4 flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-              Produtos
+  const orderDetailContent = (
+    <>
+      {/* Data do pedido */}
+      {dataPedido && (
+        <>
+          <div className="p-4 flex items-center justify-between">
+            <span className="font-cera-pro font-medium text-[16px] text-[#111]">
+              Data do pedido
             </span>
-            <div className="flex items-center gap-2">
-              {resumo.produtosDe > resumo.produtosFinal && (
-                <span className="font-cera-pro font-light text-[14px] text-[#999] line-through">
-                  {formatPrice(resumo.produtosDe)}
-                </span>
-              )}
-              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                {formatPrice(resumo.produtosFinal)}
-              </span>
-            </div>
+            <span className="font-cera-pro font-medium text-[16px] text-black">
+              {dataPedido}
+            </span>
           </div>
-          <div className="flex flex-col gap-3">
-            {displayItems.map((item: any, i: number) => {
-              const precoAtual = item.preco || item.unit_amount || 0;
-              const qty = item.quantity || 1;
-              const precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
+          <div className="bg-white h-px" />
+        </>
+      )}
 
-              // Badges individuais para pedido salvo
-              const badges = getOrderItemDiscountBadges(item, cupomDescricao);
+      {/* Produtos */}
+      <div className="p-4 flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
+            Produtos
+          </span>
+          <div className="flex items-center gap-2">
+            {resumo.produtosDe > resumo.produtosFinal && (
+              <span className="font-cera-pro font-light text-[14px] text-[#999] line-through">
+                {formatPrice(resumo.produtosDe)}
+              </span>
+            )}
+            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+              {formatPrice(resumo.produtosFinal)}
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          {displayItems.map((item: any, i: number) => {
+            const precoAtual = item.preco || item.unit_amount || 0;
+            const qty = item.quantity || 1;
+            const precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
 
-              return (
-                <div key={i} className="flex items-start gap-3">
-                  {/* Imagem */}
-                  {(item.image_url || item.imagem) && (
-                    <img
-                      src={item.image_url || item.imagem}
-                      alt={item.name || item.nome}
-                      className="w-12 h-12 object-cover rounded-md flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex flex-1 flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
-                        {item.name || item.nome} {qty > 1 && `(x${qty})`}
+            // Badges individuais para pedido salvo
+            const badges = getOrderItemDiscountBadges(item, cupomDescricao);
+
+            return (
+              <div key={i} className="flex items-start gap-3">
+                {/* Imagem */}
+                {(item.image_url || item.imagem) && (
+                  <img
+                    src={item.image_url || item.imagem}
+                    alt={item.name || item.nome}
+                    className="w-12 h-12 object-cover rounded-md flex-shrink-0"
+                  />
+                )}
+                <div className="flex flex-1 flex-col gap-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
+                      {item.name || item.nome} {qty > 1 && `(x${qty})`}
+                    </span>
+                    {badges.map((badge, bi) => (
+                      <span key={bi} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 bg-[#009142]">
+                        {badge.label}
                       </span>
-                      {badges.map((badge, bi) => (
-                        <span key={bi} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 bg-[#009142]">
-                          {badge.label}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {precoAntigo && (
-                        <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
-                          {formatPrice(precoAntigo * qty)}
-                        </span>
-                      )}
-                      <span className="font-cera-pro font-medium text-[14px] text-[#111]">
-                        {formatPrice(precoAtual * qty)}
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {precoAntigo && (
+                      <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
+                        {formatPrice(precoAntigo * qty)}
                       </span>
-                    </div>
+                    )}
+                    <span className="font-cera-pro font-medium text-[14px] text-[#111]">
+                      {formatPrice(precoAtual * qty)}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
+      </div>
 
-        <div className="bg-white h-px" />
+      <div className="bg-white h-px" />
 
-        {/* Entrega */}
-        <div className="p-4 flex flex-col gap-4">
-          <div className="flex justify-between items-center">
+      {/* Entrega */}
+      <div className="p-4 flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
+            Entrega
+          </span>
+          <span className={`font-cera-pro font-bold text-[18px] lg:text-[20px] ${
+            isFreeShipping ? 'text-[#009142]' : 'text-black'
+          }`}>
+            {isFreeShipping ? 'Gratis' : formatPrice(frete)}
+          </span>
+        </div>
+        {enderecoCompleto && (
+          <p className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
+            {enderecoCompleto}
+          </p>
+        )}
+      </div>
+
+      {/* Cupom */}
+      {resumo.descontoCupom > 0 && (
+        <>
+          <div className="bg-white h-px" />
+          <div className="p-4 flex justify-between items-center">
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-              Entrega
+              Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
             </span>
-            <span className={`font-cera-pro font-bold text-[18px] lg:text-[20px] ${
-              isFreeShipping ? 'text-[#009142]' : 'text-black'
-            }`}>
-              {isFreeShipping ? 'Gratis' : formatPrice(frete)}
+            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
+              -{formatPrice(resumo.descontoCupom)}
             </span>
           </div>
-          {enderecoCompleto && (
-            <p className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
-              {enderecoCompleto}
-            </p>
-          )}
-        </div>
+        </>
+      )}
+    </>
+  );
 
-        {/* Cupom */}
-        {resumo.descontoCupom > 0 && (
+  const orderTotalSection = (
+    <>
+      <div className="bg-white h-px" />
+      <div className="p-4 flex justify-between items-center">
+        <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
+          {metodoPagamento ? `Pagamento ${metodoPagamento}` : 'Valor total'}
+        </span>
+        <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+          {formatPrice(resumo.produtosFinal + frete)}
+        </span>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className={`bg-[#f8f3ed] rounded-[8px] ${collapsible ? '' : 'overflow-hidden'}`}>
+        {collapsible ? (
           <>
-            <div className="bg-white h-px" />
-            <div className="p-4 flex justify-between items-center">
-              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-                Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
-              </span>
-              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-                -{formatPrice(resumo.descontoCupom)}
-              </span>
+            {/* Collapsible detail area */}
+            <div className="relative">
+              <div
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+                style={{ maxHeight: isDetailCollapsed ? '140px' : '2000px' }}
+              >
+                {orderDetailContent}
+              </div>
+              {/* Gradient fade overlay */}
+              {isDetailCollapsed && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-[48px] pointer-events-none"
+                  style={{ background: 'linear-gradient(to bottom, rgba(248,243,237,0), rgba(248,243,237,1))' }}
+                />
+              )}
             </div>
+            {/* Chevron toggle */}
+            <button
+              onClick={() => setIsDetailCollapsed(!isDetailCollapsed)}
+              className="w-full flex items-center justify-center py-2 hover:bg-[#f0ebe4] transition-colors"
+            >
+              <svg
+                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                className={`transition-transform duration-300 ${isDetailCollapsed ? '' : 'rotate-180'}`}
+              >
+                <path d="M6 9L12 15L18 9" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {orderTotalSection}
+          </>
+        ) : (
+          <>
+            {orderDetailContent}
+            {orderTotalSection}
           </>
         )}
-
-        <div className="bg-white h-px" />
-
-        {/* Valor Total / Pagamento */}
-        <div className="p-4 flex justify-between items-center">
-          <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
-            {metodoPagamento ? `Pagamento ${metodoPagamento}` : 'Valor total'}
-          </span>
-          <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-            {formatPrice(resumo.produtosFinal + frete)}
-          </span>
-        </div>
       </div>
 
       {/* Tag economia */}

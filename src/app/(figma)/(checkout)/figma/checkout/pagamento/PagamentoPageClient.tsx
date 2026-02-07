@@ -145,6 +145,8 @@ export function PagamentoPageClient() {
     formatPrice,
     onAlterarProdutos: () => router.push("/figma/cart"),
     onAlterarEntrega: () => router.push("/figma/checkout/entrega"),
+    collapsible: true,
+    defaultCollapsed: true,
   };
 
   // Tela de loading enquanto cria pedido

@@ -55,7 +55,7 @@ export function IdentificacaoPageClient() {
               error={errors.cpf}
               placeholder="000.000.000-00"
               maxLength={14}
-              disabled={isLoggedIn}
+              disabled={isLoggedIn && process.env.NODE_ENV !== "development"}
             />
 
             {/* Data de nascimento */}
@@ -86,7 +86,7 @@ export function IdentificacaoPageClient() {
               onChange={handleChange}
               error={errors.email}
               type="email"
-              disabled={isLoggedIn}
+              disabled={isLoggedIn && process.env.NODE_ENV !== "development"}
             />
 
             {/* Telefone */}
