@@ -98,7 +98,7 @@ export function ConfirmacaoStepper({ currentStep }: ConfirmacaoStepperProps) {
 
                 {/* Chevron separator */}
                 {index < steps.length - 1 && (
-                  <ChevronRightIcon className="w-6 h-6 lg:w-12 lg:h-12 text-[#8e8e93] mx-2 lg:mx-4" />
+                  <ChevronRightIcon className="w-6 h-6 lg:w-12 lg:h-12 text-[#8e8e93] lg:mx-4" />
                 )}
               </div>
             );

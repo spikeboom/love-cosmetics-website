@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { DiscountBadge } from '@/core/pricing/resumo-compra';
+import { ceraPro } from '@/lib/fonts';
 
 interface CartProductCardProps {
   produto: any;
@@ -39,11 +42,14 @@ export function CartProductCard({
   isOutdated = false,
   precoAtualizado,
 }: CartProductCardProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const quantidade = produto.quantity || 1;
 
   const handleMinus = () => {
     if (quantidade > 1) {
       onSubtract();
+    } else {
+      setShowDeleteConfirm(true);
     }
   };
 
@@ -71,9 +77,62 @@ export function CartProductCard({
     : null;
 
   return (
-    <div className={`flex w-full flex-col rounded-lg overflow-clip shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)] ${
+    <div className={`relative flex w-full flex-col rounded-lg overflow-clip shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)] ${
       isOutdated ? 'ring-2 ring-[#FFE69C]' : ''
     }`}>
+      {/* Overlay de confirmação de exclusão - Desktop: sobre o card */}
+      {showDeleteConfirm && (
+        <div className="hidden md:flex absolute inset-0 z-10 items-center justify-center rounded-[8px] bg-white/90 backdrop-blur-[2px] animate-fade-in shadow-[0px_1px_3px_1px_rgba(0,0,0,0.15),0px_1px_2px_0px_rgba(0,0,0,0.3)]">
+          <div className="flex gap-4 p-4">
+            <button
+              onClick={() => {
+                onRemove();
+                setShowDeleteConfirm(false);
+              }}
+              className="flex-1 font-cera-pro font-medium text-[16px] text-[#254333] bg-[#D8F9E7] rounded-[8px] h-[48px] px-4 hover:bg-[#c5f0d8] transition-colors"
+            >
+              Excluir
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 font-cera-pro font-medium text-[16px] text-white bg-[#254333] rounded-[8px] h-[48px] px-4 hover:bg-[#1a3025] transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay de confirmação de exclusão - Mobile: portal para bottom da tela */}
+      {showDeleteConfirm && createPortal(
+        <>
+          <div
+            className="md:hidden fixed inset-0 z-50 bg-black/20 animate-fade-in w-full"
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          <div className={`${ceraPro.variable} md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-[0px_-4px_20px_rgba(0,0,0,0.1)] px-4 py-4 pb-4 animate-fade-in w-[calc(100%-16px)] mx-[8px]`}>
+            <div className="flex gap-4 w-full">
+              <button
+                onClick={() => {
+                  onRemove();
+                  setShowDeleteConfirm(false);
+                }}
+                className="flex-1 font-cera-pro font-medium text-[16px] text-[#254333] bg-[#D8F9E7] rounded-[8px] h-[48px] hover:bg-[#c5f0d8] transition-colors"
+              >
+                Excluir
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 font-cera-pro font-medium text-[16px] text-white bg-[#254333] rounded-[8px] h-[48px] hover:bg-[#1a3025] transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
       {/* Banner de preço desatualizado */}
       {isOutdated && (
         <div className="flex items-center gap-2 px-4 py-2 bg-[#FFF3CD] border-b border-[#FFE69C]">

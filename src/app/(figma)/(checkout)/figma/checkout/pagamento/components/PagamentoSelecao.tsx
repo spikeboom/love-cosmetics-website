@@ -48,7 +48,7 @@ export function PagamentoSelecao({
               {/* PIX */}
               <button
                 onClick={onSelecionarPix}
-                className="w-full rounded-[8px] border border-transparent shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] bg-white p-4 text-left transition-all hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.3),0px_2px_6px_2px_rgba(0,0,0,0.15)]"
+                className="w-full rounded-[8px] border border-[#E7A63A] bg-white p-4 text-left transition-all hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.3),0px_2px_6px_2px_rgba(0,0,0,0.15)]"
               >
                 <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-1">

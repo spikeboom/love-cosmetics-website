@@ -51,21 +51,29 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           <div className="max-w-[1440px] w-full px-6 py-12">
             <CartHeader />
 
-            <div className="flex flex-col items-center justify-center gap-8 py-16">
-              <div className="text-center">
-                <h2 className="font-times font-bold text-[32px] text-black mb-4">
-                  Seu carrinho está vazio
-                </h2>
-                <p className="font-cera-pro font-light text-[16px] text-[#333333] mb-8">
-                  Adicione produtos ao seu carrinho para continuar
+            <div className="flex flex-col items-center justify-center gap-4 py-16">
+              {/* Ícone carrinho */}
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M14 36c-2.2 0-3.98 1.8-3.98 4s1.78 4 4 4 4-1.8 4-4-1.8-4-4.02-4zM2 4v4h4l7.2 15.17-2.7 4.9C10.18 28.67 10 29.33 10 30c0 2.2 1.8 4 4 4h24v-4H15.08c-.28 0-.52-.22-.52-.5l.06-.24L16.4 26h14.9c1.5 0 2.82-.83 3.5-2.06l7.16-12.98c.16-.28.24-.62.24-.96 0-1.1-.9-2-2-2H10.44l-1.9-4H2zm32 32c-2.2 0-3.98 1.8-3.98 4s1.78 4 4 4 4-1.8 4-4-1.8-4-4.02-4z" fill="#B3261E"/>
+              </svg>
+
+              {/* Textos */}
+              <div className="flex flex-col items-center gap-4">
+                <p className="font-cera-pro font-light text-[20px] text-[#B3261E] text-center leading-[normal]">
+                  Seu carrinho está vazio.
                 </p>
-                <Link
-                  href="/figma"
-                  className="inline-block bg-[#254333] text-white font-cera-pro font-bold text-[16px] px-8 py-3 rounded-lg hover:bg-[#1a2e24] transition-colors"
-                >
-                  Continuar Comprando
-                </Link>
+                <p className="font-cera-pro font-bold text-[20px] text-[#B3261E] text-center leading-[normal]">
+                  Aproveite o melhor da Amazônia!
+                </p>
               </div>
+
+              {/* Botão continuar comprando */}
+              <Link
+                href="/figma"
+                className="mt-4 inline-block bg-[#254333] text-white font-cera-pro font-bold text-[16px] px-8 py-3 rounded-lg hover:bg-[#1a2e24] transition-colors"
+              >
+                Continuar Comprando
+              </Link>
             </div>
           </div>
         </div>

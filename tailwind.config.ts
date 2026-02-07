@@ -20,9 +20,14 @@ export default {
           "75%": { opacity: "1", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         "slide-up-toast": "slide-up-toast 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
+        "fade-in": "fade-in 0.2s ease-out",
       },
       fontFamily: {
         lato: ["var(--font-lato)", ...fontFamily.sans],

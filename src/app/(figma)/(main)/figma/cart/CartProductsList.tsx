@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { CartProductCard } from './CartProductCard';
 import { getItemDiscountBadges } from '@/core/pricing/resumo-compra';
 
@@ -127,33 +126,6 @@ export function CartProductsList({
         );
       })}
 
-      {/* Tag Múltiplas */}
-      <div className="flex flex-col justify-center gap-2 self-stretch rounded-lg bg-[#F8F3ED] p-4">
-        <div className="flex items-center gap-1">
-          <Image
-            src="/new-home/icons/verified-red.svg"
-            alt=""
-            width={16}
-            height={16}
-            className="h-4 w-4"
-          />
-          <p className="font-cera-pro text-sm font-light leading-[1.257] text-[#B3261E]">
-            10% de desconto pagando no pix
-          </p>
-        </div>
-        <div className="flex items-center gap-1">
-          <Image
-            src="/new-home/icons/verified-red.svg"
-            alt=""
-            width={16}
-            height={16}
-            className="h-4 w-4"
-          />
-          <p className="font-cera-pro text-sm font-light leading-[1.257] text-[#B3261E]">
-            Parcele em até 10x sem juros
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

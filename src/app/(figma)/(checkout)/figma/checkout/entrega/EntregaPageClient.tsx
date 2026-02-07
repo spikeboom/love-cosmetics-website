@@ -9,6 +9,7 @@ import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 import { formatCEP } from "@/lib/formatters";
+import Image from "next/image";
 
 interface FormData {
   cep: string;
@@ -153,13 +154,13 @@ export function EntregaPageClient() {
     }
   };
 
-  // Buscar CEP quando completar 9 caracteres (00000-000)
-  const handleCepBlur = async () => {
+  // Auto-buscar CEP quando completar 8 dígitos
+  useEffect(() => {
     const cepLimpo = formData.cep.replace(/\D/g, "");
     if (cepLimpo.length === 8) {
-      await buscarCep(formData.cep);
+      buscarCep(formData.cep);
     }
-  };
+  }, [formData.cep]);
 
   // Selecionar opcao de frete
   const handleSelectFreight = (index: number) => {
@@ -246,7 +247,6 @@ export function EntregaPageClient() {
                   type="text"
                   value={formData.cep}
                   onChange={(e) => handleChange("cep", e.target.value)}
-                  onBlur={handleCepBlur}
                   placeholder="00000-000"
                   maxLength={9}
                   className={`w-full h-[48px] px-4 bg-white border ${
@@ -267,6 +267,21 @@ export function EntregaPageClient() {
               )}
               {(errors.cep || errorCep) && (
                 <span className="text-red-500 text-sm">{errors.cep || errorCep}</span>
+              )}
+              {/* Cidade/Estado resumido - mesmo estilo da PDP */}
+              {formData.cidade && formData.estado && (
+                <div className="flex items-start gap-[6px] w-full">
+                  <Image
+                    src="/new-home/icons/location.svg"
+                    alt="Localização"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4 flex-shrink-0 mt-[1px]"
+                  />
+                  <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.4]">
+                    {formData.cidade} - {formData.estado}
+                  </p>
+                </div>
               )}
             </div>
 

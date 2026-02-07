@@ -43,7 +43,7 @@ export function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
 
   return (
     <div className="bg-[#f8f3ed] border-b border-[#ba7900] w-full">
-      <div className="flex gap-2 lg:gap-4 items-center lg:justify-center p-3 lg:p-[16px] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="flex gap-1 lg:gap-4 items-center lg:justify-center p-3 px-1 lg:p-[16px] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex items-center justify-between w-full max-w-[684px] min-w-max lg:min-w-0">
           {steps.map((step, index) => {
             const isActive = index === currentIndex;
@@ -71,7 +71,7 @@ export function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
 
                 {/* Chevron separator (não mostrar após o último) */}
                 {index < steps.length - 1 && (
-                  <ChevronRightIcon className="w-6 h-6 lg:w-12 lg:h-12 text-[#8e8e93] mx-2 lg:mx-4" />
+                  <ChevronRightIcon className="w-6 h-6 lg:w-12 lg:h-12 text-[#8e8e93] lg:mx-4" />
                 )}
               </div>
             );
