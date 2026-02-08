@@ -24,7 +24,10 @@ export async function POST(
     }
 
     // Verifica se já foi gerada nota fiscal
-    if (pedido.notaFiscalGerada) {
+    const body = await request.json().catch(() => ({}));
+    const forceRegenerate = body?.force === true;
+
+    if (pedido.notaFiscalGerada && !forceRegenerate) {
       return NextResponse.json(
         {
           success: false,

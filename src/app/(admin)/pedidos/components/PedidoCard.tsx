@@ -36,14 +36,18 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
   const [showPagamentos, setShowPagamentos] = useState(false);
   const [showStatusEntrega, setShowStatusEntrega] = useState(false);
   const [generatingNota, setGeneratingNota] = useState(false);
+  const [showReenviarConfirm, setShowReenviarConfirm] = useState(false);
   const [historicoRefreshKey, setHistoricoRefreshKey] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleGerarNota = async () => {
+  const handleGerarNota = async (force = false) => {
     setGeneratingNota(true);
+    setShowReenviarConfirm(false);
     try {
       const response = await fetch(`/api/pedidos/${pedido.id}/gerar-nota`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force }),
       });
 
       const data = await response.json();
@@ -339,15 +343,50 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
 
               {/* Botao Nota Fiscal */}
               {pedido.notaFiscalGerada ? (
-                <div className="flex items-center gap-2 px-4 py-2 bg-[#F0F9F4] rounded-[8px] border border-[#009142]">
-                  <ReceiptIcon />
-                  <span className="font-cera-pro font-medium text-[14px] text-[#009142]">
-                    NF Gerada
-                  </span>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowReenviarConfirm(!showReenviarConfirm)}
+                    disabled={generatingNota}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#F0F9F4] hover:bg-[#e0f3e8] rounded-[8px] border border-[#009142] transition-colors cursor-pointer"
+                  >
+                    {generatingNota ? (
+                      <SpinnerIcon className="text-[#009142]" />
+                    ) : (
+                      <ReceiptIcon />
+                    )}
+                    <span className="font-cera-pro font-medium text-[14px] text-[#009142]">
+                      NF Gerada
+                    </span>
+                  </button>
+
+                  {showReenviarConfirm && (
+                    <div className="absolute bottom-full left-0 mb-2 p-4 bg-white rounded-[12px] shadow-[0px_4px_12px_rgba(0,0,0,0.15)] border border-[#d2d2d2] z-50 min-w-[280px]">
+                      <p className="font-cera-pro font-medium text-[14px] text-black mb-1">
+                        Reenviar Nota Fiscal?
+                      </p>
+                      <p className="font-cera-pro font-light text-[12px] text-[#666666] mb-3">
+                        A nota fiscal ja foi gerada para este pedido. Deseja gerar novamente?
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setShowReenviarConfirm(false)}
+                          className="flex-1 px-3 py-2 bg-[#f0f0f0] hover:bg-[#e0e0e0] rounded-[8px] font-cera-pro font-medium text-[13px] text-[#333] transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          onClick={() => handleGerarNota(true)}
+                          className="flex-1 px-3 py-2 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] font-cera-pro font-medium text-[13px] text-white transition-colors"
+                        >
+                          Sim, Reenviar
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button
-                  onClick={handleGerarNota}
+                  onClick={() => handleGerarNota()}
                   disabled={generatingNota}
                   className={`flex items-center gap-2 px-4 py-2 rounded-[8px] transition-colors ${
                     pedido.notaFiscalErro

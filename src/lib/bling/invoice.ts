@@ -1,5 +1,7 @@
 import { createLogger } from "@/utils/logMessage";
 import { makeAuthenticatedRequest } from "./simple-auth";
+import { getKitComponentSlugs } from "@/core/pricing/kits";
+import { fetchProdutosBySlugs } from "@/lib/strapi/produtos";
 
 const logMessage = createLogger();
 
@@ -30,6 +32,8 @@ interface OrderItem {
   unit_amount?: number;
   preco?: number;
   bling_number?: number;
+  /** Nome do kit de origem (preenchido quando o item veio de um kit explodido) */
+  fromKit?: string;
 }
 
 // Interface para dados do pedido
@@ -144,15 +148,135 @@ function buildTransporteData(orderData: OrderData) {
   return transporte;
 }
 
+/**
+ * Explode itens de kits em seus componentes individuais,
+ * buscando dados atualizados do Strapi e rateando o valor proporcionalmente.
+ */
+async function explodeKitItems(items: OrderItem[]): Promise<OrderItem[]> {
+  const result: OrderItem[] = [];
+
+  // Coleta todos os slugs necessários de uma vez
+  const allSlugs = new Set<string>();
+  const kitInfos: Array<{ index: number; slugs: string[] }> = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const componentSlugs = getKitComponentSlugs({ nome: item.name });
+    if (componentSlugs) {
+      kitInfos.push({ index: i, slugs: componentSlugs });
+      for (const slug of componentSlugs) {
+        allSlugs.add(slug);
+      }
+    }
+  }
+
+  // Se não há kits, retorna os itens originais
+  if (kitInfos.length === 0) return items;
+
+  // Busca todos os componentes de uma só vez no Strapi
+  const produtosMap = await fetchProdutosBySlugs(Array.from(allSlugs));
+
+  const kitIndices = new Set(kitInfos.map((k) => k.index));
+
+  for (let i = 0; i < items.length; i++) {
+    if (!kitIndices.has(i)) {
+      // Item normal, mantém como está
+      result.push(items[i]);
+      continue;
+    }
+
+    const item = items[i];
+    const kitInfo = kitInfos.find((k) => k.index === i)!;
+
+    // Valida que todos os componentes foram encontrados
+    const componentes = kitInfo.slugs.map((slug) => {
+      const produto = produtosMap.get(slug);
+      if (!produto) {
+        throw new Error(
+          `Componente "${slug}" do kit "${item.name}" não encontrado no Strapi`
+        );
+      }
+      if (!produto.bling_number) {
+        throw new Error(
+          `Componente "${slug}" do kit "${item.name}" não possui bling_number no Strapi`
+        );
+      }
+      return produto;
+    });
+
+    // Preço unitário do kit (valor de 1 unidade)
+    const kitUnitPrice = item.preco || item.unit_amount || item.value;
+    // Valor total do kit (preço × quantidade)
+    const valorTotalKit = kitUnitPrice * item.quantity;
+
+    // Soma dos preços de tabela dos componentes (para calcular peso proporcional)
+    const somaPrecos = componentes.reduce((sum, c) => sum + c.preco, 0);
+
+    if (somaPrecos === 0) {
+      throw new Error(
+        `Soma dos preços dos componentes do kit "${item.name}" é zero`
+      );
+    }
+
+    // Rateio proporcional com correção de arredondamento no último item
+    let acumulado = 0;
+    const explodedItems: OrderItem[] = [];
+
+    for (let j = 0; j < componentes.length; j++) {
+      const comp = componentes[j];
+      let valorRateado: number;
+
+      if (j < componentes.length - 1) {
+        const peso = comp.preco / somaPrecos;
+        valorRateado = Math.round(peso * valorTotalKit * 100) / 100;
+        acumulado += valorRateado;
+      } else {
+        // Último componente: ajusta para a soma bater exatamente
+        valorRateado = Math.round((valorTotalKit - acumulado) * 100) / 100;
+      }
+
+      explodedItems.push({
+        id: comp.id,
+        name: comp.nome,
+        quantity: 1, // cada item aparece 1 vez (valor já inclui qty do kit)
+        value: valorRateado,
+        preco: valorRateado,
+        bling_number: comp.bling_number,
+        fromKit: item.name,
+      });
+    }
+
+    logMessage("Kit explodido em componentes", {
+      kitName: item.name,
+      kitQuantity: item.quantity,
+      kitUnitPrice,
+      valorTotalKit,
+      componentes: explodedItems.map((e) => ({
+        name: e.name,
+        valor: e.preco,
+        bling_number: e.bling_number,
+      })),
+      somaComponentes: explodedItems.reduce((s, e) => s + (e.preco || 0), 0),
+    });
+
+    result.push(...explodedItems);
+  }
+
+  return result;
+}
+
 // Cria uma nota fiscal no Bling
 export async function createInvoice(
   accessToken: string,
   orderData: OrderData
 ): Promise<BlingNFResponse> {
   try {
+    // Explode kits em itens individuais (busca dados do Strapi)
+    const expandedItems = await explodeKitItems(orderData.items);
+
     // Busca dados fiscais de todos os produtos em paralelo
     const produtosComTributacao = await Promise.all(
-      orderData.items.map(async (item) => {
+      expandedItems.map(async (item) => {
         if (!item.bling_number) {
           throw new Error(`Produto ${item.name} não possui bling_number`);
         }
@@ -178,6 +302,11 @@ export async function createInvoice(
         tipo: "P", // P = Produto
       };
 
+      // Adiciona informação de que o item veio de um kit desmembrado
+      if (item.fromKit) {
+        itemNF.informacoesAdicionais = `Componente do ${item.fromKit}`;
+      }
+
       // Adiciona dados fiscais se disponíveis
       if (tributacao.origem !== undefined) {
         itemNF.origem = tributacao.origem;
@@ -197,6 +326,17 @@ export async function createInvoice(
       return itemNF;
     });
 
+    // Monta informações complementares com detalhes de kits desmembrados
+    const kitsExplodidos = [...new Set(
+      expandedItems.filter(i => i.fromKit).map(i => i.fromKit!)
+    )];
+    let infoComplementar = orderData.additionalInfo || `Venda pela Internet. Pedido LV-${orderData.id}`;
+    if (kitsExplodidos.length > 0) {
+      const kitInfo = kitsExplodidos
+        .map(kit => `${kit} desmembrado em itens individuais para fins fiscais`)
+        .join("; ");
+      infoComplementar += `. ${kitInfo}.`;
+    }
 
     // Monta o corpo da requisição
     const invoiceData = {
@@ -222,9 +362,10 @@ export async function createInvoice(
         }
       },
       naturezaOperacao: { id: 15106222870 }, // ID fornecido no exemplo
+      loja: { id: 205192622 }, // Matriz
       presenca: 2, // Venda pela internet
       consumidorFinal: true,
-      informacoesComplementares: orderData.additionalInfo || `Venda pela Internet. Pedido LV-${orderData.id}`,
+      informacoesComplementares: infoComplementar,
       itens: items,
       transporte: buildTransporteData(orderData)
     };

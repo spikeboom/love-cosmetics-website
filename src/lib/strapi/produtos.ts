@@ -7,7 +7,9 @@ export interface ProdutoStrapi {
   id: number;
   documentId: string;
   nome: string;
+  slug?: string;
   preco: number;
+  bling_number?: number;
 }
 
 /**
@@ -105,6 +107,46 @@ export async function fetchProdutosByNomes(nomes: string[]): Promise<Map<string,
   const produtosMap = new Map<string, ProdutoStrapi>();
   for (const produto of result.data || []) {
     produtosMap.set(produto.nome, produto);
+  }
+
+  return produtosMap;
+}
+
+/**
+ * Busca produtos por slug no Strapi. Retorna Map<slug, ProdutoStrapi>.
+ */
+export async function fetchProdutosBySlugs(slugs: string[]): Promise<Map<string, ProdutoStrapi>> {
+  if (slugs.length === 0) return new Map();
+
+  const filters = {
+    slug: { $in: slugs },
+  };
+
+  const query = qs.stringify(
+    { filters, fields: ["id", "documentId", "nome", "slug", "preco", "bling_number"] },
+    { encodeValuesOnly: true }
+  );
+
+  const response = await fetch(`${getBaseURL()}/api/produtos?${query}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Falha ao buscar produtos por slug");
+  }
+
+  const produtosMap = new Map<string, ProdutoStrapi>();
+  for (const produto of result.data || []) {
+    if (produto.slug) {
+      produtosMap.set(produto.slug, produto);
+    }
   }
 
   return produtosMap;

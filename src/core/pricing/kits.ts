@@ -3,6 +3,46 @@ export type KitDiscount = {
   label: string; // "10% OFF"
 };
 
+/** Slugs dos produtos que compõem cada kit */
+export const KIT_COMPONENTS: Record<string, string[]> = {
+  "kit-completo": [
+    "espuma-facial",
+    "serum-facial",
+    "hidratante-facial",
+    "mascara-de-argila",
+    "manteiga-corporal",
+  ],
+  "kit-uso-diario": [
+    "espuma-facial",
+    "serum-facial",
+    "hidratante-facial",
+  ],
+};
+
+/**
+ * Detecta se o item é um kit e retorna os slugs dos seus componentes.
+ * Usa o mesmo padrão de detecção do getKitDiscount.
+ */
+export function getKitComponentSlugs(
+  product: { nome?: string | null; slug?: string | null }
+): string[] | null {
+  const slug = product.slug ? normalizeText(product.slug) : "";
+  const nome = product.nome ? normalizeText(product.nome) : "";
+  const haystack = `${slug} ${nome}`.trim();
+
+  if (!haystack) return null;
+
+  if (haystack.includes("kit uso diario")) {
+    return KIT_COMPONENTS["kit-uso-diario"];
+  }
+
+  if (haystack.includes("kit completo") || haystack.includes("kit full")) {
+    return KIT_COMPONENTS["kit-completo"];
+  }
+
+  return null;
+}
+
 function normalizeText(value: string) {
   return value
     .normalize("NFD")
