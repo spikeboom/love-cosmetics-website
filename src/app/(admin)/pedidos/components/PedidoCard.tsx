@@ -226,20 +226,18 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
 
               {/* Cupons */}
               {pedido.cupons && pedido.cupons.length > 0 && (
-                <div className="mt-4 p-3 bg-[#F0F9F4] rounded-[8px] border border-[#009142]">
-                  <p className="font-cera-pro font-medium text-[12px] text-[#009142] mb-2">
-                    Cupons Aplicados
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {pedido.cupons.map((cupom, idx) => (
-                      <span
-                        key={idx}
-                        className="bg-white px-2 py-1 rounded-[4px] font-cera-pro font-light text-[12px] text-[#009142] border border-[#009142]"
-                      >
-                        {cupom}
-                      </span>
-                    ))}
-                  </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="font-cera-pro font-light text-[12px] text-[#666666]">
+                    Cupom:
+                  </span>
+                  {pedido.cupons.map((cupom, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded-[4px] font-cera-pro font-medium text-[11px] text-[#009142] bg-[#F0F9F4]"
+                    >
+                      {cupom}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
@@ -267,42 +265,34 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                       Resumo do Pedido
                     </h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <div className="bg-[#f8f3ed] rounded-[8px] p-3">
-                      <p className="font-cera-pro font-light text-[12px] text-[#666666]">Produtos (De)</p>
-                      <p className="font-cera-pro font-bold text-[14px] text-black">{fmt(resumo.produtosDe)}</p>
-                    </div>
-                    <div className="bg-[#f8f3ed] rounded-[8px] p-3">
-                      <p className="font-cera-pro font-light text-[12px] text-[#666666]">Produtos (Por)</p>
-                      <p className="font-cera-pro font-bold text-[14px] text-black">{fmt(resumo.produtosFinal)}</p>
-                    </div>
-                    <div className="bg-[#f8f3ed] rounded-[8px] p-3">
-                      <p className="font-cera-pro font-light text-[12px] text-[#666666]">Frete</p>
-                      <p className="font-cera-pro font-bold text-[14px] text-black">{fmt(pedido.frete_calculado)}</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-cera-pro font-light text-[13px] text-[#666666]">Produtos</span>
+                      <span className="font-cera-pro font-medium text-[13px] text-black">{fmt(resumo.produtosDe)}</span>
                     </div>
                     {resumo.descontoSite > 0 && (
-                      <div className="bg-[#F0F9F4] rounded-[8px] p-3 border border-[#009142]">
-                        <p className="font-cera-pro font-light text-[12px] text-[#009142]">Descontos (site)</p>
-                        <p className="font-cera-pro font-bold text-[14px] text-[#009142]">-{fmt(resumo.descontoSite)}</p>
+                      <div className="flex justify-between">
+                        <span className="font-cera-pro font-light text-[13px] text-[#009142]">Desconto (site)</span>
+                        <span className="font-cera-pro font-medium text-[13px] text-[#009142]">-{fmt(resumo.descontoSite)}</span>
                       </div>
                     )}
                     {resumo.descontoCupom > 0 && (
-                      <div className="bg-[#F0F9F4] rounded-[8px] p-3 border border-[#009142]">
-                        <p className="font-cera-pro font-light text-[12px] text-[#009142]">
+                      <div className="flex justify-between">
+                        <span className="font-cera-pro font-light text-[13px] text-[#009142]">
                           Cupom{pedido.cupom_descricao ? ` (${pedido.cupom_descricao})` : ''}
-                        </p>
-                        <p className="font-cera-pro font-bold text-[14px] text-[#009142]">-{fmt(resumo.descontoCupom)}</p>
+                        </span>
+                        <span className="font-cera-pro font-medium text-[13px] text-[#009142]">-{fmt(resumo.descontoCupom)}</span>
                       </div>
                     )}
-                    {resumo.totalEconomizado > 0 && (
-                      <div className="bg-[#d8f9e7] rounded-[8px] p-3">
-                        <p className="font-cera-pro font-light text-[12px] text-[#254333]">Total Economizado</p>
-                        <p className="font-cera-pro font-bold text-[14px] text-[#254333]">{fmt(resumo.totalEconomizado)}</p>
-                      </div>
-                    )}
-                    <div className="bg-[#254333] rounded-[8px] p-3">
-                      <p className="font-cera-pro font-light text-[12px] text-white">Total</p>
-                      <p className="font-cera-pro font-bold text-[14px] text-white">{fmt(pedido.total_pedido)}</p>
+                    <div className="flex justify-between">
+                      <span className="font-cera-pro font-light text-[13px] text-[#666666]">Frete</span>
+                      <span className="font-cera-pro font-medium text-[13px] text-black">
+                        {pedido.frete_calculado === 0 ? "Grátis" : fmt(pedido.frete_calculado)}
+                      </span>
+                    </div>
+                    <div className="border-t border-[#d2d2d2] pt-2 flex justify-between">
+                      <span className="font-cera-pro font-bold text-[14px] text-black">Total</span>
+                      <span className="font-cera-pro font-bold text-[14px] text-black">{fmt(pedido.total_pedido)}</span>
                     </div>
                   </div>
                 </div>

@@ -75,8 +75,6 @@ export async function POST(req: NextRequest) {
 
     const { cliente, items, frete, desconto, cortesia } = body;
 
-    console.log("[Admin Pedido] Desconto recebido:", JSON.stringify(desconto));
-
     // Validações básicas
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -120,8 +118,6 @@ export async function POST(req: NextRequest) {
         }
       }
     }
-
-    console.log("[Admin Pedido] Desconto calculado:", { descontoValor, cupomDescricao, cuponsAplicados });
 
     // Calcular total
     const freteValor = frete.valor || 0;
