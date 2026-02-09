@@ -370,7 +370,7 @@ export default function NovoPedidoPage() {
           desconto: {
             tipo: tipoDesconto,
             cupom_codigo: tipoDesconto === "cupom" ? cupomCodigo : undefined,
-            valor: tipoDesconto === "manual" && descontoPorcentagem === 0 ? descontoValor : undefined,
+            valor: descontoTotal,
             porcentagem: tipoDesconto === "manual" && descontoPorcentagem > 0 ? descontoPorcentagem : undefined,
           },
           cortesia,
@@ -972,9 +972,32 @@ export default function NovoPedidoPage() {
 
               {/* Dados do Cliente */}
               <div className="bg-white rounded-[16px] p-6 shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)]">
-                <h2 className="font-cera-pro font-bold text-[18px] text-black mb-4">
-                  Dados do Cliente
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-cera-pro font-bold text-[18px] text-black">
+                    Dados do Cliente
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setCliente({
+                      nome: "Teste",
+                      sobrenome: "Admin",
+                      email: "spikeboom+teste@gmail.com",
+                      cpf: "010.550.442-48",
+                      telefone: "(92) 99139-7249",
+                      data_nascimento: "01/01/1990",
+                      cep: "69050-340",
+                      endereco: "Rua Creuza Lopes Leitão",
+                      numero: "110",
+                      complemento: "",
+                      bairro: "Parque 10 de Novembro",
+                      cidade: "Manaus",
+                      estado: "AM",
+                    })}
+                    className="font-cera-pro font-medium text-[12px] text-[#666] hover:text-[#254333] underline transition-colors"
+                  >
+                    Preencher teste
+                  </button>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

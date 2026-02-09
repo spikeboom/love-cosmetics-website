@@ -59,6 +59,8 @@ interface OrderData {
   transportadora_nome?: string;
   transportadora_servico?: string;
   transportadora_prazo?: number;
+  // Desconto do pedido (nível do documento, apenas pedidos admin)
+  desconto_total?: number;
 }
 
 // Interface para resposta da API do Bling
@@ -366,6 +368,9 @@ export async function createInvoice(
       presenca: 2, // Venda pela internet
       consumidorFinal: true,
       informacoesComplementares: infoComplementar,
+      ...(orderData.desconto_total && orderData.desconto_total > 0
+        ? { desconto: Math.round(orderData.desconto_total * 100) / 100 }
+        : {}),
       itens: items,
       transporte: buildTransporteData(orderData)
     };

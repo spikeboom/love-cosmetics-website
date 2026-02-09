@@ -75,6 +75,8 @@ export async function POST(req: NextRequest) {
 
     const { cliente, items, frete, desconto, cortesia } = body;
 
+    console.log("[Admin Pedido] Desconto recebido:", JSON.stringify(desconto));
+
     // Validações básicas
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -97,21 +99,29 @@ export async function POST(req: NextRequest) {
     );
 
     // Calcular desconto
-    let descontoValor = 0;
+    // O frontend já calcula descontoTotal e envia em desconto.valor
+    let descontoValor = desconto.valor || 0;
     let cuponsAplicados: string[] = [];
 
     if (desconto.tipo === "cupom" && desconto.cupom_codigo) {
-      // Buscar cupom no Strapi (opcional - admin pode forçar)
       cuponsAplicados = [desconto.cupom_codigo];
-      // Por simplicidade, usar valor manual se informado
-      descontoValor = desconto.valor || 0;
-    } else if (desconto.tipo === "manual") {
-      if (desconto.porcentagem) {
-        descontoValor = subtotal * (desconto.porcentagem / 100);
-      } else if (desconto.valor) {
-        descontoValor = desconto.valor;
+    }
+
+    // Gerar descrição do desconto para exibição
+    let cupomDescricao: string | null = null;
+    if (descontoValor > 0) {
+      if (desconto.tipo === "cupom" && desconto.cupom_codigo) {
+        cupomDescricao = desconto.cupom_codigo;
+      } else if (desconto.tipo === "manual") {
+        if (desconto.porcentagem) {
+          cupomDescricao = `${desconto.porcentagem}%`;
+        } else {
+          cupomDescricao = `R$${descontoValor.toFixed(2).replace(".", ",")}`;
+        }
       }
     }
+
+    console.log("[Admin Pedido] Desconto calculado:", { descontoValor, cupomDescricao, cuponsAplicados });
 
     // Calcular total
     const freteValor = frete.valor || 0;
@@ -156,6 +166,8 @@ export async function POST(req: NextRequest) {
         items: itemsParaSalvar,
         cupons: cuponsAplicados,
         descontos: Math.round(descontoValor * 100), // Salvar em centavos
+        cupom_valor: descontoValor > 0 ? descontoValor : null,
+        cupom_descricao: cupomDescricao,
         total_pedido: totalPedido,
         frete_calculado: freteValor,
         transportadora_nome: frete.transportadora_nome || null,
@@ -168,6 +180,7 @@ export async function POST(req: NextRequest) {
         destinatario: null,
         ga_session_number: null,
         ga_session_id: null,
+        origem: "admin",
         // Status inicial
         status_pagamento: cortesia ? "CORTESIA" : "PENDING",
       },

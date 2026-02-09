@@ -59,6 +59,8 @@ export async function POST(
       transportadora_nome: pedido.transportadora_nome || undefined,
       transportadora_servico: pedido.transportadora_servico || undefined,
       transportadora_prazo: pedido.transportadora_prazo || undefined,
+      // Desconto (apenas para pedidos criados pelo admin)
+      desconto_total: pedido.origem === "admin" ? (pedido.cupom_valor ?? 0) : 0,
     };
 
     // Tenta criar a nota fiscal
