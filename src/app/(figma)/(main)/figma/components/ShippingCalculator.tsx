@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useCart, useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
@@ -35,7 +35,17 @@ export function ShippingCalculator({
     addressLabel,
   } = useShipping();
 
-  // Recalcular frete automaticamente quando o carrinho mudar
+  // Chave estável: só muda quando itens, quantidades ou preços mudam
+  // Flags de cupom (cupom_applied, tag_desconto_*) não afetam o frete
+  const cartFreightKey = useMemo(() => {
+    const items = Object.entries(cart).map(([id, item]: [string, any]) =>
+      `${id}:${item.quantity}:${item.preco}`
+    );
+    items.sort();
+    return items.join('|');
+  }, [cart]);
+
+  // Recalcular frete automaticamente quando itens/quantidades/preços mudam
   useEffect(() => {
     const cartItems = Object.values(cart);
 
@@ -52,7 +62,7 @@ export function ShippingCalculator({
         calculateFreight(cep, cartItems);
       }
     }
-  }, [cart]);
+  }, [cartFreightKey]);
 
   // Auto-calcular quando CEP tiver 8 dígitos
   useEffect(() => {

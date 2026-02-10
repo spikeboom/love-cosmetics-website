@@ -1,5 +1,6 @@
 import { fetchProdutosComFallback, fetchAndValidateCupom, PRICE_TOLERANCE } from "@/lib/strapi";
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { calculateOrderTotals, centsToReais } from "@/core/pricing/order-totals";
 
 interface OrderItem {
   reference_id: string;
@@ -54,8 +55,7 @@ export async function validateOrder(
     }
 
     // 2. Buscar e validar cupom
-    let multiplicador = 1;
-    let diminuir = 0;
+    const cuponsData: Array<{ multiplacar: number; diminuir: number }> = [];
 
     if (cupons && cupons.length > 0) {
       const cupomCodigo = cupons[0];
@@ -71,8 +71,10 @@ export async function validateOrder(
         };
       }
 
-      multiplicador = cupomResult.cupom.multiplacar;
-      diminuir = cupomResult.cupom.diminuir;
+      cuponsData.push({
+        multiplacar: cupomResult.cupom.multiplacar,
+        diminuir: cupomResult.cupom.diminuir,
+      });
     }
 
     // 3. Buscar produtos do Strapi (com fallback por nome)
@@ -82,9 +84,8 @@ export async function validateOrder(
     }));
     const produtosReais = await fetchProdutosComFallback(itemsParaBusca);
 
-    // 4. Validar cada item
-    let subtotalOriginal = 0;
-    let subtotalComCupom = 0;
+    // 4. Validar cada item (preço base, sem cupom)
+    const validatedItems: Array<{ preco: number; quantity: number }> = [];
 
     for (const item of items) {
       const produtoReal = produtosReais.get(item.reference_id);
@@ -105,11 +106,11 @@ export async function validateOrder(
         finalPrice: precoStrapi,
         product: { nome: produtoReal.nome },
       });
-      const precoOriginal = kitPricing?.preco ?? precoStrapi; // base sem cupom (preço do Strapi)
-      const precoComCupom = precoOriginal * multiplicador - diminuir;
+      const precoOriginal = kitPricing?.preco ?? precoStrapi;
       const precoEnviado = item.preco;
 
-      if (Math.abs(precoComCupom - precoEnviado) > PRICE_TOLERANCE) {
+      // Agora comparamos preço base (sem cupom) diretamente
+      if (Math.abs(precoOriginal - precoEnviado) > PRICE_TOLERANCE) {
         return {
           valid: false,
           error: `O preço do produto "${item.name}" foi atualizado. Por favor, atualize seu carrinho.`,
@@ -139,14 +140,10 @@ export async function validateOrder(
         };
       }
 
-      subtotalOriginal += precoOriginal * item.quantity;
-      subtotalComCupom += precoComCupom * item.quantity;
+      validatedItems.push({ preco: precoOriginal, quantity: item.quantity });
     }
 
-    // 5. Calcular desconto
-    const descontoCalculado = subtotalOriginal - subtotalComCupom;
-
-    // 6. Validar frete
+    // 5. Validar frete
     const freteValidacao = validateFrete(freteEnviado);
     if (!freteValidacao.valid) {
       return {
@@ -158,10 +155,18 @@ export async function validateOrder(
       };
     }
 
-    // 7. Calcular total final
-    const totalCalculado = Math.max(0, subtotalComCupom) + freteEnviado;
+    // 6. Usar calculateOrderTotals como fonte de verdade
+    const totals = calculateOrderTotals({
+      items: validatedItems,
+      cupons: cuponsData,
+      frete: freteEnviado,
+    });
 
-    // 8. Comparar valores
+    const descontoCalculado = centsToReais(totals.couponDiscountCents);
+    const totalCalculado = centsToReais(totals.totalCents);
+    const subtotalOriginal = centsToReais(totals.itemsSubtotalCents);
+
+    // 7. Comparar valores
     if (Math.abs(descontoCalculado - descontosEnviado) > PRICE_TOLERANCE) {
       return {
         valid: false,

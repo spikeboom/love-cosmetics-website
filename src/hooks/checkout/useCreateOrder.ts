@@ -96,23 +96,12 @@ export function useCreateOrder(): UseCreateOrderReturn {
       // Preparar items do carrinho
       // Usar documentId (estável no Strapi v5) em vez de id (muda ao publicar)
       const items = Object.entries(cart).map(([id, product]: [string, any]) => {
-        // Calcular campos de apresentação (mesma lógica do CartProductsList)
-        const temCupomAplicado = !!product.cupom_applied || !!product.backup?.preco;
-        const precoAtual = product.preco;
-        const precoAntesDosCupom = product.backup?.preco ?? product.preco;
+        const precoAtual = product.preco; // preço base (sem cupom)
 
         // Preço original (preco_de) - o valor riscado
-        let precoDeApresentacao: number | undefined;
-        if (temCupomAplicado) {
-          precoDeApresentacao = product.backup?.preco_de ?? product.preco_de ?? precoAntesDosCupom;
-          if (precoDeApresentacao && precoDeApresentacao <= precoAtual) {
-            precoDeApresentacao = undefined;
-          }
-        } else {
-          precoDeApresentacao = product.preco_de && product.preco_de > precoAtual
-            ? product.preco_de
-            : undefined;
-        }
+        const precoDeApresentacao = product.preco_de && product.preco_de > precoAtual
+          ? product.preco_de
+          : undefined;
 
         // Calcular % OFF acumulado (arredondado para cima)
         const descontoPercentualApresentacao =
@@ -155,7 +144,7 @@ export function useCreateOrder(): UseCreateOrderReturn {
       }, 0);
 
       // Calcular dados do cupom para persistir
-      const resumoCompra = calculateCartResumoCompra(Object.values(cart));
+      const resumoCompra = calculateCartResumoCompra(Object.values(cart), cupons);
       const cupomDescricao = cupons?.length > 0 ? getTipoDesconto(cupons) : null;
 
       // Montar payload para API

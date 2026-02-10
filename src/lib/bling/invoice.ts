@@ -208,8 +208,6 @@ async function explodeKitItems(items: OrderItem[]): Promise<OrderItem[]> {
 
     // Preço unitário do kit (valor de 1 unidade)
     const kitUnitPrice = item.preco || item.unit_amount || item.value;
-    // Valor total do kit (preço × quantidade)
-    const valorTotalKit = kitUnitPrice * item.quantity;
 
     // Soma dos preços de tabela dos componentes (para calcular peso proporcional)
     const somaPrecos = componentes.reduce((sum, c) => sum + c.preco, 0);
@@ -220,7 +218,8 @@ async function explodeKitItems(items: OrderItem[]): Promise<OrderItem[]> {
       );
     }
 
-    // Rateio proporcional com correção de arredondamento no último item
+    // Rateio proporcional do preço UNITÁRIO do kit entre componentes
+    // Cada componente herda a quantity do kit
     let acumulado = 0;
     const explodedItems: OrderItem[] = [];
 
@@ -230,17 +229,17 @@ async function explodeKitItems(items: OrderItem[]): Promise<OrderItem[]> {
 
       if (j < componentes.length - 1) {
         const peso = comp.preco / somaPrecos;
-        valorRateado = Math.round(peso * valorTotalKit * 100) / 100;
+        valorRateado = Math.round(peso * kitUnitPrice * 100) / 100;
         acumulado += valorRateado;
       } else {
-        // Último componente: ajusta para a soma bater exatamente
-        valorRateado = Math.round((valorTotalKit - acumulado) * 100) / 100;
+        // Último componente: ajusta para a soma bater exatamente com o preço unitário do kit
+        valorRateado = Math.round((kitUnitPrice - acumulado) * 100) / 100;
       }
 
       explodedItems.push({
         id: comp.id,
         name: comp.nome,
-        quantity: 1, // cada item aparece 1 vez (valor já inclui qty do kit)
+        quantity: item.quantity, // herda a quantidade do kit
         value: valorRateado,
         preco: valorRateado,
         bling_number: comp.bling_number,
@@ -252,13 +251,14 @@ async function explodeKitItems(items: OrderItem[]): Promise<OrderItem[]> {
       kitName: item.name,
       kitQuantity: item.quantity,
       kitUnitPrice,
-      valorTotalKit,
+      valorTotalKit: kitUnitPrice * item.quantity,
       componentes: explodedItems.map((e) => ({
         name: e.name,
-        valor: e.preco,
+        quantity: e.quantity,
+        valorUnitario: e.preco,
         bling_number: e.bling_number,
       })),
-      somaComponentes: explodedItems.reduce((s, e) => s + (e.preco || 0), 0),
+      somaComponentesUnitario: explodedItems.reduce((s, e) => s + (e.preco || 0), 0),
     });
 
     result.push(...explodedItems);

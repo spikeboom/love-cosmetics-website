@@ -69,34 +69,13 @@ export function CartProductsList({
   return (
     <div className="flex flex-col gap-6">
       {produtos.map((produto, index) => {
-        // Verificar se tem cupom aplicado
-        const temCupomAplicado = !!produto.cupom_applied || !!produto.backup?.preco;
-
-        // Preço atual (já com todos os descontos aplicados)
+        // Preço atual (preço base, sem cupom — desconto de cupom é no total)
         const precoAtual = produto.preco;
 
-        // Preço base antes do cupom (usado para calcular desconto acumulado)
-        const precoAntesDosCupom = produto.backup?.preco ?? produto.preco;
-
         // Preço original (preco_de) - o valor riscado
-        // Se tem cupom aplicado, usa o preco_de do backup ou o preco antes do cupom
-        // Se não tem cupom, usa o preco_de do produto (se existir)
-        let precoAntigo: number | undefined;
-
-        if (temCupomAplicado) {
-          // Com cupom: mostrar preco_de riscado (do backup ou calcular)
-          // preco_de do backup é o preço original do kit ou do produto
-          precoAntigo = produto.backup?.preco_de ?? produto.preco_de ?? precoAntesDosCupom;
-          // Se o precoAntigo for igual ao precoAtual, não faz sentido mostrar riscado
-          if (precoAntigo && precoAntigo <= precoAtual) {
-            precoAntigo = undefined;
-          }
-        } else {
-          // Sem cupom: mostrar preco_de apenas se existir e for maior que o preço atual
-          precoAntigo = produto.preco_de && produto.preco_de > precoAtual
-            ? produto.preco_de
-            : undefined;
-        }
+        const precoAntigo = produto.preco_de && produto.preco_de > precoAtual
+          ? produto.preco_de
+          : undefined;
 
         // Badges individuais de desconto (kit + cupom separados)
         const discountBadges = getItemDiscountBadges(produto, cupons);

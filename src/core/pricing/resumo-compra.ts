@@ -1,4 +1,5 @@
 import { getKitDiscount } from './kits';
+import { calculateOrderTotals, centsToReais } from './order-totals';
 
 export interface DiscountBadge {
   label: string;  // ex: "15% OFF", "10%"
@@ -19,9 +20,8 @@ export function getItemDiscountBadges(item: any, cupons?: any[]): DiscountBadge[
   }
 
   // 2. Desconto de cupom (se o item tem cupom aplicado)
-  const temCupomAplicado = !!item.cupom_applied || !!item.backup?.preco;
+  const temCupomAplicado = !!item.cupom_applied;
   if (temCupomAplicado && cupons && cupons.length > 0) {
-    // Usar a label do cupom (ex: "10%", "R$5,00")
     for (const c of cupons) {
       const temPorcentagem = c.multiplacar && c.multiplacar < 1 && c.multiplacar > 0;
       const temValorFixo = c.diminuir && c.diminuir !== 0;
@@ -38,15 +38,7 @@ export function getItemDiscountBadges(item: any, cupons?: any[]): DiscountBadge[
   // Se nenhum badge identificado mas há desconto real, mostrar o % acumulado
   if (badges.length === 0) {
     const precoAtual = item.preco;
-    const precoAntesDosCupom = item.backup?.preco ?? item.preco;
-
-    let precoAntigo: number | undefined;
-    if (temCupomAplicado) {
-      precoAntigo = item.backup?.preco_de ?? item.preco_de ?? precoAntesDosCupom;
-      if (precoAntigo && precoAntigo <= precoAtual) precoAntigo = undefined;
-    } else {
-      precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
-    }
+    const precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
 
     if (precoAntigo && precoAntigo > precoAtual) {
       const pct = Math.ceil(((precoAntigo - precoAtual) / precoAntigo) * 100);
@@ -90,48 +82,46 @@ export function getOrderItemDiscountBadges(
 
 export interface ResumoCompraResult {
   produtosDe: number;     // Preco "De" (riscado) total
-  produtosPor: number;    // Preco antes do cupom
-  produtosFinal: number;  // Preco final (com cupom)
+  produtosPor: number;    // Preco antes do cupom (= preco base dos items)
+  produtosFinal: number;  // Preco final (com cupom aplicado no total)
   descontoSite: number;   // Desconto de kit/promo (produtosDe - produtosPor)
-  descontoCupom: number;  // Desconto do cupom (produtosPor - produtosFinal)
+  descontoCupom: number;  // Desconto do cupom (calculado por order-totals)
   totalEconomizado: number; // descontoSite + descontoCupom
 }
 
 /**
  * Calcula breakdown de precos a partir de items do carrinho (client-side).
- * Reutiliza a mesma logica de CartTotalsContext e cart-calculations.
+ * Agora item.preco é sempre o preço base (sem cupom). O desconto do cupom
+ * é calculado via calculateOrderTotals.
  */
-export function calculateCartResumoCompra(cartItems: any[]): ResumoCompraResult {
+export function calculateCartResumoCompra(cartItems: any[], cupons: any[] = []): ResumoCompraResult {
   let produtosDe = 0;
   let produtosPor = 0;
-  let produtosFinal = 0;
 
   for (const item of cartItems) {
     const qty = item.quantity || 1;
-    const precoAtual = item.preco;
-    const precoAntesDosCupom = item.backup?.preco ?? item.preco;
+    const precoAtual = item.preco; // preço base (sem cupom)
 
     // produtosDe: preco original (riscado) — somente se > precoAtual
-    const temCupomAplicado = !!item.cupom_applied || !!item.backup?.preco;
-    let unitDe: number;
-    if (temCupomAplicado) {
-      unitDe = item.backup?.preco_de ?? item.preco_de ?? precoAntesDosCupom;
-      if (unitDe <= precoAtual) {
-        unitDe = precoAtual;
-      }
-    } else {
-      unitDe = item.preco_de && item.preco_de > precoAtual
-        ? item.preco_de
-        : precoAtual;
-    }
+    const unitDe = item.preco_de && item.preco_de > precoAtual
+      ? item.preco_de
+      : precoAtual;
 
     produtosDe += unitDe * qty;
-    produtosPor += precoAntesDosCupom * qty;
-    produtosFinal += precoAtual * qty;
+    produtosPor += precoAtual * qty; // preço base = produtosPor
   }
 
+  // Calcular desconto do cupom via order-totals
+  const totals = calculateOrderTotals({
+    items: cartItems.map(item => ({ preco: item.preco, quantity: item.quantity || 1 })),
+    cupons,
+    frete: 0, // frete não entra no resumo de produtos
+  });
+
+  const descontoCupom = centsToReais(totals.couponDiscountCents);
+  const produtosFinal = centsToReais(totals.itemsTotalAfterCouponCents);
+
   const descontoSite = Math.max(0, produtosDe - produtosPor);
-  const descontoCupom = Math.max(0, produtosPor - produtosFinal);
   const totalEconomizado = descontoSite + descontoCupom;
 
   return { produtosDe, produtosPor, produtosFinal, descontoSite, descontoCupom, totalEconomizado };
@@ -156,24 +146,38 @@ export function calculatePedidoResumoCompra(pedido: {
     return acc + precoBase * (item.quantity || 1);
   }, 0);
 
-  // produtosFinal: soma dos precos finais
-  const produtosFinal = pedido.items.reduce((acc, item) => {
+  // soma dos items[].preco salvos
+  const somaItemPrecos = pedido.items.reduce((acc, item) => {
     return acc + item.preco * (item.quantity || 1);
   }, 0);
 
-  // descontoCupom: usar campo salvo se disponivel, senao derivar
-  const total = pedido.total_pedido ?? pedido.total ?? 0;
-  const frete = pedido.frete_calculado ?? pedido.frete ?? 0;
-
-  // totalEconomizado = produtosDe - produtosFinal (tudo junto)
-  const totalEconomizado = Math.max(0, produtosDe - produtosFinal);
-
-  // Se temos cupom_valor salvo, usamos para separar
   const descontoCupom = pedido.cupom_valor != null ? pedido.cupom_valor : 0;
-  const descontoSite = Math.max(0, totalEconomizado - descontoCupom);
+  const frete = pedido.frete_calculado ?? pedido.frete ?? 0;
+  const totalPedido = pedido.total_pedido ?? pedido.total ?? 0;
 
-  // produtosPor = produtosDe - descontoSite (preco antes do cupom)
-  const produtosPor = produtosDe - descontoSite;
+  // Heurística para detectar modelo antigo vs novo:
+  // Modelo novo: items[].preco = preço base (sem cupom), cupom_valor separado
+  //   → somaItemPrecos - cupom_valor + frete ≈ totalPedido
+  // Modelo antigo: items[].preco já tem cupom embutido
+  //   → somaItemPrecos + frete ≈ totalPedido
+  const isModeloNovo = descontoCupom > 0 &&
+    Math.abs((somaItemPrecos - descontoCupom + frete) - totalPedido) < 1;
+
+  let produtosPor: number;
+  let produtosFinal: number;
+
+  if (isModeloNovo) {
+    // Modelo novo: preco é base, cupom aplicado no total
+    produtosPor = somaItemPrecos;
+    produtosFinal = somaItemPrecos - descontoCupom;
+  } else {
+    // Modelo antigo: preco já tem cupom embutido
+    produtosPor = somaItemPrecos + descontoCupom; // reconstruir preço base
+    produtosFinal = somaItemPrecos;
+  }
+
+  const descontoSite = Math.max(0, produtosDe - produtosPor);
+  const totalEconomizado = descontoSite + descontoCupom;
 
   return { produtosDe, produtosPor, produtosFinal, descontoSite, descontoCupom, totalEconomizado };
 }

@@ -21,14 +21,12 @@ export function processProdutosRevert(rawData: any) {
   rawData = Object.values(rawData.data);
 
   const processedToReturn = rawData?.map((p: any) => {
-    const { quantity: backupQuantity, ...backupWithoutQuantity } = p?.backup || {};
-    
     return {
       ...p,
-      ...backupWithoutQuantity,
       cupom_applied: null,
       cupom_applied_codigo: null,
-      backup: p?.backup,
+      tag_desconto_1: null,
+      tag_desconto_2: null,
     };
   });
 

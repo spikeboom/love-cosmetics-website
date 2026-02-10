@@ -32,12 +32,53 @@ export function buildCustomerFromPedido(pedido: any) {
 }
 
 export function buildItemsFromPedido(pedido: any) {
-  return (pedido.items as any[]).map((item: any) => ({
-    reference_id: item.reference_id || item.id,
-    name: item.name,
-    quantity: item.quantity,
-    unit_amount: Math.round(item.unit_amount * 100),
-  }));
+  const items = pedido.items as any[];
+  const cupomValor = pedido.cupom_valor ?? 0;
+
+  if (cupomValor <= 0) {
+    // Sem cupom: enviar preços como estão
+    return items.map((item: any) => ({
+      reference_id: item.reference_id || item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit_amount: Math.round(item.unit_amount * 100),
+    }));
+  }
+
+  // Com cupom: ratear desconto proporcionalmente entre itens
+  const cupomCents = Math.round(cupomValor * 100);
+  const subtotalCents = items.reduce(
+    (acc: number, item: any) => acc + Math.round(item.unit_amount * 100) * (item.quantity || 1),
+    0,
+  );
+
+  let descontoDistribuido = 0;
+  const result = items.map((item: any, index: number) => {
+    const unitCents = Math.round(item.unit_amount * 100);
+    const itemTotalCents = unitCents * (item.quantity || 1);
+
+    let itemDescontoCents: number;
+    if (index === items.length - 1) {
+      // Último item absorve a diferença de arredondamento
+      itemDescontoCents = cupomCents - descontoDistribuido;
+    } else {
+      itemDescontoCents = Math.round((itemTotalCents / subtotalCents) * cupomCents);
+    }
+    descontoDistribuido += itemDescontoCents;
+
+    // Distribuir desconto por unidade
+    const descontoPorUnidade = Math.floor(itemDescontoCents / (item.quantity || 1));
+    const unitAmountFinal = Math.max(1, unitCents - descontoPorUnidade); // PagBank exige > 0
+
+    return {
+      reference_id: item.reference_id || item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit_amount: unitAmountFinal,
+    };
+  });
+
+  return result;
 }
 
 export function buildTotalAmount(pedido: any) {

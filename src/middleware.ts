@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const adminPaths = ["/pedidos", "/api/pedidos"];
+  const adminPaths = ["/pedidos", "/api/pedidos", "/dashboard", "/api/admin"];
   const isAdminRoute = adminPaths.some((path) =>
     pathname.startsWith(path),
   );
@@ -101,6 +101,8 @@ export const config = {
     // Rotas protegidas
     "/pedidos/:path*",
     "/api/pedidos/:path*",
+    "/dashboard/:path*",
+    "/api/admin/:path*",
     "/minha-conta/:path*",
     "/conta/:path*",
     "/api/cliente/conta/:path*",

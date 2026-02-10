@@ -49,22 +49,10 @@ export const CartTotalsProvider = ({
   useEffect(() => {
     const cartArray = Object.values(cart);
     const subtotal = cartArray.reduce((acc: number, item: any) => {
-      // Mesma lógica do CartProductsList para determinar o preco_de
-      const temCupomAplicado = !!item.cupom_applied || !!item.backup?.preco;
       const precoAtual = item.preco;
-      const precoAntesDosCupom = item.backup?.preco ?? item.preco;
-
-      let precoOriginal: number;
-      if (temCupomAplicado) {
-        precoOriginal = item.backup?.preco_de ?? item.preco_de ?? precoAntesDosCupom;
-        if (precoOriginal <= precoAtual) {
-          precoOriginal = precoAtual;
-        }
-      } else {
-        precoOriginal = item.preco_de && item.preco_de > precoAtual
-          ? item.preco_de
-          : precoAtual;
-      }
+      const precoOriginal = item.preco_de && item.preco_de > precoAtual
+        ? item.preco_de
+        : precoAtual;
 
       return acc + (precoOriginal * (item.quantity || 1));
     }, 0);
@@ -91,25 +79,28 @@ export const CartTotalsProvider = ({
       notify("Cupom removido pois não é mais válido", { variant: "warning" });
     }
 
-    // Atualizar preços dos produtos no carrinho
+    // Atualizar preços dos produtos no carrinho (sempre preço base, sem cupom)
     for (const produtoAtualizado of result.produtosAtualizados) {
       const cartItem = newCart[produtoAtualizado.id];
       if (cartItem) {
-        const cupomFoiRemovido = result.cuponsDesatualizados.length > 0;
-        const novoPreco = cupomFoiRemovido
-          ? produtoAtualizado.precoAtual
-          : produtoAtualizado.precoComCupom;
+        const novoPreco = produtoAtualizado.precoAtual;
 
         if (Math.abs(cartItem.preco - novoPreco) > 0.01) {
           newCart[produtoAtualizado.id] = {
             ...cartItem,
             preco: novoPreco,
             documentId: produtoAtualizado.documentId,
-            ...(cupomFoiRemovido
-              ? { cupom_applied: null, cupom_applied_codigo: null, backup: {} }
-              : {}),
           };
           houveAtualizacao = true;
+        }
+
+        // Se cupom foi removido, limpar flags
+        if (result.cuponsDesatualizados.length > 0) {
+          newCart[produtoAtualizado.id] = {
+            ...newCart[produtoAtualizado.id],
+            cupom_applied: null,
+            cupom_applied_codigo: null,
+          };
         }
       }
     }

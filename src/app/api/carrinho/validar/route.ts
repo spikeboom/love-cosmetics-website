@@ -123,15 +123,15 @@ export async function POST(req: NextRequest) {
         product: { nome: produtoReal.nome },
       });
       const precoAtual = kitPricing?.preco ?? precoStrapi;
-      const precoAtualComCupom = precoAtual * multiplicador - diminuir;
 
-      if (Math.abs(precoAtualComCupom - item.preco) > PRICE_TOLERANCE) {
+      // Comparar preço base (sem cupom) com preço do carrinho
+      if (Math.abs(precoAtual - item.preco) > PRICE_TOLERANCE) {
         produtosDesatualizados.push({
           id: item.id,
           nome: item.nome,
           precoCarrinho: item.preco,
           precoAtual,
-          precoAtualComCupom,
+          precoAtualComCupom: precoAtual, // mantém compatibilidade
         });
       }
 
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
         documentId: produtoReal.documentId,
         nome: produtoReal.nome,
         precoAtual,
-        precoComCupom: precoAtualComCupom,
+        precoComCupom: precoAtual, // mantém compatibilidade
       });
     }
 

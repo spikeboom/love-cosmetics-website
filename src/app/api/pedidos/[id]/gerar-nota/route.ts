@@ -39,9 +39,31 @@ export async function POST(
     }
 
     // Prepara os dados do pedido para a criação da nota
+    // Heurística para detectar modelo antigo (cupom embutido no preco) vs novo (cupom no total)
+    const items = pedido.items as any[];
+    const cupomValor = pedido.cupom_valor ?? 0;
+    const frete = pedido.frete_calculado ?? 0;
+    const totalPedido = pedido.total_pedido ?? 0;
+    const sumItemPrices = items.reduce(
+      (acc: number, it: any) => acc + (it.preco ?? it.unit_amount ?? 0) * (it.quantity || 1),
+      0,
+    );
+
+    let descontoTotal: number;
+    if (pedido.origem === "admin") {
+      // Admin sempre usa cupom_valor
+      descontoTotal = cupomValor;
+    } else if (cupomValor > 0 && Math.abs(sumItemPrices - cupomValor + frete - totalPedido) < 1) {
+      // Modelo novo: items têm preço base, cupom_valor separado
+      descontoTotal = cupomValor;
+    } else {
+      // Modelo antigo: cupom já está embutido nos preços dos itens
+      descontoTotal = 0;
+    }
+
     const orderData = {
       id: pedido.id,
-      items: pedido.items as any[],
+      items,
       nome: pedido.nome,
       sobrenome: pedido.sobrenome,
       email: pedido.email,
@@ -59,8 +81,8 @@ export async function POST(
       transportadora_nome: pedido.transportadora_nome || undefined,
       transportadora_servico: pedido.transportadora_servico || undefined,
       transportadora_prazo: pedido.transportadora_prazo || undefined,
-      // Desconto (apenas para pedidos criados pelo admin)
-      desconto_total: pedido.origem === "admin" ? (pedido.cupom_valor ?? 0) : 0,
+      // Desconto
+      desconto_total: descontoTotal,
     };
 
     // Tenta criar a nota fiscal

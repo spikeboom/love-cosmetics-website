@@ -65,7 +65,7 @@ export function ResumoCompraCard({
   // Calcular resumo de acordo com o mode
   const resumo = mode === 'order' && pedido
     ? calculatePedidoResumoCompra(pedido)
-    : calculateCartResumoCompra(cartItems || []);
+    : calculateCartResumoCompra(cartItems || [], cupons);
 
   // Descrição do cupom
   const tipoDesconto = cupomDescricao || (cupons.length > 0 ? getTipoDesconto(cupons) : '');
@@ -217,13 +217,13 @@ export function ResumoCompraCard({
               Produtos
             </span>
             <div className="flex items-center gap-2">
-              {resumo.produtosDe > resumo.produtosFinal && (
+              {resumo.produtosDe > resumo.produtosPor && (
                 <span className="font-cera-pro font-light text-[14px] text-[#999] line-through">
                   {formatPrice(resumo.produtosDe)}
                 </span>
               )}
               <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                {formatPrice(resumo.produtosFinal)}
+                {formatPrice(resumo.produtosPor)}
               </span>
             </div>
           </div>
@@ -232,16 +232,10 @@ export function ResumoCompraCard({
               const precoAtual = item.preco;
               const qty = item.quantity || 1;
 
-              // Calcular preco antigo
-              let precoAntigo: number | undefined;
-              const temCupomAplicado = !!item.cupom_applied || !!item.backup?.preco;
-              const precoAntesDosCupom = item.backup?.preco ?? item.preco;
-              if (temCupomAplicado) {
-                precoAntigo = item.backup?.preco_de ?? item.preco_de ?? precoAntesDosCupom;
-                if (precoAntigo && precoAntigo <= precoAtual) precoAntigo = undefined;
-              } else {
-                precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
-              }
+              // Preço original riscado (kit/promo, não cupom)
+              const precoAntigo = item.preco_de && item.preco_de > precoAtual
+                ? item.preco_de
+                : undefined;
 
               // Badges individuais de desconto
               const badges = getItemDiscountBadges(item, cupons);
@@ -456,13 +450,13 @@ export function ResumoCompraCard({
             Produtos
           </span>
           <div className="flex items-center gap-2">
-            {resumo.produtosDe > resumo.produtosFinal && (
+            {resumo.produtosDe > resumo.produtosPor && (
               <span className="font-cera-pro font-light text-[14px] text-[#999] line-through">
                 {formatPrice(resumo.produtosDe)}
               </span>
             )}
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-              {formatPrice(resumo.produtosFinal)}
+              {formatPrice(resumo.produtosPor)}
             </span>
           </div>
         </div>

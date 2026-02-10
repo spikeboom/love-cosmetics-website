@@ -44,7 +44,6 @@ export async function processProdutos(rawData: any, cupom?: string) {
       // Verificar se o cupom já foi aplicado (usando codigo do cupom, não multiplacar)
       const cupomCodigo = dataCookie?.[0]?.codigo;
       if (p?.cupom_applied_codigo === cupomCodigo) {
-        // se o cupom já foi aplicado, não faz nada
         return {
           ...dataLog,
         };
@@ -53,32 +52,24 @@ export async function processProdutos(rawData: any, cupom?: string) {
       const multiplicar = dataCookie?.[0]?.multiplacar || 1;
       const diminuir = dataCookie?.[0]?.diminuir || 0;
 
-      // Cupom deve aplicar em cima do preço atual do item (que já pode incluir desconto próprio do kit)
+      // Tag de desconto representa apenas o efeito do cupom (visual)
       const precoBaseSemCupom = dataLog?.preco || 0;
       const preco_modificado = precoBaseSemCupom * multiplicar - diminuir || 0;
-
-      // Tag de desconto representa apenas o efeito do cupom (sem misturar com preco_de / promo do Strapi)
       const preco_desconto = precoBaseSemCupom - preco_modificado;
 
       return {
         ...dataLog,
-        // se quiser aplicar desconto:
-        // tag_desconto_1_modified
         cupom_applied: dataCookie?.[0]?.multiplacar || null,
         cupom_applied_codigo: dataCookie?.[0]?.codigo || null,
-        // `preco_de` é apenas visual (preço riscado). Não deve ser sobrescrito pelo cupom.
+        // preco permanece como preço base (sem cupom) — desconto é aplicado no total
+        preco: dataLog?.preco,
         preco_de: dataLog?.preco_de,
-        preco: preco_modificado || 0,
         tag_desconto_1: `${preco_desconto >= 0 ? "-" : "+"}R$ ${formatPrice(Math.abs(preco_desconto))}`,
         ...(dataLog?.tag_desconto_2
           ? {
               tag_desconto_2: `ECONOMIZA ${preco_desconto >= 0 ? "-" : "+"}R$ ${formatPrice(Math.abs(preco_desconto))}`,
             }
           : {}),
-        backup: {
-          ...(dataLog?.backup || dataLog),
-          cupom_applied: null, // remove cupom_applied do backup
-        },
       };
     }) || [];
 
@@ -92,12 +83,12 @@ export async function processProdutosRevert(rawData: any) {
     rawData?.data?.map((p: any) => {
       const { ...dataLog } = p || {};
 
-      const { quantity: backupQuantity, ...backupWithoutQuantity } = dataLog?.backup || {};
-      
       return {
         ...dataLog,
-        ...backupWithoutQuantity,
-        backup: {},
+        cupom_applied: null,
+        cupom_applied_codigo: null,
+        tag_desconto_1: null,
+        tag_desconto_2: null,
       };
     }) || [];
 
