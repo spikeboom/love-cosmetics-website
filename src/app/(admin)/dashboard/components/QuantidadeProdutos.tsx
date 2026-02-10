@@ -68,7 +68,7 @@ export function QuantidadeProdutos({ dados }: QuantidadeProdutosProps) {
                   borderRadius: "8px",
                   fontSize: "13px",
                 }}
-                formatter={(value: number) => [`${value} unid.`, "Quantidade"]}
+                formatter={(value?: number) => [`${value ?? 0} unid.`, "Quantidade"]}
                 labelFormatter={(label) => label}
               />
               <Bar

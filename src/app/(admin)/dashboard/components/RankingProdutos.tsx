@@ -78,7 +78,7 @@ export function RankingProdutos({ dados }: RankingProdutosProps) {
                   borderRadius: "8px",
                   fontSize: "13px",
                 }}
-                formatter={(value: number) => [formatCurrency(value), "Faturamento"]}
+                formatter={(value?: number) => [formatCurrency(value ?? 0), "Faturamento"]}
                 labelFormatter={(label) => label}
               />
               <Bar

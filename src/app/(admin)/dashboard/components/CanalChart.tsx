@@ -69,9 +69,9 @@ export function CanalChart({ dados }: CanalChartProps) {
                   borderRadius: "8px",
                   fontSize: "13px",
                 }}
-                formatter={(value: number, name: string) => [
-                  formatCurrency(value),
-                  LABELS[name] || name,
+                formatter={(value?: number, name?: string) => [
+                  formatCurrency(value ?? 0),
+                  LABELS[name ?? ""] || name || "",
                 ]}
               />
             </PieChart>

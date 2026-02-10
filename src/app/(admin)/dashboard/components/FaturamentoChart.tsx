@@ -108,8 +108,8 @@ export function FaturamentoChart({
                 fontSize: "13px",
                 fontFamily: "var(--font-cera-pro), sans-serif",
               }}
-              formatter={(value: number, name: string) => [
-                formatCurrency(value),
+              formatter={(value?: number, name?: string) => [
+                formatCurrency(value ?? 0),
                 name === "atual"
                   ? `${MESES[mesAtual]}/${anoAtual}`
                   : `${MESES[prevMonth]}/${mesAtual === 1 ? anoAtual - 1 : anoAtual}`,
