@@ -195,7 +195,7 @@ export async function calculateFreightFrenet(
     }));
 
     // Adicionar opção dev de frete barato para testes
-    if (process.env.STAGE === "LOCAL") {
+    if (process.env.STAGE === "LOCAL" || process.env.DEV_FREIGHT_ENABLED === "true") {
       services.unshift({
         carrier: "[DEV]",
         service: "Frete Teste",
