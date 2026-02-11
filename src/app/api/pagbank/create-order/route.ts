@@ -6,11 +6,12 @@ import type {
   PagBankError,
 } from "@/types/pagbank";
 import {
-  buildCardChargeRequest,
+  buildCardOrderRequest,
   buildCustomerFromPedido,
   buildItemsFromPedido,
   buildOrderUpdateData,
   buildPixOrderRequest,
+  buildShippingFromPedido,
   buildTotalAmount,
   createPagBankOrder,
   extractChargeResponseData,
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
       endpoint = "/orders";
     } else if (paymentMethod === "credit_card") {
       // ======= PAGAMENTO COM CARTÃO =======
-      // Cartão usa o endpoint /charges (o /orders com charges dá erro 500 no sandbox)
+      // Cartão usa /orders com charges embutido (mesmo endpoint do PIX)
       if (!encryptedCard) {
         return NextResponse.json(
           { error: "Cartão criptografado não fornecido" },
@@ -101,16 +102,20 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      requestBody = buildCardChargeRequest({
+      const shipping = buildShippingFromPedido(pedido);
+
+      requestBody = buildCardOrderRequest({
         pedidoId,
         customer,
+        items,
+        shipping,
         totalAmount,
         encryptedCard,
         installments,
         notificationUrls,
       });
 
-      endpoint = "/charges";
+      endpoint = "/orders";
     } else {
       return NextResponse.json(
         { error: "Método de pagamento inválido" },
@@ -198,34 +203,30 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      // Resposta do /charges é direta (não tem array charges[])
-      const chargeResponse = responseData as any;
+      // Resposta do /orders com charges embutido
+      const orderResponse = responseData as PagBankOrderResponse;
 
       // Atualizar pedido no banco de dados
+      const updateData = buildOrderUpdateData({
+        orderResponse,
+        paymentMethod,
+      });
+
       await prisma.pedido.update({
         where: { id: pedidoId },
-        data: {
-          pagbank_charge_id: chargeResponse.id,
-          status_pagamento: chargeResponse.status,
-          payment_card_info: chargeResponse.payment_method?.card
-            ? JSON.stringify({
-                brand: chargeResponse.payment_method.card.brand,
-                last_digits: chargeResponse.payment_method.card.last_digits,
-                first_digits: chargeResponse.payment_method.card.first_digits,
-                installments: installments,
-              })
-            : undefined,
-        },
+        data: updateData,
       });
+
+      const charge = orderResponse.charges?.[0];
 
       return NextResponse.json({
         success: true,
-        orderId: chargeResponse.id, // Para /charges, o ID é o charge ID
-        chargeId: chargeResponse.id,
+        orderId: orderResponse.id,
+        chargeId: charge?.id,
         paymentMethod: "credit_card",
-        status: chargeResponse.status,
+        status: charge?.status,
         message:
-          chargeResponse.status === "PAID" || chargeResponse.status === "AUTHORIZED"
+          charge?.status === "PAID" || charge?.status === "AUTHORIZED"
             ? "Pagamento aprovado!"
             : "Pagamento em análise",
       });

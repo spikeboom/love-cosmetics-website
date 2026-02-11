@@ -194,6 +194,17 @@ export async function calculateFreightFrenet(
       serviceCode: service.ServiceCode
     }));
 
+    // Adicionar opção dev de frete barato para testes
+    if (process.env.STAGE === "LOCAL") {
+      services.unshift({
+        carrier: "[DEV]",
+        service: "Frete Teste",
+        price: 0.10,
+        deliveryTime: 1,
+        serviceCode: "DEV_TEST"
+      });
+    }
+
     // Encontrar o mais barato
     const cheapest = services.reduce((min, service) =>
       service.price < min.price ? service : min

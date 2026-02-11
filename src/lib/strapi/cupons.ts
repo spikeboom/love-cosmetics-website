@@ -61,8 +61,8 @@ export async function fetchAndValidateCupom(codigo: string): Promise<CupomValida
     valido: true,
     cupom: {
       codigo: cupom.codigo,
-      multiplacar: cupom.multiplacar || 1,
-      diminuir: cupom.diminuir || 0,
+      multiplacar: cupom.multiplacar ?? 1,
+      diminuir: cupom.diminuir ?? 0,
       ativo: cupom.ativo,
       data_expiracao: cupom.data_expiracao,
       usos_restantes: cupom.usos_restantes,

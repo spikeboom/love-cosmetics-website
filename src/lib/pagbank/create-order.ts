@@ -254,7 +254,8 @@ export async function createPagBankOrder({
   const bodyJson = JSON.stringify(requestBody);
 
   // Determina o tipo de pagamento para o log de auditoria
-  const tipoPagamento = endpoint === "/orders" ? "PIX" : "CARTAO";
+  const hasCharges = "charges" in requestBody && Array.isArray((requestBody as any).charges);
+  const tipoPagamento = hasCharges ? "CARTAO" : (endpoint === "/orders" ? "PIX" : "CARTAO");
 
   // [PAGBANK-AUDIT-LOG] Log do request para validação PagBank
   logPagBankRequest({

@@ -30,11 +30,12 @@ export function PagamentoCartao({
     Partial<Record<keyof CartaoData, string>>
   >({});
 
+  const MIN_PARCELA = 5; // PagBank exige mínimo R$ 5 por parcela
   const parcelas = [
     { valor: 1 as Parcelas, total: valorTotal },
     { valor: 2 as Parcelas, total: valorTotal / 2 },
     { valor: 3 as Parcelas, total: valorTotal / 3 },
-  ];
+  ].filter((p) => p.valor === 1 || p.total >= MIN_PARCELA);
 
   const handleCartaoChange = (
     field: keyof CartaoData,
