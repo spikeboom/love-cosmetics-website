@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface BannerSlide {
   id: number;
@@ -11,32 +12,28 @@ interface BannerSlide {
   discount?: string;
   description: string;
   cta: string;
+  href: string;
 }
 
 const bannerSlides: BannerSlide[] = [
   {
     id: 1,
-    image: "/new-home/banner/banner-produto.png",
-    imageMobile: "/new-home/banner/banner-produto-mobile.png",
-    title: "Manteiga Corporal",
-    description: "Hidratação profunda, alívio das inflamações e rachaduras",
-    cta: "Comprar",
+    image: "/new-home/banner/banner-tecnologia-amazonia-full.png",
+    imageMobile: "/new-home/banner/banner-tecnologia-amazonia-mobile.png",
+    title: "Tecnologia & Amazônia",
+    description: "Ativos amazônicos com ciência para cuidar da sua pele.",
+    cta: "Ver todos os produtos",
+    href: "/figma/search",
   },
   {
     id: 2,
-    image: "/new-home/banner/banner-produto.png",
-    imageMobile: "/new-home/banner/banner-produto-mobile.png",
-    title: "Manteiga Corporal",
-    description: "Hidratação profunda, alívio das inflamações e rachaduras",
-    cta: "Comprar",
-  },
-  {
-    id: 3,
-    image: "/new-home/banner/banner-produto.png",
-    imageMobile: "/new-home/banner/banner-produto-mobile.png",
-    title: "Manteiga Corporal",
-    description: "Hidratação profunda, alívio das inflamações e rachaduras",
-    cta: "Comprar",
+    image: "/new-home/banner/banner-kits-full.png",
+    imageMobile: "/new-home/banner/banner-kits-mobile.png",
+    discount: "Até 15% OFF",
+    title: "Kits Lovè",
+    description: "Hidratação profunda, alívio das inflamações e renovação da pele.",
+    cta: "Ver kits",
+    href: "/figma/search?q=kit",
   },
 ];
 
@@ -88,9 +85,7 @@ export function BannerPrincipal() {
 
   return (
     <div className="relative w-full bg-white">
-      {/* Layout Mobile */}
       <div className="lg:hidden">
-        {/* Imagem mobile */}
         <div
           className="relative w-full h-[234px] overflow-hidden"
           onTouchStart={handleTouchStart}
@@ -118,9 +113,7 @@ export function BannerPrincipal() {
           </div>
         </div>
 
-        {/* Content mobile */}
         <div className="flex flex-col gap-4 px-4 pb-6 pt-4">
-          {/* Indicadores de carrossel mobile */}
           <div className="flex gap-1">
             {bannerSlides.map((_, index) => (
               <Image
@@ -138,7 +131,6 @@ export function BannerPrincipal() {
             ))}
           </div>
 
-          {/* Texto mobile */}
           <div className="flex flex-col gap-4">
             {slide.discount && (
               <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
@@ -153,18 +145,18 @@ export function BannerPrincipal() {
             </p>
           </div>
 
-          {/* Botão mobile */}
           <div className="flex gap-2 items-center">
-            <button className="font-roboto font-medium text-sm bg-[#254333] text-white rounded-lg px-4 py-2.5 hover:bg-[#1a3024] transition-colors tracking-[0.1px] leading-5">
+            <Link
+              href={slide.href}
+              className="font-roboto font-medium text-sm bg-[#254333] text-white rounded-lg px-4 py-2.5 hover:bg-[#1a3024] transition-colors tracking-[0.1px] leading-5"
+            >
               {slide.cta}
-            </button>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Layout Desktop */}
       <div className="hidden lg:block relative w-full h-[534px]">
-        {/* Imagem de fundo com animação de slide */}
         <div className="relative w-full h-[500px] overflow-hidden">
           <div
             style={{
@@ -187,17 +179,14 @@ export function BannerPrincipal() {
           </div>
         </div>
 
-        {/* Content Box - Desktop */}
-        <div
-          className="absolute top-[97px] left-[720px] w-[600px] bg-white/75 backdrop-blur-sm p-8 flex flex-col gap-8">
-          {/* Texto */}
+        <div className="absolute top-[97px] right-[32px] xl:right-[80px] w-[600px] max-w-[calc(100%-64px)] bg-white/75 backdrop-blur-sm p-8 flex flex-col gap-8">
           <div className="flex flex-col gap-8">
             {slide.discount && (
               <p className="font-cera-pro font-bold text-[32px] text-[#254333] leading-none">
                 {slide.discount}
               </p>
             )}
-            <p className="font-times font-bold text-[60px] text-black leading-none whitespace-pre">
+            <p className="font-times font-bold text-[56px] text-black leading-none break-words">
               {slide.title}
             </p>
             <p className="font-cera-pro font-light text-[32px] text-black leading-none">
@@ -205,15 +194,16 @@ export function BannerPrincipal() {
             </p>
           </div>
 
-          {/* Botão */}
           <div className="flex gap-2 items-center w-full">
-            <button className="font-roboto font-medium text-base bg-[#254333] text-white rounded-2xl px-6 py-4 hover:bg-[#1a3024] transition-colors tracking-[0.15px] leading-6">
+            <Link
+              href={slide.href}
+              className="font-roboto font-medium text-base bg-[#254333] text-white rounded-2xl px-6 py-4 hover:bg-[#1a3024] transition-colors tracking-[0.15px] leading-6"
+            >
               {slide.cta}
-            </button>
+            </Link>
           </div>
         </div>
 
-        {/* Indicadores de carrossel desktop */}
         <div className="absolute bottom-0 w-full flex flex-col gap-2.5 items-center py-4">
           <div className="flex gap-1 items-start justify-center">
             {bannerSlides.map((_, index) => (
@@ -233,7 +223,6 @@ export function BannerPrincipal() {
           </div>
         </div>
 
-        {/* Botões de navegação lateral desktop */}
         <div className="absolute top-[250px] -translate-y-1/2 left-0 right-0 w-[1440px] mx-auto px-3 flex items-center justify-between pointer-events-none">
           <div
             onClick={handlePrevious}
@@ -247,7 +236,7 @@ export function BannerPrincipal() {
             onClick={handleNext}
             className="relative w-14 h-14 flex-shrink-0 pointer-events-auto cursor-pointer"
             role="button"
-            aria-label="Próximo slide"
+            aria-label="Proximo slide"
           >
             <Image src="/new-home/icons/arrow-right.svg" alt="" fill className="object-contain" />
           </div>
