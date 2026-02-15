@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/contexts";
 import { useNotifications } from "@/core/notifications/NotificationContext";
+import { ucAddToCart } from "../../../_tracking/uc-ecommerce";
 
 interface CardProdutoProps {
   id?: string;
@@ -76,6 +77,15 @@ export function CardProduto({
       largura,
       comprimento,
       imagem,
+    });
+
+    ucAddToCart({
+      item: {
+        item_id: id,
+        item_name: nome,
+        price: preco,
+        quantity: 1,
+      },
     });
 
     enqueueSnackbar("", {

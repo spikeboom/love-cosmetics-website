@@ -93,6 +93,7 @@ export async function GET(
     // Formatar items completos para apresentação detalhada
     const itemsFormatados = pedido.items.map((item: unknown) => {
       const typedItem = item as {
+        reference_id?: string;
         name?: string;
         productName?: string;
         title?: string;
@@ -105,6 +106,7 @@ export async function GET(
         image_url?: string;
       };
       return {
+        reference_id: typedItem.reference_id,
         name: typedItem.name || typedItem.productName || typedItem.title || 'Produto',
         quantity: typedItem.quantity || 1,
         preco: typedItem.preco || typedItem.unit_amount || 0,

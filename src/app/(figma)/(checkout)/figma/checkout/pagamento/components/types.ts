@@ -17,6 +17,9 @@ export interface CheckoutData {
     semNumero: boolean;
     complemento: string;
     informacoesAdicionais: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
     tipoEntrega: "normal" | "expressa";
   } | null;
 }

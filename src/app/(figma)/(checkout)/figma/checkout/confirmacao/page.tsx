@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts";
 import {
@@ -12,6 +12,7 @@ import {
   PedidoDetalhes,
   PageStatus,
 } from "./components";
+import { ucPurchase } from "../../../../_tracking/uc-ecommerce";
 
 function ConfirmacaoContent() {
   const router = useRouter();
@@ -27,6 +28,7 @@ function ConfirmacaoContent() {
   const [receberComunicacoes, setReceberComunicacoes] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const firedPurchaseRef = useRef(false);
 
   // Funcao para buscar detalhes completos do pedido
   const fetchPedidoDetalhes = async () => {
@@ -40,6 +42,54 @@ function ConfirmacaoContent() {
       console.error("Erro ao buscar detalhes do pedido:", error);
     }
   };
+
+  const purchaseItems = useMemo(() => {
+    if (!pedidoDetalhes?.produtos?.items) return [];
+    return pedidoDetalhes.produtos.items.map((it, index) => ({
+      item_id: it.reference_id || it.name,
+      item_name: it.name,
+      price: it.preco,
+      quantity: it.quantity,
+      index,
+    }));
+  }, [pedidoDetalhes]);
+
+  useEffect(() => {
+    if (!pedidoId) return;
+    if (pageStatus !== "success") return;
+    if (!pedidoDetalhes) return;
+    if (firedPurchaseRef.current) return;
+
+    try {
+      if (localStorage.getItem(`uc_purchase_sent_${pedidoId}`) === "1") {
+        firedPurchaseRef.current = true;
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    firedPurchaseRef.current = true;
+    ucPurchase({
+      transactionId: pedidoId,
+      value: pedidoDetalhes.total,
+      shipping: pedidoDetalhes.entrega?.valor,
+      coupon: (pedidoDetalhes.cupons || []).join(",") || undefined,
+      items: purchaseItems,
+      user_data: {
+        email: pedidoDetalhes.cliente?.email,
+        phone_number: pedidoDetalhes.cliente?.telefone,
+        address: pedidoDetalhes.endereco
+          ? {
+              city: pedidoDetalhes.endereco.cidade,
+              region: pedidoDetalhes.endereco.estado,
+              postal_code: pedidoDetalhes.endereco.cep,
+              street: pedidoDetalhes.endereco.completo,
+            }
+          : undefined,
+      },
+    });
+  }, [pedidoId, pageStatus, pedidoDetalhes, purchaseItems]);
 
   useEffect(() => {
     if (!pedidoId) {

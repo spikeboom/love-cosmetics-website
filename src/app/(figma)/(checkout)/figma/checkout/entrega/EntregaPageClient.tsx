@@ -9,6 +9,7 @@ import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 import { formatCEP } from "@/lib/formatters";
+import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 import Image from "next/image";
 
 interface FormData {
@@ -209,6 +210,31 @@ export function EntregaPageClient() {
     if (validateForm()) {
       localStorage.setItem("checkoutEntrega", JSON.stringify(formData));
       syncToServer({ entrega: formData });
+
+      // Disparar user_data_update com endereco completo
+      // Recuperar dados de identificacao para enviar junto
+      try {
+        const identificacao = localStorage.getItem("checkoutIdentificacao");
+        const idData = identificacao ? JSON.parse(identificacao) : {};
+        const nomeCompleto = idData.nome?.trim() || "";
+        const partes = nomeCompleto.split(/\s+/);
+
+        ucUserDataUpdate({
+          email: idData.email,
+          phone_number: idData.telefone?.replace(/\D/g, "") || undefined,
+          first_name: partes[0] || undefined,
+          last_name: partes.length > 1 ? partes.slice(1).join(" ") : undefined,
+          address: {
+            city: formData.cidade,
+            region: formData.estado,
+            postal_code: formData.cep?.replace(/\D/g, "") || undefined,
+            street: formData.rua,
+          },
+        });
+      } catch {
+        // ignore
+      }
+
       router.push("/figma/checkout/pagamento");
     }
   };

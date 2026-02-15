@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { VitrineSection } from "../components/VitrineSection";
@@ -12,13 +12,21 @@ import { CartCouponInput } from "./CartCouponInput";
 import { CartSummary } from "./CartSummary";
 import { CartLoadingSkeleton } from "@/components/cart/CartLoadingSkeleton";
 import Link from "next/link";
+import { ucBeginCheckout, ucViewCart } from "../../../_tracking/uc-ecommerce";
+
+function getCupomCodigo(cupom: unknown): string | undefined {
+  if (!cupom || typeof cupom !== "object") return undefined;
+  const codigo = (cupom as Record<string, unknown>).codigo;
+  return typeof codigo === "string" ? codigo : undefined;
+}
 
 interface CartPageClientProps {
-  produtos: any[];
+  produtos: unknown[];
 }
 
 export function CartPageClient({ produtos }: CartPageClientProps) {
   const router = useRouter();
+  const firedViewCartRef = useRef(false);
 
   // Novos hooks segmentados
   const { cart, addQuantityProductToCart, subtractQuantityProductToCart, removeProductFromCart, isCartLoaded } = useCart();
@@ -35,8 +43,50 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
   }, [cart, cupons, isValid, isValidating, validateCart]);
 
   // Converter cart object para array
-  const cartArray = Object.values(cart);
+  const cartArray = Object.values(cart) as unknown[];
   const isEmpty = cartArray.length === 0;
+
+  const cartItemsForTracking = useMemo(
+    () =>
+      cartArray.map((raw, index) => {
+        const p = raw as {
+          id?: unknown;
+          nome?: unknown;
+          preco?: unknown;
+          quantity?: unknown;
+        };
+
+        return {
+          item_id: String(p.id ?? "unknown"),
+          item_name: String(p.nome ?? "Produto"),
+          price: typeof p.preco === "number" ? p.preco : Number(p.preco ?? 0),
+          quantity: typeof p.quantity === "number" ? p.quantity : Number(p.quantity ?? 1),
+          index,
+        };
+      }),
+    [cartArray]
+  );
+
+  useEffect(() => {
+    if (!isCartLoaded) return;
+    if (firedViewCartRef.current) return;
+    firedViewCartRef.current = true;
+
+    ucViewCart({
+      items: cartItemsForTracking,
+      value: total,
+    });
+  }, [isCartLoaded, cartItemsForTracking, total]);
+
+  const handleCheckout = () => {
+    ucBeginCheckout({
+      items: cartItemsForTracking,
+      value: total,
+      coupon: cupons?.map(getCupomCodigo).filter(Boolean).join(",") || undefined,
+      shipping: freightValue,
+    });
+    router.push("/figma/checkout");
+  };
 
   // Mostrar loading enquanto carrega do localStorage
   if (!isCartLoaded) {
@@ -114,7 +164,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           frete={freightValue}
           cupons={cupons}
           total={total}
-          onCheckout={() => router.push('/figma/checkout')}
+          onCheckout={handleCheckout}
           isMobile={true}
           freteCalculado={hasCalculated}
           isCartValid={isValid}
@@ -168,7 +218,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                 frete={freightValue}
                 cupons={cupons}
                 total={total}
-                onCheckout={() => router.push('/figma/checkout')}
+                onCheckout={handleCheckout}
                 isMobile={false}
                 freteCalculado={hasCalculated}
                 isCartValid={isValid}

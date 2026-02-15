@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CardProduto } from "./CardProduto";
+import { ucViewItemList } from "../../../_tracking/uc-ecommerce";
 
 interface Produto {
   id?: string;
@@ -28,18 +29,52 @@ interface Produto {
 interface ProductGridProps {
   produtos: Produto[];
   paginaPorPagina?: number;
+  listId?: string;
+  listName?: string;
 }
 
 export function ProductGrid({
   produtos,
   paginaPorPagina = 12,
+  listId,
+  listName,
 }: ProductGridProps) {
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const lastFingerprintRef = useRef<string | null>(null);
 
   const totalPaginas = Math.ceil(produtos.length / paginaPorPagina);
   const indexInicio = (paginaAtual - 1) * paginaPorPagina;
   const indexFim = indexInicio + paginaPorPagina;
   const produtosPagina = produtos.slice(indexInicio, indexFim);
+
+  const visibleItemsForTracking = useMemo(
+    () =>
+      produtosPagina.map((p, index) => ({
+        item_id: String(p.id ?? "unknown"),
+        item_name: p.nome,
+        price: p.preco,
+        quantity: 1,
+        index,
+      })),
+    [produtosPagina]
+  );
+
+  useEffect(() => {
+    if (visibleItemsForTracking.length === 0) return;
+
+    const fingerprint = JSON.stringify({
+      paginaAtual,
+      paginaPorPagina,
+      listId,
+      listName,
+      items: visibleItemsForTracking.map((i) => [i.item_id, i.index]),
+    });
+
+    if (lastFingerprintRef.current === fingerprint) return;
+    lastFingerprintRef.current = fingerprint;
+
+    ucViewItemList({ items: visibleItemsForTracking, listId, listName });
+  }, [visibleItemsForTracking, paginaAtual, paginaPorPagina, listId, listName]);
 
   const handlePaginaAnterior = () => {
     if (paginaAtual > 1) setPaginaAtual(paginaAtual - 1);

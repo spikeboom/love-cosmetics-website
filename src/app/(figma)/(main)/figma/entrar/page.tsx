@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts";
+import { ucUserDataUpdate } from "../../../_tracking/uc-ecommerce";
 
 // Funcao para formatar CPF
 function formatCPF(value: string): string {
@@ -64,7 +65,16 @@ export default function EntrarPage() {
         return;
       }
 
-      // Login bem sucedido - atualizar estado de auth e redirecionar
+      // Login bem sucedido - disparar user_data_update antes de redirecionar
+      if (result.cliente) {
+        ucUserDataUpdate({
+          email: result.cliente.email,
+          phone_number: result.cliente.telefone,
+          first_name: result.cliente.nome,
+          last_name: result.cliente.sobrenome,
+        });
+      }
+
       await refreshAuth();
       router.push("/figma/minha-conta/pedidos");
     } catch {

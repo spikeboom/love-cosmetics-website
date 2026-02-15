@@ -11,7 +11,7 @@ import {
 } from "@/utils/cart-operations";
 import { handleCupom as handleCupomUtil, handleAddCupom as handleAddCupomUtil } from "@/utils/coupon-operations";
 import { calculateCartTotals } from "@/utils/cart-calculations";
-import { addProductEvent } from "@/core/tracking/product-tracking";
+
 import { processProdutosComOuSemCupom, processProdutosRevert } from "@/core/processing/product-processing";
 import { StorageService } from "@/core/storage/storage-service";
 import { CartCalculations } from "@/core/utils/cart-calculations";
@@ -106,11 +106,11 @@ export const MeuContextoProvider = ({ children }) => {
   }, [cart, cupons, cartValidation, notify]);
 
   const addProductToCart = (product) => {
-    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons, addProductEvent);
+    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cupons);
   };
 
   const addQuantityProductToCart = ({ product }) => {
-    addQuantityProductToCartUtil({ product }, cart, setCart, addProductEvent);
+    addQuantityProductToCartUtil({ product }, cart, setCart);
   };
 
   const subtractQuantityProductToCart = ({ product }) => {

@@ -1,6 +1,6 @@
 import { processProdutosComOuSemCupom } from "@/core/processing/product-processing";
 
-export const addProductToCart = (product: any, cart: any, setCart: any, setLoadingAddItem: any, cupons: any, addProductEvent: any) => {
+export const addProductToCart = (product: any, cart: any, setCart: any, setLoadingAddItem: any, cupons: any) => {
   setLoadingAddItem(true);
 
   const newCart = { ...cart };
@@ -21,20 +21,16 @@ export const addProductToCart = (product: any, cart: any, setCart: any, setLoadi
     }, {});
     setCart(cartResult);
 
-    addProductEvent(product);
-
     setLoadingAddItem(false);
   });
 };
 
-export const addQuantityProductToCart = ({ product }: any, cart: any, setCart: any, addProductEvent: any) => {
+export const addQuantityProductToCart = ({ product }: any, cart: any, setCart: any) => {
   const newCart = { ...cart };
   if (newCart[product.id]) {
     newCart[product.id].quantity += 1;
   }
   setCart(newCart);
-
-  addProductEvent(product);
 };
 
 export const subtractQuantityProductToCart = ({ product }: any, cart: any, setCart: any, removeProductFromCartFn: any) => {

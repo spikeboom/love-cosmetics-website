@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
@@ -11,6 +11,7 @@ import { ProductGallery, ProductFilters, useShareProduct } from "./components";
 import { calculateProductPrices } from "@/utils/calculate-prices";
 import { useCart } from "@/contexts";
 import { useNotifications } from "@/core/notifications/NotificationContext";
+import { ucAddToCart, ucViewItem } from "../../../../_tracking/uc-ecommerce";
 
 interface ProductPageClientProps {
   produto: any;
@@ -68,12 +69,43 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
   const handleAddToCart = () => {
     addProductToCart(getProductData());
     showAddedToCartToast();
+
+    ucAddToCart({
+      item: {
+        item_id: String(produto?.id ?? "unknown"),
+        item_name: String(produto?.nome ?? "Produto"),
+        price: priceInfo.preco,
+        quantity: 1,
+      },
+    });
   };
 
   const handleBuy = () => {
     addProductToCart(getProductData());
     showAddedToCartToast();
+
+    ucAddToCart({
+      item: {
+        item_id: String(produto?.id ?? "unknown"),
+        item_name: String(produto?.nome ?? "Produto"),
+        price: priceInfo.preco,
+        quantity: 1,
+      },
+    });
   };
+
+  useEffect(() => {
+    if (!produto?.id) return;
+    ucViewItem({
+      item: {
+        item_id: String(produto.id),
+        item_name: String(produto.nome ?? "Produto"),
+        price: priceInfo.preco,
+        quantity: 1,
+      },
+      value: priceInfo.preco,
+    });
+  }, [produto?.id, produto?.nome, priceInfo.preco]);
 
   // Processa imagens do produto
   const productImagesMain = produto?.carouselImagensPrincipal?.length > 0

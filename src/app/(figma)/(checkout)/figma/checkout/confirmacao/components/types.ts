@@ -9,6 +9,7 @@ export interface PedidoStatus {
 }
 
 export interface ProdutoItem {
+  reference_id?: string;
   name: string;
   quantity: number;
   preco: number;

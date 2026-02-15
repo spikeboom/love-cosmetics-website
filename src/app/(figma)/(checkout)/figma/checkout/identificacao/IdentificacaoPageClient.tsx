@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
+import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 
 export function IdentificacaoPageClient() {
   const router = useRouter();
@@ -24,6 +25,17 @@ export function IdentificacaoPageClient() {
     if (validateForm()) {
       saveToStorage();
       syncToServer({ identificacao: formData });
+
+      // Disparar user_data_update com dados de identificacao
+      const nomeCompleto = formData.nome?.trim() || "";
+      const partes = nomeCompleto.split(/\s+/);
+      ucUserDataUpdate({
+        email: formData.email,
+        phone_number: formData.telefone?.replace(/\D/g, "") || undefined,
+        first_name: partes[0] || undefined,
+        last_name: partes.length > 1 ? partes.slice(1).join(" ") : undefined,
+      });
+
       router.push("/figma/checkout/entrega");
     }
   };

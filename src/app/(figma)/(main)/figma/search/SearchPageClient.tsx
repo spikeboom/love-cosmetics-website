@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Breadcrumbs } from "../components/Breadcrumbs";
 import { SearchFilters } from "../components/SearchFilters";
 import { ProductGrid } from "../components/ProductGrid";
@@ -114,7 +114,12 @@ export function SearchPageClient({ produtos, titulo, query }: SearchPageClientPr
           {/* Product Grid */}
           <div className="flex-1 w-full">
             {produtosOrdenados.length > 0 ? (
-              <ProductGrid produtos={produtosOrdenados} paginaPorPagina={12} />
+              <ProductGrid
+                produtos={produtosOrdenados}
+                paginaPorPagina={12}
+                listId={query ? `search:${query}` : "search:all"}
+                listName={query ? `Busca: ${query}` : titulo}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <p className="font-cera-pro font-medium text-[20px] text-black mb-2">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { useCreateOrder } from "@/hooks/checkout";
+import { ucPurchase } from "../../../../_tracking/uc-ecommerce";
 import {
   TelaAtual,
   FormaPagamento,
@@ -61,7 +62,7 @@ export function PagamentoPageClient() {
   }, [router]);
 
   // Calculos de valores - usar valores do Context diretamente
-  const cartArray = Object.values(cart);
+  const cartArray = Object.values(cart) as unknown[];
 
   // Mesma lógica do /cart:
   // subtotalOriginal = soma dos preco_de (preços originais riscados)
@@ -116,6 +117,58 @@ export function PagamentoPageClient() {
   };
 
   const handlePaymentSuccess = () => {
+    if (pedidoId) {
+      ucPurchase({
+        transactionId: pedidoId,
+        value: valorTotal,
+        shipping: valorFrete,
+        coupon: cupons
+          ?.map((cupom) => {
+            if (!cupom || typeof cupom !== "object") return undefined;
+            const codigo = (cupom as unknown as Record<string, unknown>).codigo;
+            return typeof codigo === "string" ? codigo : undefined;
+          })
+          .filter(Boolean)
+          .join(",") || undefined,
+        items: cartArray.map((raw, index: number) => {
+          const p = raw as {
+            id?: unknown;
+            nome?: unknown;
+            preco?: unknown;
+            quantity?: unknown;
+          };
+
+          return {
+            item_id: String(p.id ?? "unknown"),
+            item_name: String(p.nome ?? "Produto"),
+            price: typeof p.preco === "number" ? p.preco : Number(p.preco ?? 0),
+            quantity: typeof p.quantity === "number" ? p.quantity : Number(p.quantity ?? 1),
+            index,
+          };
+        }),
+        user_data: checkoutData?.identificacao
+          ? {
+              email: checkoutData.identificacao.email,
+              phone_number: checkoutData.identificacao.telefone,
+              address: checkoutData.entrega
+                ? {
+                    city: checkoutData.entrega.cidade,
+                    region: checkoutData.entrega.estado,
+                    postal_code: checkoutData.entrega.cep,
+                    street: checkoutData.entrega.rua,
+                  }
+                : undefined,
+            }
+          : undefined,
+      });
+
+      try {
+        localStorage.setItem(`uc_purchase_sent_${pedidoId}`, "1");
+      } catch {
+        // ignore
+      }
+    }
+
     // Limpar carrinho do Context (estado em memoria)
     clearCart();
     clearCupons();

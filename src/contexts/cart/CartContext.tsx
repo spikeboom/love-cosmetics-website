@@ -8,7 +8,7 @@ import {
   removeProductFromCart as removeProductFromCartUtil,
   clearCart as clearCartUtil
 } from "@/utils/cart-operations";
-import { addProductEvent } from "@/core/tracking/product-tracking";
+
 import { StorageService } from "@/core/storage/storage-service";
 import { CartCalculations } from "@/core/utils/cart-calculations";
 import type { CartProduct, CartContextType } from "./types";
@@ -34,11 +34,11 @@ export const CartProvider = ({ children, cupons = [] }: CartProviderProps) => {
 
   const addProductToCart = useCallback((product: CartProduct) => {
     const cuponsAtuais = StorageService.loadCoupons();
-    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cuponsAtuais, addProductEvent);
+    addProductToCartUtil(product, cart, setCart, setLoadingAddItem, cuponsAtuais);
   }, [cart]);
 
   const addQuantityProductToCart = useCallback(({ product }: { product: CartProduct }) => {
-    addQuantityProductToCartUtil({ product }, cart, setCart, addProductEvent);
+    addQuantityProductToCartUtil({ product }, cart, setCart);
   }, [cart]);
 
   const removeProductFromCart = useCallback(({ product }: { product: CartProduct }) => {
