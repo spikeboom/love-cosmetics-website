@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
@@ -20,6 +21,7 @@ interface ProductPageClientProps {
 
 export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const router = useRouter();
   const { addProductToCart } = useCart();
   const { enqueueSnackbar } = useNotifications();
   const { handleShare } = useShareProduct({ productName: produto?.nome || "Produto" });
@@ -82,7 +84,6 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
   const handleBuy = () => {
     addProductToCart(getProductData());
-    showAddedToCartToast();
 
     ucAddToCart({
       item: {
@@ -92,6 +93,8 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         quantity: 1,
       },
     });
+
+    router.push("/cart");
   };
 
   useEffect(() => {

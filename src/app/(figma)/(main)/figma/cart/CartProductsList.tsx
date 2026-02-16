@@ -77,8 +77,9 @@ export function CartProductsList({
           ? produto.preco_de
           : undefined;
 
-        // Badges individuais de desconto (kit + cupom separados)
-        const discountBadges = getItemDiscountBadges(produto, cupons);
+        // Badges individuais de desconto (apenas kit, cupom aparece no total)
+        const discountBadges = getItemDiscountBadges(produto, cupons)
+          .filter(b => b.type !== 'cupom');
 
         const tags = produto.tags || [];
 

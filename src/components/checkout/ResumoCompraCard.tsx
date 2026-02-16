@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { formatPrice } from '@/lib/formatters';
-import { calculateCartResumoCompra, calculatePedidoResumoCompra, getItemDiscountBadges, getOrderItemDiscountBadges } from '@/core/pricing/resumo-compra';
+import { calculateCartResumoCompra, calculatePedidoResumoCompra } from '@/core/pricing/resumo-compra';
 import { getTipoDesconto } from '@/utils/cart-calculations';
 import { OutdatedCartAlert } from '@/components/cart/OutdatedCartAlert';
 
@@ -145,7 +145,7 @@ export function ResumoCompraCard({
             {/* Cupom */}
             {resumo.descontoCupom > 0 && (
               <div className="flex justify-between items-center self-stretch gap-8">
-                <p className={`font-cera-pro font-light leading-[1.257] text-[#111111] ${
+                <p className={`font-cera-pro font-light leading-[1.257] text-[#009142] ${
                   isMobile ? 'text-[14px]' : 'text-xl'
                 }`}>
                   Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
@@ -237,20 +237,12 @@ export function ResumoCompraCard({
                 ? item.preco_de
                 : undefined;
 
-              // Badges individuais de desconto
-              const badges = getItemDiscountBadges(item, cupons);
-
               return (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
                       {item.nome || item.name} {qty > 1 && `(x${qty})`}
                     </span>
-                    {badges.map((badge, i) => (
-                      <span key={i} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#009142]">
-                        {badge.label}
-                      </span>
-                    ))}
                   </div>
                   <div className="flex items-center gap-2">
                     {precoAntigo && (
@@ -310,7 +302,7 @@ export function ResumoCompraCard({
           <>
             <div className="bg-white h-px w-full" />
             <div className="p-4 flex items-center justify-between">
-              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111111]">
+              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
                 Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
               </span>
               <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
@@ -466,9 +458,6 @@ export function ResumoCompraCard({
             const qty = item.quantity || 1;
             const precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
 
-            // Badges individuais para pedido salvo
-            const badges = getOrderItemDiscountBadges(item, cupomDescricao);
-
             return (
               <div key={i} className="flex items-start gap-3">
                 {/* Imagem */}
@@ -484,11 +473,6 @@ export function ResumoCompraCard({
                     <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
                       {item.name || item.nome} {qty > 1 && `(x${qty})`}
                     </span>
-                    {badges.map((badge, bi) => (
-                      <span key={bi} className="text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 bg-[#009142]">
-                        {badge.label}
-                      </span>
-                    ))}
                   </div>
                   <div className="flex items-center gap-2">
                     {precoAntigo && (
@@ -533,7 +517,7 @@ export function ResumoCompraCard({
         <>
           <div className="bg-white h-px" />
           <div className="p-4 flex justify-between items-center">
-            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#111]">
+            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
               Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
             </span>
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">

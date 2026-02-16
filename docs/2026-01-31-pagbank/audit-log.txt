@@ -576,3 +576,518 @@ Timestamp: 2026-02-11T21:55:38.750Z
   ]
 }
 
+=== PIX - REQUEST ===
+Timestamp: 2026-02-16T19:28:59.776Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "e0109822-b0b8-477a-9e1c-960f7b4996c7",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 27839
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 8827
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 45503,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-02-16T19:43:59.776Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-02-16T19:29:00.615Z
+Status: 201
+
+{
+  "id": "ORDE_F931F533-539E-435D-B484-040FA2780659",
+  "reference_id": "e0109822-b0b8-477a-9e1c-960f7b4996c7",
+  "created_at": "2026-02-16T16:29:00.640-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 27839
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 8827
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_B1A00343-84E2-419B-993C-4C65874240A7",
+      "expiration_date": "2026-02-16T16:43:59.000-03:00",
+      "amount": {
+        "value": 45503
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/B1A00343-84E2-419B-993C-4C65874240A727600016BR.COM.PAGSEGURO0136B1A00343-84E2-419B-993C-4C65874240A75204597753039865406455.035802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304BAC7",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_B1A00343-84E2-419B-993C-4C65874240A7/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_B1A00343-84E2-419B-993C-4C65874240A7/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_F931F533-539E-435D-B484-040FA2780659",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_F931F533-539E-435D-B484-040FA2780659/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-02-16T19:30:37.642Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "49331b7a-0ea0-4afc-987c-0ffca7ba9da1",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 61
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 19
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-02-16T19:45:37.642Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-02-16T19:30:38.238Z
+Status: 201
+
+{
+  "id": "ORDE_3401B38D-B8BA-40AB-AD19-2C5691B11687",
+  "reference_id": "49331b7a-0ea0-4afc-987c-0ffca7ba9da1",
+  "created_at": "2026-02-16T16:30:38.369-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 61
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 19
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_97899A1B-58FF-4F45-B2DF-F6B086413BE1",
+      "expiration_date": "2026-02-16T16:45:37.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/97899A1B-58FF-4F45-B2DF-F6B086413BE127600016BR.COM.PAGSEGURO013697899A1B-58FF-4F45-B2DF-F6B086413BE152045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***63046EB7",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_97899A1B-58FF-4F45-B2DF-F6B086413BE1/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_97899A1B-58FF-4F45-B2DF-F6B086413BE1/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_3401B38D-B8BA-40AB-AD19-2C5691B11687",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_3401B38D-B8BA-40AB-AD19-2C5691B11687/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-02-16T19:30:42.687Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "6bbf2bb6-f07a-43ed-9fdc-e65129ca9330",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 61
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 19
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-02-16T19:45:42.687Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-02-16T19:30:43.194Z
+Status: 201
+
+{
+  "id": "ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE",
+  "reference_id": "6bbf2bb6-f07a-43ed-9fdc-e65129ca9330",
+  "created_at": "2026-02-16T16:30:43.260-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 61
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 19
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_C7861520-9624-4CDE-A03F-EEBB03DA7472",
+      "expiration_date": "2026-02-16T16:45:42.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/C7861520-9624-4CDE-A03F-EEBB03DA747227600016BR.COM.PAGSEGURO0136C7861520-9624-4CDE-A03F-EEBB03DA747252045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304E2AD",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C7861520-9624-4CDE-A03F-EEBB03DA7472/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C7861520-9624-4CDE-A03F-EEBB03DA7472/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-02-16T19:31:12.996Z
+
+{
+  "id": "ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE",
+  "reference_id": "6bbf2bb6-f07a-43ed-9fdc-e65129ca9330",
+  "created_at": "2026-02-16T16:30:43.260-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 1,
+      "unit_amount": 61
+    },
+    {
+      "reference_id": "317",
+      "name": "Sérum Facial",
+      "quantity": 2,
+      "unit_amount": 19
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_C7861520-9624-4CDE-A03F-EEBB03DA7472",
+      "expiration_date": "2026-02-16T16:45:42.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/C7861520-9624-4CDE-A03F-EEBB03DA747227600016BR.COM.PAGSEGURO0136C7861520-9624-4CDE-A03F-EEBB03DA747252045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304E2AD",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C7861520-9624-4CDE-A03F-EEBB03DA7472/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C7861520-9624-4CDE-A03F-EEBB03DA7472/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_C7861520-9624-4CDE-A03F-EEBB03DA7472",
+      "reference_id": "6bbf2bb6-f07a-43ed-9fdc-e65129ca9330",
+      "status": "PAID",
+      "created_at": "2026-02-16T16:31:12.294-03:00",
+      "paid_at": "2026-02-16T16:31:12.618-03:00",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_A5E9780A-47DB-49FD-9330-9593B0B5FFD9",
+          "end_to_end_id": "E00416968202602161931nVHZi4h60Xn",
+          "holder": {
+            "name": "ROBERTO DE ALMEIDA CRUZ NETO",
+            "tax_id": "***550442**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_C7861520-9624-4CDE-A03F-EEBB03DA7472",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_C7861520-9624-4CDE-A03F-EEBB03DA7472/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_CB2426A6-377D-4F55-A15E-1E3315684EDE/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+

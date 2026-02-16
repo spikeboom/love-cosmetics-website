@@ -68,8 +68,6 @@ export function SuccessState({ pedidoDetalhes }: SuccessStateProps) {
               enderecoCompleto={pedidoDetalhes?.endereco.completo}
               cupomDescricao={pedidoDetalhes?.cupom_descricao ?? undefined}
               metodoPagamento={getMetodoPagamentoLabel()}
-              collapsible
-              defaultCollapsed
             />
           )}
 
