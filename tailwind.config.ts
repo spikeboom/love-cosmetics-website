@@ -24,10 +24,16 @@ export default {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
+        "shimmer": {
+          "0%": { width: "0%", marginLeft: "0%" },
+          "50%": { width: "60%", marginLeft: "20%" },
+          "100%": { width: "0%", marginLeft: "100%" },
+        },
       },
       animation: {
         "slide-up-toast": "slide-up-toast 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
         "fade-in": "fade-in 0.2s ease-out",
+        "shimmer": "shimmer 1.5s ease-in-out infinite",
       },
       fontFamily: {
         lato: ["var(--font-lato)", ...fontFamily.sans],

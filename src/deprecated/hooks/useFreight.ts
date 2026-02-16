@@ -10,7 +10,7 @@ interface UseFreightReturn {
   deliveryTime: string;
   isLoading: boolean;
   error: string | null;
-  calculateFreight: (cep: string, cartItems?: CartProduct[]) => Promise<void>;
+  calculateFreight: (cep: string, cartItems?: CartProduct[], options?: { silent?: boolean }) => Promise<void>;
   clearError: () => void;
   hasCalculated: boolean;
   availableServices: Array<{
@@ -98,19 +98,22 @@ export function useFreight(): UseFreightReturn {
     }
   }, [freightValue, deliveryTime, availableServices, selectedServiceIndex, hasCalculated, addressLabel]);
 
-  const calculateFreightInternal = useCallback(async (cepValue: string, cartItems?: CartProduct[]) => {
+  const calculateFreightInternal = useCallback(async (cepValue: string, cartItems?: CartProduct[], options?: { silent?: boolean }) => {
     if (!FreightService.isValidCep(cepValue)) {
-      setError('CEP inválido. Digite um CEP com 8 dígitos.');
+      if (!options?.silent) {
+        setError('CEP inválido. Digite um CEP com 8 dígitos.');
+      }
       return;
     }
 
-    // Se não houver itens no carrinho, usar valores padrão
+    // Se não houver itens, não calcular
     if (!cartItems || cartItems.length === 0) {
-      setError('Carrinho vazio. Adicione produtos para calcular o frete.');
       return;
     }
 
-    setIsLoading(true);
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
     setError(null);
 
     try {

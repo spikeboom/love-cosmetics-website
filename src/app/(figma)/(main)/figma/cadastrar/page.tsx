@@ -258,7 +258,7 @@ export default function CadastrarPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimo 6 caracteres"
-              className={getInputClassName("password")}
+              className={`${getInputClassName("password")} tracking-[0.3em] placeholder:tracking-normal`}
             />
           </div>
 
@@ -272,7 +272,7 @@ export default function CadastrarPage() {
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
               placeholder="Repita sua senha"
-              className={getInputClassName("passwordConfirm")}
+              className={`${getInputClassName("passwordConfirm")} tracking-[0.3em] placeholder:tracking-normal`}
             />
           </div>
 

@@ -62,7 +62,10 @@ export function EntregaPageClient() {
   }, [router, freight.hasCalculated, freight.availableServices.length]);
 
   // Carregar dados: primeiro do usuário logado, depois do localStorage
+  // O CEP do contexto de shipping (PDP/carrinho) tem prioridade
   useEffect(() => {
+    const shippingCep = freight.cep;
+
     const loadData = async () => {
       try {
         // Tentar buscar dados do usuário logado
@@ -80,7 +83,8 @@ export function EntregaPageClient() {
             if (enderecoData && typeof enderecoData === "object" && enderecoData.cep) {
               setFormData(prev => ({
                 ...prev,
-                cep: enderecoData.cep ? enderecoData.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : "",
+                // CEP do shipping context tem prioridade sobre o do cliente
+                cep: shippingCep || (enderecoData.cep ? enderecoData.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : ""),
                 rua: enderecoData.endereco || "",
                 numero: enderecoData.numero || "",
                 complemento: enderecoData.complemento || "",
@@ -103,10 +107,12 @@ export function EntregaPageClient() {
         try {
           const parsed = JSON.parse(saved);
           // Nao sobrescrever selectedFreightIndex - esse vem do Context
-          const { selectedFreightIndex: _ignored, ...restData } = parsed;
+          const { selectedFreightIndex: _ignored, cep: savedCep, ...restData } = parsed;
           setFormData(prev => ({
             ...prev,
             ...restData,
+            // CEP do shipping context tem prioridade sobre o salvo
+            cep: shippingCep || savedCep || prev.cep,
           }));
         } catch {
           // Ignorar erro
@@ -118,13 +124,13 @@ export function EntregaPageClient() {
     loadData();
   }, []);
 
-  // Inicializar CEP e selectedFreightIndex do Context (tem prioridade)
+  // Inicializar CEP do Context e endereço (tem prioridade sobre localStorage)
   useEffect(() => {
-    if (freight.hasCalculated) {
+    if (freight.cep) {
       setFormData(prev => ({
         ...prev,
-        cep: freight.cep || prev.cep,
-        selectedFreightIndex: freight.selectedServiceIndex,
+        cep: freight.cep,
+        ...(freight.hasCalculated ? { selectedFreightIndex: freight.selectedServiceIndex } : {}),
       }));
     }
   }, [freight.cep, freight.hasCalculated, freight.selectedServiceIndex]);
@@ -289,12 +295,14 @@ export function EntregaPageClient() {
                 </a>
               </div>
               {loadingCep && (
-                <span className="text-[#254333] text-sm">Buscando endereco...</span>
+                <div className="w-full h-[3px] bg-[#E0E0E0] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#009142] rounded-full animate-shimmer" />
+                </div>
               )}
               {(errors.cep || errorCep) && (
                 <span className="text-red-500 text-sm">{errors.cep || errorCep}</span>
               )}
-              {/* Cidade/Estado resumido - mesmo estilo da PDP */}
+              {/* Cidade/Estado/Bairro resumido - mesmo estilo da PDP */}
               {formData.cidade && formData.estado && (
                 <div className="flex items-start gap-[6px] w-full">
                   <Image
@@ -305,7 +313,7 @@ export function EntregaPageClient() {
                     className="w-4 h-4 flex-shrink-0 mt-[1px]"
                   />
                   <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.4]">
-                    {formData.cidade} - {formData.estado}
+                    {formData.bairro && `${formData.bairro}, `}{formData.cidade} - {formData.estado}
                   </p>
                 </div>
               )}
@@ -328,65 +336,6 @@ export function EntregaPageClient() {
               {errors.rua && (
                 <span className="text-red-500 text-sm">{errors.rua}</span>
               )}
-            </div>
-
-            {/* Bairro */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Bairro *
-              </label>
-              <input
-                type="text"
-                value={formData.bairro}
-                onChange={(e) => handleChange("bairro", e.target.value)}
-                placeholder=""
-                className={`w-full h-[48px] px-4 bg-white border ${
-                  errors.bairro ? "border-red-500" : "border-[#d2d2d2]"
-                } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-              />
-              {errors.bairro && (
-                <span className="text-red-500 text-sm">{errors.bairro}</span>
-              )}
-            </div>
-
-            {/* Cidade e Estado */}
-            <div className="flex gap-4">
-              <div className="flex flex-col gap-3 lg:gap-[16px] flex-1">
-                <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                  Cidade *
-                </label>
-                <input
-                  type="text"
-                  value={formData.cidade}
-                  onChange={(e) => handleChange("cidade", e.target.value)}
-                  placeholder=""
-                  className={`w-full h-[48px] px-4 bg-white border ${
-                    errors.cidade ? "border-red-500" : "border-[#d2d2d2]"
-                  } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-                />
-                {errors.cidade && (
-                  <span className="text-red-500 text-sm">{errors.cidade}</span>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-3 lg:gap-[16px] w-[100px]">
-                <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                  Estado *
-                </label>
-                <input
-                  type="text"
-                  value={formData.estado}
-                  onChange={(e) => handleChange("estado", e.target.value)}
-                  placeholder="UF"
-                  maxLength={2}
-                  className={`w-full h-[48px] px-4 bg-white border ${
-                    errors.estado ? "border-red-500" : "border-[#d2d2d2]"
-                  } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333] uppercase`}
-                />
-                {errors.estado && (
-                  <span className="text-red-500 text-sm">{errors.estado}</span>
-                )}
-              </div>
             </div>
 
             {/* Numero */}

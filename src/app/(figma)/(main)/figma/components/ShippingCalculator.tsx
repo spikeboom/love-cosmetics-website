@@ -5,12 +5,23 @@ import Image from "next/image";
 import { useCart, useShipping } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 
+interface FallbackProduct {
+  quantity: number;
+  peso_gramas: number;
+  altura: number;
+  largura: number;
+  comprimento: number;
+  bling_number?: string;
+  preco: number;
+}
+
 interface ShippingCalculatorProps {
   title?: string;
   buttonLabel?: string;
   placeholder?: string;
   inputFontSize?: 'small' | 'large';
   width?: 'full' | 'fixed';
+  fallbackProduct?: FallbackProduct;
 }
 
 export function ShippingCalculator({
@@ -19,6 +30,7 @@ export function ShippingCalculator({
   placeholder = "Digite seu CEP",
   inputFontSize = 'large',
   width = 'full',
+  fallbackProduct,
 }: ShippingCalculatorProps) {
   const { cart } = useCart();
   const {
@@ -35,6 +47,14 @@ export function ShippingCalculator({
     addressLabel,
   } = useShipping();
 
+  // Itens efetivos: carrinho, ou produto fallback (PDP) quando carrinho vazio
+  const getEffectiveItems = () => {
+    const cartItems = Object.values(cart);
+    if (cartItems.length > 0) return cartItems;
+    if (fallbackProduct) return [fallbackProduct];
+    return [];
+  };
+
   // Chave estável: só muda quando itens, quantidades ou preços mudam
   // Flags de cupom (cupom_applied, tag_desconto_*) não afetam o frete
   const cartFreightKey = useMemo(() => {
@@ -47,43 +67,43 @@ export function ShippingCalculator({
 
   // Recalcular frete automaticamente quando itens/quantidades/preços mudam
   useEffect(() => {
-    const cartItems = Object.values(cart);
+    const items = getEffectiveItems();
 
-    // Se carrinho estiver vazio, limpar valores de frete
-    if (cartItems.length === 0) {
+    // Se não tem itens (carrinho vazio e sem fallback), limpar valores de frete
+    if (items.length === 0) {
       resetFreight();
       return;
     }
 
-    // Se tem CEP e já calculou antes, recalcular
+    // Se tem CEP e já calculou antes, recalcular silenciosamente
     if (cep && hasCalculated) {
       const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length === 8) {
-        calculateFreight(cep, cartItems);
+        calculateFreight(cep, items, { silent: true });
       }
     }
   }, [cartFreightKey]);
 
   // Auto-calcular quando CEP tiver 8 dígitos
   useEffect(() => {
-    const cartItems = Object.values(cart);
+    const items = getEffectiveItems();
     const cleanCep = cep.replace(/\D/g, '');
 
-    // Se carrinho estiver vazio, não calcular
-    if (cartItems.length === 0) {
+    // Se não tem itens, não calcular
+    if (items.length === 0) {
       return;
     }
 
-    // Se CEP tiver 8 dígitos e ainda não calculou, calcular automaticamente
+    // Se CEP tiver 8 dígitos e ainda não calculou, calcular automaticamente (silencioso)
     if (cleanCep.length === 8 && !hasCalculated) {
-      calculateFreight(cep, cartItems);
+      calculateFreight(cep, items, { silent: true });
     }
   }, [cep]);
 
   const handleCalculate = () => {
     if (cep) {
-      const cartItems = Object.values(cart);
-      calculateFreight(cep, cartItems);
+      const items = getEffectiveItems();
+      calculateFreight(cep, items);
     }
   };
 
@@ -124,16 +144,6 @@ export function ShippingCalculator({
           } text-black leading-[1.257] px-[8px] py-0 focus:outline-none bg-transparent min-w-0`}
         />
 
-        {/* Botão Limpar CEP (aparece quando tem CEP) */}
-        {cep && (
-          <button
-            onClick={handleClearCep}
-            className="text-[#B3261E] hover:text-[#8a1c17] px-1 md:px-2 text-[11px] md:text-[12px] font-cera-pro font-light underline whitespace-nowrap flex-shrink-0"
-          >
-            Limpar
-          </button>
-        )}
-
         <button
           onClick={handleCalculate}
           disabled={isLoading || cleanCep.length < 8}
@@ -141,11 +151,18 @@ export function ShippingCalculator({
         >
           <div className="flex gap-[8px] items-center justify-center px-3 md:px-[16px] py-[10px]">
             <p className="font-cera-pro font-medium text-sm md:text-[16px] text-white leading-[1.257] whitespace-nowrap tracking-[0px]">
-              {isLoading ? 'Calculando...' : buttonLabel}
+              {buttonLabel}
             </p>
           </div>
         </button>
       </div>
+
+      {/* Barra de carregamento */}
+      {isLoading && (
+        <div className="w-full h-[3px] bg-[#E0E0E0] rounded-full overflow-hidden -mt-[8px]">
+          <div className="h-full bg-[#009142] rounded-full animate-shimmer" />
+        </div>
+      )}
 
       {/* Endereço resumido - logo abaixo do input */}
       {addressLabel && hasCalculated && !error && (

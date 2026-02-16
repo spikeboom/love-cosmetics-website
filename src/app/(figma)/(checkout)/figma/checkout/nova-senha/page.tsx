@@ -122,7 +122,7 @@ function NovaSenhaContent() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="********"
-                className="w-full h-[48px] px-4 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-[#333] placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]"
+                className="w-full h-[48px] px-4 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-[#333] placeholder:text-[#8c8c8c] placeholder:tracking-normal tracking-[0.3em] focus:outline-none focus:border-[#254333]"
               />
             </div>
 
@@ -136,7 +136,7 @@ function NovaSenhaContent() {
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
                 placeholder="********"
-                className="w-full h-[48px] px-4 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-[#333] placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]"
+                className="w-full h-[48px] px-4 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-[#333] placeholder:text-[#8c8c8c] placeholder:tracking-normal tracking-[0.3em] focus:outline-none focus:border-[#254333]"
               />
             </div>
 

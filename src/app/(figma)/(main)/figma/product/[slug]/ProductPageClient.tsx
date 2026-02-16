@@ -210,7 +210,17 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               <ProductDescription produto={produto} />
 
               {/* Shipping Calculator */}
-              <ShippingCalculator />
+              <ShippingCalculator
+                fallbackProduct={{
+                  quantity: 1,
+                  peso_gramas: produto.peso_gramas,
+                  altura: produto.altura,
+                  largura: produto.largura,
+                  comprimento: produto.comprimento,
+                  bling_number: produto.bling_number,
+                  preco: priceInfo.preco,
+                }}
+              />
 
               {/* Action Buttons */}
               <ProductActionButtons

@@ -20,7 +20,7 @@ export interface ShippingState {
 
 export interface ShippingOperations {
   setCep: (cep: string) => void;
-  calculateFreight: (cep: string, cartItems?: any[]) => Promise<void>;
+  calculateFreight: (cep: string, cartItems?: any[], options?: { silent?: boolean }) => Promise<void>;
   clearError: () => void;
   setSelectedFreight: (price: number, deliveryTime: number, index?: number) => void;
   resetFreight: () => void;

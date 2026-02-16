@@ -145,10 +145,10 @@ export function ResumoCompraCard({
             {/* Cupom */}
             {resumo.descontoCupom > 0 && (
               <div className="flex justify-between items-center self-stretch gap-8">
-                <p className={`font-cera-pro font-light leading-[1.257] text-[#009142] ${
+                <p className={`font-cera-pro font-light leading-[1.257] ${
                   isMobile ? 'text-[14px]' : 'text-xl'
                 }`}>
-                  Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
+                  <span className="text-[#111111]">Cupom</span>{tipoDesconto ? <span className="text-[#009142]"> ({tipoDesconto})</span> : ''}
                 </p>
                 <p className={`font-cera-pro font-light leading-[1.257] text-[#009142] ${
                   isMobile ? 'text-[14px]' : 'text-xl'
@@ -229,31 +229,13 @@ export function ResumoCompraCard({
           </div>
           <div className="flex flex-col gap-2">
             {displayItems.map((item: any, index: number) => {
-              const precoAtual = item.preco;
               const qty = item.quantity || 1;
 
-              // Preço original riscado (kit/promo, não cupom)
-              const precoAntigo = item.preco_de && item.preco_de > precoAtual
-                ? item.preco_de
-                : undefined;
-
               return (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
-                      {item.nome || item.name} {qty > 1 && `(x${qty})`}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {precoAntigo && (
-                      <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
-                        {formatPrice(precoAntigo * qty)}
-                      </span>
-                    )}
-                    <span className="font-cera-pro font-medium text-[14px] lg:text-[16px] text-[#111]">
-                      {formatPrice(precoAtual * qty)}
-                    </span>
-                  </div>
+                <div key={index} className="flex items-center">
+                  <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
+                    {item.nome || item.name} {qty > 1 && `(x${qty})`}
+                  </span>
                 </div>
               );
             })}
@@ -302,8 +284,8 @@ export function ResumoCompraCard({
           <>
             <div className="bg-white h-px w-full" />
             <div className="p-4 flex items-center justify-between">
-              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-                Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
+              <span className="font-cera-pro font-bold text-[18px] lg:text-[20px]">
+                <span className="text-[#111111]">Cupom</span>{tipoDesconto ? <span className="text-[#009142]"> ({tipoDesconto})</span> : ''}
               </span>
               <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
                 -{formatPrice(resumo.descontoCupom)}
@@ -454,9 +436,7 @@ export function ResumoCompraCard({
         </div>
         <div className="flex flex-col gap-3">
           {displayItems.map((item: any, i: number) => {
-            const precoAtual = item.preco || item.unit_amount || 0;
             const qty = item.quantity || 1;
-            const precoAntigo = item.preco_de && item.preco_de > precoAtual ? item.preco_de : undefined;
 
             return (
               <div key={i} className="flex items-start gap-3">
@@ -469,21 +449,9 @@ export function ResumoCompraCard({
                   />
                 )}
                 <div className="flex flex-1 flex-col gap-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
-                      {item.name || item.nome} {qty > 1 && `(x${qty})`}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {precoAntigo && (
-                      <span className="font-cera-pro font-light text-[12px] text-[#999] line-through">
-                        {formatPrice(precoAntigo * qty)}
-                      </span>
-                    )}
-                    <span className="font-cera-pro font-medium text-[14px] text-[#111]">
-                      {formatPrice(precoAtual * qty)}
-                    </span>
-                  </div>
+                  <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">
+                    {item.name || item.nome} {qty > 1 && `(x${qty})`}
+                  </span>
                 </div>
               </div>
             );
@@ -517,8 +485,8 @@ export function ResumoCompraCard({
         <>
           <div className="bg-white h-px" />
           <div className="p-4 flex justify-between items-center">
-            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
-              Cupom{tipoDesconto ? ` (${tipoDesconto})` : ''}
+            <span className="font-cera-pro font-bold text-[18px] lg:text-[20px]">
+              <span className="text-[#111]">Cupom</span>{tipoDesconto ? <span className="text-[#009142]"> ({tipoDesconto})</span> : ''}
             </span>
             <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#009142]">
               -{formatPrice(resumo.descontoCupom)}

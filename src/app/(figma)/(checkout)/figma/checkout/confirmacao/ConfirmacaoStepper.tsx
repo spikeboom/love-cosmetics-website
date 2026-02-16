@@ -8,61 +8,52 @@ interface ConfirmacaoStepperProps {
   currentStep: Step;
 }
 
-// Steps para fluxo de senha/verificacao (criar conta ou login)
+function StepPersonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 12C10.9 12 9.95833 11.6083 9.175 10.825C8.39167 10.0417 8 9.1 8 8C8 6.9 8.39167 5.95833 9.175 5.175C9.95833 4.39167 10.9 4 12 4C13.1 4 14.0417 4.39167 14.825 5.175C15.6083 5.95833 16 6.9 16 8C16 9.1 15.6083 10.0417 14.825 10.825C14.0417 11.6083 13.1 12 12 12ZM4 20V18.2C4 17.6333 4.14583 17.1125 4.4375 16.6375C4.72917 16.1625 5.11667 15.8 5.6 15.55C6.63333 15.0333 7.68333 14.6458 8.75 14.3875C9.81667 14.1292 10.9 14 12 14C13.1 14 14.1833 14.1292 15.25 14.3875C16.3167 14.6458 17.3667 15.0333 18.4 15.55C18.8833 15.8 19.2708 16.1625 19.5625 16.6375C19.8542 17.1125 20 17.6333 20 18.2V20H4Z" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function StepTruckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 14.7417 10.6667" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4.16667 10.6667C3.61111 10.6667 3.13889 10.4722 2.75 10.0833C2.36111 9.69444 2.16667 9.22222 2.16667 8.66667H1.31667C1.12778 8.66667 0.969445 8.60278 0.841667 8.475C0.713889 8.34722 0.65 8.18889 0.65 8C0.65 7.81111 0.713889 7.65278 0.841667 7.525C0.969445 7.39722 1.12778 7.33333 1.31667 7.33333H2.68333C2.87222 7.12222 3.09444 6.95833 3.35 6.84167C3.60556 6.725 3.87778 6.66667 4.16667 6.66667C4.45556 6.66667 4.72778 6.725 4.98333 6.84167C5.23889 6.95833 5.46111 7.12222 5.65 7.33333H8.43333L9.83333 1.33333H3.33333C3.14444 1.33333 2.98611 1.26944 2.85833 1.14167C2.73056 1.01389 2.66667 0.855556 2.66667 0.666667C2.66667 0.477778 2.73056 0.319444 2.85833 0.191667C2.98611 0.0638889 3.14444 0 3.33333 0H10.6667C10.8889 0 11.0667 0.0833333 11.2 0.25C11.3333 0.416667 11.3722 0.605556 11.3167 0.816667L10.8833 2.66667H12.1667C12.3778 2.66667 12.5778 2.71389 12.7667 2.80833C12.9556 2.90278 13.1111 3.03333 13.2333 3.2L14.4833 4.85C14.6056 5.00556 14.6833 5.175 14.7167 5.35833C14.75 5.54167 14.75 5.72778 14.7167 5.91667L14.2667 8.13333C14.2333 8.28889 14.1556 8.41667 14.0333 8.51667C13.9111 8.61667 13.7722 8.66667 13.6167 8.66667H12.8333C12.8333 9.22222 12.6389 9.69444 12.25 10.0833C11.8611 10.4722 11.3889 10.6667 10.8333 10.6667C10.2778 10.6667 9.80556 10.4722 9.41667 10.0833C9.02778 9.69444 8.83333 9.22222 8.83333 8.66667H6.16667C6.16667 9.22222 5.97222 9.69444 5.58333 10.0833C5.19444 10.4722 4.72222 10.6667 4.16667 10.6667ZM4.16667 9.33333C4.35556 9.33333 4.51389 9.26945 4.64167 9.14167C4.76944 9.01389 4.83333 8.85556 4.83333 8.66667C4.83333 8.47778 4.76944 8.31944 4.64167 8.19167C4.51389 8.06389 4.35556 8 4.16667 8C3.97778 8 3.81944 8.06389 3.69167 8.19167C3.56389 8.31944 3.5 8.47778 3.5 8.66667C3.5 8.85556 3.56389 9.01389 3.69167 9.14167C3.81944 9.26945 3.97778 9.33333 4.16667 9.33333ZM10.8333 9.33333C11.0222 9.33333 11.1806 9.26945 11.3083 9.14167C11.4361 9.01389 11.5 8.85556 11.5 8.66667C11.5 8.47778 11.4361 8.31944 11.3083 8.19167C11.1806 8.06389 11.0222 8 10.8333 8C10.6444 8 10.4861 8.06389 10.3583 8.19167C10.2306 8.31944 10.1667 8.47778 10.1667 8.66667C10.1667 8.85556 10.2306 9.01389 10.3583 9.14167C10.4861 9.26945 10.6444 9.33333 10.8333 9.33333Z" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function StepPaymentIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.33333 8.66667C8.77778 8.66667 8.30556 8.47222 7.91667 8.08333C7.52778 7.69444 7.33333 7.22222 7.33333 6.66667C7.33333 6.11111 7.52778 5.63889 7.91667 5.25C8.30556 4.86111 8.77778 4.66667 9.33333 4.66667C9.88889 4.66667 10.3611 4.86111 10.75 5.25C11.1389 5.63889 11.3333 6.11111 11.3333 6.66667C11.3333 7.22222 11.1389 7.69444 10.75 8.08333C10.3611 8.47222 9.88889 8.66667 9.33333 8.66667ZM4.66667 10.6667C4.3 10.6667 3.98611 10.5361 3.725 10.275C3.46389 10.0139 3.33333 9.7 3.33333 9.33333V4C3.33333 3.63333 3.46389 3.31944 3.725 3.05833C3.98611 2.79722 4.3 2.66667 4.66667 2.66667H14C14.3667 2.66667 14.6806 2.79722 14.9417 3.05833C15.2028 3.31944 15.3333 3.63333 15.3333 4V9.33333C15.3333 9.7 15.2028 10.0139 14.9417 10.275C14.6806 10.5361 14.3667 10.6667 14 10.6667H4.66667ZM6 9.33333H12.6667C12.6667 8.96667 12.7972 8.65278 13.0583 8.39167C13.3194 8.13056 13.6333 8 14 8V5.33333C13.6333 5.33333 13.3194 5.20278 13.0583 4.94167C12.7972 4.68056 12.6667 4.36667 12.6667 4H6C6 4.36667 5.86944 4.68056 5.60833 4.94167C5.34722 5.20278 5.03333 5.33333 4.66667 5.33333V8C5.03333 8 5.34722 8.13056 5.60833 8.39167C5.86944 8.65278 6 8.96667 6 9.33333ZM12.6667 13.3333H2C1.63333 13.3333 1.31944 13.2028 1.05833 12.9417C0.797222 12.6806 0.666667 12.3667 0.666667 12V5.33333C0.666667 5.14444 0.730556 4.98611 0.858333 4.85833C0.986111 4.73056 1.14444 4.66667 1.33333 4.66667C1.52222 4.66667 1.68056 4.73056 1.80833 4.85833C1.93611 4.98611 2 5.14444 2 5.33333V12H12.6667C12.8556 12 13.0139 12.0639 13.1417 12.1917C13.2694 12.3194 13.3333 12.4778 13.3333 12.6667C13.3333 12.8556 13.2694 13.0139 13.1417 13.1417C13.0139 13.2694 12.8556 13.3333 12.6667 13.3333Z" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function StepShieldIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="currentColor"/>
+    </svg>
+  );
+}
+
+// Steps para fluxo de senha/verificacao
 const stepsAutenticacao: { id: Step; label: string; icon: React.ReactNode }[] = [
-  {
-    id: "senha",
-    label: "Senha",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
-      </svg>
-    ),
-  },
-  {
-    id: "verificacao",
-    label: "Verificacao",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="currentColor"/>
-      </svg>
-    ),
-  },
+  { id: "senha", label: "Senha", icon: <StepPersonIcon /> },
+  { id: "verificacao", label: "Verificacao", icon: <StepShieldIcon /> },
 ];
 
-// Steps para fluxo de checkout (identificacao > entrega > pagamento)
+// Steps para fluxo de checkout
 const stepsCheckout: { id: Step; label: string; icon: React.ReactNode }[] = [
-  {
-    id: "identificacao",
-    label: "Identificacao",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
-      </svg>
-    ),
-  },
-  {
-    id: "entrega",
-    label: "Entrega",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 8H17V4H3C1.9 4 1 4.9 1 6V17H3C3 18.66 4.34 20 6 20S9 18.66 9 17H15C15 18.66 16.34 20 18 20S21 18.66 21 17H23V12L20 8ZM6 18.5C5.17 18.5 4.5 17.83 4.5 17S5.17 15.5 6 15.5 7.5 16.17 7.5 17 6.83 18.5 6 18.5ZM19.5 9.5L21.46 12H17V9.5H19.5ZM18 18.5C17.17 18.5 16.5 17.83 16.5 17S17.17 15.5 18 15.5 19.5 16.17 19.5 17 18.83 18.5 18 18.5Z" fill="currentColor"/>
-      </svg>
-    ),
-  },
-  {
-    id: "pagamento",
-    label: "Pagamento",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 4H4C2.89 4 2.01 4.89 2.01 6L2 18C2 19.11 2.89 20 4 20H20C21.11 20 22 19.11 22 18V6C22 4.89 21.11 4 20 4ZM20 18H4V12H20V18ZM20 8H4V6H20V8Z" fill="currentColor"/>
-      </svg>
-    ),
-  },
+  { id: "identificacao", label: "Identificacao", icon: <StepPersonIcon /> },
+  { id: "entrega", label: "Entrega", icon: <StepTruckIcon /> },
+  { id: "pagamento", label: "Pagamento", icon: <StepPaymentIcon /> },
 ];
 
 export function ConfirmacaoStepper({ currentStep }: ConfirmacaoStepperProps) {
-  // Determinar qual conjunto de steps usar baseado no step atual
   const isCheckoutFlow = ["identificacao", "entrega", "pagamento"].includes(currentStep);
   const steps = isCheckoutFlow ? stepsCheckout : stepsAutenticacao;
 
@@ -70,25 +61,25 @@ export function ConfirmacaoStepper({ currentStep }: ConfirmacaoStepperProps) {
 
   return (
     <div className="bg-[#f8f3ed] border-b border-[#ba7900] w-full">
-      <div className="flex gap-2 lg:gap-4 items-center justify-center p-3 lg:p-[16px]">
-        <div className="flex items-center justify-center gap-4 lg:gap-8">
+      <div className="flex items-center justify-center py-3 px-2 lg:py-[16px] lg:px-[16px]">
+        <div className="flex items-center gap-1 lg:gap-2">
           {steps.map((step, index) => {
             const isActive = index === currentIndex;
             const isPast = index < currentIndex;
 
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center gap-1 lg:gap-2">
                 {/* Step item */}
-                <div className="flex gap-[8px] items-center">
+                <div className="flex gap-[4px] lg:gap-[6px] items-center">
                   <div
-                    className={`w-[24px] h-[24px] ${
+                    className={`w-[16px] h-[16px] ${
                       isActive || isPast ? "text-[#e7a63a]" : "text-[#8e8e93]"
                     }`}
                   >
                     {step.icon}
                   </div>
                   <p
-                    className={`font-cera-pro font-light text-[14px] lg:text-[20px] whitespace-nowrap leading-[normal] ${
+                    className={`font-cera-pro font-light text-[12px] lg:text-[16px] whitespace-nowrap leading-[normal] ${
                       isActive || isPast ? "text-black" : "text-[#8e8e93]"
                     }`}
                   >
@@ -98,7 +89,7 @@ export function ConfirmacaoStepper({ currentStep }: ConfirmacaoStepperProps) {
 
                 {/* Chevron separator */}
                 {index < steps.length - 1 && (
-                  <ChevronRightIcon className="w-6 h-6 lg:w-12 lg:h-12 text-[#8e8e93] lg:mx-4" />
+                  <ChevronRightIcon className="w-4 h-4 lg:w-6 lg:h-6 text-[#8e8e93]" />
                 )}
               </div>
             );

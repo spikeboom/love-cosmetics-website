@@ -324,50 +324,30 @@ export function CartProductCard({
               </div>
             </div>
 
-            {/* Tags e Remover - Desktop only */}
-            <div className="hidden md:flex items-center justify-between gap-4 self-stretch">
-              {tags.length > 0 && (
-                <div className="flex gap-[10px]">
-                  {tags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-center gap-1 rounded bg-[#F8F3ED] px-4 py-1"
-                    >
-                      {tag.icon && (
-                        <Image
-                          src={tag.icon}
-                          alt=""
-                          width={16}
-                          height={16}
-                          className="h-4 w-4"
-                        />
-                      )}
-                      <span className="font-cera-pro text-sm font-light leading-[1.257] text-[#B3261E]">
-                        {tag.texto}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Botão Remover */}
-              <button
-                onClick={onRemove}
-                className="font-cera-pro text-sm font-light text-[#B3261E] hover:text-[#8a1c17] underline transition-colors"
-                aria-label="Remover produto"
-              >
-                Remover
-              </button>
-            </div>
-
-            {/* Botão Remover - Mobile only */}
-            <button
-              onClick={onRemove}
-              className="md:hidden font-cera-pro text-sm font-light text-[#B3261E] hover:text-[#8a1c17] underline transition-colors self-start"
-              aria-label="Remover produto"
-            >
-              Remover
-            </button>
+            {/* Tags - Desktop only */}
+            {tags.length > 0 && (
+              <div className="hidden md:flex gap-[10px] self-stretch">
+                {tags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-center gap-1 rounded bg-[#F8F3ED] px-4 py-1"
+                  >
+                    {tag.icon && (
+                      <Image
+                        src={tag.icon}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="h-4 w-4"
+                      />
+                    )}
+                    <span className="font-cera-pro text-sm font-light leading-[1.257] text-[#B3261E]">
+                      {tag.texto}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
