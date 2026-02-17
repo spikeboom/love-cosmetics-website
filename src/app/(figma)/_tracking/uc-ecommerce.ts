@@ -60,6 +60,17 @@ function pushEcommerceEvent(
     event,
     event_id: newEventId(event),
     ecommerce,
+    // Duplicate key fields at top level for Stape Data Tag → sGTM.
+    // The Data Client does NOT flatten the GA4 ecommerce object,
+    // so the Meta CAPI template needs these at the top level.
+    items: ecommerce.items,
+    currency: ecommerce.currency,
+    value: ecommerce.value,
+    transaction_id: ecommerce.transaction_id,
+    shipping: ecommerce.shipping,
+    tax: ecommerce.tax,
+    coupon: ecommerce.coupon,
+    num_items: ecommerce.items?.length,
     ...extra,
   });
 }
