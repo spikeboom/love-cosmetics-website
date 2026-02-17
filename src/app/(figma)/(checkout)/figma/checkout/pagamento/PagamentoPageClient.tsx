@@ -148,7 +148,7 @@ export function PagamentoPageClient() {
         }),
         user_data: checkoutData?.identificacao
           ? {
-              email: checkoutData.identificacao.email,
+              email_address: checkoutData.identificacao.email,
               phone_number: checkoutData.identificacao.telefone,
               address: checkoutData.entrega
                 ? {

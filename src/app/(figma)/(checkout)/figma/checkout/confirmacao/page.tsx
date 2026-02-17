@@ -77,7 +77,7 @@ function ConfirmacaoContent() {
       coupon: (pedidoDetalhes.cupons || []).join(",") || undefined,
       items: purchaseItems,
       user_data: {
-        email: pedidoDetalhes.cliente?.email,
+        email_address: pedidoDetalhes.cliente?.email,
         phone_number: pedidoDetalhes.cliente?.telefone,
         address: pedidoDetalhes.endereco
           ? {

@@ -163,7 +163,7 @@ export function ucUserDataUpdate(args: {
 
   const user_data: Record<string, unknown> = {};
 
-  if (args.email) user_data.email = args.email;
+  if (args.email) user_data.email_address = args.email;
   if (args.phone_number) user_data.phone_number = args.phone_number;
 
   if (args.first_name || args.last_name || args.address) {
