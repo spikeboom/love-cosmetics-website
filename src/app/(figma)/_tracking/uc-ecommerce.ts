@@ -86,7 +86,13 @@ export function ucViewItemList(args: {
     item_list_name: it.item_list_name ?? args.listName,
   }));
 
-  pushEcommerceEvent("view_item_list", { items });
+  const value = items.reduce((acc, it) => {
+    const qty = safeNumber(it.quantity) ?? 1;
+    const price = safeNumber(it.price) ?? 0;
+    return acc + qty * price;
+  }, 0);
+
+  pushEcommerceEvent("view_item_list", { currency: "BRL", value, items });
 }
 
 export function ucViewItem(args: {

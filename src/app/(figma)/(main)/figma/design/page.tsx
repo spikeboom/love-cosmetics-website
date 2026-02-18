@@ -1,4 +1,5 @@
 import { BannerPrincipal } from "../components/BannerPrincipal";
+import { CupomBanner } from "../components/CupomBanner";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
@@ -45,6 +46,11 @@ export default async function FigmaHomePage() {
     <div className="w-full max-w-[1440px] mx-auto">
       {/* Banner principal com produto em destaque */}
       <BannerPrincipal />
+
+      {/* Faixa cupom primeira compra - Full width */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <CupomBanner />
+      </div>
 
       {/* Cards de certificados/badges - Full width */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
