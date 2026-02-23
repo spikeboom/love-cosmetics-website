@@ -344,40 +344,43 @@ export function PagamentoPixReal({
                 </p>
               )}
 
-              {/* Toggle Polling (Debug) */}
-              <div className="flex items-center justify-between p-3 bg-gray-100 rounded-[8px]">
-                <span className="font-cera-pro text-[14px] text-gray-600">
-                  Polling automatico {pollingEnabled ? "(ativo)" : "(desativado)"}
-                </span>
-                <button
-                  onClick={handleTogglePolling}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    pollingEnabled ? "bg-[#254333]" : "bg-gray-300"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                      pollingEnabled ? "left-7" : "left-1"
-                    }`}
-                  />
-                </button>
-              </div>
+              {/* Toggle Polling (Debug) + Simular Pagamento PIX (Sandbox) */}
+              {process.env.NEXT_PUBLIC_DEV_TOOLS === "true" && (
+                <>
+                  <div className="flex items-center justify-between p-3 bg-gray-100 rounded-[8px]">
+                    <span className="font-cera-pro text-[14px] text-gray-600">
+                      Polling automatico {pollingEnabled ? "(ativo)" : "(desativado)"}
+                    </span>
+                    <button
+                      onClick={handleTogglePolling}
+                      className={`relative w-12 h-6 rounded-full transition-colors ${
+                        pollingEnabled ? "bg-[#254333]" : "bg-gray-300"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                          pollingEnabled ? "left-7" : "left-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
 
-              {/* Simular Pagamento PIX (Sandbox) */}
-              <button
-                onClick={handleSimulatePixPayment}
-                disabled={simulatingPayment}
-                className="w-full p-3 bg-gray-100 rounded-[8px] text-[14px] text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
-              >
-                {simulatingPayment ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                    Simulando pagamento PIX...
-                  </span>
-                ) : (
-                  "Simular pagamento PIX"
-                )}
-              </button>
+                  <button
+                    onClick={handleSimulatePixPayment}
+                    disabled={simulatingPayment}
+                    className="w-full p-3 bg-gray-100 rounded-[8px] text-[14px] text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  >
+                    {simulatingPayment ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                        Simulando pagamento PIX...
+                      </span>
+                    ) : (
+                      "Simular pagamento PIX"
+                    )}
+                  </button>
+                </>
+              )}
 
               {/* Resumo */}
               <PagamentoResumo {...resumoProps} />

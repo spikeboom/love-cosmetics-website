@@ -169,7 +169,7 @@ export function ResumoCompraCard({
             <h2 className={`font-cera-pro font-medium leading-[1.257] text-[#111111] ${
               isMobile ? 'text-base' : 'text-2xl font-bold'
             }`}>
-              {formatPrice(resumo.produtosFinal + frete)}
+              {formatPrice(resumo.produtosFinal + (freteCalculado ? frete : 0))}
             </h2>
           </div>
 

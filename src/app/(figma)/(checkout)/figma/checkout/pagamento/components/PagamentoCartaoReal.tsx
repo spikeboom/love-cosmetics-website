@@ -210,26 +210,28 @@ export function PagamentoCartaoReal({
                 <h2 className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                   Adicionar cartao de credito
                 </h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleSimulatePayment}
-                    disabled={simulatingPayment || loading || checkingPayment}
-                    className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-                  >
-                    {simulatingPayment ? "Simulando..." : "Simular Pagamento"}
-                  </button>
-                  <span className="text-gray-300">|</span>
-                  <button
-                    onClick={() => setShowTestCards(!showTestCards)}
-                    className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showTestCards ? "Fechar" : "Sandbox"}
-                  </button>
-                </div>
+                {process.env.NEXT_PUBLIC_DEV_TOOLS === "true" && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSimulatePayment}
+                      disabled={simulatingPayment || loading || checkingPayment}
+                      className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                    >
+                      {simulatingPayment ? "Simulando..." : "Simular Pagamento"}
+                    </button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                      onClick={() => setShowTestCards(!showTestCards)}
+                      className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showTestCards ? "Fechar" : "Sandbox"}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Cartoes de Teste (Sandbox) */}
-              {showTestCards && (
+              {process.env.NEXT_PUBLIC_DEV_TOOLS === "true" && showTestCards && (
                 <div className="bg-gray-50 rounded-[8px] p-3 border border-gray-200">
                   <p className="text-[11px] text-gray-500 mb-2">Cartoes de teste:</p>
                   <div className="grid grid-cols-2 gap-2">
