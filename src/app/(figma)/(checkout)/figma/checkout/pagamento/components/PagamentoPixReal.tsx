@@ -17,6 +17,8 @@ interface PagamentoPixRealProps {
   onVoltar: () => void;
   onSuccess: () => void;
   onError: (error: string) => void;
+  externalError?: string | null;
+  onClearExternalError?: () => void;
   resumoProps: ResumoProps;
 }
 
@@ -27,6 +29,8 @@ export function PagamentoPixReal({
   onVoltar,
   onSuccess,
   onError,
+  externalError = null,
+  onClearExternalError,
   resumoProps,
 }: PagamentoPixRealProps) {
   const {
@@ -37,6 +41,7 @@ export function PagamentoPixReal({
     startPaymentPolling,
     stopPolling,
     checkOrderStatus,
+    clearError,
   } = usePagBankPayment();
 
   const router = useRouter();
@@ -104,6 +109,15 @@ export function PagamentoPixReal({
   useEffect(() => {
     if (!qrCodeData) return;
 
+    // Sync countdown with PagBank expiration when available.
+    if (qrCodeData.expirationDate) {
+      const exp = new Date(qrCodeData.expirationDate).getTime();
+      if (Number.isFinite(exp)) {
+        const seconds = Math.max(0, Math.floor((exp - Date.now()) / 1000));
+        setTimeLeft(seconds);
+      }
+    }
+
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 0) {
@@ -116,6 +130,15 @@ export function PagamentoPixReal({
 
     return () => clearInterval(timer);
   }, [qrCodeData]);
+
+  // When PIX expires, stop polling and block usage of the old code.
+  useEffect(() => {
+    if (!qrCodeData) return;
+    if (timeLeft > 0) return;
+
+    stopPolling();
+    setPollingEnabled(false);
+  }, [qrCodeData, timeLeft, stopPolling]);
 
   const copyToClipboard = async () => {
     if (!qrCodeData?.text) return;
@@ -158,6 +181,34 @@ export function PagamentoPixReal({
     }
   };
 
+  const handleRegeneratePix = async () => {
+    if (loading) return;
+
+    setVerifyMessage(null);
+    setCopied(false);
+    onClearExternalError?.();
+    clearError();
+
+    stopPolling();
+    setPollingEnabled(true);
+    setTimeLeft(15 * 60);
+
+    const result = await createPixPayment(pedidoId);
+
+    if (result.success && result.orderId) {
+      orderIdRef.current = result.orderId;
+      startPaymentPolling(
+        result.orderId,
+        () => onSuccess(),
+        (err) => onError(err),
+        10000,
+        15 * 60 * 1000,
+      );
+    } else if (result.message) {
+      onError(result.message);
+    }
+  };
+
   const handleSimulatePixPayment = async () => {
     setSimulatingPayment(true);
     try {
@@ -187,6 +238,26 @@ export function PagamentoPixReal({
         <div className="flex flex-col gap-8 w-full max-w-[684px]">
           <BotaoVoltar onClick={onVoltar} />
 
+          {externalError ? (
+            <div className="bg-red-50 border border-red-200 rounded-[8px] p-4 flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <p className="font-cera-pro font-bold text-[14px] text-red-700">
+                  Erro no pagamento
+                </p>
+                <p className="font-cera-pro text-[12px] text-red-600">{externalError}</p>
+              </div>
+              {onClearExternalError ? (
+                <button
+                  type="button"
+                  onClick={onClearExternalError}
+                  className="font-cera-pro text-[12px] text-red-700 underline"
+                >
+                  Fechar
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="w-12 h-12 border-4 border-[#254333] border-t-transparent rounded-full animate-spin mb-4" />
@@ -208,7 +279,41 @@ export function PagamentoPixReal({
               </button>
             </div>
           ) : qrCodeData ? (
-            <>
+            timeLeft === 0 ? (
+              <>
+                <div className="bg-amber-50 border border-amber-200 rounded-[8px] p-6 text-center">
+                  <p className="font-cera-pro font-bold text-[18px] text-amber-700 mb-2">
+                    PIX expirado
+                  </p>
+                  <p className="font-cera-pro text-[14px] text-amber-700">
+                    O codigo PIX expirou. Gere um novo codigo para continuar o pagamento.
+                  </p>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+                  <button
+                    onClick={handleRegeneratePix}
+                    disabled={loading}
+                    className="flex-1 h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-white">
+                      Gerar novo codigo
+                    </span>
+                  </button>
+                  <button
+                    onClick={onVoltar}
+                    className="flex-1 h-[60px] bg-white border border-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#f8f3ed] transition-colors"
+                  >
+                    <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-[#254333]">
+                      Voltar
+                    </span>
+                  </button>
+                </div>
+
+                <PagamentoResumo {...resumoProps} />
+              </>
+            ) : (
+              <>
               {/* Header: Falta pouco + QR Code */}
               <div className="flex flex-col lg:flex-row gap-8 items-start justify-between">
                 {/* Lado esquerdo */}
@@ -385,6 +490,7 @@ export function PagamentoPixReal({
               {/* Resumo */}
               <PagamentoResumo {...resumoProps} />
             </>
+            )
           ) : null}
         </div>
       </div>

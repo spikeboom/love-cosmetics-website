@@ -1,13 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
+import { useCart } from "@/contexts";
 
 export function IdentificacaoPageClient() {
   const router = useRouter();
+  const { cart, isCartLoaded } = useCart();
   const {
     formData,
     errors,
@@ -18,6 +21,14 @@ export function IdentificacaoPageClient() {
     saveToStorage,
   } = useIdentificacaoForm();
   const { syncToServer } = useCheckoutSync();
+
+  // Guard: prevent starting checkout with an empty cart.
+  useEffect(() => {
+    if (!isCartLoaded) return;
+    if (Object.keys(cart || {}).length === 0) {
+      router.push("/figma/cart");
+    }
+  }, [cart, isCartLoaded, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

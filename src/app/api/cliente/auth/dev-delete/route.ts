@@ -1,69 +1,68 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyAdminJWTOnly } from "@/lib/admin/auth-edge";
 
-// APENAS PARA DESENVOLVIMENTO - Excluir cliente pelo CPF
-export async function DELETE(request: NextRequest) {
-  // Bloquear em produção
-  if (process.env.NODE_ENV === 'production' || process.env.STAGE === 'PRODUCTION') {
-    return NextResponse.json(
-      { error: 'Esta rota não está disponível em produção' },
-      { status: 403 }
-    );
+function isProductionEnv() {
+  return process.env.NODE_ENV === "production" || process.env.STAGE === "PRODUCTION";
+}
+
+async function guardDevRoute(req: NextRequest): Promise<NextResponse | null> {
+  // Never expose dev-only destructive routes in production.
+  if (isProductionEnv()) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  const token = req.cookies.get("auth_token")?.value;
+  const admin = token ? await verifyAdminJWTOnly(token) : null;
+  if (!admin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  return null;
+}
+
+// Dev-only: delete cliente by CPF (requires admin auth and non-production env).
+export async function DELETE(request: NextRequest) {
+  const guard = await guardDevRoute(request);
+  if (guard) return guard;
 
   try {
     const { searchParams } = new URL(request.url);
-    const cpf = searchParams.get('cpf');
+    const cpf = searchParams.get("cpf");
 
     if (!cpf) {
-      return NextResponse.json(
-        { error: 'CPF é obrigatório' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "CPF e obrigatorio" }, { status: 400 });
     }
 
-    // Limpar CPF
-    const cpfLimpo = cpf.replace(/\D/g, '');
+    const cpfLimpo = cpf.replace(/\D/g, "");
 
-    // Buscar cliente
     const cliente = await prisma.cliente.findFirst({
-      where: { cpf: cpfLimpo }
+      where: { cpf: cpfLimpo },
     });
 
     if (!cliente) {
-      return NextResponse.json(
-        { error: 'Cliente não encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Cliente nao encontrado" }, { status: 404 });
     }
 
-    // Excluir sessões primeiro (foreign key)
     await prisma.sessaoCliente.deleteMany({
-      where: { clienteId: cliente.id }
+      where: { clienteId: cliente.id },
     });
 
-    // Excluir cliente
     await prisma.cliente.delete({
-      where: { id: cliente.id }
+      where: { id: cliente.id },
     });
-
-    console.log(`[DEV] Cliente excluído: ${cliente.nome} (CPF: ${cpfLimpo})`);
 
     return NextResponse.json({
       success: true,
-      message: `Cliente ${cliente.nome} excluído com sucesso`,
+      message: `Cliente ${cliente.nome} excluido com sucesso`,
       cliente: {
         id: cliente.id,
         nome: cliente.nome,
-        email: cliente.email
-      }
+        email: cliente.email,
+      },
     });
-
   } catch (error) {
-    console.error('Erro ao excluir cliente:', error);
-    return NextResponse.json(
-      { error: 'Erro ao excluir cliente' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erro ao excluir cliente" }, { status: 500 });
   }
 }
+

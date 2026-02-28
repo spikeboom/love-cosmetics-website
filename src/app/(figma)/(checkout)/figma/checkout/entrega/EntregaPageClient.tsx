@@ -6,7 +6,7 @@ import { CheckoutStepper } from "../CheckoutStepper";
 import { BotaoVoltar } from "../pagamento/components/BotaoVoltar";
 import { useViaCep } from "@/hooks/checkout";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
-import { useShipping } from "@/contexts";
+import { useShipping, useCart } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 import { formatCEP } from "@/lib/formatters";
 import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
@@ -27,6 +27,7 @@ interface FormData {
 
 export function EntregaPageClient() {
   const router = useRouter();
+  const { cart, isCartLoaded } = useCart();
   const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
   const { syncToServer } = useCheckoutSync();
   const freight = useShipping();
@@ -48,6 +49,11 @@ export function EntregaPageClient() {
 
   // Verificar se o usuario passou pela identificacao e se frete foi calculado
   useEffect(() => {
+    if (isCartLoaded && Object.keys(cart || {}).length === 0) {
+      router.push("/figma/cart");
+      return;
+    }
+
     const identificacao = localStorage.getItem("checkoutIdentificacao");
     if (!identificacao) {
       router.push("/figma/checkout/identificacao");
@@ -59,7 +65,7 @@ export function EntregaPageClient() {
       router.push("/figma/cart");
       return;
     }
-  }, [router, freight.hasCalculated, freight.availableServices.length]);
+  }, [router, freight.hasCalculated, freight.availableServices.length, cart, isCartLoaded]);
 
   // Carregar dados: primeiro do usuário logado, depois do localStorage
   // O CEP do contexto de shipping (PDP/carrinho) tem prioridade

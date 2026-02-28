@@ -1,6 +1,7 @@
-import { fetchProdutosComFallback, fetchAndValidateCupom, PRICE_TOLERANCE } from "@/lib/strapi";
-import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { calculateFreightFrenet } from "@/app/actions/freight-actions";
 import { calculateOrderTotals, centsToReais } from "@/core/pricing/order-totals";
+import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { fetchAndValidateCupom, fetchProdutosComFallback, PRICE_TOLERANCE } from "@/lib/strapi";
 
 interface OrderItem {
   reference_id: string;
@@ -22,17 +23,65 @@ interface ValidationResult {
     itemsSubtotal: number;
     cupomDesconto: number;
     freteValidado: number;
+    cupomCodigo?: string | null;
+    cupomUsosRestantes?: number | null;
+    freteService?: {
+      carrier: string;
+      service: string;
+      deliveryTime: number;
+      serviceCode: string;
+    };
   };
 }
 
+type FrenetService = {
+  carrier: string;
+  service: string;
+  price: number;
+  deliveryTime: number;
+  serviceCode: string;
+};
+
+function isProductionEnv() {
+  return process.env.NODE_ENV === "production" || process.env.STAGE === "PRODUCTION";
+}
+
+function cleanCep(cep: unknown): string {
+  return String(cep || "").replace(/\D/g, "");
+}
+
 function validateFrete(freteEnviado: number): { valid: boolean; error?: string } {
-  if (freteEnviado < 0) {
-    return { valid: false, error: "Valor de frete inválido (negativo)" };
+  if (!Number.isFinite(freteEnviado)) {
+    return { valid: false, error: "Valor de frete invalido" };
   }
-  if (freteEnviado > 150) {
+  if (freteEnviado < 0) {
+    return { valid: false, error: "Valor de frete invalido (negativo)" };
+  }
+  if (freteEnviado > 500) {
     return { valid: false, error: "Valor de frete suspeito (muito alto)" };
   }
   return { valid: true };
+}
+
+function isDevFreightService(service: FrenetService) {
+  return service.carrier === "[DEV]" || service.serviceCode === "DEV_TEST";
+}
+
+function findMatchingFreightServiceByPriceCents(services: FrenetService[], freteEnviado: number) {
+  const targetCents = Math.round(freteEnviado * 100);
+  let best: FrenetService | null = null;
+  let bestDiff = Number.POSITIVE_INFINITY;
+
+  for (const s of services) {
+    const cents = Math.round(s.price * 100);
+    const diff = Math.abs(cents - targetCents);
+    if (diff <= 1 && diff < bestDiff) {
+      best = s;
+      bestDiff = diff;
+    }
+  }
+
+  return best;
 }
 
 export async function validateOrder(
@@ -40,10 +89,11 @@ export async function validateOrder(
   cupons: string[],
   descontosEnviado: number,
   totalEnviado: number,
-  freteEnviado: number
+  freteEnviado: number,
+  cepDestino: string,
 ): Promise<ValidationResult> {
   try {
-    // 1. Validar se há items
+    // 1. Validar se ha items
     if (!items || items.length === 0) {
       return {
         valid: false,
@@ -54,17 +104,41 @@ export async function validateOrder(
       };
     }
 
-    // 2. Buscar e validar cupom
+    // 2. Validar CEP
+    const cepLimpo = cleanCep(cepDestino);
+    if (cepLimpo.length !== 8) {
+      return {
+        valid: false,
+        error: "CEP invalido",
+        code: "INVALID_CEP",
+        calculatedTotal: 0,
+        calculatedDescontos: 0,
+      };
+    }
+
+    // 3. Buscar e validar cupom (server-side)
     const cuponsData: Array<{ multiplacar: number; diminuir: number }> = [];
+    let cupomCodigoValidado: string | null = null;
+    let cupomUsosRestantes: number | null = null;
+
+    if (Array.isArray(cupons) && cupons.length > 1) {
+      return {
+        valid: false,
+        error: "Apenas 1 cupom por pedido",
+        code: "MULTIPLE_COUPONS_NOT_ALLOWED",
+        calculatedTotal: 0,
+        calculatedDescontos: 0,
+      };
+    }
 
     if (cupons && cupons.length > 0) {
-      const cupomCodigo = cupons[0];
+      const cupomCodigo = String(cupons[0] || "").trim();
       const cupomResult = await fetchAndValidateCupom(cupomCodigo);
 
       if (!cupomResult.valido || !cupomResult.cupom) {
         return {
           valid: false,
-          error: `Cupom "${cupomCodigo}" inválido ou expirado`,
+          error: `Cupom \"${cupomCodigo}\" invalido ou expirado`,
           code: "INVALID_COUPON",
           calculatedTotal: 0,
           calculatedDescontos: 0,
@@ -75,17 +149,29 @@ export async function validateOrder(
         multiplacar: cupomResult.cupom.multiplacar,
         diminuir: cupomResult.cupom.diminuir,
       });
+      cupomCodigoValidado = cupomResult.cupom.codigo;
+      cupomUsosRestantes =
+        typeof cupomResult.cupom.usos_restantes === "number" ? cupomResult.cupom.usos_restantes : null;
     }
 
-    // 3. Buscar produtos do Strapi (com fallback por nome)
-    const itemsParaBusca = items.map(item => ({
+    // 4. Buscar produtos do Strapi (com fallback por nome)
+    const itemsParaBusca = items.map((item) => ({
       id: item.reference_id,
       nome: item.name,
     }));
     const produtosReais = await fetchProdutosComFallback(itemsParaBusca);
 
-    // 4. Validar cada item (preço base, sem cupom)
+    // 5. Validar cada item (preco base, sem cupom)
     const validatedItems: Array<{ preco: number; quantity: number }> = [];
+    const itemsParaFrete: Array<{
+      quantity: number;
+      peso_gramas?: number;
+      altura?: number;
+      largura?: number;
+      comprimento?: number;
+      bling_number?: number;
+      preco: number;
+    }> = [];
 
     for (const item of items) {
       const produtoReal = produtosReais.get(item.reference_id);
@@ -93,14 +179,14 @@ export async function validateOrder(
       if (!produtoReal) {
         return {
           valid: false,
-          error: `Produto não encontrado: ${item.name}`,
+          error: `Produto nao encontrado: ${item.name}`,
           code: "PRODUCT_NOT_FOUND",
           calculatedTotal: 0,
           calculatedDescontos: 0,
         };
       }
 
-      // Preço do Strapi já é o preço final (com desconto do kit aplicado)
+      // Preco do Strapi ja e o preco final (com desconto do kit aplicado)
       const precoStrapi = produtoReal.preco;
       const kitPricing = applyKitDiscountFromFinalPrice({
         finalPrice: precoStrapi,
@@ -109,11 +195,11 @@ export async function validateOrder(
       const precoOriginal = kitPricing?.preco ?? precoStrapi;
       const precoEnviado = item.preco;
 
-      // Agora comparamos preço base (sem cupom) diretamente
+      // Comparar preco base (sem cupom) diretamente
       if (Math.abs(precoOriginal - precoEnviado) > PRICE_TOLERANCE) {
         return {
           valid: false,
-          error: `O preço do produto "${item.name}" foi atualizado. Por favor, atualize seu carrinho.`,
+          error: `O preco do produto \"${item.name}\" foi atualizado. Por favor, atualize seu carrinho.`,
           code: "PRICE_MISMATCH",
           calculatedTotal: 0,
           calculatedDescontos: 0,
@@ -123,7 +209,7 @@ export async function validateOrder(
       if (item.quantity <= 0) {
         return {
           valid: false,
-          error: `Quantidade inválida para "${item.name}"`,
+          error: `Quantidade invalida para \"${item.name}\"`,
           code: "INVALID_QUANTITY",
           calculatedTotal: 0,
           calculatedDescontos: 0,
@@ -133,7 +219,7 @@ export async function validateOrder(
       if (item.quantity > 100) {
         return {
           valid: false,
-          error: `Quantidade suspeita para "${item.name}" (máximo 100 unidades)`,
+          error: `Quantidade suspeita para \"${item.name}\" (maximo 100 unidades)`,
           code: "SUSPICIOUS_QUANTITY",
           calculatedTotal: 0,
           calculatedDescontos: 0,
@@ -141,9 +227,18 @@ export async function validateOrder(
       }
 
       validatedItems.push({ preco: precoOriginal, quantity: item.quantity });
+      itemsParaFrete.push({
+        quantity: item.quantity,
+        peso_gramas: produtoReal.peso_gramas,
+        altura: produtoReal.altura,
+        largura: produtoReal.largura,
+        comprimento: produtoReal.comprimento,
+        bling_number: produtoReal.bling_number,
+        preco: precoOriginal,
+      });
     }
 
-    // 5. Validar frete
+    // 6. Validar frete enviado e recalcular no server (Frenet)
     const freteValidacao = validateFrete(freteEnviado);
     if (!freteValidacao.valid) {
       return {
@@ -155,22 +250,70 @@ export async function validateOrder(
       };
     }
 
-    // 6. Usar calculateOrderTotals como fonte de verdade
+    let freteValidado = freteEnviado;
+    let freteService: FrenetService | undefined;
+
+    const freteResult = await calculateFreightFrenet(cepLimpo, itemsParaFrete);
+    if (!freteResult.success) {
+      if (isProductionEnv()) {
+        return {
+          valid: false,
+          error: freteResult.error || "Nao foi possivel validar o frete no momento",
+          code: "FREIGHT_UNAVAILABLE",
+          calculatedTotal: 0,
+          calculatedDescontos: 0,
+        };
+      }
+    } else {
+      const services = (isProductionEnv()
+        ? freteResult.services.filter((s) => !isDevFreightService(s))
+        : freteResult.services) as FrenetService[];
+
+      const match = findMatchingFreightServiceByPriceCents(services, freteEnviado);
+      if (!match) {
+        const cheapest = services.reduce((min, s) => (s.price < min.price ? s : min), services[0]);
+        freteValidado = cheapest?.price ?? freteEnviado;
+
+        const totalsForError = calculateOrderTotals({
+          items: validatedItems,
+          cupons: cuponsData,
+          frete: freteValidado,
+        });
+
+        return {
+          valid: false,
+          error: "Frete desatualizado. Volte e recalcule o frete para continuar.",
+          code: "FREIGHT_MISMATCH",
+          calculatedTotal: centsToReais(totalsForError.totalCents),
+          calculatedDescontos: centsToReais(totalsForError.couponDiscountCents),
+          details: {
+            itemsSubtotal: centsToReais(totalsForError.itemsSubtotalCents),
+            cupomDesconto: centsToReais(totalsForError.couponDiscountCents),
+            freteValidado,
+          },
+        };
+      }
+
+      freteValidado = match.price;
+      freteService = match;
+    }
+
+    // 7. Usar calculateOrderTotals como fonte de verdade
     const totals = calculateOrderTotals({
       items: validatedItems,
       cupons: cuponsData,
-      frete: freteEnviado,
+      frete: freteValidado,
     });
 
     const descontoCalculado = centsToReais(totals.couponDiscountCents);
     const totalCalculado = centsToReais(totals.totalCents);
     const subtotalOriginal = centsToReais(totals.itemsSubtotalCents);
 
-    // 7. Comparar valores
+    // 8. Comparar valores (defesa em profundidade / carrinho desatualizado)
     if (Math.abs(descontoCalculado - descontosEnviado) > PRICE_TOLERANCE) {
       return {
         valid: false,
-        error: `Valor do desconto divergente. Por favor, atualize seu carrinho.`,
+        error: "Valor do desconto divergente. Por favor, atualize seu carrinho.",
         code: "DISCOUNT_MISMATCH",
         calculatedTotal: totalCalculado,
         calculatedDescontos: descontoCalculado,
@@ -180,7 +323,7 @@ export async function validateOrder(
     if (Math.abs(totalCalculado - totalEnviado) > PRICE_TOLERANCE) {
       return {
         valid: false,
-        error: `Valor total divergente. Por favor, atualize seu carrinho.`,
+        error: "Valor total divergente. Por favor, atualize seu carrinho.",
         code: "TOTAL_MISMATCH",
         calculatedTotal: totalCalculado,
         calculatedDescontos: descontoCalculado,
@@ -194,11 +337,23 @@ export async function validateOrder(
       details: {
         itemsSubtotal: subtotalOriginal,
         cupomDesconto: descontoCalculado,
-        freteValidado: freteEnviado,
+        freteValidado,
+        cupomCodigo: cupomCodigoValidado,
+        cupomUsosRestantes,
+        ...(freteService
+          ? {
+              freteService: {
+                carrier: freteService.carrier,
+                service: freteService.service,
+                deliveryTime: freteService.deliveryTime,
+                serviceCode: freteService.serviceCode,
+              },
+            }
+          : {}),
       },
     };
   } catch (error) {
-    console.error("Erro na validação do pedido:", error);
+    console.error("Erro na validacao do pedido:", error);
     return {
       valid: false,
       error: "Erro interno ao validar pedido",

@@ -16,6 +16,9 @@ interface PagamentoSelecaoProps {
   onSelecionarCartao: () => void;
   onVoltar: () => void;
   resumoProps: ResumoProps;
+  loading?: boolean;
+  errorMessage?: string | null;
+  onClearError?: () => void;
 }
 
 export function PagamentoSelecao({
@@ -25,10 +28,14 @@ export function PagamentoSelecao({
   onSelecionarCartao,
   onVoltar,
   resumoProps,
+  loading = false,
+  errorMessage = null,
+  onClearError,
 }: PagamentoSelecaoProps) {
   const [selecionado, setSelecionado] = useState<MetodoPagamento>("pix");
 
   const handleFinalizar = () => {
+    if (loading) return;
     if (selecionado === "pix") {
       onSelecionarPix();
     } else {
@@ -56,6 +63,28 @@ export function PagamentoSelecao({
                 Informe qual vai ser a forma de pagamento:
               </p>
             </div>
+
+            {errorMessage ? (
+              <div className="bg-red-50 border border-red-200 rounded-[8px] p-4 flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <p className="font-cera-pro font-bold text-[14px] text-red-700">
+                    Erro no pagamento
+                  </p>
+                  <p className="font-cera-pro text-[12px] text-red-600">
+                    {errorMessage}
+                  </p>
+                </div>
+                {onClearError ? (
+                  <button
+                    type="button"
+                    onClick={onClearError}
+                    className="font-cera-pro text-[12px] text-red-700 underline"
+                  >
+                    Fechar
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
 
             {/* Opcoes de Pagamento */}
             <div className="flex flex-col gap-4">
@@ -106,10 +135,11 @@ export function PagamentoSelecao({
             {/* Botao Finalizar compra */}
             <button
               onClick={handleFinalizar}
-              className="w-full h-[56px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a3025] transition-colors"
+              disabled={loading}
+              className="w-full h-[56px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a3025] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <span className="font-cera-pro font-medium text-[16px] text-white">
-                Finalizar compra
+                {loading ? "Processando..." : "Finalizar compra"}
               </span>
             </button>
           </div>

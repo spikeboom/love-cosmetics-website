@@ -6,8 +6,20 @@ import { buildGtmPurchasePayload, sendGtmPurchaseEvent } from "@/lib/pagbank/gtm
 import { fetchPagBankOrder } from "@/lib/pagbank/orders";
 import { validateWebhookSignature } from "@/lib/pagbank/signature";
 import { logWebhookReceived } from "@/lib/pagbank/pagbank-audit-logger";
+import { getPagBankApiUrl, getPagBankToken } from "@/utils/pagbank-config";
+import { consumeCupomForPedido, releaseCupomForPedido } from "@/lib/cupom/usage";
 
 const logMessage = createLogger();
+
+const FAILURE_STATUSES = new Set(["DECLINED", "CANCELED", "PAYMENT_FAILED"]);
+
+function isPaidStatus(status: unknown) {
+  return status === "PAID" || status === "AUTHORIZED";
+}
+
+function isFailureStatus(status: unknown) {
+  return typeof status === "string" && FAILURE_STATUSES.has(status);
+}
 
 /**
  * Webhook para receber notificacoes do PagBank sobre mudancas no status do pagamento
@@ -57,6 +69,9 @@ export async function POST(req: NextRequest) {
         status_pagamento: true,
         ga_session_id: true,
         ga_session_number: true,
+        cupomReserva: {
+          select: { codigo: true, status: true, expiresAt: true },
+        },
       },
     });
 
@@ -122,6 +137,15 @@ export async function POST(req: NextRequest) {
         await sendGtmPurchaseEvent(gtmPayload, logMessage);
       }
 
+      // Cupom: consumir no pagamento confirmado (PAID/AUTHORIZED) e liberar em falhas.
+      if (pedido.cupomReserva?.codigo) {
+        if (isPaidStatus(chargeStatus)) {
+          await consumeCupomForPedido({ pedidoId: pedido.id, codigo: pedido.cupomReserva.codigo });
+        } else if (isFailureStatus(chargeStatus) && pedido.cupomReserva.status === "RESERVED") {
+          await releaseCupomForPedido(pedido.id);
+        }
+      }
+
       // TODO: Enviar email para cliente conforme status
       // - PAID: Pagamento confirmado
       // - DECLINED: Pagamento recusado
@@ -173,14 +197,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const pagBankUrl = process.env.PAGBANK_API_URL || "https://sandbox.api.pagseguro.com";
-    const token = process.env.PAGBANK_TOKEN_SANDBOX;
+    let pagBankUrl: string;
+    try {
+      pagBankUrl = getPagBankApiUrl();
+    } catch {
+      return NextResponse.json({ error: "PagBank API URL nao configurada" }, { status: 500 });
+    }
 
+    const token = getPagBankToken();
     if (!token) {
-      return NextResponse.json(
-        { error: "Token do PagBank nao configurado" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Token do PagBank nao configurado" }, { status: 500 });
     }
 
     const orderResult = await fetchPagBankOrder({

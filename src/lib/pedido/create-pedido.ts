@@ -7,19 +7,35 @@ export async function createPedidoFromBody({
   body,
   totalSeguro,
   descontosSeguro,
+  freteSeguro,
+  transportadoraSeguro,
+  prismaClient,
 }: {
   body: any;
   totalSeguro: number;
   descontosSeguro: number;
+  freteSeguro: number;
+  transportadoraSeguro?: {
+    nome: string | null;
+    servico: string | null;
+    prazo: number | null;
+  };
+  prismaClient?: any;
 }) {
-  return prisma.pedido.create({
+  const dataNascimento =
+    body.data_nascimento instanceof Date ? body.data_nascimento : new Date(body.data_nascimento);
+
+  const db = prismaClient ?? prisma;
+
+  return (db as any).pedido.create({
     data: {
+      idempotency_key: body.idempotencyKey ?? null,
       nome: body.nome,
       sobrenome: body.sobrenome,
       email: body.email,
       cpf: body.cpf,
       telefone: body.telefone,
-      data_nascimento: new Date(body.data_nascimento),
+      data_nascimento: dataNascimento,
       pais: body.pais,
       cep: body.cep,
       endereco: body.endereco,
@@ -32,13 +48,13 @@ export async function createPedidoFromBody({
       cupons: body.cupons,
       descontos: descontosSeguro,
       total_pedido: totalSeguro,
-      frete_calculado: body.frete_calculado,
+      frete_calculado: freteSeguro,
       subtotal_produtos: body.subtotal_produtos,
       cupom_valor: body.cupom_valor ?? null,
       cupom_descricao: body.cupom_descricao ?? null,
-      transportadora_nome: body.transportadora_nome,
-      transportadora_servico: body.transportadora_servico,
-      transportadora_prazo: body.transportadora_prazo ? parseInt(String(body.transportadora_prazo)) : null,
+      transportadora_nome: transportadoraSeguro?.nome ?? body.transportadora_nome,
+      transportadora_servico: transportadoraSeguro?.servico ?? body.transportadora_servico,
+      transportadora_prazo: transportadoraSeguro?.prazo ?? (body.transportadora_prazo ? parseInt(String(body.transportadora_prazo)) : null),
       salvar_minhas_informacoes: body.salvar_minhas_informacoes,
       aceito_receber_whatsapp: body.aceito_receber_whatsapp,
       destinatario: body.destinatario,

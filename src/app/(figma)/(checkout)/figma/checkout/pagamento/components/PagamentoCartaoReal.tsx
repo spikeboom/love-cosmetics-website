@@ -13,6 +13,8 @@ interface PagamentoCartaoRealProps {
   onVoltar: () => void;
   onSuccess: () => void;
   onError: (error: string) => void;
+  externalError?: string | null;
+  onClearExternalError?: () => void;
 }
 
 type Parcelas = 1 | 2 | 3;
@@ -32,6 +34,8 @@ export function PagamentoCartaoReal({
   onVoltar,
   onSuccess,
   onError,
+  externalError = null,
+  onClearExternalError,
 }: PagamentoCartaoRealProps) {
   const {
     loading,
@@ -127,6 +131,10 @@ export function PagamentoCartaoReal({
     if (paymentError) {
       clearError();
     }
+
+    if (externalError) {
+      onClearExternalError?.();
+    }
   };
 
   const validateForm = () => {
@@ -202,6 +210,26 @@ export function PagamentoCartaoReal({
       <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
         <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           <BotaoVoltar onClick={onVoltar} />
+
+          {externalError ? (
+            <div className="bg-red-50 border border-red-200 rounded-[8px] p-4 flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <p className="font-cera-pro font-bold text-[14px] text-red-700">
+                  Erro no pagamento
+                </p>
+                <p className="font-cera-pro text-[12px] text-red-600">{externalError}</p>
+              </div>
+              {onClearExternalError ? (
+                <button
+                  type="button"
+                  onClick={onClearExternalError}
+                  className="font-cera-pro text-[12px] text-red-700 underline"
+                >
+                  Fechar
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="flex flex-col gap-8">
             {/* Titulo e Preview do Cartao */}

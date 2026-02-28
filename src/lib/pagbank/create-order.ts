@@ -1,23 +1,44 @@
 import type {
-  PagBankOrderRequest,
-  PagBankOrderResponse,
-  PagBankPixOrderRequest,
   PagBankChargeRequest,
   PagBankCustomer,
   PagBankItem,
+  PagBankOrderRequest,
+  PagBankOrderResponse,
+  PagBankPixOrderRequest,
   PagBankShipping,
 } from "@/types/pagbank";
-import {
-  logPagBankRequest,
-  logPagBankResponse,
-} from "./pagbank-audit-logger";
+import { logPagBankRequest, logPagBankResponse } from "./pagbank-audit-logger";
 
-export function buildCustomerFromPedido(pedido: any) {
-  const cleanedPhone = pedido.telefone.replace(/\D/g, "");
-  const cleanedCPF = pedido.cpf.replace(/\D/g, "");
+type FreightService = {
+  carrier: string;
+  service: string;
+  price: number;
+  deliveryTime: number;
+  serviceCode: string;
+};
+
+function isProductionEnv() {
+  return process.env.NODE_ENV === "production" || process.env.STAGE === "PRODUCTION";
+}
+
+function cents(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.round(n * 100);
+}
+
+function positiveInt(value: unknown, fallback = 1): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(1, Math.floor(n));
+}
+
+export function buildCustomerFromPedido(pedido: any): PagBankCustomer {
+  const cleanedPhone = String(pedido.telefone || "").replace(/\D/g, "");
+  const cleanedCPF = String(pedido.cpf || "").replace(/\D/g, "");
 
   return {
-    name: `${pedido.nome} ${pedido.sobrenome}`,
+    name: `${pedido.nome} ${pedido.sobrenome}`.trim(),
     email: pedido.email,
     tax_id: cleanedCPF,
     phones: [
@@ -31,63 +52,216 @@ export function buildCustomerFromPedido(pedido: any) {
   };
 }
 
-export function buildItemsFromPedido(pedido: any) {
-  const items = pedido.items as any[];
-  const cupomValor = pedido.cupom_valor ?? 0;
+/**
+ * Build PagBank items in cents, ensuring deterministic sums even with coupons + quantities.
+ * We also add "Frete" as an item so sum(items) matches the amount value sent to PagBank.
+ */
+export function buildItemsFromPedido(pedido: any): PagBankItem[] {
+  const rawItems = Array.isArray(pedido.items) ? (pedido.items as any[]) : [];
 
-  if (cupomValor <= 0) {
-    // Sem cupom: enviar preços como estão
-    return items.map((item: any) => ({
-      reference_id: item.reference_id || item.id,
-      name: item.name,
-      quantity: item.quantity,
-      unit_amount: Math.round(item.unit_amount * 100),
-    }));
+  const freteCents = Math.max(0, cents(pedido.frete_calculado));
+  const totalCents = Math.max(0, cents(pedido.total_pedido));
+  const targetProductsCents = Math.max(0, totalCents - freteCents);
+
+  const productLines = rawItems
+    .map((item: any, index: number) => {
+      const referenceId = String(item.reference_id || item.id || `item-${index + 1}`);
+      const name = String(item.name || "Item");
+      const quantity = positiveInt(item.quantity, 1);
+      const unitCents = Math.max(1, cents(item.unit_amount ?? item.preco ?? 0));
+
+      return { index, referenceId, name, quantity, unitCents };
+    })
+    .filter((l) => l.quantity > 0);
+
+  if (productLines.length === 0) {
+    const items = freteCents > 0
+      ? [
+          {
+            reference_id: `frete-${pedido.id || "pedido"}`,
+            name: "Frete",
+            quantity: 1,
+            unit_amount: freteCents,
+          },
+        ]
+      : [];
+
+    return adjustItemsSumToTotalCents(items, totalCents, pedido.id);
   }
 
-  // Com cupom: ratear desconto proporcionalmente entre itens
-  const cupomCents = Math.round(cupomValor * 100);
-  const subtotalCents = items.reduce(
-    (acc: number, item: any) => acc + Math.round(item.unit_amount * 100) * (item.quantity || 1),
-    0,
-  );
+  const subtotalCents = productLines.reduce((acc, l) => acc + l.unitCents * l.quantity, 0);
 
-  let descontoDistribuido = 0;
-  const result = items.map((item: any, index: number) => {
-    const unitCents = Math.round(item.unit_amount * 100);
-    const itemTotalCents = unitCents * (item.quantity || 1);
+  // No coupon (or total already equals subtotal): keep original unit amounts.
+  if (subtotalCents <= 0 || targetProductsCents >= subtotalCents) {
+    const items: PagBankItem[] = productLines.map((l) => ({
+      reference_id: l.referenceId,
+      name: l.name,
+      quantity: l.quantity,
+      unit_amount: l.unitCents,
+    }));
 
-    let itemDescontoCents: number;
-    if (index === items.length - 1) {
-      // Último item absorve a diferença de arredondamento
-      itemDescontoCents = cupomCents - descontoDistribuido;
-    } else {
-      itemDescontoCents = Math.round((itemTotalCents / subtotalCents) * cupomCents);
+    if (freteCents > 0) {
+      items.push({
+        reference_id: `frete-${pedido.id || "pedido"}`,
+        name: "Frete",
+        quantity: 1,
+        unit_amount: freteCents,
+      });
     }
-    descontoDistribuido += itemDescontoCents;
 
-    // Distribuir desconto por unidade
-    const descontoPorUnidade = Math.floor(itemDescontoCents / (item.quantity || 1));
-    const unitAmountFinal = Math.max(1, unitCents - descontoPorUnidade); // PagBank exige > 0
+    return adjustItemsSumToTotalCents(items, totalCents, pedido.id);
+  }
 
-    return {
-      reference_id: item.reference_id || item.id,
-      name: item.name,
-      quantity: item.quantity,
-      unit_amount: unitAmountFinal,
-    };
+  const discountCents = subtotalCents - targetProductsCents;
+
+  // Allocate discount per line using largest remainder method.
+  const allocations = productLines.map((l) => {
+    const lineTotalCents = l.unitCents * l.quantity;
+    const numerator = lineTotalCents * discountCents;
+    const floorDiscount = Math.floor(numerator / subtotalCents);
+    const remainder = numerator % subtotalCents;
+    return { ...l, lineTotalCents, floorDiscount, remainder };
   });
+
+  let distributed = allocations.reduce((acc, a) => acc + a.floorDiscount, 0);
+  let remaining = discountCents - distributed;
+
+  // Distribute leftover cents to lines with highest remainder.
+  allocations
+    .slice()
+    .sort((a, b) => b.remainder - a.remainder)
+    .forEach((a) => {
+      if (remaining <= 0) return;
+      a.floorDiscount += 1;
+      remaining -= 1;
+    });
+
+  // Rebuild items preserving original order.
+  allocations.sort((a, b) => a.index - b.index);
+
+  const result: PagBankItem[] = [];
+
+  for (const a of allocations) {
+    const lineDiscount = a.floorDiscount;
+    const perUnitDiscount = Math.floor(lineDiscount / a.quantity);
+    const extraUnits = lineDiscount % a.quantity; // these units get +1 cent discount
+
+    const baseUnit = Math.max(1, a.unitCents - perUnitDiscount);
+    const extraUnit = Math.max(1, baseUnit - 1);
+
+    const qtyBase = a.quantity - extraUnits;
+    if (qtyBase > 0) {
+      result.push({
+        reference_id: a.referenceId,
+        name: a.name,
+        quantity: qtyBase,
+        unit_amount: baseUnit,
+      });
+    }
+    if (extraUnits > 0) {
+      result.push({
+        reference_id: `${a.referenceId}-d`,
+        name: a.name,
+        quantity: extraUnits,
+        unit_amount: extraUnit,
+      });
+    }
+  }
+
+  // Add shipping as an item so sum(items) matches the amount sent to PagBank.
+  if (freteCents > 0) {
+    result.push({
+      reference_id: `frete-${pedido.id || "pedido"}`,
+      name: "Frete",
+      quantity: 1,
+      unit_amount: freteCents,
+    });
+  }
+
+  return adjustItemsSumToTotalCents(result, totalCents, pedido.id);
+}
+
+export function buildTotalAmount(pedido: any) {
+  return Math.round(Number(pedido.total_pedido || 0) * 100);
+}
+
+function sumItemsCents(items: PagBankItem[]) {
+  return items.reduce((acc, item) => acc + item.unit_amount * item.quantity, 0);
+}
+
+function isFreteItem(item: PagBankItem) {
+  return item.name === "Frete" || String(item.reference_id || "").startsWith("frete-");
+}
+
+/**
+ * Best-effort fix for rare cent-level divergences (rounding/clamps).
+ * PagBank items are informational but we still try to keep sum(items) == total.
+ */
+function adjustItemsSumToTotalCents(
+  items: PagBankItem[],
+  totalCents: number,
+  pedidoId?: string,
+): PagBankItem[] {
+  const result = items.map((i) => ({ ...i }));
+  const current = sumItemsCents(result);
+  let diff = totalCents - current;
+  if (diff === 0) return result;
+
+  const tryAdjustAtIndex = (idx: number) => {
+    const it = result[idx];
+    if (!it) return false;
+
+    if (it.quantity === 1) {
+      const newAmount = it.unit_amount + diff;
+      if (newAmount < 1) return false;
+      it.unit_amount = newAmount;
+      diff = 0;
+      return true;
+    }
+
+    // Split out 1 unit so we can adjust by arbitrary cents.
+    const newAmount = it.unit_amount + diff;
+    if (newAmount < 1) return false;
+
+    it.quantity -= 1;
+    const ref = String(it.reference_id || "item");
+    result.splice(idx + 1, 0, {
+      reference_id: `${ref}-adj`,
+      name: it.name,
+      quantity: 1,
+      unit_amount: newAmount,
+    });
+
+    diff = 0;
+    return true;
+  };
+
+  const freteIndex = result.findIndex(isFreteItem);
+  if (freteIndex >= 0 && tryAdjustAtIndex(freteIndex)) return result;
+
+  for (let i = result.length - 1; i >= 0; i--) {
+    if (result[i].quantity === 1 && tryAdjustAtIndex(i)) return result;
+  }
+
+  for (let i = result.length - 1; i >= 0; i--) {
+    if (result[i].quantity > 1 && tryAdjustAtIndex(i)) return result;
+  }
+
+  // If we need to add cents and couldn't adjust any existing line, append an adjustment item.
+  if (diff > 0) {
+    result.push({
+      reference_id: `ajuste-${pedidoId || "pedido"}`,
+      name: "Ajuste",
+      quantity: 1,
+      unit_amount: diff,
+    });
+  }
 
   return result;
 }
 
-export function buildTotalAmount(pedido: any) {
-  // total_pedido já inclui o frete (calculado em validate-order.ts linha 162)
-  return Math.round(pedido.total_pedido * 100);
-}
-
-export function buildShippingFromPedido(pedido: any) {
-  const cleanedCEP = pedido.cep.replace(/\D/g, "");
+export function buildShippingFromPedido(pedido: any): PagBankShipping {
+  const cleanedCEP = String(pedido.cep || "").replace(/\D/g, "");
 
   return {
     address: {
@@ -104,10 +278,15 @@ export function buildShippingFromPedido(pedido: any) {
 }
 
 export function resolveNotificationUrls() {
-  const baseUrl =
-    process.env.NGROK_URL ||
-    process.env.BASE_URL_PRODUCTION ||
-    "https://www.lovecosmetics.com.br";
+  const isProd = isProductionEnv();
+
+  // Never prioritize NGROK_URL in production.
+  const baseUrl = isProd
+    ? process.env.BASE_URL_PRODUCTION || "https://www.lovecosmetics.com.br"
+    : process.env.NGROK_URL ||
+      process.env.BASE_URL_LOCAL ||
+      process.env.BASE_URL_PRODUCTION ||
+      "http://localhost:3000";
 
   return {
     baseUrl,
@@ -197,8 +376,7 @@ export function buildCardOrderRequest({
 }
 
 /**
- * Constrói payload para o endpoint /charges (usado para cartão de crédito)
- * O endpoint /orders com charges estava dando erro 500 no sandbox
+ * Build payload for /charges endpoint (legacy).
  */
 export function buildCardChargeRequest({
   pedidoId,
@@ -253,11 +431,10 @@ export async function createPagBankOrder({
   const url = `${pagBankUrl}${endpoint}`;
   const bodyJson = JSON.stringify(requestBody);
 
-  // Determina o tipo de pagamento para o log de auditoria
   const hasCharges = "charges" in requestBody && Array.isArray((requestBody as any).charges);
-  const tipoPagamento = hasCharges ? "CARTAO" : (endpoint === "/orders" ? "PIX" : "CARTAO");
+  const tipoPagamento = hasCharges ? "CARTAO" : endpoint === "/orders" ? "PIX" : "CARTAO";
 
-  // [PAGBANK-AUDIT-LOG] Log do request para validação PagBank
+  // [PAGBANK-AUDIT-LOG]
   logPagBankRequest({
     tipo: tipoPagamento,
     url,
@@ -265,14 +442,17 @@ export async function createPagBankOrder({
     body: requestBody,
   });
 
-  // Log do request para debug
-  console.log(JSON.stringify({
-    message: "PagBank Request Debug",
-    url,
-    tokenPrefix: token?.substring(0, 8) + "...",
-    bodyLength: bodyJson.length,
-    requestBody: requestBody,
-  }));
+  // Avoid logging full request bodies in production.
+  if (!isProductionEnv()) {
+    console.log(
+      JSON.stringify({
+        message: "PagBank Request Debug",
+        url,
+        tokenPrefix: token?.substring(0, 8) + "...",
+        bodyLength: bodyJson.length,
+      }),
+    );
+  }
 
   const response = await fetch(url, {
     method: "POST",
@@ -283,29 +463,28 @@ export async function createPagBankOrder({
     body: bodyJson,
   });
 
-  // Tenta ler o corpo da resposta como texto primeiro
   const responseText = await response.text();
 
-  // Log da resposta
-  console.log(JSON.stringify({
-    message: "PagBank Response Debug",
-    status: response.status,
-    statusText: response.statusText,
-    responseLength: responseText.length,
-    responseBody: responseText.substring(0, 1000),
-  }));
+  if (!isProductionEnv()) {
+    console.log(
+      JSON.stringify({
+        message: "PagBank Response Debug",
+        status: response.status,
+        statusText: response.statusText,
+        responseLength: responseText.length,
+        responseBody: responseText.substring(0, 1000),
+      }),
+    );
+  }
 
-  let data;
+  let data: any;
   try {
     data = responseText ? JSON.parse(responseText) : null;
   } catch {
-    data = {
-      rawResponse: responseText,
-      parseError: "Resposta não é JSON válido"
-    };
+    data = { rawResponse: responseText, parseError: "Response is not valid JSON" };
   }
 
-  // [PAGBANK-AUDIT-LOG] Log do response para validação PagBank
+  // [PAGBANK-AUDIT-LOG]
   logPagBankResponse({
     tipo: tipoPagamento,
     status: response.status,
@@ -328,6 +507,7 @@ export function buildOrderUpdateData({
 }) {
   const updateData: any = {
     pagbank_order_id: orderResponse.id,
+    payment_method: paymentMethod === "pix" ? "pix" : "credit_card",
   };
 
   if (paymentMethod === "pix") {
@@ -344,7 +524,7 @@ export function buildOrderUpdateData({
       updateData.pagbank_charge_id = charge.id;
       updateData.status_pagamento = charge.status;
 
-      if (charge.payment_method.card) {
+      if (charge.payment_method?.card) {
         updateData.payment_card_info = JSON.stringify({
           brand: charge.payment_method.card.brand,
           last_digits: charge.payment_method.card.last_digits,

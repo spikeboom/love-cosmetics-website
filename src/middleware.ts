@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJWTOnly } from "@/lib/cliente/auth-edge";
+import { verifyAdminJWTOnly } from "@/lib/admin/auth-edge";
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -21,7 +22,9 @@ export async function middleware(request: NextRequest) {
   if (isAdminRoute) {
     const adminToken = request.cookies.get("auth_token")?.value;
 
-    if (!adminToken || adminToken !== "sktE)7381J1") {
+    const adminPayload = adminToken ? await verifyAdminJWTOnly(adminToken) : null;
+
+    if (!adminPayload) {
       return NextResponse.redirect(new URL("/pedidos/login", request.url));
     }
   }

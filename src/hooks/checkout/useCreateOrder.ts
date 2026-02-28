@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { calculateCartResumoCompra } from "@/core/pricing/resumo-compra";
 import { getTipoDesconto } from "@/utils/cart-calculations";
@@ -45,6 +45,7 @@ export function useCreateOrder(): UseCreateOrderReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
 
   // Novos hooks segmentados
   const { cart } = useCart();
@@ -58,6 +59,11 @@ export function useCreateOrder(): UseCreateOrderReturn {
   }, []);
 
   const createOrder = useCallback(async (): Promise<CreateOrderResult> => {
+    if (inFlightRef.current) {
+      return { success: false, error: "Pedido em processamento. Aguarde.", code: "ORDER_IN_PROGRESS" };
+    }
+
+    inFlightRef.current = true;
     setLoading(true);
     setError(null);
     setErrorCode(null);
@@ -147,6 +153,21 @@ export function useCreateOrder(): UseCreateOrderReturn {
       const resumoCompra = calculateCartResumoCompra(Object.values(cart), cupons);
       const cupomDescricao = cupons?.length > 0 ? getTipoDesconto(cupons) : null;
 
+      // Idempotency key: prevents duplicate pedidos on retries/double-clicks.
+      let idempotencyKey: string | undefined;
+      if (typeof window !== "undefined") {
+        try {
+          idempotencyKey = sessionStorage.getItem("checkoutIdempotencyKey") || undefined;
+          if (!idempotencyKey) {
+            idempotencyKey = crypto.randomUUID();
+            sessionStorage.setItem("checkoutIdempotencyKey", idempotencyKey);
+          }
+        } catch {
+          // If sessionStorage is unavailable, proceed without idempotency (server still validates totals).
+          idempotencyKey = undefined;
+        }
+      }
+
       // Montar payload para API
       const payload = {
         nome,
@@ -178,6 +199,7 @@ export function useCreateOrder(): UseCreateOrderReturn {
         subtotal_produtos: subtotalProdutos,
         cupom_valor: resumoCompra.descontoCupom > 0 ? resumoCompra.descontoCupom : null,
         cupom_descricao: cupomDescricao || null,
+        idempotencyKey,
       };
 
       // Chamar API
@@ -197,6 +219,10 @@ export function useCreateOrder(): UseCreateOrderReturn {
         return { success: false, error: errorMessage, code: errorCodeResult };
       }
 
+      if (typeof window !== "undefined" && result?.id) {
+        sessionStorage.setItem("checkoutPedidoId", String(result.id));
+      }
+
       return {
         success: true,
         pedidoId: result.id,
@@ -207,6 +233,7 @@ export function useCreateOrder(): UseCreateOrderReturn {
       return { success: false, error: message };
     } finally {
       setLoading(false);
+      inFlightRef.current = false;
     }
   }, [cart, total, descontos, cupons, freightValue, getSelectedFreightData]);
 

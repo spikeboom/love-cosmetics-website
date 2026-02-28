@@ -47,6 +47,9 @@ model Pedido {
   ga_session_id             String?
   ga_session_number         String?
 
+  // Idempotency key for checkout order creation (prevents duplicate pedidos on retries/double-click).
+  idempotency_key           String?  @unique
+
   // Nota Fiscal
   notaFiscalGerada          Boolean  @default(false)
   notaFiscalId              String?
@@ -77,6 +80,9 @@ model Pedido {
 
   // Relação opcional com cliente
   pedidoCliente             PedidoCliente?
+
+  // Reserva/consumo de cupom (controle global de usos / usos_restantes)
+  cupomReserva              CupomReserva?
 
   // Histórico de status de entrega
   historicoStatusEntrega    HistoricoStatusEntrega[]
@@ -193,6 +199,23 @@ model CupomUsado {
 
   @@index([clienteId])
   @@index([cupom])
+}
+
+model CupomReserva {
+  id        String   @id @default(uuid())
+  codigo    String
+  pedidoId  String   @unique
+  pedido    Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  // RESERVED | CONSUMED | RELEASED
+  status    String   @default("RESERVED")
+  // Reservation TTL to avoid blocking coupons forever on abandoned checkouts
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([codigo])
+  @@index([status])
+  @@index([expiresAt])
 }
 
 model TokenRecuperacao {

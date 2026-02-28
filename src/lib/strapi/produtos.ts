@@ -10,6 +10,11 @@ export interface ProdutoStrapi {
   slug?: string;
   preco: number;
   bling_number?: number;
+  // Dimensoes/peso (usados para calculo de frete Frenet)
+  peso_gramas?: number;
+  altura?: number;
+  largura?: number;
+  comprimento?: number;
 }
 
 /**
@@ -44,7 +49,20 @@ export async function fetchProdutosByIds(ids: string[]): Promise<Map<string, Pro
   }
 
   const query = qs.stringify(
-    { filters, fields: ["id", "documentId", "nome", "preco"] },
+    {
+      filters,
+      fields: [
+        "id",
+        "documentId",
+        "nome",
+        "preco",
+        "bling_number",
+        "peso_gramas",
+        "altura",
+        "largura",
+        "comprimento",
+      ],
+    },
     { encodeValuesOnly: true }
   );
 
@@ -85,7 +103,20 @@ export async function fetchProdutosByNomes(nomes: string[]): Promise<Map<string,
   };
 
   const query = qs.stringify(
-    { filters, fields: ["id", "documentId", "nome", "preco"] },
+    {
+      filters,
+      fields: [
+        "id",
+        "documentId",
+        "nome",
+        "preco",
+        "bling_number",
+        "peso_gramas",
+        "altura",
+        "largura",
+        "comprimento",
+      ],
+    },
     { encodeValuesOnly: true }
   );
 
@@ -123,7 +154,21 @@ export async function fetchProdutosBySlugs(slugs: string[]): Promise<Map<string,
   };
 
   const query = qs.stringify(
-    { filters, fields: ["id", "documentId", "nome", "slug", "preco", "bling_number"] },
+    {
+      filters,
+      fields: [
+        "id",
+        "documentId",
+        "nome",
+        "slug",
+        "preco",
+        "bling_number",
+        "peso_gramas",
+        "altura",
+        "largura",
+        "comprimento",
+      ],
+    },
     { encodeValuesOnly: true }
   );
 

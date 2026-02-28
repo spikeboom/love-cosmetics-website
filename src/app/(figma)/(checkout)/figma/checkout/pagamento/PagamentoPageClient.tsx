@@ -18,27 +18,59 @@ import { formatPrice } from "@/lib/formatters";
 
 export function PagamentoPageClient() {
   const router = useRouter();
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, isCartLoaded } = useCart();
   const { cupons, clearCupons, handleCupom } = useCoupon();
   const { freightValue } = useShipping();
   const { total, descontos, subtotalOriginal } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder, clearError } = useCreateOrder();
 
   // Códigos de erro que indicam carrinho desatualizado
-  const cartOutdatedCodes = ["PRICE_MISMATCH", "DISCOUNT_MISMATCH", "TOTAL_MISMATCH", "PRODUCT_NOT_FOUND"];
+  const cartOutdatedCodes = [
+    "PRICE_MISMATCH",
+    "DISCOUNT_MISMATCH",
+    "TOTAL_MISMATCH",
+    "PRODUCT_NOT_FOUND",
+    "FREIGHT_MISMATCH",
+    "FREIGHT_UNAVAILABLE",
+    "INVALID_CEP",
+    "INVALID_FREIGHT",
+    "EMPTY_CART",
+  ];
   const isCartOutdated = orderErrorCode && cartOutdatedCodes.includes(orderErrorCode);
 
   // Códigos de erro relacionados a cupom
-  const couponErrorCodes = ["COUPON_FIRST_PURCHASE_ONLY", "INVALID_COUPON"];
+  const couponErrorCodes = ["COUPON_FIRST_PURCHASE_ONLY", "INVALID_COUPON", "COUPON_EXHAUSTED"];
   const isCouponError = orderErrorCode && couponErrorCodes.includes(orderErrorCode);
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
   const [telaAtual, setTelaAtual] = useState<TelaAtual>("selecao");
   const [pedidoId, setPedidoId] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     identificacao: null,
     entrega: null,
   });
+
+  // Restaurar pedidoId (evita criar novo pedido ao voltar/avancar no navegador)
+  useEffect(() => {
+    try {
+      const storedPedidoId = sessionStorage.getItem("checkoutPedidoId");
+      if (storedPedidoId) {
+        setPedidoId(storedPedidoId);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Guard: checkout sem itens no carrinho
+  useEffect(() => {
+    if (pedidoId) return;
+    if (!isCartLoaded) return;
+    if (Object.keys(cart).length === 0) {
+      router.push("/figma/cart");
+    }
+  }, [cart, router, pedidoId, isCartLoaded]);
 
   // Carregar dados das etapas anteriores
   useEffect(() => {
@@ -85,6 +117,7 @@ export function PagamentoPageClient() {
 
   // Criar pedido antes de ir para pagamento
   const handleCriarPedidoEPagar = async (metodo: "pix" | "cartao") => {
+    setPaymentError(null);
     if (pedidoId) {
       // Ja tem pedido criado, ir direto para pagamento
       setFormaPagamento(metodo);
@@ -173,6 +206,15 @@ export function PagamentoPageClient() {
     clearCart();
     clearCupons();
 
+    // Limpar sessao do checkout (idempotencia/pedido persistido)
+    try {
+      sessionStorage.removeItem("checkoutPedidoId");
+      sessionStorage.removeItem("checkoutIdempotencyKey");
+    } catch {
+      // ignore
+    }
+    setPaymentError(null);
+
     // Limpar dados de pagamento do localStorage
     // Manter identificacao e entrega para proximas compras
     localStorage.removeItem("checkoutPagamento");
@@ -182,8 +224,10 @@ export function PagamentoPageClient() {
   };
 
   const handlePaymentError = (error: string) => {
-    alert(`Erro no pagamento: ${error}`);
+    setPaymentError(error);
   };
+
+  const clearPaymentError = () => setPaymentError(null);
 
   // Props compartilhadas para o resumo
   const resumoProps: ResumoProps = {
@@ -279,6 +323,8 @@ export function PagamentoPageClient() {
         onVoltar={voltarParaSelecao}
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
+        externalError={paymentError}
+        onClearExternalError={clearPaymentError}
         resumoProps={resumoProps}
       />
     );
@@ -294,6 +340,8 @@ export function PagamentoPageClient() {
         onVoltar={voltarParaSelecao}
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
+        externalError={paymentError}
+        onClearExternalError={clearPaymentError}
       />
     );
   }
@@ -310,6 +358,9 @@ export function PagamentoPageClient() {
       onSelecionarPix={handleSelecionarPix}
       onSelecionarCartao={handleSelecionarCartao}
       onVoltar={voltarParaEntrega}
+      loading={creatingOrder}
+      errorMessage={paymentError}
+      onClearError={clearPaymentError}
       resumoProps={resumoProps}
     />
   );
