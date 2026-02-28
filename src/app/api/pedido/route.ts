@@ -182,6 +182,19 @@ export async function POST(req: NextRequest) {
         }
       : undefined;
 
+    // Campos de apresentação: usar sempre valores validados pelo server (não confiar no client)
+    const cupomValorSeguro =
+      validationResult.details?.cupomDesconto && validationResult.details.cupomDesconto > 0
+        ? validationResult.details.cupomDesconto
+        : null;
+    const cupomDescricaoSeguro = validationResult.details?.cupomDescricao ?? null;
+
+    const bodySeguro = {
+      ...body,
+      cupom_valor: cupomValorSeguro,
+      cupom_descricao: cupomDescricaoSeguro,
+    };
+
     const cupomCodigoParaReserva = validationResult.details?.cupomCodigo ?? null;
     const cupomMaxUsos = validationResult.details?.cupomUsosRestantes ?? null;
 
@@ -222,7 +235,7 @@ export async function POST(req: NextRequest) {
     try {
       pedido = await prisma.$transaction(async (tx) => {
         const created = await createPedidoFromBody({
-          body,
+          body: bodySeguro,
           totalSeguro,
           descontosSeguro,
           freteSeguro,

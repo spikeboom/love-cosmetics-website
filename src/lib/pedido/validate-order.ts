@@ -3,6 +3,31 @@ import { calculateOrderTotals, centsToReais } from "@/core/pricing/order-totals"
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 import { fetchAndValidateCupom, fetchProdutosComFallback, PRICE_TOLERANCE } from "@/lib/strapi";
 
+function formatCupomDescricao(cupons: Array<{ multiplacar?: number; diminuir?: number }>): string | null {
+  if (!Array.isArray(cupons) || cupons.length === 0) return null;
+
+  const partes: string[] = [];
+
+  for (const c of cupons) {
+    const multiplacar = typeof c.multiplacar === "number" ? c.multiplacar : null;
+    const diminuir = typeof c.diminuir === "number" ? c.diminuir : null;
+
+    const temPorcentagem = multiplacar !== null && multiplacar < 1 && multiplacar > 0;
+    const temValorFixo = diminuir !== null && diminuir !== 0;
+
+    if (temPorcentagem) {
+      const porcentagem = Math.round((1 - multiplacar) * 100);
+      partes.push(`${porcentagem}%`);
+    }
+
+    if (temValorFixo) {
+      partes.push(`R$${Math.abs(diminuir).toFixed(2).replace(".", ",")}`);
+    }
+  }
+
+  return partes.length > 0 ? partes.join(" + ") : null;
+}
+
 interface OrderItem {
   reference_id: string;
   name: string;
@@ -22,6 +47,7 @@ interface ValidationResult {
   details?: {
     itemsSubtotal: number;
     cupomDesconto: number;
+    cupomDescricao?: string | null;
     freteValidado: number;
     cupomCodigo?: string | null;
     cupomUsosRestantes?: number | null;
@@ -308,6 +334,7 @@ export async function validateOrder(
     const descontoCalculado = centsToReais(totals.couponDiscountCents);
     const totalCalculado = centsToReais(totals.totalCents);
     const subtotalOriginal = centsToReais(totals.itemsSubtotalCents);
+    const cupomDescricao = cupomCodigoValidado ? formatCupomDescricao(cuponsData) : null;
 
     // 8. Comparar valores (defesa em profundidade / carrinho desatualizado)
     if (Math.abs(descontoCalculado - descontosEnviado) > PRICE_TOLERANCE) {
@@ -337,6 +364,7 @@ export async function validateOrder(
       details: {
         itemsSubtotal: subtotalOriginal,
         cupomDesconto: descontoCalculado,
+        cupomDescricao,
         freteValidado,
         cupomCodigo: cupomCodigoValidado,
         cupomUsosRestantes,

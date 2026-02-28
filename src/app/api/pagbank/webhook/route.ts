@@ -50,7 +50,15 @@ export async function POST(req: NextRequest) {
     }
 
     // Parsear JSON apos validacao
-    const body: PagBankWebhookNotification = JSON.parse(rawBody);
+    let body: PagBankWebhookNotification;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      logMessage("Webhook recebido com body nao-JSON (probe ou formato legado)", {
+        bodyPreview: rawBody.substring(0, 200),
+      });
+      return NextResponse.json({ success: true, message: "Acknowledged" });
+    }
 
     // [PAGBANK-AUDIT-LOG] Log do webhook para validação PagBank
     logWebhookReceived(body);

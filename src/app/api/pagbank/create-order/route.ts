@@ -164,17 +164,18 @@ export async function POST(req: NextRequest) {
 
     // Acquire lock: only one request can transition to CREATING and proceed.
     // Allowed states: no payment created yet (status null) OR terminal failure (allow retry).
-    const allowedStatuses: Array<string | null> = [null, "DECLINED", "CANCELED", "PAYMENT_FAILED"];
+    const failureStatuses = ["DECLINED", "CANCELED", "PAYMENT_FAILED"];
     if (paymentMethod === "pix" && pixExpired) {
-      allowedStatuses.push("AWAITING_PAYMENT");
+      failureStatuses.push("AWAITING_PAYMENT");
     }
 
     const lock = await prisma.pedido.updateMany({
       where: {
         id: pedidoId,
-        status_pagamento: {
-          in: allowedStatuses as string[],
-        },
+        OR: [
+          { status_pagamento: null },
+          { status_pagamento: { in: failureStatuses } },
+        ],
       },
       data: {
         status_pagamento: CREATING_STATUS,

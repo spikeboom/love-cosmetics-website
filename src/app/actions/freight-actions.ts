@@ -190,7 +190,7 @@ export async function calculateFreightFrenet(
       price: typeof service.ShippingPrice === 'string'
         ? parseFloat(service.ShippingPrice)
         : service.ShippingPrice,
-      deliveryTime: service.DeliveryTime,
+      deliveryTime: typeof service.DeliveryTime === 'string' ? parseInt(service.DeliveryTime, 10) : service.DeliveryTime,
       serviceCode: service.ServiceCode
     }));
 
