@@ -111,8 +111,8 @@ export default function NovoPedidoPage() {
   // Desconto
   const [tipoDesconto, setTipoDesconto] = useState<"nenhum" | "cupom" | "manual">("nenhum");
   const [cupomCodigo, setCupomCodigo] = useState("");
-  const [descontoValor, setDescontoValor] = useState<number>(0);
-  const [descontoPorcentagem, setDescontoPorcentagem] = useState<number>(0);
+  const [descontoValor, setDescontoValor] = useState("");
+  const [descontoPorcentagem, setDescontoPorcentagem] = useState("");
 
   // Cortesia
   const [cortesia, setCortesia] = useState(false);
@@ -223,15 +223,18 @@ export default function NovoPedidoPage() {
   // Cálculos
   const subtotal = carrinho.reduce((acc, item) => acc + item.preco * item.quantity, 0);
 
+  const descontoValorNum = parseFloat(descontoValor) || 0;
+  const descontoPorcentagemNum = parseFloat(descontoPorcentagem) || 0;
+
   let descontoTotal = 0;
   if (tipoDesconto === "manual") {
-    if (descontoPorcentagem > 0) {
-      descontoTotal = subtotal * (descontoPorcentagem / 100);
+    if (descontoPorcentagemNum > 0) {
+      descontoTotal = subtotal * (descontoPorcentagemNum / 100);
     } else {
-      descontoTotal = descontoValor;
+      descontoTotal = descontoValorNum;
     }
   } else if (tipoDesconto === "cupom") {
-    descontoTotal = descontoValor;
+    descontoTotal = descontoValorNum;
   }
 
   const total = cortesia ? 0 : Math.max(0, subtotal - descontoTotal + freteValor);
@@ -371,7 +374,7 @@ export default function NovoPedidoPage() {
             tipo: tipoDesconto,
             cupom_codigo: tipoDesconto === "cupom" ? cupomCodigo : undefined,
             valor: descontoTotal,
-            porcentagem: tipoDesconto === "manual" && descontoPorcentagem > 0 ? descontoPorcentagem : undefined,
+            porcentagem: tipoDesconto === "manual" && descontoPorcentagemNum > 0 ? descontoPorcentagemNum : undefined,
           },
           cortesia,
         }),
@@ -873,8 +876,8 @@ export default function NovoPedidoPage() {
                       checked={tipoDesconto === "nenhum"}
                       onChange={() => {
                         setTipoDesconto("nenhum");
-                        setDescontoValor(0);
-                        setDescontoPorcentagem(0);
+                        setDescontoValor("");
+                        setDescontoPorcentagem("");
                       }}
                       className="accent-[#254333]"
                     />
@@ -925,7 +928,8 @@ export default function NovoPedidoPage() {
                         min="0"
                         step="0.01"
                         value={descontoValor}
-                        onChange={(e) => setDescontoValor(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setDescontoValor(e.target.value)}
+                        placeholder="0.00"
                         className="w-full bg-white border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333]"
                       />
                     </div>
@@ -944,9 +948,10 @@ export default function NovoPedidoPage() {
                         step="0.01"
                         value={descontoValor}
                         onChange={(e) => {
-                          setDescontoValor(parseFloat(e.target.value) || 0);
-                          setDescontoPorcentagem(0);
+                          setDescontoValor(e.target.value);
+                          setDescontoPorcentagem("");
                         }}
+                        placeholder="0.00"
                         className="w-full bg-white border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333]"
                       />
                     </div>
@@ -960,9 +965,10 @@ export default function NovoPedidoPage() {
                         max="100"
                         value={descontoPorcentagem}
                         onChange={(e) => {
-                          setDescontoPorcentagem(parseFloat(e.target.value) || 0);
-                          setDescontoValor(0);
+                          setDescontoPorcentagem(e.target.value);
+                          setDescontoValor("");
                         }}
+                        placeholder="0"
                         className="w-full bg-white border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333]"
                       />
                     </div>
