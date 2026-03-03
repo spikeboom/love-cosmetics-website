@@ -234,7 +234,11 @@ export default function NovoPedidoPage() {
       descontoTotal = descontoValorNum;
     }
   } else if (tipoDesconto === "cupom") {
-    descontoTotal = descontoValorNum;
+    if (descontoPorcentagemNum > 0) {
+      descontoTotal = subtotal * (descontoPorcentagemNum / 100);
+    } else {
+      descontoTotal = descontoValorNum;
+    }
   }
 
   const total = cortesia ? 0 : Math.max(0, subtotal - descontoTotal + freteValor);
@@ -374,7 +378,7 @@ export default function NovoPedidoPage() {
             tipo: tipoDesconto,
             cupom_codigo: tipoDesconto === "cupom" ? cupomCodigo : undefined,
             valor: descontoTotal,
-            porcentagem: tipoDesconto === "manual" && descontoPorcentagemNum > 0 ? descontoPorcentagemNum : undefined,
+            porcentagem: descontoPorcentagemNum > 0 ? descontoPorcentagemNum : undefined,
           },
           cortesia,
         }),
@@ -921,16 +925,42 @@ export default function NovoPedidoPage() {
                     </div>
                     <div>
                       <label className="font-cera-pro font-light text-[12px] text-[#666] block mb-1">
+                        Porcentagem (%)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={descontoPorcentagem}
+                        onChange={(e) => {
+                          setDescontoPorcentagem(e.target.value);
+                          setDescontoValor("");
+                        }}
+                        placeholder="10"
+                        className="w-full bg-white border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333]"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="font-cera-pro font-light text-[12px] text-[#666] block mb-1">
                         Valor do Desconto (R$)
+                        {descontoPorcentagemNum > 0 && subtotal > 0 && (
+                          <span className="ml-2 text-[#254333] font-medium">
+                            = R$ {(subtotal * descontoPorcentagemNum / 100).toFixed(2)}
+                          </span>
+                        )}
                       </label>
                       <input
                         type="number"
                         min="0"
                         step="0.01"
-                        value={descontoValor}
-                        onChange={(e) => setDescontoValor(e.target.value)}
+                        value={descontoPorcentagemNum > 0 ? (subtotal * descontoPorcentagemNum / 100).toFixed(2) : descontoValor}
+                        onChange={(e) => {
+                          setDescontoValor(e.target.value);
+                          setDescontoPorcentagem("");
+                        }}
+                        readOnly={descontoPorcentagemNum > 0}
                         placeholder="0.00"
-                        className="w-full bg-white border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333]"
+                        className={`w-full border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333] ${descontoPorcentagemNum > 0 ? "bg-gray-100 text-gray-500" : "bg-white"}`}
                       />
                     </div>
                   </div>
