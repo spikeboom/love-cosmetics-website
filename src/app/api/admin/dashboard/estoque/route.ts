@@ -10,6 +10,7 @@ interface ProdutoStrapi {
   id: number;
   documentId: string;
   nome: string;
+  preco?: number;
   bling_number?: number;
 }
 
@@ -25,7 +26,7 @@ export async function GET() {
     const query = qs.stringify(
       {
         filters: { bling_number: { $notNull: true } },
-        fields: ["id", "documentId", "nome", "bling_number"],
+        fields: ["id", "documentId", "nome", "preco", "bling_number"],
         pagination: { pageSize: 100 },
       },
       { encodeValuesOnly: true }
@@ -133,11 +134,15 @@ export async function GET() {
     const estoque = produtos.map((prod) => {
       const bn = prod.bling_number!;
       const saldo = blingMapById.get(Number(bn)) || blingMapByCode.get(String(bn));
+      const saldoFisico = saldo?.saldoFisicoTotal ?? null;
+      const preco = prod.preco ?? 0;
       return {
         nome: prod.nome,
         bling_number: bn,
-        saldoFisico: saldo?.saldoFisicoTotal ?? null,
+        preco,
+        saldoFisico,
         saldoVirtual: saldo?.saldoVirtualTotal ?? null,
+        estoqueReais: saldoFisico !== null && preco > 0 ? saldoFisico * preco : null,
       };
     });
 

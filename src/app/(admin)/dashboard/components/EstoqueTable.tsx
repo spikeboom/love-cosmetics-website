@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface EstoqueItem {
   nome: string;
   bling_number: number;
+  preco: number;
   saldoFisico: number | null;
   saldoVirtual: number | null;
+  estoqueReais: number | null;
 }
 
 function getStatusLabel(saldo: number | null) {
@@ -15,6 +17,15 @@ function getStatusLabel(saldo: number | null) {
   if (saldo <= 5) return { text: "Critico", color: "bg-orange-100 text-orange-700" };
   if (saldo <= 15) return { text: "Baixo", color: "bg-yellow-100 text-yellow-700" };
   return { text: "OK", color: "bg-green-100 text-[#009142]" };
+}
+
+function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 }
 
 export function EstoqueTable() {
@@ -39,6 +50,8 @@ export function EstoqueTable() {
       setLoading(false);
     }
   };
+
+  const totalEstoqueReais = estoque.reduce((sum, item) => sum + (item.estoqueReais ?? 0), 0);
 
   return (
     <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-5">
@@ -92,49 +105,61 @@ export function EstoqueTable() {
       )}
 
       {loaded && estoque.length > 0 && (
-        <div className="max-h-[280px] overflow-y-auto">
-          <table className="w-full text-left">
-            <thead className="sticky top-0 bg-white">
-              <tr className="border-b border-[#e5e5e5]">
-                <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 uppercase tracking-wide">
-                  Produto
-                </th>
-                <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">
-                  Fisico
-                </th>
-                <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">
-                  Virtual
-                </th>
-                <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {estoque.map((item) => {
-                const status = getStatusLabel(item.saldoFisico);
-                return (
-                  <tr key={item.bling_number} className="border-b border-[#f0f0f0]">
-                    <td className="font-cera-pro font-light text-[12px] text-[#333333] py-2 pr-2 max-w-[180px] truncate" title={item.nome}>
-                      {item.nome}
-                    </td>
-                    <td className="font-cera-pro font-medium text-[12px] text-[#333333] py-2 text-right tabular-nums">
-                      {item.saldoFisico ?? "--"}
-                    </td>
-                    <td className="font-cera-pro font-light text-[12px] text-[#666666] py-2 text-right tabular-nums">
-                      {item.saldoVirtual ?? "--"}
-                    </td>
-                    <td className="py-2 text-right">
-                      <span className={`font-cera-pro font-medium text-[10px] rounded px-2 py-0.5 ${status.color}`}>
-                        {status.text}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div className="max-h-[280px] overflow-y-auto">
+            <table className="w-full text-left">
+              <thead className="sticky top-0 bg-white">
+                <tr className="border-b border-[#e5e5e5]">
+                  <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 uppercase tracking-wide">
+                    Produto
+                  </th>
+                  <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">
+                    Fisico
+                  </th>
+                  <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">
+                    Estoque R$
+                  </th>
+                  <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {estoque.map((item) => {
+                  const status = getStatusLabel(item.saldoFisico);
+                  return (
+                    <tr key={item.bling_number} className="border-b border-[#f0f0f0]">
+                      <td className="font-cera-pro font-light text-[12px] text-[#333333] py-2 pr-2 max-w-[180px] truncate" title={item.nome}>
+                        {item.nome}
+                      </td>
+                      <td className="font-cera-pro font-medium text-[12px] text-[#333333] py-2 text-right tabular-nums">
+                        {item.saldoFisico ?? "--"}
+                      </td>
+                      <td className="font-cera-pro font-medium text-[12px] text-[#333333] py-2 text-right tabular-nums">
+                        {item.estoqueReais !== null ? formatCurrency(item.estoqueReais) : "--"}
+                      </td>
+                      <td className="py-2 text-right">
+                        <span className={`font-cera-pro font-medium text-[10px] rounded px-2 py-0.5 ${status.color}`}>
+                          {status.text}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {totalEstoqueReais > 0 && (
+            <div className="mt-3 pt-3 border-t border-[#e5e5e5] flex justify-between items-center">
+              <span className="font-cera-pro font-medium text-[11px] text-[#666666] uppercase tracking-wide">
+                Total em Estoque
+              </span>
+              <span className="font-cera-pro font-bold text-[14px] text-[#254333]">
+                {formatCurrency(totalEstoqueReais)}
+              </span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

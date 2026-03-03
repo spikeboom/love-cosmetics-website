@@ -10,6 +10,13 @@ import { QuantidadeProdutos } from "./components/QuantidadeProdutos";
 import { EstoqueTable } from "./components/EstoqueTable";
 import { PeriodoFilter } from "./components/PeriodoFilter";
 
+interface MargemProduto {
+  nome: string;
+  custoOperacional: number;
+  precoVenda: number;
+  margemBruta: number;
+}
+
 interface DashboardData {
   faturamento: number;
   ticketMedio: number;
@@ -22,6 +29,8 @@ interface DashboardData {
   faturamentoPorCanal: { origem: string; valor: number; pedidos: number }[];
   rankingProdutos: { nome: string; faturamento: number; quantidade: number }[];
   quantidadePorProduto: { nome: string; quantidade: number; faturamento: number }[];
+  margemProdutos: MargemProduto[];
+  margemBrutaMedia: number;
   periodo: { mes: number; ano: number };
   periodoAnterior: { mes: number; ano: number };
 }
@@ -223,9 +232,9 @@ export default function DashboardPage() {
               />
               <KpiCard
                 titulo="Margem Bruta"
-                valor=""
+                valor={data.margemBrutaMedia > 0 ? `${data.margemBrutaMedia.toFixed(1)}%` : ""}
                 icone={<MarginIcon />}
-                aviso="Sem dados de custo cadastrados"
+                aviso={data.margemBrutaMedia > 0 ? undefined : "Sem dados de custo cadastrados"}
               />
             </div>
 
@@ -244,9 +253,47 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Rankings + Estoque */}
+            {/* Margem Bruta por Produto */}
+            {data.margemProdutos.length > 0 && (
+              <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-5">
+                <div className="mb-4">
+                  <h3 className="font-cera-pro font-bold text-[16px] text-black">
+                    Margem Bruta por Produto
+                  </h3>
+                  <p className="font-cera-pro font-light text-[11px] text-[#999999] mt-0.5">
+                    (Preco de Venda - CPV) / Preco de Venda
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-[#e5e5e5]">
+                        <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 uppercase tracking-wide">Produto</th>
+                        <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">CPV</th>
+                        <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">Preco Venda</th>
+                        <th className="font-cera-pro font-medium text-[11px] text-[#666666] pb-2 text-right uppercase tracking-wide">Margem</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.margemProdutos.map((item) => (
+                        <tr key={item.nome} className="border-b border-[#f0f0f0]">
+                          <td className="font-cera-pro font-light text-[12px] text-[#333333] py-2.5 pr-2">{item.nome}</td>
+                          <td className="font-cera-pro font-light text-[12px] text-[#666666] py-2.5 text-right tabular-nums">{formatCurrency(item.custoOperacional)}</td>
+                          <td className="font-cera-pro font-medium text-[12px] text-[#333333] py-2.5 text-right tabular-nums">{item.precoVenda > 0 ? formatCurrency(item.precoVenda) : "--"}</td>
+                          <td className={`font-cera-pro font-bold text-[13px] py-2.5 text-right tabular-nums ${item.margemBruta >= 50 ? "text-[#009142]" : item.margemBruta >= 30 ? "text-[#7B6F5E]" : item.margemBruta >= 15 ? "text-orange-600" : "text-[#B3261E]"}`}>
+                            {item.precoVenda > 0 ? `${item.margemBruta.toFixed(1)}%` : "--"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Ranking + Estoque */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <RankingProdutos dados={data.rankingProdutos} />
+              <RankingProdutos dados={data.rankingProdutos} margemProdutos={data.margemProdutos} />
               <QuantidadeProdutos dados={data.quantidadePorProduto} />
               <EstoqueTable />
             </div>

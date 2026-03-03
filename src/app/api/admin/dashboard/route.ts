@@ -1,5 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import qs from "qs";
+
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN;
+
+// Custo operacional (CPV) por produto individual — hardcoded
+const CUSTO_OPERACIONAL_BASE: Record<string, number> = {
+  Espuma: 44.9,
+  "Máscara": 44.17,
+  "Sérum": 45.7,
+  Hidratante: 58.54,
+  Manteiga: 56.45,
+};
+
+// Kits: CPV = soma dos componentes
+// Kit Uso Diário = Espuma + Sérum + Hidratante
+// Kit Completo   = Espuma + Sérum + Hidratante + Máscara + Manteiga
+const KIT_COMPONENTS: Record<string, string[]> = {
+  "Kit Uso Diário": ["Espuma", "Sérum", "Hidratante"],
+  "Kit Completo": ["Espuma", "Sérum", "Hidratante", "Máscara", "Manteiga"],
+};
+
+function buildCustoOperacional(): Record<string, number> {
+  const custos: Record<string, number> = { ...CUSTO_OPERACIONAL_BASE };
+  for (const [kitNome, componentes] of Object.entries(KIT_COMPONENTS)) {
+    custos[kitNome] = componentes.reduce(
+      (sum, comp) => sum + (CUSTO_OPERACIONAL_BASE[comp] ?? 0),
+      0
+    );
+  }
+  return custos;
+}
 
 const TEST_EMAIL_FILTER = `NOT (
   LOWER(p.email) LIKE '%teste%' OR
@@ -176,7 +208,6 @@ export async function GET(req: NextRequest) {
           AND item->>'name' IS NOT NULL
         GROUP BY item->>'name'
         ORDER BY faturamento DESC
-        LIMIT 5
       `);
 
       quantidadePorProduto = await prisma.$queryRawUnsafe(`
@@ -190,7 +221,6 @@ export async function GET(req: NextRequest) {
           AND item->>'name' IS NOT NULL
         GROUP BY item->>'name'
         ORDER BY quantidade DESC
-        LIMIT 5
       `);
       console.log("[DASHBOARD] rankingProdutos:", JSON.stringify(rankingProdutos, (_, v) => typeof v === 'bigint' ? v.toString() : v));
       console.log("[DASHBOARD] quantidadePorProduto:", JSON.stringify(quantidadePorProduto, (_, v) => typeof v === 'bigint' ? v.toString() : v));
@@ -211,6 +241,81 @@ export async function GET(req: NextRequest) {
       prevTotalPedidos > 0
         ? ((totalPedidos - prevTotalPedidos) / prevTotalPedidos) * 100
         : 0;
+
+    // 7. Margem bruta — buscar precos do Strapi e cruzar com CPV
+    let margemProdutos: { nome: string; custoOperacional: number; precoVenda: number; margemBruta: number }[] = [];
+    let margemBrutaMedia = 0;
+
+    try {
+      const CUSTO_OPERACIONAL = buildCustoOperacional();
+      const nomesComCusto = Object.keys(CUSTO_OPERACIONAL);
+
+      // Buscar todos os produtos do Strapi (individuais + kits)
+      const strapiQuery = qs.stringify(
+        {
+          fields: ["nome", "slug", "preco"],
+          pagination: { pageSize: 100 },
+        },
+        { encodeValuesOnly: true }
+      );
+
+      const strapiRes = await fetch(`${STRAPI_URL}/api/produtos?${strapiQuery}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${STRAPI_TOKEN}`,
+        },
+        cache: "no-store",
+      });
+
+      if (strapiRes.ok) {
+        const strapiData = await strapiRes.json();
+        const produtos: { nome: string; slug?: string; preco: number }[] = strapiData.data || [];
+
+        // Mapear nome do custo → produto do Strapi usando match parcial
+        margemProdutos = nomesComCusto.map((key) => {
+          const cpv = CUSTO_OPERACIONAL[key];
+          const keyLower = key.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const prod = produtos.find((p) => {
+            const nomeLower = p.nome.toLowerCase()
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return nomeLower.includes(keyLower);
+          });
+          const preco = prod?.preco ?? 0;
+          const margem = preco > 0 ? ((preco - cpv) / preco) * 100 : 0;
+          return {
+            nome: key,
+            custoOperacional: cpv,
+            precoVenda: preco,
+            margemBruta: margem,
+          };
+        });
+
+        // Média ponderada pelo faturamento (se tiver ranking)
+        const rankingAll = rankingProdutos.length > 0 ? rankingProdutos : [];
+        let somaMargemPond = 0;
+        let somaFatPond = 0;
+        for (const rk of rankingAll) {
+          const rkNomeLower = rk.nome.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const mp = margemProdutos.find((m) => {
+            const mNomeLower = m.nome.toLowerCase()
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return rkNomeLower.includes(mNomeLower);
+          });
+          if (mp && mp.margemBruta > 0) {
+            somaMargemPond += mp.margemBruta * Number(rk.faturamento);
+            somaFatPond += Number(rk.faturamento);
+          }
+        }
+        margemBrutaMedia = somaFatPond > 0 ? somaMargemPond / somaFatPond : 0;
+
+        console.log("[DASHBOARD] margemProdutos:", margemProdutos);
+        console.log("[DASHBOARD] margemBrutaMedia:", margemBrutaMedia);
+      }
+    } catch (margemErr) {
+      console.error("[DASHBOARD] Erro ao calcular margem:", margemErr);
+    }
 
     return NextResponse.json({
       faturamento,
@@ -242,6 +347,8 @@ export async function GET(req: NextRequest) {
         quantidade: Number(p.quantidade),
         faturamento: Number(p.faturamento),
       })),
+      margemProdutos,
+      margemBrutaMedia,
       periodo: { mes, ano },
       periodoAnterior: { mes: prevMonth, ano: prevYear },
     });
