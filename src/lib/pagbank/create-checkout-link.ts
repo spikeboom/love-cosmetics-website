@@ -100,7 +100,7 @@ export async function createPagBankCheckoutLink(
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: `Bearer ${process.env.PAGSEGURO_TOKEN_DEV}`,
+        Authorization: `Bearer ${process.env.PAGBANK_TOKEN_SANDBOX}`,
         accept: "*/*",
       },
       body: JSON.stringify(bodyCheckoutPagSeguro),
