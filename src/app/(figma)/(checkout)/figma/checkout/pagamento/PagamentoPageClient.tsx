@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { useCreateOrder } from "@/hooks/checkout";
+import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { ucPurchase } from "../../../../_tracking/uc-ecommerce";
 import {
   TelaAtual,
@@ -23,6 +24,13 @@ export function PagamentoPageClient() {
   const { freightValue } = useShipping();
   const { total, descontos, subtotalOriginal } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder, clearError } = useCreateOrder();
+  const { syncToServer } = useCheckoutSync();
+
+  // Track pagamento step on mount
+  useEffect(() => {
+    syncToServer({ step: "pagamento" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Códigos de erro que indicam carrinho desatualizado
   const cartOutdatedCodes = [

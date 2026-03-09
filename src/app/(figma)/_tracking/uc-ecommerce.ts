@@ -199,6 +199,15 @@ export function ucUserDataUpdate(args: {
     event: "user_data_update",
     event_id: newEventId("user_data_update"),
     user_data,
+    // Duplicate PII at top level so GA4 registers them as event params
+    // and they appear in BigQuery export (user_data nested object is NOT exported).
+    email_address: args.email || undefined,
+    phone_number: args.phone_number || undefined,
+    first_name: args.first_name || undefined,
+    last_name: args.last_name || undefined,
+    checkout_city: args.address?.city || undefined,
+    checkout_region: args.address?.region || undefined,
+    checkout_postal_code: args.address?.postal_code || undefined,
   });
 }
 

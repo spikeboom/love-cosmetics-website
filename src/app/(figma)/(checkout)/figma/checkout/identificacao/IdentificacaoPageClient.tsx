@@ -35,7 +35,7 @@ export function IdentificacaoPageClient() {
 
     if (validateForm()) {
       saveToStorage();
-      syncToServer({ identificacao: formData });
+      syncToServer({ identificacao: formData, step: "identificacao" });
 
       // Disparar user_data_update com dados de identificacao
       const nomeCompleto = formData.nome?.trim() || "";

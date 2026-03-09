@@ -221,7 +221,7 @@ export function EntregaPageClient() {
 
     if (validateForm()) {
       localStorage.setItem("checkoutEntrega", JSON.stringify(formData));
-      syncToServer({ entrega: formData });
+      syncToServer({ entrega: formData, step: "entrega" });
 
       // Disparar user_data_update com endereco completo
       // Recuperar dados de identificacao para enviar junto

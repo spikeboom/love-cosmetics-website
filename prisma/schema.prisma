@@ -113,6 +113,48 @@ model StatusCheckout {
   info Json
 }
 
+// Dados de checkout abandonado (logado ou não-logado)
+// Salva email/phone/items a cada step para permitir recuperação de carrinhos
+model CheckoutAbandonado {
+  id              String   @id @default(uuid())
+  sessionId       String   // ID da sessão anônima (gerado no browser)
+
+  // Step atual: "identificacao" | "entrega" | "pagamento"
+  step            String
+
+  // Dados de contato (preenchidos na identificação)
+  email           String?
+  telefone        String?
+  nome            String?
+  cpf             String?
+
+  // Dados de endereço (preenchidos na entrega)
+  cep             String?
+  cidade          String?
+  estado          String?
+
+  // Dados do carrinho
+  items           Json?    // Array de { item_id, item_name, price, quantity }
+  valor           Float?   // Valor total do carrinho
+  cupons          String[]
+
+  // Se converteu (para filtrar abandonos reais)
+  convertido      Boolean  @default(false)
+
+  // Metadados
+  device          String?  // "mobile" | "desktop" | "tablet"
+  userAgent       String?
+  ip              String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([email])
+  @@index([convertido])
+  @@index([createdAt])
+  @@index([step])
+}
+
 
 model StatusPagamento {
   id   Int    @id @default(autoincrement())
