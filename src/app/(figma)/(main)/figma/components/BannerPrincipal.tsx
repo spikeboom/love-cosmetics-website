@@ -18,6 +18,15 @@ interface BannerSlide {
 const bannerSlides: BannerSlide[] = [
   {
     id: 1,
+    image: "/new-home/banner/banner-mes-da-mulher-1-full.png",
+    imageMobile: "/new-home/banner/banner-mes-da-mulher-1-mobile.png",
+    title: "Respeito não é presente.\nÉ princípio.",
+    description: "Na Lovè, todo dia é dia da mulher.",
+    cta: "Descubra a rotina Lovè",
+    href: "/figma/search",
+  },
+  {
+    id: 2,
     image: "/new-home/banner/banner-tecnologia-amazonia-full.png",
     imageMobile: "/new-home/banner/banner-tecnologia-amazonia-mobile.png",
     title: "Tecnologia & Amazônia",
@@ -26,7 +35,7 @@ const bannerSlides: BannerSlide[] = [
     href: "/figma/search",
   },
   {
-    id: 2,
+    id: 3,
     image: "/new-home/banner/banner-kits-full.png",
     imageMobile: "/new-home/banner/banner-kits-mobile.png",
     discount: "Até 15% OFF",
@@ -137,7 +146,7 @@ export function BannerPrincipal() {
                 {slide.discount}
               </p>
             )}
-            <p className="font-times font-bold text-[32px] text-black leading-none">
+            <p className="font-times font-bold text-[32px] text-black leading-none whitespace-pre-line">
               {slide.title}
             </p>
             <p className="font-cera-pro font-light text-[14px] text-black leading-none">
@@ -148,7 +157,7 @@ export function BannerPrincipal() {
           <div className="flex gap-2 items-center">
             <Link
               href={slide.href}
-              className="font-roboto font-medium text-sm bg-[#254333] text-white rounded-lg px-4 py-2.5 hover:bg-[#1a3024] transition-colors tracking-[0.1px] leading-5"
+              className="font-cera-pro font-normal text-sm bg-[#254333] text-white rounded-lg px-4 py-2.5 hover:bg-[#1a3024] transition-colors tracking-[0.1px] leading-5"
             >
               {slide.cta}
             </Link>
@@ -186,7 +195,7 @@ export function BannerPrincipal() {
                 {slide.discount}
               </p>
             )}
-            <p className="font-times font-bold text-[56px] text-black leading-none break-words">
+            <p className="font-times font-bold text-[56px] text-black leading-none break-words whitespace-pre-line">
               {slide.title}
             </p>
             <p className="font-cera-pro font-light text-[32px] text-black leading-none">
@@ -197,7 +206,7 @@ export function BannerPrincipal() {
           <div className="flex gap-2 items-center w-full">
             <Link
               href={slide.href}
-              className="font-roboto font-medium text-base bg-[#254333] text-white rounded-2xl px-6 py-4 hover:bg-[#1a3024] transition-colors tracking-[0.15px] leading-6"
+              className="font-cera-pro font-normal text-base bg-[#254333] text-white rounded-2xl px-6 py-4 hover:bg-[#1a3024] transition-colors tracking-[0.15px] leading-6"
             >
               {slide.cta}
             </Link>
