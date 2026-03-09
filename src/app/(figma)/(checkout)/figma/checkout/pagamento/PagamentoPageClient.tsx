@@ -159,6 +159,9 @@ export function PagamentoPageClient() {
 
   const handlePaymentSuccess = () => {
     if (pedidoId) {
+      // Marca essa sessao de checkout como convertida para filtrar abandonos reais.
+      syncToServer({ step: "pagamento", convertido: true });
+
       ucPurchase({
         transactionId: pedidoId,
         value: valorTotal,
@@ -218,6 +221,7 @@ export function PagamentoPageClient() {
     try {
       sessionStorage.removeItem("checkoutPedidoId");
       sessionStorage.removeItem("checkoutIdempotencyKey");
+      sessionStorage.removeItem("checkout_session_id");
     } catch {
       // ignore
     }

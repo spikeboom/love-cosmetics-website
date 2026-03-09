@@ -20,16 +20,22 @@ interface CheckoutSyncData {
     estado: string;
   };
   step: "identificacao" | "entrega" | "pagamento";
+  convertido?: boolean;
 }
 
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "";
-  let sid = sessionStorage.getItem("checkout_session_id");
-  if (!sid) {
-    sid = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  try {
+    const existing = sessionStorage.getItem("checkout_session_id");
+    if (existing) return existing;
+
+    const uuid = (window as any)?.crypto?.randomUUID?.();
+    const sid = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     sessionStorage.setItem("checkout_session_id", sid);
+    return sid;
+  } catch {
+    return "";
   }
-  return sid;
 }
 
 function getDevice(): string {
@@ -45,12 +51,12 @@ export function useCheckoutSync() {
   const { cart } = useCart();
   const { cupons } = useCoupon();
   const { total } = useCartTotals();
-  const syncingRef = useRef(false);
+  const inFlightRef = useRef<Set<string>>(new Set());
 
   const syncToServer = useCallback(
     (data: CheckoutSyncData) => {
       // Sync para o perfil do cliente logado (comportamento original)
-      if (isAuthenticated) {
+      if (isAuthenticated && (data.identificacao || data.entrega)) {
         fetch("/api/cliente/checkout-sync", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -60,12 +66,13 @@ export function useCheckoutSync() {
       }
 
       // Tracking de abandono para TODOS (logados e não-logados)
-      if (syncingRef.current) return;
-      syncingRef.current = true;
+      const requestKey = `${data.step}:${data.convertido ? "1" : "0"}`;
+      if (inFlightRef.current.has(requestKey)) return;
+      inFlightRef.current.add(requestKey);
 
       const sessionId = getOrCreateSessionId();
       if (!sessionId) {
-        syncingRef.current = false;
+        inFlightRef.current.delete(requestKey);
         return;
       }
 
@@ -84,10 +91,14 @@ export function useCheckoutSync() {
         sessionId,
         step: data.step,
         items,
-        valor: total || null,
+        valor: total ?? null,
         cupons: cupons?.map((c: any) => c.codigo).filter(Boolean) || [],
         device: getDevice(),
       };
+
+      if (data.convertido) {
+        trackPayload.convertido = true;
+      }
 
       // Dados de identificação
       if (data.identificacao) {
@@ -121,11 +132,12 @@ export function useCheckoutSync() {
       fetch("/api/checkout/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        keepalive: true,
         body: JSON.stringify(trackPayload),
       })
         .catch(() => {})
         .finally(() => {
-          syncingRef.current = false;
+          inFlightRef.current.delete(requestKey);
         });
     },
     [isAuthenticated, cart, cupons, total]

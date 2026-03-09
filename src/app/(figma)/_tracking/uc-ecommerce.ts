@@ -9,6 +9,15 @@ function getDataLayer(): DataLayer | null {
   return w.dataLayer;
 }
 
+function getCheckoutSessionId(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    return sessionStorage.getItem("checkout_session_id") || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function safeNumber(value: unknown): number | undefined {
   const n = typeof value === "number" ? value : Number(value);
   return Number.isFinite(n) ? n : undefined;
@@ -59,6 +68,7 @@ function pushEcommerceEvent(
   dl.push({
     event,
     event_id: newEventId(event),
+    checkout_session_id: getCheckoutSessionId(),
     ecommerce,
     // Duplicate key fields at top level for Stape Data Tag → sGTM.
     // The Data Client does NOT flatten the GA4 ecommerce object,
@@ -199,12 +209,8 @@ export function ucUserDataUpdate(args: {
     event: "user_data_update",
     event_id: newEventId("user_data_update"),
     user_data,
-    // Duplicate PII at top level so GA4 registers them as event params
-    // and they appear in BigQuery export (user_data nested object is NOT exported).
-    email_address: args.email || undefined,
-    phone_number: args.phone_number || undefined,
-    first_name: args.first_name || undefined,
-    last_name: args.last_name || undefined,
+    // Non-PII join key for warehouse/debug (avoid sending raw PII as GA4 event params).
+    checkout_session_id: getCheckoutSessionId(),
     checkout_city: args.address?.city || undefined,
     checkout_region: args.address?.region || undefined,
     checkout_postal_code: args.address?.postal_code || undefined,
@@ -235,4 +241,3 @@ export function ucPurchase(args: {
     args.user_data ? { user_data: args.user_data } : undefined
   );
 }
-
