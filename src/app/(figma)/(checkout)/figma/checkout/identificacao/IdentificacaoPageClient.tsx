@@ -54,6 +54,10 @@ export function IdentificacaoPageClient() {
     e.preventDefault();
 
     if (validateForm()) {
+      // Garantir que o CEP usado no checkout reflita no ShippingContext antes de avanÃ§ar.
+      if (formData.cep) {
+        setShippingCep(formData.cep);
+      }
       saveToStorage();
       syncToServer({ identificacao: formData, step: "identificacao" });
 

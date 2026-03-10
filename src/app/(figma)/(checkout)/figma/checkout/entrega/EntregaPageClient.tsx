@@ -31,6 +31,11 @@ export function EntregaPageClient() {
   const freight = useShipping();
   const shippingCepRef = useRef(freight.cep);
   shippingCepRef.current = freight.cep;
+  const setFreightCepRef = useRef(freight.setCep);
+  setFreightCepRef.current = freight.setCep;
+  const buscarCepRef = useRef(buscarCep);
+  buscarCepRef.current = buscarCep;
+  const viaCepFetchedCepRef = useRef<string>("");
 
   const [formData, setFormData] = useState<FormData>({
     cep: "",
@@ -61,10 +66,10 @@ export function EntregaPageClient() {
   }, [router, cart, isCartLoaded]);
 
   // Carregar dados do endereço: usuário logado > localStorage > identificação
-  // O CEP do shipping context (carrinho/PDP) SEMPRE tem prioridade máxima
+  // O CEP do step de identificação deve prevalecer aqui (fonte mais recente).
   useEffect(() => {
     const loadData = async () => {
-      // Determinar o melhor CEP disponível (shipping context > identificação > salvo)
+      // Determinar o melhor CEP disponível (identificação > shipping context > salvo)
       let idCep = "";
       try {
         const idStr = localStorage.getItem("checkoutIdentificacao");
@@ -88,18 +93,49 @@ export function EntregaPageClient() {
             if (enderecoData && typeof enderecoData === "object" && enderecoData.cep) {
               const clienteCep = enderecoData.cep ? enderecoData.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : "";
               const shippingCep = shippingCepRef.current;
+              const finalCep = idCep || shippingCep || clienteCep;
+              const finalCepLimpo = finalCep.replace(/\D/g, "");
+              const clienteCepLimpo = clienteCep.replace(/\D/g, "");
+              const podeUsarEnderecoCliente =
+                finalCepLimpo.length === 8 &&
+                clienteCepLimpo.length === 8 &&
+                finalCepLimpo === clienteCepLimpo;
+
+              // Garantir sincronização do ShippingContext com o CEP final desta etapa.
+              if (finalCep && finalCep !== shippingCep) {
+                setFreightCepRef.current(finalCep);
+              }
+
               setFormData(prev => ({
                 ...prev,
-                // Prioridade: shipping context > identificação > cliente
-                cep: shippingCep || idCep || clienteCep,
-                rua: enderecoData.endereco || "",
-                numero: enderecoData.numero || "",
-                complemento: enderecoData.complemento || "",
-                bairro: enderecoData.bairro || "",
-                cidade: enderecoData.cidade || "",
-                estado: enderecoData.estado || "",
+                // Prioridade: identificação > shipping context > cliente
+                cep: finalCep,
+                // Evitar mostrar endereço antigo quando o CEP final não bate com o do cliente
+                rua: podeUsarEnderecoCliente ? enderecoData.endereco || "" : "",
+                numero: podeUsarEnderecoCliente ? enderecoData.numero || "" : "",
+                complemento: podeUsarEnderecoCliente ? enderecoData.complemento || "" : "",
+                bairro: podeUsarEnderecoCliente ? enderecoData.bairro || "" : "",
+                cidade: podeUsarEnderecoCliente ? enderecoData.cidade || "" : "",
+                estado: podeUsarEnderecoCliente ? enderecoData.estado || "" : "",
               }));
-              console.log(`📦 [ENTREGA] Dados carregados (cliente logado) — CEP final: ${shippingCep || idCep || clienteCep} (shipping: ${shippingCep}, id: ${idCep}, cliente: ${clienteCep})`);
+
+              // Se o CEP final não bater com o do cliente, preencher via ViaCEP já na entrada do step
+              // (evita ficar com rua vazia/antiga enquanto navega entre etapas).
+              if (finalCepLimpo.length === 8 && !podeUsarEnderecoCliente) {
+                viaCepFetchedCepRef.current = finalCepLimpo;
+                const viaCepEndereco = await buscarCepRef.current(finalCep);
+                if (viaCepEndereco) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    rua: viaCepEndereco.rua || prev.rua,
+                    bairro: viaCepEndereco.bairro || prev.bairro,
+                    cidade: viaCepEndereco.cidade || prev.cidade,
+                    estado: viaCepEndereco.estado || prev.estado,
+                  }));
+                }
+              }
+
+              console.log(`📦 [ENTREGA] Dados carregados (cliente logado) — CEP final: ${finalCep} (shipping: ${shippingCep}, id: ${idCep}, cliente: ${clienteCep})`);
               setIsLoading(false);
               return;
             }
@@ -117,12 +153,42 @@ export function EntregaPageClient() {
           const { selectedFreightIndex: _ignored, cep: savedCep, ...restData } = parsed;
           void _ignored;
           const shippingCep = shippingCepRef.current;
-          const finalCep = shippingCep || idCep || savedCep || "";
+          const finalCep = idCep || shippingCep || savedCep || "";
+          const finalCepLimpo = finalCep.replace(/\D/g, "");
+          const savedCepLimpo = String(savedCep || "").replace(/\D/g, "");
+          const podeReusarEnderecoSalvo =
+            finalCepLimpo.length === 8 &&
+            savedCepLimpo.length === 8 &&
+            finalCepLimpo === savedCepLimpo;
+
+          // Garantir sincronização do ShippingContext com o CEP final desta etapa.
+          if (finalCep && finalCep !== shippingCep) {
+            setFreightCepRef.current(finalCep);
+          }
+
           setFormData(prev => ({
             ...prev,
             ...restData,
             cep: finalCep,
+            // Se o CEP mudou, não carregar rua/bairro/cidade/estado antigos
+            ...(podeReusarEnderecoSalvo ? {} : { rua: "", bairro: "", cidade: "", estado: "" }),
           }));
+
+          // Se o CEP atual não bate com o salvo, preencher via ViaCEP agora
+          if (finalCepLimpo.length === 8 && !podeReusarEnderecoSalvo) {
+            viaCepFetchedCepRef.current = finalCepLimpo;
+            const viaCepEndereco = await buscarCepRef.current(finalCep);
+            if (viaCepEndereco) {
+              setFormData((prev) => ({
+                ...prev,
+                rua: viaCepEndereco.rua || prev.rua,
+                bairro: viaCepEndereco.bairro || prev.bairro,
+                cidade: viaCepEndereco.cidade || prev.cidade,
+                estado: viaCepEndereco.estado || prev.estado,
+              }));
+            }
+          }
+
           console.log(`📦 [ENTREGA] Dados carregados (localStorage) — CEP final: ${finalCep} (shipping: ${shippingCep}, id: ${idCep}, saved: ${savedCep})`);
         } catch {
           // Ignorar erro
@@ -130,9 +196,29 @@ export function EntregaPageClient() {
       } else {
         // Sem dados salvos, usar CEP do shipping ou identificação
         const shippingCep = shippingCepRef.current;
-        const finalCep = shippingCep || idCep || "";
+        const finalCep = idCep || shippingCep || "";
         if (finalCep) {
+          // Garantir sincronização do ShippingContext com o CEP final desta etapa.
+          if (finalCep !== shippingCep) {
+            setFreightCepRef.current(finalCep);
+          }
           setFormData(prev => ({ ...prev, cep: finalCep }));
+
+          const finalCepLimpo = finalCep.replace(/\D/g, "");
+          if (finalCepLimpo.length === 8) {
+            viaCepFetchedCepRef.current = finalCepLimpo;
+            const viaCepEndereco = await buscarCepRef.current(finalCep);
+            if (viaCepEndereco) {
+              setFormData((prev) => ({
+                ...prev,
+                rua: viaCepEndereco.rua || prev.rua,
+                bairro: viaCepEndereco.bairro || prev.bairro,
+                cidade: viaCepEndereco.cidade || prev.cidade,
+                estado: viaCepEndereco.estado || prev.estado,
+              }));
+            }
+          }
+
           console.log(`📦 [ENTREGA] Sem dados salvos — CEP final: ${finalCep} (shipping: ${shippingCep}, id: ${idCep})`);
         }
       }
@@ -188,7 +274,10 @@ export function EntregaPageClient() {
   useEffect(() => {
     const cepLimpo = formData.cep.replace(/\D/g, "");
     if (cepLimpo.length === 8) {
-      buscarCep(formData.cep);
+      if (viaCepFetchedCepRef.current !== cepLimpo) {
+        viaCepFetchedCepRef.current = cepLimpo;
+        buscarCep(formData.cep);
+      }
 
       // Calcular frete sempre que o CEP mudar (pode ser um CEP novo)
       const cepMudou = freight.cep.replace(/\D/g, "") !== cepLimpo;
