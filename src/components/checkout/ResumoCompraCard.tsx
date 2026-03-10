@@ -81,7 +81,7 @@ export function ResumoCompraCard({
   // ========== MODE: CART ==========
   if (mode === 'cart') {
     const isOutdated = isCartValid === false;
-    const canCheckout = freteCalculado && !isOutdated;
+    const canCheckout = !isOutdated;
 
     return (
       <div className={`flex flex-col bg-white ${
@@ -195,7 +195,7 @@ export function ResumoCompraCard({
             >
               <div className={`flex items-center justify-center ${isMobile ? 'px-4 py-[10px]' : 'py-3'}`}>
                 <span className="font-cera-pro font-medium text-white text-base">
-                  {!freteCalculado ? 'Calcule o frete' : isOutdated ? 'Atualize o carrinho' : 'Continuar'}
+                  {isOutdated ? 'Atualize o carrinho' : 'Continuar'}
                 </span>
               </div>
             </button>
@@ -354,7 +354,7 @@ export function ResumoCompraCard({
     );
 
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         {/* Mobile: expand/collapse (comportamento original) */}
         <div className="lg:hidden">
           <button

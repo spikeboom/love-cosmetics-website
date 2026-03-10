@@ -389,13 +389,13 @@ export function EntregaPageClient() {
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="entrega" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-2 lg:pt-[12px] pb-6 lg:pb-[32px]">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 lg:gap-[32px] w-full max-w-[684px]">
           <BotaoVoltar onClick={handleVoltar} />
 
-          <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
+          <div className="flex flex-col gap-2 lg:gap-[32px] pb-3 lg:py-[24px]">
             {/* Rua / Avenida */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Rua / Avenida *
               </label>
@@ -414,7 +414,7 @@ export function EntregaPageClient() {
             </div>
 
             {/* Numero */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Numero *
               </label>
@@ -449,7 +449,7 @@ export function EntregaPageClient() {
             </div>
 
             {/* Complemento */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Complemento (opcional)
               </label>
@@ -468,7 +468,7 @@ export function EntregaPageClient() {
             </div>
 
             {/* Opcoes de Frete (Frenet) */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Selecione a forma de envio
               </label>
@@ -497,7 +497,7 @@ export function EntregaPageClient() {
           {/* Botao Continuar */}
           <button
             type="submit"
-            className="w-full h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
+            className="w-full h-[56px] lg:h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
           >
             <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-white">
               Continuar

@@ -83,7 +83,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
       items: cartItemsForTracking,
       value: total,
       coupon: cupons?.map(getCupomCodigo).filter(Boolean).join(",") || undefined,
-      shipping: freightValue,
+      shipping: hasCalculated ? freightValue : undefined,
     });
     router.push("/figma/checkout");
   };
@@ -200,6 +200,7 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
                   placeholder="Digite seu CEP"
                   inputFontSize="large"
                   width="full"
+                  variant="cart"
                 />
               </div>
 

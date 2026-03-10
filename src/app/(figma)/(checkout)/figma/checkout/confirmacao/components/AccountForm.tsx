@@ -68,7 +68,7 @@ export function AccountForm({
           {/* Formulario */}
           <form onSubmit={onSubmit} className="flex flex-col gap-4 lg:gap-[16px]">
             {/* Campo de senha */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <div className="flex justify-between items-center">
                 <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                   {isLogin ? "Digite sua senha" : "Informe uma senha"}
@@ -93,7 +93,7 @@ export function AccountForm({
 
             {/* Confirmar senha (apenas para criar conta) */}
             {!isLogin && (
-              <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+              <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
                 <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                   Confirme sua senha
                 </label>

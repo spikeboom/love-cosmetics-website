@@ -91,8 +91,8 @@ export function PagamentoCartao({
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="pagamento" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
-        <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-2 lg:pt-[12px] pb-6 lg:pb-[32px]">
+        <div className="flex flex-col gap-2 lg:gap-[32px] w-full max-w-[684px]">
           <BotaoVoltar onClick={onVoltar} />
 
           <div className="flex flex-col gap-8">
@@ -118,7 +118,7 @@ export function PagamentoCartao({
             </div>
 
             {/* Numero do Cartao */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Numero do cartao
               </label>
@@ -140,7 +140,7 @@ export function PagamentoCartao({
             </div>
 
             {/* Nome no Cartao */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Nome no cartao
               </label>
@@ -161,7 +161,7 @@ export function PagamentoCartao({
             </div>
 
             {/* Validade */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Validade
               </label>
@@ -183,7 +183,7 @@ export function PagamentoCartao({
             </div>
 
             {/* CVV */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 CVV
               </label>
@@ -203,7 +203,7 @@ export function PagamentoCartao({
             </div>
 
             {/* Parcelas */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Selecione o numero de parcelas
               </label>

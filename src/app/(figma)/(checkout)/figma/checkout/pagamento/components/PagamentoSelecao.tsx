@@ -47,15 +47,15 @@ export function PagamentoSelecao({
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="pagamento" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
-        <div className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-2 lg:pt-[12px] pb-6 lg:pb-[32px]">
+        <div className="flex flex-col gap-2 lg:gap-[32px] w-full max-w-[684px]">
           <BotaoVoltar onClick={onVoltar} />
 
           <PagamentoResumo {...resumoProps} />
 
           {/* Secao de Pagamento */}
-          <div className="flex flex-col gap-6 py-6">
-            <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 pb-4">
+            <div className="flex flex-col gap-2">
               <h2 className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Pagamento
               </h2>

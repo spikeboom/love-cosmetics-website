@@ -90,9 +90,9 @@ export function IdentificacaoPageClient() {
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="identificacao" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
-          <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-2 lg:pt-[12px] pb-6 lg:pb-[32px]">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 lg:gap-[32px] w-full max-w-[684px]">
+          <div className="flex flex-col gap-4 lg:gap-[32px] py-3 lg:py-[24px]">
             {/* CPF */}
             <FormField
               label="Informe seu CPF *"
@@ -137,7 +137,7 @@ export function IdentificacaoPageClient() {
             />
 
             {/* CEP */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+            <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 CEP *
               </label>
@@ -190,7 +190,7 @@ export function IdentificacaoPageClient() {
           {/* Botao Continuar */}
           <button
             type="submit"
-            className="w-full h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
+            className="w-full h-[56px] lg:h-[60px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a2e24] transition-colors"
           >
             <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-white">
               Continuar
@@ -227,7 +227,7 @@ function FormField({
   disabled = false,
 }: FormFieldProps) {
   return (
-    <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+    <div className="flex flex-col gap-2 lg:gap-[16px] w-full">
       <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
         {label}
       </label>

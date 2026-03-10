@@ -43,7 +43,7 @@ export function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
 
   return (
     <div className="bg-[#f8f3ed] border-b border-[#ba7900] w-full">
-      <div className="flex items-center justify-center py-3 px-2 lg:py-[16px] lg:px-[16px]">
+      <div className="flex items-center justify-center py-2 px-2 lg:py-[16px] lg:px-[16px]">
         <div className="flex items-center gap-1 lg:gap-2">
           {steps.map((step, index) => {
             const isActive = index === currentIndex;

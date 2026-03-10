@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { RefreshIcon, SpinnerIcon, MailIcon, PhoneIcon, ClockIcon } from "./Icons";
+import { RefreshIcon, SpinnerIcon, MailIcon, PhoneIcon, ClockIcon, TrashIcon } from "./Icons";
 
 interface AbandonoItem {
   item_id: string;
@@ -84,6 +84,7 @@ export function AbandonosPanel() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const pageSize = 20;
 
   const fetchAbandonos = useCallback(async (isRefresh = false) => {
@@ -114,6 +115,23 @@ export function AbandonosPanel() {
   useEffect(() => {
     fetchAbandonos(false);
   }, [fetchAbandonos]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Remover este carrinho abandonado?")) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/admin/abandonos?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao remover");
+      setAbandonos((prev) => prev.filter((a) => a.id !== id));
+      setTotal((prev) => Math.max(prev - 1, 0));
+      if (expandedId === id) setExpandedId(null);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao remover abandono");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -195,13 +213,16 @@ export function AbandonosPanel() {
       ) : (
         <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] overflow-hidden">
           {/* Header da tabela - desktop */}
-          <div className="hidden lg:grid lg:grid-cols-[1fr_1fr_120px_100px_120px_100px] gap-4 px-6 py-3 bg-[#f8f3ed] border-b border-[#e5e5e5]">
-            <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Contato</span>
-            <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Itens</span>
-            <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Valor</span>
-            <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Etapa</span>
-            <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Quando</span>
-            <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Device</span>
+          <div className="hidden lg:flex items-center gap-2 px-6 py-3 bg-[#f8f3ed] border-b border-[#e5e5e5]">
+            <div className="grid grid-cols-[1fr_1fr_120px_100px_120px_100px] gap-4 flex-1">
+              <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Contato</span>
+              <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Itens</span>
+              <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Valor</span>
+              <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Etapa</span>
+              <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Quando</span>
+              <span className="font-cera-pro font-bold text-[12px] text-[#666666] uppercase tracking-wide">Device</span>
+            </div>
+            <div className="h-8 w-8" aria-hidden="true" />
           </div>
 
           {abandonos.map((ab) => {
@@ -211,10 +232,11 @@ export function AbandonosPanel() {
             return (
               <div key={ab.id} className="border-b border-[#f0f0f0] last:border-b-0">
                 {/* Row principal */}
-                <button
-                  onClick={() => setExpandedId(isExpanded ? null : ab.id)}
-                  className="w-full text-left px-4 lg:px-6 py-4 hover:bg-[#faf8f5] transition-colors"
-                >
+                <div className="flex w-full items-start lg:items-center gap-2 px-4 lg:px-6 py-4 hover:bg-[#faf8f5] transition-colors">
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : ab.id)}
+                    className="flex-1 text-left"
+                  >
                   {/* Mobile layout */}
                   <div className="lg:hidden space-y-2">
                     <div className="flex items-center justify-between">
@@ -298,7 +320,22 @@ export function AbandonosPanel() {
                       </span>
                     </div>
                   </div>
-                </button>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(ab.id)}
+                    disabled={deletingId === ab.id}
+                    aria-label="Apagar abandono"
+                    className="h-8 w-8 flex items-center justify-center rounded-md text-[#999999] hover:text-[#B3261E] hover:bg-white/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                  >
+                    {deletingId === ab.id ? (
+                      <SpinnerIcon className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <TrashIcon />
+                    )}
+                  </button>
+                </div>
 
                 {/* Detalhes expandidos */}
                 {isExpanded && (

@@ -22,6 +22,7 @@ interface ShippingCalculatorProps {
   inputFontSize?: 'small' | 'large';
   width?: 'full' | 'fixed';
   fallbackProduct?: FallbackProduct;
+  variant?: 'cart' | 'pdp';
 }
 
 export function ShippingCalculator({
@@ -31,6 +32,7 @@ export function ShippingCalculator({
   inputFontSize = 'large',
   width = 'full',
   fallbackProduct,
+  variant = 'pdp',
 }: ShippingCalculatorProps) {
   const { cart } = useCart();
   const {
@@ -46,6 +48,13 @@ export function ShippingCalculator({
     selectedServiceIndex,
     addressLabel,
   } = useShipping();
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(price);
+  };
 
   // Itens efetivos: carrinho, ou produto fallback (PDP) quando carrinho vazio
   const getEffectiveItems = () => {
@@ -119,11 +128,41 @@ export function ShippingCalculator({
   const handleClearCep = () => {
     setCep('');
     resetFreight();
+    try {
+      localStorage.removeItem("love_cosmetics_last_cep");
+      localStorage.removeItem("love_cosmetics_freight_data");
+    } catch {
+      // ignore
+    }
   };
 
   const selectedService = availableServices[selectedServiceIndex];
 
   const cleanCep = cep.replace(/\D/g, '');
+
+  // Carrinho: sempre selecionar a opção de menor valor (sem mostrar lista)
+  useEffect(() => {
+    if (variant !== "cart") return;
+    if (!hasCalculated) return;
+    if (error) return;
+    if (availableServices.length === 0) return;
+
+    const cheapestIndex = availableServices.reduce((minIndex, service, index) => {
+      if (service.price < availableServices[minIndex].price) return index;
+      return minIndex;
+    }, 0);
+
+    if (selectedServiceIndex === cheapestIndex) return;
+    const cheapest = availableServices[cheapestIndex];
+    setSelectedFreight(cheapest.price, cheapest.deliveryTime, cheapestIndex);
+  }, [
+    variant,
+    hasCalculated,
+    error,
+    availableServices,
+    selectedServiceIndex,
+    setSelectedFreight,
+  ]);
 
   return (
     <div className={`flex flex-col gap-[16px] items-start w-full ${width === 'fixed' ? 'md:w-[447px]' : ''}`}>
@@ -145,6 +184,24 @@ export function ShippingCalculator({
             inputFontSize === 'small' ? 'text-[14px]' : 'text-base md:text-[20px]'
           } text-black leading-[1.257] px-[8px] py-0 focus:outline-none bg-transparent min-w-0`}
         />
+
+        {(cep.length > 0 || hasCalculated) && (
+          <button
+            type="button"
+            onClick={handleClearCep}
+            aria-label="Limpar CEP"
+            className="h-[32px] w-[32px] flex items-center justify-center text-[#666666] hover:text-[#111111] flex-shrink-0 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        )}
 
         <button
           onClick={handleCalculate}
@@ -192,7 +249,7 @@ export function ShippingCalculator({
       )}
 
       {/* Opções de Frete Disponíveis */}
-      {hasCalculated && !error && availableServices.length > 0 && (
+      {variant !== "cart" && hasCalculated && !error && availableServices.length > 0 && (
         <div className="flex flex-col gap-[8px] items-start w-full">
           <p className="font-cera-pro font-medium text-[14px] text-[#111111] leading-[normal]">
             Selecione a forma de envio:
@@ -222,6 +279,24 @@ export function ShippingCalculator({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Carrinho: mostrar apenas o menor frete */}
+      {variant === "cart" && hasCalculated && !error && selectedService && (
+        <div className="mt-1 p-3 bg-[#F0F9F4] rounded-lg border border-[#009142] w-full">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/new-home/icons/verified-green.svg"
+              alt="Verificado"
+              width={16}
+              height={16}
+              className="w-4 h-4 flex-shrink-0"
+            />
+            <p className="font-cera-pro font-light text-[12px] text-[#009142] leading-[1.257]">
+              até {selectedService.deliveryTime} dia(s) úteis - {formatPrice(selectedService.price)}
+            </p>
+          </div>
         </div>
       )}
     </div>
