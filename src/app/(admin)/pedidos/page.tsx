@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Pedido } from "./components/types";
 import { PedidoCard } from "./components/PedidoCard";
+import { AbandonosPanel } from "./components/AbandonosPanel";
 import {
   PackageIcon,
   RefreshIcon,
@@ -12,7 +13,16 @@ import {
   SpinnerIcon,
 } from "./components/Icons";
 
+const ShoppingCartIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+  </svg>
+);
+
 export default function PedidosPage() {
+  const [activeTab, setActiveTab] = useState<"pedidos" | "abandonos">("pedidos");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -213,11 +223,41 @@ export default function PedidosPage() {
               </span>
             </Link>
           </div>
+
+          {/* Tabs */}
+          <div className="flex gap-1 mt-4">
+            <button
+              onClick={() => setActiveTab("pedidos")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
+                activeTab === "pedidos"
+                  ? "bg-[#f8f3ed] text-[#254333]"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <PackageIcon />
+              Pedidos
+            </button>
+            <button
+              onClick={() => setActiveTab("abandonos")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
+                activeTab === "abandonos"
+                  ? "bg-[#f8f3ed] text-[#254333]"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <ShoppingCartIcon />
+              Carrinhos Abandonados
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Conteudo */}
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-6">
+        {activeTab === "abandonos" ? (
+          <AbandonosPanel />
+        ) : (
+        <>
         {/* Barra de Acoes */}
         <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-4 lg:p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -360,6 +400,8 @@ export default function PedidosPage() {
             </button>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
