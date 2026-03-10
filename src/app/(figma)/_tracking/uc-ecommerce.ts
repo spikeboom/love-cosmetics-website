@@ -12,7 +12,13 @@ function getDataLayer(): DataLayer | null {
 function getCheckoutSessionId(): string | undefined {
   if (typeof window === "undefined") return undefined;
   try {
-    return sessionStorage.getItem("checkout_session_id") || undefined;
+    const existing = sessionStorage.getItem("checkout_session_id");
+    if (existing) return existing;
+
+    const uuid = (window as any)?.crypto?.randomUUID?.();
+    const sid = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    sessionStorage.setItem("checkout_session_id", sid);
+    return sid;
   } catch {
     return undefined;
   }
@@ -44,6 +50,8 @@ export type UCEcommerceItem = {
   item_category3?: string;
   item_variant?: string;
 };
+
+export type UCCheckoutStep = "identificacao" | "entrega" | "pagamento";
 
 type UCEcommercePayload = {
   currency?: string;
@@ -84,6 +92,12 @@ function pushEcommerceEvent(
     ...extra,
   });
 }
+
+const checkoutStepNumber: Record<UCCheckoutStep, number> = {
+  identificacao: 1,
+  entrega: 2,
+  pagamento: 3,
+};
 
 export function ucViewItemList(args: {
   items: UCEcommerceItem[];
@@ -217,6 +231,37 @@ export function ucUserDataUpdate(args: {
   });
 }
 
+export function ucCheckoutStep(args: { step: UCCheckoutStep }) {
+  const dl = getDataLayer();
+  if (!dl) return;
+
+  dl.push({
+    event: "checkout_step",
+    event_id: newEventId("checkout_step"),
+    checkout_session_id: getCheckoutSessionId(),
+    checkout_step: args.step,
+    checkout_step_number: checkoutStepNumber[args.step],
+    url_pagina: window.location.href,
+  });
+}
+
+export function ucViewSearchResults(args: {
+  searchTerm: string;
+  resultsCount?: number;
+}) {
+  const dl = getDataLayer();
+  if (!dl) return;
+
+  dl.push({
+    event: "view_search_results",
+    event_id: newEventId("view_search_results"),
+    checkout_session_id: getCheckoutSessionId(),
+    search_term: args.searchTerm,
+    search_results_count: safeNumber(args.resultsCount),
+    url_pagina: window.location.href,
+  });
+}
+
 export function ucShippingCalculate(args: {
   cep: string;
   cidade?: string;
@@ -245,6 +290,70 @@ export function ucShippingCalculate(args: {
     shipping_transportadora: args.transportadora,
     shipping_total_servicos: safeNumber(args.totalServicos),
   });
+}
+
+export function ucAddShippingInfo(args: {
+  items: UCEcommerceItem[];
+  currency?: string;
+  value?: number;
+  coupon?: string;
+  shipping?: number;
+  shippingTier?: string;
+  carrier?: string;
+  service?: string;
+  deliveryTime?: number;
+  serviceCode?: string;
+}) {
+  const computedValue = args.items.reduce((acc, it) => {
+    const qty = safeNumber(it.quantity) ?? 1;
+    const price = safeNumber(it.price) ?? 0;
+    return acc + qty * price;
+  }, 0);
+
+  pushEcommerceEvent(
+    "add_shipping_info",
+    {
+      currency: args.currency ?? "BRL",
+      value: safeNumber(args.value ?? computedValue),
+      coupon: args.coupon,
+      shipping: safeNumber(args.shipping),
+      items: args.items,
+    },
+    {
+      shipping_tier: args.shippingTier,
+      shipping_carrier: args.carrier,
+      shipping_service: args.service,
+      shipping_delivery_time: safeNumber(args.deliveryTime),
+      shipping_service_code: args.serviceCode,
+    }
+  );
+}
+
+export function ucAddPaymentInfo(args: {
+  items: UCEcommerceItem[];
+  paymentType: "pix" | "credit_card";
+  currency?: string;
+  value?: number;
+  coupon?: string;
+  shipping?: number;
+}) {
+  const computedValue = args.items.reduce((acc, it) => {
+    const qty = safeNumber(it.quantity) ?? 1;
+    const price = safeNumber(it.price) ?? 0;
+    return acc + qty * price;
+  }, 0);
+
+  pushEcommerceEvent(
+    "add_payment_info",
+    {
+      currency: args.currency ?? "BRL",
+      value: safeNumber(args.value ?? computedValue),
+      coupon: args.coupon,
+      shipping: safeNumber(args.shipping),
+      items: args.items,
+    },
+    { payment_type: args.paymentType }
+  );
 }
 
 export function ucPurchase(args: {

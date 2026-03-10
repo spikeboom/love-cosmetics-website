@@ -9,7 +9,7 @@ import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { useShipping, useCart } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 import { formatCEP } from "@/lib/formatters";
-import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
+import { ucAddShippingInfo, ucCheckoutStep, ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 
 interface FormData {
   cep: string;
@@ -36,6 +36,7 @@ export function EntregaPageClient() {
   const buscarCepRef = useRef(buscarCep);
   buscarCepRef.current = buscarCep;
   const viaCepFetchedCepRef = useRef<string>("");
+  const firedStepEventRef = useRef(false);
 
   const [formData, setFormData] = useState<FormData>({
     cep: "",
@@ -63,6 +64,11 @@ export function EntregaPageClient() {
       router.push("/figma/checkout/identificacao");
       return;
     }
+
+    if (!isCartLoaded) return;
+    if (firedStepEventRef.current) return;
+    firedStepEventRef.current = true;
+    ucCheckoutStep({ step: "entrega" });
   }, [router, cart, isCartLoaded]);
 
   // Carregar dados do endereço: usuário logado > localStorage > identificação
@@ -364,6 +370,46 @@ export function EntregaPageClient() {
         });
       } catch {
         // ignore
+      }
+
+      // Tracking: add_shipping_info (GA4) com frete selecionado
+      const cartItemsForTracking = Object.values(cart || {}).map((raw, index) => {
+        const p = raw as {
+          id?: unknown;
+          nome?: unknown;
+          preco?: unknown;
+          quantity?: unknown;
+        };
+
+        const quantity = typeof p.quantity === "number" ? p.quantity : Number(p.quantity ?? 1);
+        const price = typeof p.preco === "number" ? p.preco : Number(p.preco ?? 0);
+
+        return {
+          item_id: String(p.id ?? "unknown"),
+          item_name: String(p.nome ?? "Produto"),
+          price,
+          quantity,
+          index,
+        };
+      });
+
+      const computedValue = cartItemsForTracking.reduce(
+        (acc, it) => acc + (Number(it.price ?? 0) * Number(it.quantity ?? 1)),
+        0
+      );
+
+      const selectedService = freight.availableServices[formData.selectedFreightIndex];
+      if (cartItemsForTracking.length > 0 && selectedService) {
+        ucAddShippingInfo({
+          items: cartItemsForTracking,
+          value: computedValue,
+          shipping: selectedService.price,
+          shippingTier: `${selectedService.carrier} - ${selectedService.service}`,
+          carrier: selectedService.carrier,
+          service: selectedService.service,
+          deliveryTime: selectedService.deliveryTime,
+          serviceCode: selectedService.serviceCode,
+        });
       }
 
       router.push("/figma/checkout/pagamento");

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
-import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
+import { ucCheckoutStep, ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 import { useCart, useShipping } from "@/contexts";
 import { useViaCep } from "@/hooks/checkout";
 import { formatCEP } from "@/lib/formatters";
@@ -14,6 +14,7 @@ import Image from "next/image";
 export function IdentificacaoPageClient() {
   const router = useRouter();
   const { cart, isCartLoaded } = useCart();
+  const firedStepEventRef = useRef(false);
   const { cep: shippingCep, setCep: setShippingCep } = useShipping();
   const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
   const {
@@ -32,7 +33,12 @@ export function IdentificacaoPageClient() {
     if (!isCartLoaded) return;
     if (Object.keys(cart || {}).length === 0) {
       router.push("/figma/cart");
+      return;
     }
+
+    if (firedStepEventRef.current) return;
+    firedStepEventRef.current = true;
+    ucCheckoutStep({ step: "identificacao" });
   }, [cart, isCartLoaded, router]);
 
   // Manter o ShippingContext sincronizado com o CEP do checkout (bidirecional).

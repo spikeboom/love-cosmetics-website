@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Breadcrumbs } from "../components/Breadcrumbs";
 import { SearchFilters } from "../components/SearchFilters";
 import { ProductGrid } from "../components/ProductGrid";
 import { CertificadosSection } from "../components/CertificadosSection";
+import { ucViewSearchResults } from "@/app/(figma)/_tracking/uc-ecommerce";
 
 interface Produto {
   id: string;
@@ -47,6 +48,19 @@ const filterSectionsConfig = [
 
 export function SearchPageClient({ produtos, titulo, query }: SearchPageClientProps) {
   const [activeSort, setActiveSort] = useState("sort-relevancia");
+  const lastTrackedQueryRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const term = query?.trim();
+    if (!term) return;
+    if (lastTrackedQueryRef.current === term) return;
+    lastTrackedQueryRef.current = term;
+
+    ucViewSearchResults({
+      searchTerm: term,
+      resultsCount: produtos.length,
+    });
+  }, [query, produtos.length]);
 
   const handleFilterChange = (section: string, itemId: string) => {
     if (section === "Ordenar por") {

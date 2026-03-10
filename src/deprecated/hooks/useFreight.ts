@@ -146,9 +146,14 @@ export function useFreight(): UseFreightReturn {
       const result = await calculateFreightFrenet(cepValue, items);
 
       if (result.success) {
+        const cheapestIndex = result.services.reduce((minIndex, service, index) => {
+          const min = result.services[minIndex];
+          return service.price < min.price ? index : minIndex;
+        }, 0);
+
         // Tentar manter o serviço selecionado anteriormente se ainda existir
         const previousService = availableServices[selectedServiceIndex];
-        let newSelectedIndex = 0; // Padrão: mais barato
+        let newSelectedIndex = cheapestIndex; // Padrão: mais barato
 
         if (previousService) {
           // Procurar serviço equivalente (mesmo carrier e serviceCode)
@@ -215,6 +220,13 @@ export function useFreight(): UseFreightReturn {
           let sessionId: string | undefined;
           try {
             sessionId = sessionStorage.getItem("checkout_session_id") || undefined;
+            if (!sessionId) {
+              const sid: string =
+                (window as any)?.crypto?.randomUUID?.() ??
+                `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+              sessionId = sid;
+              sessionStorage.setItem("checkout_session_id", sid);
+            }
           } catch { /* ignore */ }
 
           // Dados pessoais do localStorage
@@ -235,7 +247,7 @@ export function useFreight(): UseFreightReturn {
 
           const w = typeof window !== "undefined" ? window.innerWidth : 1024;
           const device = w < 768 ? "mobile" : w < 1024 ? "tablet" : "desktop";
-          const menorFrete = result.services[0];
+          const menorFrete = result.services[cheapestIndex];
 
           const origemValue = typeof window !== "undefined" && window.location.pathname.includes("/checkout/entrega")
             ? "entrega"

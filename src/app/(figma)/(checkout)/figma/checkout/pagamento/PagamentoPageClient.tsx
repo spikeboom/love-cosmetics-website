@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { useCreateOrder } from "@/hooks/checkout";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
-import { ucPurchase } from "../../../../_tracking/uc-ecommerce";
+import { ucAddPaymentInfo, ucCheckoutStep, ucPurchase } from "../../../../_tracking/uc-ecommerce";
 import {
   TelaAtual,
   FormaPagamento,
@@ -25,6 +25,8 @@ export function PagamentoPageClient() {
   const { total, descontos, subtotalOriginal } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder, clearError } = useCreateOrder();
   const { syncToServer } = useCheckoutSync();
+  const firedStepEventRef = useRef(false);
+  const firedPaymentInfoRef = useRef<Set<string>>(new Set());
 
   // Track pagamento step on mount
   useEffect(() => {
@@ -95,6 +97,11 @@ export function PagamentoPageClient() {
       return;
     }
 
+    if (!firedStepEventRef.current) {
+      firedStepEventRef.current = true;
+      ucCheckoutStep({ step: "pagamento" });
+    }
+
     setCheckoutData({
       identificacao: JSON.parse(identificacao),
       entrega: JSON.parse(entrega),
@@ -112,6 +119,51 @@ export function PagamentoPageClient() {
   const descontosAcumulados = subtotalOriginal - (total - valorFrete);
   const freteGratis = valorFrete === 0;
   const valorTotal = total; // Usar direto do Context
+
+  // Tracking: add_payment_info (GA4) ao iniciar a tela de pagamento (PIX / cartão)
+  useEffect(() => {
+    if (!pedidoId) return;
+    if (telaAtual !== "pix" && telaAtual !== "cartao") return;
+
+    const key = `${pedidoId}:${telaAtual}`;
+    if (firedPaymentInfoRef.current.has(key)) return;
+    firedPaymentInfoRef.current.add(key);
+
+    const coupon =
+      cupons
+        ?.map((cupom) => {
+          if (!cupom || typeof cupom !== "object") return undefined;
+          const codigo = (cupom as unknown as Record<string, unknown>).codigo;
+          return typeof codigo === "string" ? codigo : undefined;
+        })
+        .filter(Boolean)
+        .join(",") || undefined;
+
+    const cartItemsForTracking = cartArray.map((raw, index: number) => {
+      const p = raw as {
+        id?: unknown;
+        nome?: unknown;
+        preco?: unknown;
+        quantity?: unknown;
+      };
+
+      return {
+        item_id: String(p.id ?? "unknown"),
+        item_name: String(p.nome ?? "Produto"),
+        price: typeof p.preco === "number" ? p.preco : Number(p.preco ?? 0),
+        quantity: typeof p.quantity === "number" ? p.quantity : Number(p.quantity ?? 1),
+        index,
+      };
+    });
+
+    ucAddPaymentInfo({
+      paymentType: telaAtual === "pix" ? "pix" : "credit_card",
+      items: cartItemsForTracking,
+      value: valorTotal,
+      shipping: valorFrete,
+      coupon,
+    });
+  }, [pedidoId, telaAtual, cartArray, cupons, valorFrete, valorTotal]);
 
   const enderecoCompleto = checkoutData.entrega
     ? `${checkoutData.entrega.rua}, ${
