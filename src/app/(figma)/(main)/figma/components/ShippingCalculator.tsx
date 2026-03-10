@@ -79,6 +79,7 @@ export function ShippingCalculator({
     if (cep && hasCalculated) {
       const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length === 8) {
+        console.log(`📦 [SHIPPING-CALC] Recalculando frete — cartFreightKey mudou, CEP: ${cleanCep}`);
         calculateFreight(cep, items, { silent: true });
       }
     }
@@ -96,6 +97,7 @@ export function ShippingCalculator({
 
     // Se CEP tiver 8 dígitos e ainda não calculou, calcular automaticamente (silencioso)
     if (cleanCep.length === 8 && !hasCalculated) {
+      console.log(`📦 [SHIPPING-CALC] Auto-calculando frete — CEP completo: ${cleanCep}, hasCalculated: false`);
       calculateFreight(cep, items, { silent: true });
     }
   }, [cep]);

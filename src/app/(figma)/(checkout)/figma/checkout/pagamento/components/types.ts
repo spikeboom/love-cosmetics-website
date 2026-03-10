@@ -5,10 +5,11 @@ export type TelaAtual = "selecao" | "pix" | "cartao";
 export interface CheckoutData {
   identificacao: {
     cpf: string;
-    dataNascimento: string;
+    dataNascimento?: string;
     nome: string;
     email: string;
     telefone: string;
+    cep?: string;
   } | null;
   entrega: {
     cep: string;
@@ -16,11 +17,9 @@ export interface CheckoutData {
     numero: string;
     semNumero: boolean;
     complemento: string;
-    informacoesAdicionais: string;
     bairro: string;
     cidade: string;
     estado: string;
-    tipoEntrega: "normal" | "expressa";
   } | null;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { BotaoVoltar } from "../pagamento/components/BotaoVoltar";
@@ -10,7 +10,6 @@ import { useShipping, useCart } from "@/contexts";
 import { FreightOptions } from "@/components/figma-shared";
 import { formatCEP } from "@/lib/formatters";
 import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
-import Image from "next/image";
 
 interface FormData {
   cep: string;
@@ -21,16 +20,17 @@ interface FormData {
   bairro: string;
   cidade: string;
   estado: string;
-  informacoesAdicionais: string;
   selectedFreightIndex: number;
 }
 
 export function EntregaPageClient() {
   const router = useRouter();
   const { cart, isCartLoaded } = useCart();
-  const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
+  const { buscarCep, endereco } = useViaCep();
   const { syncToServer } = useCheckoutSync();
   const freight = useShipping();
+  const shippingCepRef = useRef(freight.cep);
+  shippingCepRef.current = freight.cep;
 
   const [formData, setFormData] = useState<FormData>({
     cep: "",
@@ -41,13 +41,12 @@ export function EntregaPageClient() {
     bairro: "",
     cidade: "",
     estado: "",
-    informacoesAdicionais: "",
     selectedFreightIndex: 0,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  // Verificar se o usuario passou pela identificacao e se frete foi calculado
+  // Verificar se o usuario passou pela identificacao
   useEffect(() => {
     if (isCartLoaded && Object.keys(cart || {}).length === 0) {
       router.push("/figma/cart");
@@ -59,20 +58,22 @@ export function EntregaPageClient() {
       router.push("/figma/checkout/identificacao");
       return;
     }
+  }, [router, cart, isCartLoaded]);
 
-    // Verificar se frete foi calculado no carrinho
-    if (!freight.hasCalculated || freight.availableServices.length === 0) {
-      router.push("/figma/cart");
-      return;
-    }
-  }, [router, freight.hasCalculated, freight.availableServices.length, cart, isCartLoaded]);
-
-  // Carregar dados: primeiro do usuário logado, depois do localStorage
-  // O CEP do contexto de shipping (PDP/carrinho) tem prioridade
+  // Carregar dados do endereço: usuário logado > localStorage > identificação
+  // O CEP do shipping context (carrinho/PDP) SEMPRE tem prioridade máxima
   useEffect(() => {
-    const shippingCep = freight.cep;
-
     const loadData = async () => {
+      // Determinar o melhor CEP disponível (shipping context > identificação > salvo)
+      let idCep = "";
+      try {
+        const idStr = localStorage.getItem("checkoutIdentificacao");
+        if (idStr) {
+          const idData = JSON.parse(idStr);
+          idCep = idData.cep || "";
+        }
+      } catch { /* ignore */ }
+
       try {
         // Tentar buscar dados do usuário logado
         const response = await fetch("/api/cliente/auth/verificar", {
@@ -83,14 +84,14 @@ export function EntregaPageClient() {
           const data = await response.json();
           if (data.authenticated && data.cliente) {
             const cliente = data.cliente;
-            // Se cliente tem endereço salvo, usar
-            // A API retorna endereco como objeto: { cep, endereco, numero, ... }
             const enderecoData = cliente.endereco;
             if (enderecoData && typeof enderecoData === "object" && enderecoData.cep) {
+              const clienteCep = enderecoData.cep ? enderecoData.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : "";
+              const shippingCep = shippingCepRef.current;
               setFormData(prev => ({
                 ...prev,
-                // CEP do shipping context tem prioridade sobre o do cliente
-                cep: shippingCep || (enderecoData.cep ? enderecoData.cep.replace(/(\d{5})(\d{3})/, "$1-$2") : ""),
+                // Prioridade: shipping context > identificação > cliente
+                cep: shippingCep || idCep || clienteCep,
                 rua: enderecoData.endereco || "",
                 numero: enderecoData.numero || "",
                 complemento: enderecoData.complemento || "",
@@ -98,6 +99,7 @@ export function EntregaPageClient() {
                 cidade: enderecoData.cidade || "",
                 estado: enderecoData.estado || "",
               }));
+              console.log(`📦 [ENTREGA] Dados carregados (cliente logado) — CEP final: ${shippingCep || idCep || clienteCep} (shipping: ${shippingCep}, id: ${idCep}, cliente: ${clienteCep})`);
               setIsLoading(false);
               return;
             }
@@ -112,16 +114,26 @@ export function EntregaPageClient() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          // Nao sobrescrever selectedFreightIndex - esse vem do Context
           const { selectedFreightIndex: _ignored, cep: savedCep, ...restData } = parsed;
+          void _ignored;
+          const shippingCep = shippingCepRef.current;
+          const finalCep = shippingCep || idCep || savedCep || "";
           setFormData(prev => ({
             ...prev,
             ...restData,
-            // CEP do shipping context tem prioridade sobre o salvo
-            cep: shippingCep || savedCep || prev.cep,
+            cep: finalCep,
           }));
+          console.log(`📦 [ENTREGA] Dados carregados (localStorage) — CEP final: ${finalCep} (shipping: ${shippingCep}, id: ${idCep}, saved: ${savedCep})`);
         } catch {
           // Ignorar erro
+        }
+      } else {
+        // Sem dados salvos, usar CEP do shipping ou identificação
+        const shippingCep = shippingCepRef.current;
+        const finalCep = shippingCep || idCep || "";
+        if (finalCep) {
+          setFormData(prev => ({ ...prev, cep: finalCep }));
+          console.log(`📦 [ENTREGA] Sem dados salvos — CEP final: ${finalCep} (shipping: ${shippingCep}, id: ${idCep})`);
         }
       }
       setIsLoading(false);
@@ -130,14 +142,19 @@ export function EntregaPageClient() {
     loadData();
   }, []);
 
-  // Inicializar CEP do Context e endereço (tem prioridade sobre localStorage)
+  // Quando o shipping context atualizar o CEP (tem prioridade máxima SEMPRE)
   useEffect(() => {
     if (freight.cep) {
-      setFormData(prev => ({
-        ...prev,
-        cep: freight.cep,
-        ...(freight.hasCalculated ? { selectedFreightIndex: freight.selectedServiceIndex } : {}),
-      }));
+      setFormData(prev => {
+        if (prev.cep !== freight.cep) {
+          console.log(`📦 [ENTREGA] freight.cep mudou — de "${prev.cep}" para "${freight.cep}"`);
+        }
+        return {
+          ...prev,
+          cep: freight.cep,
+          ...(freight.hasCalculated ? { selectedFreightIndex: freight.selectedServiceIndex } : {}),
+        };
+      });
     }
   }, [freight.cep, freight.hasCalculated, freight.selectedServiceIndex]);
 
@@ -167,11 +184,24 @@ export function EntregaPageClient() {
     }
   };
 
-  // Auto-buscar CEP quando completar 8 dígitos
+  // Auto-buscar CEP e calcular frete quando completar 8 dígitos
   useEffect(() => {
     const cepLimpo = formData.cep.replace(/\D/g, "");
     if (cepLimpo.length === 8) {
       buscarCep(formData.cep);
+
+      // Calcular frete sempre que o CEP mudar (pode ser um CEP novo)
+      const cepMudou = freight.cep.replace(/\D/g, "") !== cepLimpo;
+      console.log(`📦 [ENTREGA] useEffect CEP — cep: ${cepLimpo}, freight.cep: ${freight.cep}, hasCalculated: ${freight.hasCalculated}, cepMudou: ${cepMudou}`);
+      if (!freight.hasCalculated || cepMudou) {
+        const cartItems = Object.values(cart);
+        if (cartItems.length > 0) {
+          console.log(`📦 [ENTREGA] Chamando calculateFreight — CEP: ${formData.cep}, itens: ${cartItems.length}`);
+          freight.calculateFreight(formData.cep, cartItems, { silent: true });
+        }
+      } else {
+        console.log(`⏭️ [ENTREGA] Pulando calculateFreight — CEP não mudou e já calculou`);
+      }
     }
   }, [formData.cep]);
 
@@ -270,61 +300,11 @@ export function EntregaPageClient() {
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="entrega" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           <BotaoVoltar onClick={handleVoltar} />
 
           <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
-            {/* CEP */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                CEP *
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.cep}
-                  onChange={(e) => handleChange("cep", e.target.value)}
-                  placeholder="00000-000"
-                  maxLength={9}
-                  className={`w-full h-[48px] px-4 bg-white border ${
-                    errors.cep || errorCep ? "border-red-500" : "border-[#d2d2d2]"
-                  } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
-                />
-                <a
-                  href="https://buscacepinter.correios.com.br/app/endereco/index.php"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 font-cera-pro font-light text-[14px] lg:text-[16px] text-[#254333] underline"
-                >
-                  Nao sei meu CEP
-                </a>
-              </div>
-              {loadingCep && (
-                <div className="w-full h-[3px] bg-[#E0E0E0] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#009142] rounded-full animate-shimmer" />
-                </div>
-              )}
-              {(errors.cep || errorCep) && (
-                <span className="text-red-500 text-sm">{errors.cep || errorCep}</span>
-              )}
-              {/* Cidade/Estado/Bairro resumido - mesmo estilo da PDP */}
-              {formData.cidade && formData.estado && (
-                <div className="flex items-start gap-[6px] w-full">
-                  <Image
-                    src="/new-home/icons/location.svg"
-                    alt="Localização"
-                    width={16}
-                    height={16}
-                    className="w-4 h-4 flex-shrink-0 mt-[1px]"
-                  />
-                  <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.4]">
-                    {formData.bairro && `${formData.bairro}, `}{formData.cidade} - {formData.estado}
-                  </p>
-                </div>
-              )}
-            </div>
-
             {/* Rua / Avenida */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
@@ -398,31 +378,30 @@ export function EntregaPageClient() {
               )}
             </div>
 
-            {/* Informacoes adicionais */}
-            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
-              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
-                Informacoes adicionais (opcional)
-              </label>
-              <textarea
-                value={formData.informacoesAdicionais}
-                onChange={(e) => handleChange("informacoesAdicionais", e.target.value)}
-                placeholder="Ponto de referencia, instrucoes para entrega..."
-                rows={3}
-                className="w-full min-h-[80px] px-4 py-3 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333] resize-none"
-              />
-            </div>
-
             {/* Opcoes de Frete (Frenet) */}
             <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
               <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
                 Selecione a forma de envio
               </label>
-              <FreightOptions
-                services={freight.availableServices}
-                selectedIndex={formData.selectedFreightIndex}
-                onSelect={handleSelectFreight}
-                radioName="freight-option-checkout"
-              />
+              {freight.isLoading ? (
+                <div className="flex items-center gap-2 py-4">
+                  <div className="w-5 h-5 border-2 border-[#254333] border-t-transparent rounded-full animate-spin" />
+                  <span className="font-cera-pro font-light text-[14px] text-[#666]">
+                    Calculando opções de frete...
+                  </span>
+                </div>
+              ) : freight.availableServices.length > 0 ? (
+                <FreightOptions
+                  services={freight.availableServices}
+                  selectedIndex={formData.selectedFreightIndex}
+                  onSelect={handleSelectFreight}
+                  radioName="freight-option-checkout"
+                />
+              ) : (
+                <p className="font-cera-pro font-light text-[14px] text-[#666] py-2">
+                  Nenhuma opção de frete disponível. Verifique o CEP informado.
+                </p>
+              )}
             </div>
           </div>
 

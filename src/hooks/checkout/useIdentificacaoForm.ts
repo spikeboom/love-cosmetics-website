@@ -1,35 +1,64 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { identificacaoSchema } from "@/lib/checkout/validation";
 import { validacoes } from "@/lib/checkout/validation";
-import { formatCPF, formatDateInput, formatTelefone } from "@/lib/formatters";
+import { formatCPF, formatTelefone, formatCEP } from "@/lib/formatters";
 
 export interface IdentificacaoFormData {
   cpf: string;
-  dataNascimento: string;
   nome: string;
   email: string;
   telefone: string;
+  cep: string;
 }
 
 const STORAGE_KEY = "checkoutIdentificacao";
 
-export function useIdentificacaoForm() {
+function safeString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+export function useIdentificacaoForm(overrideCep?: string) {
+  const normalizedOverrideCep = overrideCep ? formatCEP(overrideCep) : "";
+  const overrideCepRef = useRef<string>("");
+  overrideCepRef.current = normalizedOverrideCep;
+
+  const cepDirtyRef = useRef(false);
+
   const [formData, setFormData] = useState<IdentificacaoFormData>({
     cpf: "",
-    dataNascimento: "",
     nome: "",
     email: "",
     telefone: "",
+    cep: "",
   });
   const [errors, setErrors] = useState<Partial<IdentificacaoFormData>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Carregar dados: primeiro do usuario logado, depois do localStorage
+  // Prioridade de CEP: shipping context (override) > localStorage (checkoutIdentificacao) > cliente logado (API)
+  // Sem race conditions: o fetch async nao pode sobrescrever um CEP que chegou depois via shipping context.
   useEffect(() => {
+    let cancelled = false;
+
     const loadData = async () => {
+      // Ler localStorage antes do fetch (mesmo para logados), pois tem prioridade sobre o CEP do cliente logado.
+      let storageData: Partial<IdentificacaoFormData> | null = null;
+      let storageCep = "";
       try {
-        // Tentar buscar dados do usuario logado
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === "object") {
+            const parsedObj = parsed as Record<string, unknown>;
+            storageData = parsedObj as Partial<IdentificacaoFormData>;
+            storageCep = formatCEP(safeString(parsedObj.cep));
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      try {
         const response = await fetch("/api/cliente/auth/verificar", {
           credentials: "include",
         });
@@ -38,59 +67,99 @@ export function useIdentificacaoForm() {
           const data = await response.json();
           if (data.authenticated && data.cliente) {
             const cliente = data.cliente;
-            // Formatar data de nascimento se existir
-            let dataNascimentoFormatada = "";
-            if (cliente.dataNascimento) {
-              const date = new Date(cliente.dataNascimento);
-              dataNascimentoFormatada = `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
-            }
+            const enderecoData = cliente.endereco;
+            const clienteCep = enderecoData?.cep ? formatCEP(enderecoData.cep) : "";
 
-            setFormData({
-              cpf: cliente.cpf ? formatCPF(cliente.cpf) : "",
-              dataNascimento: dataNascimentoFormatada,
-              nome: `${cliente.nome || ""} ${cliente.sobrenome || ""}`.trim(),
-              email: cliente.email || "",
-              telefone: cliente.telefone ? formatTelefone(cliente.telefone) : "",
-            });
+            const finalCep = overrideCepRef.current || storageCep || clienteCep;
+
+            if (cancelled) return;
+
+            setFormData((prev) => ({
+              cpf: cliente.cpf ? formatCPF(cliente.cpf) : storageData?.cpf || prev.cpf || "",
+              nome:
+                `${cliente.nome || ""} ${cliente.sobrenome || ""}`.trim() ||
+                storageData?.nome ||
+                prev.nome ||
+                "",
+              email: cliente.email || storageData?.email || prev.email || "",
+              telefone: cliente.telefone
+                ? formatTelefone(cliente.telefone)
+                : storageData?.telefone || prev.telefone || "",
+              cep: finalCep || prev.cep || "",
+            }));
+
+            console.log(
+              `[ID-FORM] Dados carregados (cliente) - CEP final: ${finalCep || "N/A"} (override: ${
+                overrideCepRef.current || "N/A"
+              }, storage: ${storageCep || "N/A"}, cliente: ${clienteCep || "N/A"})`
+            );
+
             setIsLoggedIn(true);
             setIsLoading(false);
             return;
           }
         }
       } catch {
-        // Erro ao buscar usuario logado, continuar para localStorage
+        // ignore
       }
 
-      // Fallback: carregar do localStorage
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setFormData(parsed);
-        } catch {
-          // Ignorar erro de parse
-        }
+      if (cancelled) return;
+
+      if (storageData) {
+        const finalCep = overrideCepRef.current || storageCep;
+        setFormData({
+          cpf: storageData.cpf || "",
+          nome: storageData.nome || "",
+          email: storageData.email || "",
+          telefone: storageData.telefone || "",
+          cep: finalCep || "",
+        });
+
+        console.log(
+          `[ID-FORM] Dados carregados (localStorage) - CEP final: ${finalCep || "N/A"} (override: ${
+            overrideCepRef.current || "N/A"
+          }, storage: ${storageCep || "N/A"})`
+        );
+      } else if (overrideCepRef.current) {
+        setFormData((prev) => ({ ...prev, cep: overrideCepRef.current }));
+        console.log(`[ID-FORM] Sem dados salvos - CEP override: ${overrideCepRef.current}`);
       }
+
       setIsLoading(false);
     };
 
     loadData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Se o shipping context atualizar o CEP depois do carregamento, aplicar sem sobrescrever digitacao do usuario.
+  useEffect(() => {
+    if (!normalizedOverrideCep) return;
+    if (cepDirtyRef.current) return;
+
+    setFormData((prev) => {
+      if (prev.cep === normalizedOverrideCep) return prev;
+      return { ...prev, cep: normalizedOverrideCep };
+    });
+  }, [normalizedOverrideCep]);
 
   const handleChange = useCallback((field: keyof IdentificacaoFormData, value: string) => {
     let formattedValue = value;
 
     if (field === "cpf") {
       formattedValue = formatCPF(value);
-    } else if (field === "dataNascimento") {
-      formattedValue = formatDateInput(value);
+    } else if (field === "cep") {
+      formattedValue = formatCEP(value);
+      cepDirtyRef.current = true;
     } else if (field === "telefone") {
       formattedValue = formatTelefone(value);
     }
 
     setFormData((prev) => ({ ...prev, [field]: formattedValue }));
 
-    // Limpar erro ao digitar
     setErrors((prev) => {
       if (prev[field]) {
         return { ...prev, [field]: undefined };
@@ -112,7 +181,6 @@ export function useIdentificacaoForm() {
       return false;
     }
 
-    // Validacao adicional de CPF com checksum
     if (!validacoes.cpf(formData.cpf)) {
       setErrors({ cpf: "CPF invalido" });
       return false;

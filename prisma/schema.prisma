@@ -20,7 +20,7 @@ model Pedido {
   email                     String
   telefone                  String
   cpf                       String
-  data_nascimento           DateTime
+  data_nascimento           DateTime?
   pais                      String
   cep                       String
   endereco                  String
@@ -155,6 +155,45 @@ model CheckoutAbandonado {
   @@index([step])
 }
 
+model ConsultaCep {
+  id              String   @id @default(uuid())
+
+  cep             String
+  bairro          String?
+  cidade          String?
+  estado          String?
+
+  // Contexto: "carrinho", "pdp", "identificacao", "entrega"
+  origem          String?
+
+  // Sessão (mesmo ID do checkout abandonado)
+  sessionId       String?
+
+  // Dados pessoais (se disponíveis no momento da consulta)
+  email           String?
+  nome            String?
+  telefone        String?
+  cpf             String?
+  clienteId       String?  // Se logado
+
+  // Dados de frete retornados
+  freteMinimo     Float?   // Menor valor de frete retornado
+  prazoMinimo     Int?     // Menor prazo (dias) retornado
+  transportadora  String?  // Transportadora do menor frete
+  totalServicos   Int?     // Quantas opções retornaram
+
+  // Metadados
+  device          String?
+  userAgent       String?
+  ip              String?
+  createdAt       DateTime @default(now())
+
+  @@index([cep])
+  @@index([estado])
+  @@index([sessionId])
+  @@index([email])
+  @@index([createdAt])
+}
 
 model StatusPagamento {
   id   Int    @id @default(autoincrement())

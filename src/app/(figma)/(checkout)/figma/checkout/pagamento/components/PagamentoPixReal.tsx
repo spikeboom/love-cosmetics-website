@@ -234,7 +234,7 @@ export function PagamentoPixReal({
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="pagamento" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
         <div className="flex flex-col gap-8 w-full max-w-[684px]">
           <BotaoVoltar onClick={onVoltar} />
 

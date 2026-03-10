@@ -217,6 +217,36 @@ export function ucUserDataUpdate(args: {
   });
 }
 
+export function ucShippingCalculate(args: {
+  cep: string;
+  cidade?: string;
+  estado?: string;
+  bairro?: string;
+  origem?: string;
+  freteMinimo?: number;
+  prazoMinimo?: number;
+  transportadora?: string;
+  totalServicos?: number;
+}) {
+  const dl = getDataLayer();
+  if (!dl) return;
+
+  dl.push({
+    event: "shipping_calculate",
+    event_id: newEventId("shipping_calculate"),
+    checkout_session_id: getCheckoutSessionId(),
+    shipping_cep: args.cep,
+    shipping_cidade: args.cidade,
+    shipping_estado: args.estado,
+    shipping_bairro: args.bairro,
+    shipping_origem: args.origem,
+    shipping_frete_minimo: safeNumber(args.freteMinimo),
+    shipping_prazo_minimo: safeNumber(args.prazoMinimo),
+    shipping_transportadora: args.transportadora,
+    shipping_total_servicos: safeNumber(args.totalServicos),
+  });
+}
+
 export function ucPurchase(args: {
   transactionId: string;
   items: UCEcommerceItem[];

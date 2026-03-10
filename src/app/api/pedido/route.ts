@@ -50,7 +50,7 @@ const createPedidoSchema = z
     email: z.string().email().max(254),
     telefone: z.string().min(8).max(25).refine((v) => validacoes.telefone(v), "Telefone invalido"),
     cpf: z.string().min(11).max(25).refine((v) => validacoes.cpf(v), "CPF invalido"),
-    data_nascimento: dataNascimentoSchema,
+    data_nascimento: dataNascimentoSchema.optional().nullable(),
     pais: z.string().min(1).max(60),
 
     // Entrega

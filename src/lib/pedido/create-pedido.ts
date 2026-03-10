@@ -22,8 +22,9 @@ export async function createPedidoFromBody({
   };
   prismaClient?: any;
 }) {
-  const dataNascimento =
-    body.data_nascimento instanceof Date ? body.data_nascimento : new Date(body.data_nascimento);
+  const dataNascimento = body.data_nascimento
+    ? (body.data_nascimento instanceof Date ? body.data_nascimento : new Date(body.data_nascimento))
+    : null;
 
   const db = prismaClient ?? prisma;
 

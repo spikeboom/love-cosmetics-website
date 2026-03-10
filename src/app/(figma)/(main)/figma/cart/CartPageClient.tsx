@@ -195,8 +195,8 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
               {/* Frete */}
               <div className="w-full md:max-w-[447px]">
                 <ShippingCalculator
-                  title="Calcule o frete"
-                  buttonLabel="Calcular"
+                  title="Consultar prazo"
+                  buttonLabel="Consultar"
                   placeholder="Digite seu CEP"
                   inputFontSize="large"
                   width="full"

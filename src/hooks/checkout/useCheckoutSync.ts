@@ -8,7 +8,7 @@ interface CheckoutSyncData {
     email?: string;
     cpf?: string;
     telefone: string;
-    dataNascimento: string;
+    cep?: string;
   };
   entrega?: {
     cep: string;

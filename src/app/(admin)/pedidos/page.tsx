@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Pedido } from "./components/types";
 import { PedidoCard } from "./components/PedidoCard";
 import { AbandonosPanel } from "./components/AbandonosPanel";
+import { ConsultasCepPanel } from "./components/ConsultasCepPanel";
 import {
   PackageIcon,
   RefreshIcon,
@@ -21,8 +22,15 @@ const ShoppingCartIcon = () => (
   </svg>
 );
 
+const MapPinTabIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
 export default function PedidosPage() {
-  const [activeTab, setActiveTab] = useState<"pedidos" | "abandonos">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "abandonos" | "ceps">("pedidos");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -248,6 +256,17 @@ export default function PedidosPage() {
               <ShoppingCartIcon />
               Carrinhos Abandonados
             </button>
+            <button
+              onClick={() => setActiveTab("ceps")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
+                activeTab === "ceps"
+                  ? "bg-[#f8f3ed] text-[#254333]"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <MapPinTabIcon />
+              CEPs Consultados
+            </button>
           </div>
         </div>
       </div>
@@ -256,6 +275,8 @@ export default function PedidosPage() {
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-6">
         {activeTab === "abandonos" ? (
           <AbandonosPanel />
+        ) : activeTab === "ceps" ? (
+          <ConsultasCepPanel />
         ) : (
         <>
         {/* Barra de Acoes */}

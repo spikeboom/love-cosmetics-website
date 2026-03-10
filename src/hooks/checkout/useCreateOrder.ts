@@ -7,10 +7,11 @@ import { getTipoDesconto } from "@/utils/cart-calculations";
 
 interface IdentificacaoData {
   cpf: string;
-  dataNascimento: string;
+  dataNascimento?: string;
   nome: string;
   email: string;
   telefone: string;
+  cep?: string;
 }
 
 interface EntregaData {
@@ -22,8 +23,8 @@ interface EntregaData {
   bairro: string;
   cidade: string;
   estado: string;
-  informacoesAdicionais: string;
-  tipoEntrega: "normal" | "expressa";
+  informacoesAdicionais?: string;
+  tipoEntrega?: "normal" | "expressa";
 }
 
 interface CreateOrderResult {

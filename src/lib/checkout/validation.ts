@@ -70,10 +70,6 @@ export const identificacaoSchema = z.object({
     .string()
     .min(1, "CPF e obrigatorio")
     .refine((val) => validarCPF(val), "CPF invalido"),
-  dataNascimento: z
-    .string()
-    .min(1, "Data de nascimento e obrigatoria")
-    .refine((val) => validarDataNascimento(val), "Data de nascimento invalida"),
   nome: z
     .string()
     .min(3, "Nome deve ter pelo menos 3 caracteres")
@@ -83,6 +79,10 @@ export const identificacaoSchema = z.object({
     .string()
     .min(1, "Telefone e obrigatorio")
     .refine((val) => validarTelefone(val), "Telefone invalido"),
+  cep: z
+    .string()
+    .min(1, "CEP e obrigatorio")
+    .refine((val) => validarCEP(val), "CEP invalido"),
 });
 
 // Schema de Entrega
@@ -99,7 +99,7 @@ export const entregaSchema = z.object({
   cidade: z.string().min(2, "Cidade e obrigatoria"),
   estado: z.string().min(2, "Estado e obrigatorio"),
   informacoesAdicionais: z.string().optional(),
-  tipoEntrega: z.enum(["normal", "expressa"]),
+  tipoEntrega: z.enum(["normal", "expressa"]).optional(),
 });
 
 // Schema de Cartao

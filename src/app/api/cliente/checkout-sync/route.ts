@@ -6,7 +6,7 @@ interface CheckoutSyncBody {
   identificacao?: {
     nome: string;
     telefone: string;
-    dataNascimento: string;
+    dataNascimento?: string;
   };
   entrega?: {
     cep: string;

@@ -6,11 +6,16 @@ import { CheckoutStepper } from "../CheckoutStepper";
 import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
-import { useCart } from "@/contexts";
+import { useCart, useShipping } from "@/contexts";
+import { useViaCep } from "@/hooks/checkout";
+import { formatCEP } from "@/lib/formatters";
+import Image from "next/image";
 
 export function IdentificacaoPageClient() {
   const router = useRouter();
   const { cart, isCartLoaded } = useCart();
+  const { cep: shippingCep, setCep: setShippingCep } = useShipping();
+  const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
   const {
     formData,
     errors,
@@ -19,7 +24,7 @@ export function IdentificacaoPageClient() {
     handleChange,
     validateForm,
     saveToStorage,
-  } = useIdentificacaoForm();
+  } = useIdentificacaoForm(shippingCep || undefined);
   const { syncToServer } = useCheckoutSync();
 
   // Guard: prevent starting checkout with an empty cart.
@@ -29,6 +34,21 @@ export function IdentificacaoPageClient() {
       router.push("/figma/cart");
     }
   }, [cart, isCartLoaded, router]);
+
+  // Manter o ShippingContext sincronizado com o CEP do checkout (bidirecional).
+  useEffect(() => {
+    if (!formData.cep) return;
+    if (formData.cep === shippingCep) return;
+    setShippingCep(formData.cep);
+  }, [formData.cep, setShippingCep, shippingCep]);
+
+  // Auto-buscar CEP quando completar 8 dígitos
+  useEffect(() => {
+    const cepLimpo = formData.cep.replace(/\D/g, "");
+    if (cepLimpo.length === 8) {
+      buscarCep(formData.cep);
+    }
+  }, [formData.cep]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +86,7 @@ export function IdentificacaoPageClient() {
     <div className="bg-white flex flex-col w-full flex-1">
       <CheckoutStepper currentStep="identificacao" />
 
-      <div className="flex justify-center px-4 lg:px-[24px] pt-6 lg:pt-[24px] pb-8 lg:pb-[32px]">
+      <div className="flex justify-center px-4 lg:px-[24px] pt-3 lg:pt-[12px] pb-8 lg:pb-[32px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 lg:gap-[32px] w-full max-w-[684px]">
           <div className="flex flex-col gap-6 lg:gap-[32px] py-4 lg:py-[24px]">
             {/* CPF */}
@@ -81,20 +101,9 @@ export function IdentificacaoPageClient() {
               disabled={isLoggedIn && process.env.NODE_ENV !== "development"}
             />
 
-            {/* Data de nascimento */}
+            {/* Nome completo */}
             <FormField
-              label="Data de nascimento *"
-              field="dataNascimento"
-              value={formData.dataNascimento}
-              onChange={handleChange}
-              error={errors.dataNascimento}
-              placeholder="DD/MM/AAAA"
-              maxLength={10}
-            />
-
-            {/* Nome e sobrenome */}
-            <FormField
-              label="Nome e sobrenome *"
+              label="Nome completo *"
               field="nome"
               value={formData.nome}
               onChange={handleChange}
@@ -122,6 +131,56 @@ export function IdentificacaoPageClient() {
               placeholder="(00) 00000-0000"
               maxLength={15}
             />
+
+            {/* CEP */}
+            <div className="flex flex-col gap-3 lg:gap-[16px] w-full">
+              <label className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                CEP *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.cep}
+                  onChange={(e) => handleChange("cep", formatCEP(e.target.value))}
+                  placeholder="00000-000"
+                  maxLength={9}
+                  className={`w-full h-[48px] px-4 bg-white border ${
+                    errors.cep || errorCep ? "border-red-500" : "border-[#d2d2d2]"
+                  } rounded-[8px] font-cera-pro font-light text-[18px] lg:text-[20px] text-black placeholder:text-[#8c8c8c] focus:outline-none focus:border-[#254333]`}
+                />
+                <a
+                  href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 font-cera-pro font-light text-[14px] lg:text-[16px] text-[#254333] underline"
+                >
+                  Não sei meu CEP
+                </a>
+              </div>
+              {loadingCep && (
+                <div className="w-full h-[3px] bg-[#E0E0E0] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#009142] rounded-full animate-shimmer" />
+                </div>
+              )}
+              {(errors.cep || errorCep) && (
+                <span className="text-red-500 text-sm">{errors.cep || errorCep}</span>
+              )}
+              {/* Bairro, Cidade/UF resumido */}
+              {endereco && endereco.cidade && endereco.estado && (
+                <div className="flex items-start gap-[6px] w-full">
+                  <Image
+                    src="/new-home/icons/location.svg"
+                    alt="Localização"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4 flex-shrink-0 mt-[1px]"
+                  />
+                  <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.4]">
+                    {endereco.bairro && `${endereco.bairro}, `}{endereco.cidade} - {endereco.estado}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Botao Continuar */}
