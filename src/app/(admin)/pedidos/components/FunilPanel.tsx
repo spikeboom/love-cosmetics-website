@@ -1,0 +1,266 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { RefreshIcon, SpinnerIcon } from "./Icons";
+
+interface FunnelStep {
+  key: string;
+  label: string;
+  count: number;
+}
+
+interface FunnelData {
+  steps: FunnelStep[];
+  totalSessions: number;
+  days: number;
+}
+
+const STEP_COLORS = [
+  "#254333",
+  "#2b4e3d",
+  "#315947",
+  "#376451",
+  "#3d6f5b",
+  "#437a65",
+  "#498f73",
+  "#4fa481",
+  "#55b88b",
+  "#5fc898",
+  "#69d8a5",
+  "#009142",
+];
+
+export function FunilPanel() {
+  const [data, setData] = useState<FunnelData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [days, setDays] = useState(30);
+
+  const fetchFunnel = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/funil?days=${days}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Erro ao buscar funil");
+      }
+      const json = await res.json();
+      setData(json);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFunnel();
+  }, [days]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <SpinnerIcon className="h-8 w-8 text-[#254333]" />
+        <span className="ml-3 font-cera-pro font-light text-[14px] text-[#666666]">
+          Consultando BigQuery...
+        </span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6">
+        <div className="flex gap-[8px] items-center bg-red-50 rounded-lg p-3 mb-4">
+          <p className="font-cera-pro font-light text-[14px] text-[#B3261E]">{error}</p>
+        </div>
+        <button
+          onClick={fetchFunnel}
+          className="flex items-center gap-2 px-4 py-2 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] transition-colors"
+        >
+          <RefreshIcon />
+          <span className="font-cera-pro font-medium text-[14px] text-white">Tentar Novamente</span>
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { steps, totalSessions } = data;
+  const maxCount = steps[0]?.count || 1;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-4 lg:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#D8F9E7] rounded-full flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#254333" strokeWidth="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                Funil de Conversão
+              </p>
+              <p className="font-cera-pro font-light text-[12px] text-[#666666]">
+                {totalSessions.toLocaleString("pt-BR")} sessões nos últimos {days} dias
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex rounded-[8px] overflow-hidden border border-[#d2d2d2]">
+              {[7, 14, 30, 60].map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDays(d)}
+                  className={`px-4 py-2 font-cera-pro font-medium text-[14px] transition-colors ${
+                    days === d
+                      ? "bg-[#254333] text-white"
+                      : "bg-white text-[#333333] hover:bg-[#f8f3ed]"
+                  }`}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={fetchFunnel}
+              className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] rounded-[8px] transition-colors"
+            >
+              <RefreshIcon />
+              <span className="font-cera-pro font-medium text-[14px] text-[#254333]">Atualizar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Funnel Chart */}
+      <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6 lg:p-8">
+        <div className="space-y-3">
+          {steps.map((step, i) => {
+            const widthPct = maxCount > 0 ? Math.max((step.count / maxCount) * 100, 4) : 4;
+            const prevCount = i > 0 ? steps[i - 1].count : step.count;
+            const dropRate = prevCount > 0 ? ((prevCount - step.count) / prevCount) * 100 : 0;
+            const conversionFromFirst = steps[0].count > 0 ? (step.count / steps[0].count) * 100 : 0;
+
+            return (
+              <div key={step.key} className="group">
+                <div className="flex items-center gap-4">
+                  {/* Step number */}
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white font-cera-pro font-bold text-[12px]"
+                    style={{ backgroundColor: STEP_COLORS[i] || STEP_COLORS[0] }}
+                  >
+                    {i + 1}
+                  </div>
+
+                  {/* Label */}
+                  <div className="w-[180px] flex-shrink-0">
+                    <p className="font-cera-pro font-medium text-[14px] text-[#333333] truncate">
+                      {step.label}
+                    </p>
+                  </div>
+
+                  {/* Bar */}
+                  <div className="flex-1 h-10 bg-[#f0f0f0] rounded-[6px] overflow-hidden relative">
+                    <div
+                      className="h-full rounded-[6px] transition-all duration-700 ease-out flex items-center px-3"
+                      style={{
+                        width: `${widthPct}%`,
+                        backgroundColor: STEP_COLORS[i] || STEP_COLORS[0],
+                      }}
+                    >
+                      <span className="font-cera-pro font-bold text-[13px] text-white whitespace-nowrap">
+                        {step.count.toLocaleString("pt-BR")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="w-[120px] flex-shrink-0 text-right">
+                    <p className="font-cera-pro font-medium text-[13px] text-[#333333]">
+                      {conversionFromFirst.toFixed(1)}%
+                    </p>
+                    {i > 0 && dropRate > 0 && (
+                      <p className="font-cera-pro font-light text-[11px] text-[#B3261E]">
+                        -{dropRate.toFixed(1)}% drop
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Drop arrow between steps */}
+                {i < steps.length - 1 && (
+                  <div className="flex items-center gap-4 py-0.5">
+                    <div className="w-7 flex justify-center">
+                      <svg width="8" height="12" viewBox="0 0 8 12" fill="none">
+                        <path d="M4 0v10M1 7l3 3 3-3" stroke="#ccc" strokeWidth="1.5" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Summary */}
+        <div className="mt-8 pt-6 border-t border-[#e5e5e5]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <SummaryCard
+              label="Taxa de Conversão"
+              value={`${steps[0].count > 0 ? ((steps[steps.length - 1].count / steps[0].count) * 100).toFixed(2) : 0}%`}
+              subtitle="Página → Compra"
+              color="#009142"
+            />
+            <SummaryCard
+              label="Carrinho → Compra"
+              value={`${steps[4]?.count > 0 ? ((steps[steps.length - 1].count / steps[4].count) * 100).toFixed(1) : 0}%`}
+              subtitle="Conversão do carrinho"
+              color="#254333"
+            />
+            <SummaryCard
+              label="Checkout → Compra"
+              value={`${steps[5]?.count > 0 ? ((steps[steps.length - 1].count / steps[5].count) * 100).toFixed(1) : 0}%`}
+              subtitle="Conversão do checkout"
+              color="#254333"
+            />
+            <SummaryCard
+              label="Total de Compras"
+              value={steps[steps.length - 1].count.toLocaleString("pt-BR")}
+              subtitle={`Em ${days} dias`}
+              color="#009142"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  subtitle,
+  color,
+}: {
+  label: string;
+  value: string;
+  subtitle: string;
+  color: string;
+}) {
+  return (
+    <div className="bg-[#f8f3ed] rounded-[12px] p-4">
+      <p className="font-cera-pro font-light text-[12px] text-[#666666]">{label}</p>
+      <p className="font-cera-pro font-bold text-[24px] mt-1" style={{ color }}>
+        {value}
+      </p>
+      <p className="font-cera-pro font-light text-[11px] text-[#999999] mt-0.5">{subtitle}</p>
+    </div>
+  );
+}

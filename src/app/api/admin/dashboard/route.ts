@@ -77,6 +77,14 @@ export async function GET(req: NextRequest) {
 
     if (statusPagamento !== "todos") {
       conditions.push(`p.status_pagamento = '${statusPagamento}'`);
+    } else {
+      // Por padrão, considerar apenas pedidos efetivamente pagos:
+      // 1) PagBank confirmou (PAID/AUTHORIZED), OU
+      // 2) status_entrega foi alterado de AGUARDANDO_PAGAMENTO (pagamento manual/imputado)
+      conditions.push(`(
+        p.status_pagamento IN ('PAID', 'AUTHORIZED')
+        OR p.status_entrega <> 'AGUARDANDO_PAGAMENTO'
+      )`);
     }
 
     if (origem !== "todos") {

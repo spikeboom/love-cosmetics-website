@@ -6,6 +6,7 @@ import { Pedido } from "./components/types";
 import { PedidoCard } from "./components/PedidoCard";
 import { AbandonosPanel } from "./components/AbandonosPanel";
 import { ConsultasCepPanel } from "./components/ConsultasCepPanel";
+import { FunilPanel } from "./components/FunilPanel";
 import {
   PackageIcon,
   RefreshIcon,
@@ -30,7 +31,7 @@ const MapPinTabIcon = () => (
 );
 
 export default function PedidosPage() {
-  const [activeTab, setActiveTab] = useState<"pedidos" | "abandonos" | "ceps">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "abandonos" | "ceps" | "funil">("pedidos");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -267,6 +268,19 @@ export default function PedidosPage() {
               <MapPinTabIcon />
               CEPs Consultados
             </button>
+            <button
+              onClick={() => setActiveTab("funil")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
+                activeTab === "funil"
+                  ? "bg-[#f8f3ed] text-[#254333]"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+              Funil
+            </button>
           </div>
         </div>
       </div>
@@ -277,6 +291,8 @@ export default function PedidosPage() {
           <AbandonosPanel />
         ) : activeTab === "ceps" ? (
           <ConsultasCepPanel />
+        ) : activeTab === "funil" ? (
+          <FunilPanel />
         ) : (
         <>
         {/* Barra de Acoes */}
