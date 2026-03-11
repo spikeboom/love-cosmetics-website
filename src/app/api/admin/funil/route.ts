@@ -11,10 +11,24 @@ function getBigQueryClient(): BigQuery {
   });
 }
 
+const CHANNEL_FILTERS: Record<string, string> = {
+  all: "",
+  paid_social: `AND session_source IN ('ig', 'facebook', 'fb', 'instagram', 'meta')
+    AND session_medium IN ('paid', 'cpc', 'ppc', 'paidsocial')`,
+  organic_social: `AND session_source IN ('ig', 'facebook', 'fb', 'instagram', 'l.instagram.com', 'm.facebook.com', 'l.facebook.com', 'facebook.com', 'instagram.com')
+    AND session_medium IN ('organic', 'social', 'referral')`,
+  organic_search: `AND session_medium = 'organic'
+    AND session_source IN ('google', 'bing', 'yahoo', 'duckduckgo')`,
+  direct: `AND (session_source IS NULL OR session_source = '(direct)')
+    AND (session_medium IS NULL OR session_medium = '(none)')`,
+};
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const days = Math.min(Number(searchParams.get("days") || 30), 90);
+  const channel = searchParams.get("channel") || "all";
   const dataset = process.env.BQ_DATASET_ID || "analytics_468537898";
+  const channelFilter = CHANNEL_FILTERS[channel] || "";
 
   try {
     const bq = getBigQueryClient();
@@ -26,25 +40,46 @@ export async function GET(req: NextRequest) {
           FORMAT_DATE('%Y%m%d', CURRENT_DATE()) AS end_date
       ),
 
-      sessions AS (
+      raw_events AS (
         SELECT
           CONCAT(user_pseudo_id, '.', CAST(
             (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS STRING
           )) AS session_id,
           event_name,
-          (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_step') AS checkout_step_name
+          (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_step') AS checkout_step_name,
+          collected_traffic_source.manual_source AS traffic_source,
+          collected_traffic_source.manual_medium AS traffic_medium
         FROM \`${dataset}.events_*\`, date_range
         WHERE _TABLE_SUFFIX BETWEEN date_range.start_date AND date_range.end_date
       ),
 
-      session_events AS (
+      session_traffic AS (
         SELECT
           session_id,
-          ARRAY_AGG(DISTINCT event_name) AS events,
-          ARRAY_AGG(DISTINCT checkout_step_name IGNORE NULLS) AS checkout_steps
-        FROM sessions
+          ARRAY_AGG(traffic_source IGNORE NULLS ORDER BY traffic_source LIMIT 1)[SAFE_OFFSET(0)] AS session_source,
+          ARRAY_AGG(traffic_medium IGNORE NULLS ORDER BY traffic_medium LIMIT 1)[SAFE_OFFSET(0)] AS session_medium
+        FROM raw_events
         WHERE session_id IS NOT NULL
         GROUP BY session_id
+      ),
+
+      session_events AS (
+        SELECT
+          r.session_id,
+          ARRAY_AGG(DISTINCT r.event_name) AS events,
+          ARRAY_AGG(DISTINCT r.checkout_step_name IGNORE NULLS) AS checkout_steps,
+          t.session_source,
+          t.session_medium
+        FROM raw_events r
+        JOIN session_traffic t ON r.session_id = t.session_id
+        GROUP BY r.session_id, t.session_source, t.session_medium
+      ),
+
+      filtered_sessions AS (
+        SELECT *
+        FROM session_events
+        WHERE 1=1
+        ${channelFilter}
       ),
 
       funnel AS (
@@ -62,7 +97,7 @@ export async function GET(req: NextRequest) {
           COUNTIF('pagamento' IN UNNEST(checkout_steps)) AS step_pagamento,
           COUNTIF('add_payment_info' IN UNNEST(events)) AS add_payment_info,
           COUNTIF('purchase' IN UNNEST(events)) AS purchase,
-        FROM session_events
+        FROM filtered_sessions
       )
 
       SELECT * FROM funnel
@@ -92,7 +127,7 @@ export async function GET(req: NextRequest) {
 
     const totalSessions = Number(data.total_sessions || 0);
 
-    return NextResponse.json({ steps, totalSessions, days });
+    return NextResponse.json({ steps, totalSessions, days, channel });
   } catch (err: unknown) {
     console.error("Funil API error:", err);
     const message = err instanceof Error ? err.message : "Erro desconhecido";

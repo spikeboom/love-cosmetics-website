@@ -35,12 +35,13 @@ export function FunilPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [days, setDays] = useState(30);
+  const [channel, setChannel] = useState("all");
 
   const fetchFunnel = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/funil?days=${days}`);
+      const res = await fetch(`/api/admin/funil?days=${days}&channel=${channel}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "Erro ao buscar funil");
@@ -56,7 +57,7 @@ export function FunilPanel() {
 
   useEffect(() => {
     fetchFunnel();
-  }, [days]);
+  }, [days, channel]);
 
   if (loading) {
     return (
@@ -108,11 +109,28 @@ export function FunilPanel() {
               </p>
               <p className="font-cera-pro font-light text-[12px] text-[#666666]">
                 {totalSessions.toLocaleString("pt-BR")} sessões nos últimos {days} dias
+                {channel !== "all" && (
+                  <span className="ml-1 px-2 py-0.5 bg-[#D8F9E7] rounded text-[11px] text-[#254333] font-medium">
+                    {({ paid_social: "Paid Social", organic_social: "Social Orgânico", organic_search: "Busca Orgânica", direct: "Direto" } as Record<string, string>)[channel]}
+                  </span>
+                )}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              className="px-4 py-2 border border-[#d2d2d2] rounded-[8px] font-cera-pro font-medium text-[14px] text-[#333333] bg-white hover:bg-[#f8f3ed] transition-colors cursor-pointer"
+            >
+              <option value="all">Todos os canais</option>
+              <option value="paid_social">Paid Social</option>
+              <option value="organic_social">Social Orgânico</option>
+              <option value="organic_search">Busca Orgânica</option>
+              <option value="direct">Direto</option>
+            </select>
+
             <div className="flex rounded-[8px] overflow-hidden border border-[#d2d2d2]">
               {[7, 14, 30, 60].map((d) => (
                 <button
