@@ -40,6 +40,24 @@ const TEST_EMAIL_FILTER = `NOT (
   LOWER(p.email) LIKE '%+%test%'
 )`;
 
+const EFFECTIVE_PAID_FILTER = `(
+  p.status_pagamento IN ('PAID', 'AUTHORIZED')
+  OR p.status_entrega <> 'AGUARDANDO_PAGAMENTO'
+  OR EXISTS (
+    SELECT 1
+    FROM "StatusPagamento" sp
+    WHERE sp.info->>'reference_id' = p.id
+      AND (
+        sp.info->>'status' IN ('PAID', 'AUTHORIZED')
+        OR EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(COALESCE(sp.info->'charges', '[]'::jsonb)) AS charge
+          WHERE charge->>'status' IN ('PAID', 'AUTHORIZED')
+        )
+      )
+  )
+)`;
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -76,15 +94,31 @@ export async function GET(req: NextRequest) {
     }
 
     if (statusPagamento !== "todos") {
-      conditions.push(`p.status_pagamento = '${statusPagamento}'`);
+      if (statusPagamento === "PAID" || statusPagamento === "AUTHORIZED") {
+        conditions.push(`(
+          p.status_pagamento = '${statusPagamento}'
+          OR EXISTS (
+            SELECT 1
+            FROM "StatusPagamento" sp
+            WHERE sp.info->>'reference_id' = p.id
+              AND (
+                sp.info->>'status' = '${statusPagamento}'
+                OR EXISTS (
+                  SELECT 1
+                  FROM jsonb_array_elements(COALESCE(sp.info->'charges', '[]'::jsonb)) AS charge
+                  WHERE charge->>'status' = '${statusPagamento}'
+                )
+              )
+          )
+        )`);
+      } else {
+        conditions.push(`p.status_pagamento = '${statusPagamento}'`);
+      }
     } else {
       // Por padrão, considerar apenas pedidos efetivamente pagos:
       // 1) PagBank confirmou (PAID/AUTHORIZED), OU
       // 2) status_entrega foi alterado de AGUARDANDO_PAGAMENTO (pagamento manual/imputado)
-      conditions.push(`(
-        p.status_pagamento IN ('PAID', 'AUTHORIZED')
-        OR p.status_entrega <> 'AGUARDANDO_PAGAMENTO'
-      )`);
+      conditions.push(EFFECTIVE_PAID_FILTER);
     }
 
     if (origem !== "todos") {

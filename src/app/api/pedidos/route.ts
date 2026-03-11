@@ -37,14 +37,20 @@ export async function GET(req: NextRequest) {
     // Filtro para pedidos efetivados (pagos)
     if (apenasEfetivados) {
       whereConditions.push(`(
-        p.status_pagamento = 'PAID' OR
+        p.status_pagamento IN ('PAID', 'AUTHORIZED') OR
+        p.status_entrega <> 'AGUARDANDO_PAGAMENTO' OR
         EXISTS (
-          SELECT 1 FROM "StatusPagamento" sp
+          SELECT 1
+          FROM "StatusPagamento" sp
           WHERE sp.info->>'reference_id' = p.id
-          AND EXISTS (
-            SELECT 1 FROM jsonb_array_elements(sp.info->'charges') AS charge
-            WHERE charge->>'status' = 'PAID'
-          )
+            AND (
+              sp.info->>'status' IN ('PAID', 'AUTHORIZED') OR
+              EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(COALESCE(sp.info->'charges', '[]'::jsonb)) AS charge
+                WHERE charge->>'status' IN ('PAID', 'AUTHORIZED')
+              )
+            )
         )
       )`);
     }
@@ -64,21 +70,23 @@ export async function GET(req: NextRequest) {
               'status', CASE
                           -- Webhook de /charges: status direto no body (sp.info->>'status')
                           WHEN sp.info->>'status' = 'PAID' THEN 'Pagamento Completo'
-                          WHEN sp.info->>'status' IN ('AUTHORIZED', 'IN_ANALYSIS') THEN 'Pagamento Parcial'
+                          WHEN sp.info->>'status' = 'AUTHORIZED' THEN 'Pagamento Completo'
+                          WHEN sp.info->>'status' = 'IN_ANALYSIS' THEN 'Pagamento Parcial'
                           WHEN sp.info->>'status' IS NOT NULL AND sp.info->>'status' NOT IN ('PAID', 'AUTHORIZED', 'IN_ANALYSIS') THEN 'Falha no Pagamento'
                           -- Webhook de /orders: status dentro do array charges[]
-                          WHEN agg.total_charges > 0 AND agg.total_charges = agg.total_paid THEN 'Pagamento Completo'
-                          WHEN agg.total_charges > 0 AND agg.total_paid > 0 THEN 'Pagamento Parcial'
+                          WHEN agg.total_charges > 0 AND agg.total_charges = agg.total_paid_or_authorized THEN 'Pagamento Completo'
+                          WHEN agg.total_charges > 0 AND agg.total_paid_or_authorized > 0 THEN 'Pagamento Parcial'
                           WHEN agg.total_charges > 0 THEN 'Falha no Pagamento'
                           ELSE 'Status Desconhecido'
                         END
             )
+            ORDER BY sp.id DESC
           )
           FROM "StatusPagamento" sp
           LEFT JOIN LATERAL (
             SELECT
               COUNT(*) AS total_charges,
-              SUM(CASE WHEN charge->>'status' = 'PAID' THEN 1 ELSE 0 END) AS total_paid
+              SUM(CASE WHEN charge->>'status' IN ('PAID', 'AUTHORIZED') THEN 1 ELSE 0 END) AS total_paid_or_authorized
             FROM (
               SELECT jsonb_array_elements(COALESCE(sp.info->'charges', '[]'::jsonb)) AS charge
             ) sub

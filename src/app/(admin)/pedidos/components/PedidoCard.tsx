@@ -624,7 +624,11 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                       <ClockIcon />
                       Historico de Alteracoes
                     </h4>
-                    <HistoricoStatusEntrega pedidoId={pedido.id} refreshKey={historicoRefreshKey} />
+                    <HistoricoStatusEntrega
+                      pedidoId={pedido.id}
+                      refreshKey={historicoRefreshKey}
+                      onDeleted={onStatusChange}
+                    />
                   </div>
                 </div>
               </div>

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { STATUS_ENTREGA, USUARIOS_PERMITIDOS } from "@/app/(admin)/pedidos/constants/statusEntrega";
 
-// GET - Buscar histórico de status de um pedido
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -12,7 +11,7 @@ export async function GET(
 
     const historico = await prisma.historicoStatusEntrega.findMany({
       where: { pedidoId: id },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     });
 
     return NextResponse.json({
@@ -22,15 +21,14 @@ export async function GET(
       usuariosPermitidos: USUARIOS_PERMITIDOS,
     });
   } catch (error) {
-    console.error("Erro ao buscar histórico de status:", error);
+    console.error("Erro ao buscar historico de status:", error);
     return NextResponse.json(
-      { success: false, error: "Erro ao buscar histórico" },
+      { success: false, error: "Erro ao buscar historico" },
       { status: 500 }
     );
   }
 }
 
-// POST - Alterar status de entrega
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -40,29 +38,34 @@ export async function POST(
     const body = await req.json();
     const { statusNovo, alteradoPor, observacao } = body;
 
-    // Validações
     if (!statusNovo) {
       return NextResponse.json(
-        { success: false, error: "Status é obrigatório" },
+        { success: false, error: "Status e obrigatorio" },
         { status: 400 }
       );
     }
 
     if (!alteradoPor) {
       return NextResponse.json(
-        { success: false, error: "Usuário é obrigatório" },
+        { success: false, error: "Usuario e obrigatorio" },
+        { status: 400 }
+      );
+    }
+
+    if (!USUARIOS_PERMITIDOS.includes(alteradoPor)) {
+      return NextResponse.json(
+        { success: false, error: "Usuario invalido" },
         { status: 400 }
       );
     }
 
     if (!Object.keys(STATUS_ENTREGA).includes(statusNovo)) {
       return NextResponse.json(
-        { success: false, error: "Status inválido" },
+        { success: false, error: "Status invalido" },
         { status: 400 }
       );
     }
 
-    // Buscar pedido atual
     const pedido = await prisma.pedido.findUnique({
       where: { id },
       select: { status_entrega: true },
@@ -70,12 +73,11 @@ export async function POST(
 
     if (!pedido) {
       return NextResponse.json(
-        { success: false, error: "Pedido não encontrado" },
+        { success: false, error: "Pedido nao encontrado" },
         { status: 404 }
       );
     }
 
-    // Atualizar status e criar histórico em uma transação
     const [pedidoAtualizado, historicoNovo] = await prisma.$transaction([
       prisma.pedido.update({
         where: { id },
@@ -102,6 +104,78 @@ export async function POST(
     console.error("Erro ao atualizar status de entrega:", error);
     return NextResponse.json(
       { success: false, error: "Erro ao atualizar status" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = await req.json();
+    const historicoId = typeof body?.historicoId === "string" ? body.historicoId : "";
+
+    if (!historicoId) {
+      return NextResponse.json(
+        { success: false, error: "historicoId e obrigatorio" },
+        { status: 400 }
+      );
+    }
+
+    const registro = await prisma.historicoStatusEntrega.findUnique({
+      where: { id: historicoId },
+      select: { id: true, pedidoId: true },
+    });
+
+    if (!registro || registro.pedidoId !== id) {
+      return NextResponse.json(
+        { success: false, error: "Registro de historico nao encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const pedido = await prisma.pedido.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!pedido) {
+      return NextResponse.json(
+        { success: false, error: "Pedido nao encontrado" },
+        { status: 404 }
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.historicoStatusEntrega.delete({
+        where: { id: historicoId },
+      });
+
+      const ultimoHistorico = await tx.historicoStatusEntrega.findFirst({
+        where: { pedidoId: id },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: { statusNovo: true },
+      });
+
+      await tx.pedido.update({
+        where: { id },
+        data: {
+          status_entrega: ultimoHistorico?.statusNovo || "AGUARDANDO_PAGAMENTO",
+        },
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Registro removido com sucesso",
+    });
+  } catch (error) {
+    console.error("Erro ao remover status de entrega:", error);
+    return NextResponse.json(
+      { success: false, error: "Erro ao remover status" },
       { status: 500 }
     );
   }

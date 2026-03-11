@@ -17,6 +17,7 @@ export type StatusEntregaKey = keyof typeof STATUS_ENTREGA;
 // Usuários permitidos
 export const USUARIOS_PERMITIDOS = [
   "Adriano",
+  "Roberto",
   "Cassy",
   "Paulo",
   "Gerilza",

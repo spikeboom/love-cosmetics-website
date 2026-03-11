@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   STATUS_ENTREGA,
   STATUS_COLORS,
@@ -53,7 +53,7 @@ export function StatusEntregaManager({ pedidoId, statusAtual, onStatusChange }: 
 
   const handleSubmit = async () => {
     if (!usuario) {
-      setError("Selecione quem está alterando");
+      setError("Selecione quem esta alterando");
       return;
     }
 
@@ -84,8 +84,8 @@ export function StatusEntregaManager({ pedidoId, statusAtual, onStatusChange }: 
       } else {
         setError(data.error || "Erro ao atualizar status");
       }
-    } catch (err) {
-      setError("Erro de conexão");
+    } catch {
+      setError("Erro de conexao");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,6 @@ export function StatusEntregaManager({ pedidoId, statusAtual, onStatusChange }: 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Status */}
         <div>
           <label className="font-cera-pro font-light text-[12px] text-[#666] block mb-1">
             Novo Status
@@ -112,7 +111,6 @@ export function StatusEntregaManager({ pedidoId, statusAtual, onStatusChange }: 
           </select>
         </div>
 
-        {/* Usuário */}
         <div>
           <label className="font-cera-pro font-light text-[12px] text-[#666] block mb-1">
             Alterado por *
@@ -132,26 +130,23 @@ export function StatusEntregaManager({ pedidoId, statusAtual, onStatusChange }: 
         </div>
       </div>
 
-      {/* Observação */}
       <div>
         <label className="font-cera-pro font-light text-[12px] text-[#666] block mb-1">
-          Observação (opcional)
+          Observacao (opcional)
         </label>
         <input
           type="text"
           value={observacao}
           onChange={(e) => setObservacao(e.target.value)}
-          placeholder="Ex: Código de rastreio: AB123456789BR"
+          placeholder="Ex: Codigo de rastreio: AB123456789BR"
           className="w-full bg-white border border-[#d2d2d2] rounded-[8px] p-2 font-cera-pro text-[14px] focus:outline-none focus:border-[#254333]"
         />
       </div>
 
-      {/* Erro */}
       {error && (
         <p className="font-cera-pro font-light text-[12px] text-[#B3261E]">{error}</p>
       )}
 
-      {/* Botão */}
       <button
         onClick={handleSubmit}
         disabled={loading || novoStatus === statusAtual}
@@ -170,34 +165,68 @@ export function StatusEntregaManager({ pedidoId, statusAtual, onStatusChange }: 
 interface HistoricoStatusEntregaProps {
   pedidoId: string;
   refreshKey?: number;
+  onDeleted?: () => void;
 }
 
-export function HistoricoStatusEntrega({ pedidoId, refreshKey = 0 }: HistoricoStatusEntregaProps) {
+export function HistoricoStatusEntrega({ pedidoId, refreshKey = 0, onDeleted }: HistoricoStatusEntregaProps) {
   const [historico, setHistorico] = useState<HistoricoItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
-  React.useEffect(() => {
-    async function fetchHistorico() {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/pedidos/${pedidoId}/status-entrega`);
-        const data = await response.json();
-        if (data.success) {
-          setHistorico(data.historico);
-        }
-      } catch (err) {
-        console.error("Erro ao buscar histórico:", err);
-      } finally {
-        setLoading(false);
+  const fetchHistorico = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/pedidos/${pedidoId}/status-entrega`);
+      const data = await response.json();
+      if (data.success) {
+        setHistorico(data.historico);
       }
+    } catch (err) {
+      console.error("Erro ao buscar historico:", err);
+    } finally {
+      setLoading(false);
     }
+  }, [pedidoId]);
+
+  useEffect(() => {
     fetchHistorico();
-  }, [pedidoId, refreshKey]);
+  }, [fetchHistorico, refreshKey]);
+
+  const handleRemove = async (historicoId: string) => {
+    if (!confirm("Tem certeza que deseja remover este status do historico?")) {
+      return;
+    }
+
+    setRemovingId(historicoId);
+    setDeleteError("");
+
+    try {
+      const response = await fetch(`/api/pedidos/${pedidoId}/status-entrega`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ historicoId }),
+      });
+      const data = await response.json();
+
+      if (!data.success) {
+        setDeleteError(data.error || "Erro ao remover status");
+        return;
+      }
+
+      await fetchHistorico();
+      onDeleted?.();
+    } catch {
+      setDeleteError("Erro de conexao ao remover status");
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   if (loading) {
     return (
       <p className="font-cera-pro font-light text-[14px] text-[#666]">
-        Carregando histórico...
+        Carregando historico...
       </p>
     );
   }
@@ -205,13 +234,18 @@ export function HistoricoStatusEntrega({ pedidoId, refreshKey = 0 }: HistoricoSt
   if (historico.length === 0) {
     return (
       <p className="font-cera-pro font-light text-[14px] text-[#666]">
-        Nenhuma alteração de status registrada
+        Nenhuma alteracao de status registrada
       </p>
     );
   }
 
   return (
     <div className="space-y-3">
+      {deleteError && (
+        <p className="font-cera-pro font-light text-[12px] text-[#B3261E]">
+          {deleteError}
+        </p>
+      )}
       {historico.map((item) => (
         <div
           key={item.id}
@@ -227,9 +261,18 @@ export function HistoricoStatusEntrega({ pedidoId, refreshKey = 0 }: HistoricoSt
               )}
               <StatusEntregaBadge status={item.statusNovo} compact />
             </div>
-            <span className="font-cera-pro font-light text-[11px] text-[#666]">
-              {new Date(item.createdAt).toLocaleString("pt-BR")}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-cera-pro font-light text-[11px] text-[#666]">
+                {new Date(item.createdAt).toLocaleString("pt-BR")}
+              </span>
+              <button
+                onClick={() => handleRemove(item.id)}
+                disabled={removingId === item.id}
+                className="px-2 py-1 rounded-[6px] border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed font-cera-pro font-medium text-[11px]"
+              >
+                {removingId === item.id ? "Removendo..." : "Remover"}
+              </button>
+            </div>
           </div>
           <p className="font-cera-pro font-medium text-[12px] text-[#333]">
             Por: {item.alteradoPor}
