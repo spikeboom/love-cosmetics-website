@@ -248,37 +248,17 @@ export function ShippingCalculator({
         </div>
       )}
 
-      {/* Opções de Frete Disponíveis */}
+      {/* Opções de Frete Disponíveis (PDP: apenas informativo, sem seleção) */}
       {variant !== "cart" && hasCalculated && !error && availableServices.length > 0 && (
         <div className="flex flex-col gap-[8px] items-start w-full">
           <p className="font-cera-pro font-medium text-[14px] text-[#111111] leading-[normal]">
-            Selecione a forma de envio:
+            Opções de envio:
           </p>
 
           <FreightOptions
             services={availableServices}
-            selectedIndex={selectedServiceIndex}
-            onSelect={handleSelectService}
-            radioName="freight-option-cart"
+            readOnly
           />
-
-          {/* Resumo do frete selecionado */}
-          {selectedService && (
-            <div className="mt-2 p-3 bg-[#F0F9F4] rounded-lg border border-[#009142] w-full">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/new-home/icons/verified-green.svg"
-                  alt="Verificado"
-                  width={16}
-                  height={16}
-                  className="w-4 h-4 flex-shrink-0"
-                />
-                <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-[1.257]">
-                  CEP {cep} - {selectedService.carrier} - Entrega em {selectedService.deliveryTime} {selectedService.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -293,7 +273,7 @@ export function ShippingCalculator({
               height={16}
               className="w-4 h-4 flex-shrink-0"
             />
-            <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-[1.257]">
+            <p className="font-cera-pro font-bold text-[14px] text-[#009142] leading-[1.257]">
               até {selectedService.deliveryTime} dia(s) úteis - {formatPrice(selectedService.price)}
             </p>
           </div>
