@@ -19,12 +19,10 @@ interface DiaValor {
 interface FaturamentoChartProps {
   dadosAtual: DiaValor[];
   dadosAnterior: DiaValor[];
-  mesAtual: number;
-  anoAtual: number;
-}
-
-function getDaysInMonth(month: number, year: number) {
-  return new Date(year, month, 0).getDate();
+  dataInicio: string;
+  dataFim: string;
+  dataInicioAnterior: string;
+  dataFimAnterior: string;
 }
 
 function formatCurrency(value: number) {
@@ -36,48 +34,66 @@ function formatCurrency(value: number) {
   });
 }
 
-const MESES = [
-  "", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-  "Jul", "Ago", "Set", "Out", "Nov", "Dez",
-];
+function formatDateBR(dateStr: string): string {
+  const [, m, d] = dateStr.split("-");
+  return `${d}/${m}`;
+}
+
+function getAllDatesInRange(start: string, end: string): string[] {
+  const dates: string[] = [];
+  const current = new Date(start + "T12:00:00");
+  const endDate = new Date(end + "T12:00:00");
+  while (current <= endDate) {
+    const y = current.getFullYear();
+    const m = String(current.getMonth() + 1).padStart(2, "0");
+    const d = String(current.getDate()).padStart(2, "0");
+    dates.push(`${y}-${m}-${d}`);
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
 
 export function FaturamentoChart({
   dadosAtual,
   dadosAnterior,
-  mesAtual,
-  anoAtual,
+  dataInicio,
+  dataFim,
+  dataInicioAnterior,
+  dataFimAnterior,
 }: FaturamentoChartProps) {
-  const totalDias = getDaysInMonth(mesAtual, anoAtual);
+  // Build all dates in the current range
+  const allDates = getAllDatesInRange(dataInicio, dataFim);
 
-  // Map data by day number for alignment
-  const atualByDay = new Map<number, number>();
-  dadosAtual.forEach((d) => {
-    const dayNum = new Date(d.dia + "T12:00:00").getDate();
-    atualByDay.set(dayNum, d.valor);
-  });
+  // Map data by date
+  const atualByDate = new Map<string, number>();
+  dadosAtual.forEach((d) => atualByDate.set(d.dia, d.valor));
 
-  const anteriorByDay = new Map<number, number>();
+  // Map previous period by day index (align by position, not by date)
+  const allDatesAnterior = getAllDatesInRange(dataInicioAnterior, dataFimAnterior);
+  const anteriorByIndex = new Map<number, number>();
   dadosAnterior.forEach((d) => {
-    const dayNum = new Date(d.dia + "T12:00:00").getDate();
-    anteriorByDay.set(dayNum, d.valor);
+    const idx = allDatesAnterior.indexOf(d.dia);
+    if (idx >= 0) anteriorByIndex.set(idx, d.valor);
   });
 
   // Build chart data with cumulative values
   let acumAtual = 0;
   let acumAnterior = 0;
-  const chartData = [];
-
-  for (let day = 1; day <= totalDias; day++) {
-    acumAtual += atualByDay.get(day) || 0;
-    acumAnterior += anteriorByDay.get(day) || 0;
-    chartData.push({
-      dia: day,
+  const chartData = allDates.map((date, i) => {
+    acumAtual += atualByDate.get(date) || 0;
+    acumAnterior += anteriorByIndex.get(i) || 0;
+    return {
+      dia: formatDateBR(date),
       atual: Math.round(acumAtual * 100) / 100,
       anterior: Math.round(acumAnterior * 100) / 100,
-    });
-  }
+    };
+  });
 
-  const prevMonth = mesAtual === 1 ? 12 : mesAtual - 1;
+  const labelAtual = `${formatDateBR(dataInicio)} - ${formatDateBR(dataFim)}`;
+  const labelAnterior = `${formatDateBR(dataInicioAnterior)} - ${formatDateBR(dataFimAnterior)}`;
+
+  // Show fewer tick labels when range is large
+  const tickInterval = allDates.length > 60 ? 6 : allDates.length > 30 ? 3 : allDates.length > 14 ? 1 : 0;
 
   return (
     <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-5">
@@ -93,6 +109,7 @@ export function FaturamentoChart({
               tick={{ fontSize: 11, fill: "#666666" }}
               tickLine={false}
               axisLine={{ stroke: "#e5e5e5" }}
+              interval={tickInterval}
             />
             <YAxis
               tick={{ fontSize: 11, fill: "#666666" }}
@@ -110,19 +127,15 @@ export function FaturamentoChart({
               }}
               formatter={(value?: number, name?: string) => [
                 formatCurrency(value ?? 0),
-                name === "atual"
-                  ? `${MESES[mesAtual]}/${anoAtual}`
-                  : `${MESES[prevMonth]}/${mesAtual === 1 ? anoAtual - 1 : anoAtual}`,
+                name === "atual" ? labelAtual : labelAnterior,
               ]}
-              labelFormatter={(label) => `Dia ${label}`}
+              labelFormatter={(label) => `${label}`}
             />
             <Legend
               verticalAlign="top"
               height={36}
               formatter={(value) =>
-                value === "atual"
-                  ? `${MESES[mesAtual]}/${anoAtual}`
-                  : `${MESES[prevMonth]}/${mesAtual === 1 ? anoAtual - 1 : anoAtual}`
+                value === "atual" ? labelAtual : labelAnterior
               }
               wrapperStyle={{ fontSize: "12px", fontFamily: "var(--font-cera-pro), sans-serif" }}
             />

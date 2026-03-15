@@ -58,26 +58,41 @@ const EFFECTIVE_PAID_FILTER = `(
   )
 )`;
 
+function formatDateISO(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const mes = Number(searchParams.get("mes") || new Date().getMonth() + 1);
-    const ano = Number(searchParams.get("ano") || new Date().getFullYear());
     const origem = searchParams.get("origem") || "todos";
     const statusPagamento = searchParams.get("statusPagamento") || "todos";
     const filterMode = searchParams.get("filterMode") || "hideTests";
 
-    // Build date range for current period
-    const startDate = `${ano}-${String(mes).padStart(2, "0")}-01`;
-    const nextMonth = mes === 12 ? 1 : mes + 1;
-    const nextYear = mes === 12 ? ano + 1 : ano;
-    const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+    // Date range: dataInicio / dataFim (default: last 30 days)
+    const now = new Date();
+    const dataFim = searchParams.get("dataFim") || formatDateISO(now);
+    const dataInicio = searchParams.get("dataInicio") || formatDateISO(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000));
 
-    // Previous month for comparison
-    const prevMonth = mes === 1 ? 12 : mes - 1;
-    const prevYear = mes === 1 ? ano - 1 : ano;
-    const prevStartDate = `${prevYear}-${String(prevMonth).padStart(2, "0")}-01`;
-    const prevEndDate = startDate;
+    // Calculate the period duration in days for the comparison period
+    const startMs = new Date(dataInicio + "T00:00:00").getTime();
+    const endMs = new Date(dataFim + "T23:59:59").getTime();
+    const periodDays = Math.round((endMs - startMs) / (1000 * 60 * 60 * 24)) + 1;
+
+    // Previous period: same duration, ending the day before dataInicio
+    const prevEndDate = new Date(startMs - 24 * 60 * 60 * 1000);
+    const prevStartDate = new Date(prevEndDate.getTime() - (periodDays - 1) * 24 * 60 * 60 * 1000);
+    const dataInicioAnterior = formatDateISO(prevStartDate);
+    const dataFimAnterior = formatDateISO(prevEndDate);
+
+    // SQL date boundaries (exclusive end for current, inclusive via next day)
+    const startDate = dataInicio;
+    const endDateExclusive = formatDateISO(new Date(new Date(dataFim + "T00:00:00").getTime() + 24 * 60 * 60 * 1000));
+    const prevStart = dataInicioAnterior;
+    const prevEndExclusive = formatDateISO(new Date(new Date(dataFimAnterior + "T00:00:00").getTime() + 24 * 60 * 60 * 1000));
 
     // Build WHERE conditions
     const conditions: string[] = [];
@@ -115,9 +130,6 @@ export async function GET(req: NextRequest) {
         conditions.push(`p.status_pagamento = '${statusPagamento}'`);
       }
     } else {
-      // Por padrão, considerar apenas pedidos efetivamente pagos:
-      // 1) PagBank confirmou (PAID/AUTHORIZED), OU
-      // 2) status_entrega foi alterado de AGUARDANDO_PAGAMENTO (pagamento manual/imputado)
       conditions.push(EFFECTIVE_PAID_FILTER);
     }
 
@@ -126,34 +138,11 @@ export async function GET(req: NextRequest) {
     }
 
     const baseWhere = conditions.join(" AND ");
-    const currentWhere = `${baseWhere} AND p."createdAt" >= '${startDate}'::timestamp AND p."createdAt" < '${endDate}'::timestamp`;
-    const prevWhere = `${baseWhere} AND p."createdAt" >= '${prevStartDate}'::timestamp AND p."createdAt" < '${prevEndDate}'::timestamp`;
+    const currentWhere = `${baseWhere} AND p."createdAt" >= '${startDate}'::timestamp AND p."createdAt" < '${endDateExclusive}'::timestamp`;
+    const prevWhere = `${baseWhere} AND p."createdAt" >= '${prevStart}'::timestamp AND p."createdAt" < '${prevEndExclusive}'::timestamp`;
 
-    console.log("[DASHBOARD] Params:", { mes, ano, origem, statusPagamento });
-    console.log("[DASHBOARD] Date range:", { startDate, endDate, prevStartDate, prevEndDate });
-    console.log("[DASHBOARD] currentWhere:", currentWhere);
-
-    // DEBUG: check what actually exists in the DB
-    const debug = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT
-        p.status_pagamento,
-        COUNT(*) as cnt,
-        MIN(p."createdAt") as min_date,
-        MAX(p."createdAt") as max_date
-      FROM "Pedido" p
-      GROUP BY p.status_pagamento
-      ORDER BY cnt DESC
-    `);
-    console.log("[DASHBOARD DEBUG] Pedidos by status_pagamento:", JSON.stringify(debug, (_, v) => typeof v === 'bigint' ? v.toString() : v));
-
-    const debugDates = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT
-        COUNT(*) as total,
-        MIN(p."createdAt") as min_date,
-        MAX(p."createdAt") as max_date
-      FROM "Pedido" p
-    `);
-    console.log("[DASHBOARD DEBUG] All pedidos date range:", JSON.stringify(debugDates, (_, v) => typeof v === 'bigint' ? v.toString() : v));
+    console.log("[DASHBOARD] Params:", { dataInicio, dataFim, origem, statusPagamento });
+    console.log("[DASHBOARD] Date range:", { startDate, endDateExclusive, prevStart, prevEndExclusive });
 
     // 1. KPIs: faturamento, ticket medio, total pedidos
     const kpis = await prisma.$queryRawUnsafe<
@@ -166,15 +155,11 @@ export async function GET(req: NextRequest) {
       WHERE ${currentWhere}
     `);
 
-    console.log("[DASHBOARD] kpis raw:", JSON.stringify(kpis, (_, v) => typeof v === 'bigint' ? v.toString() : v));
-
     const faturamento = Number(kpis[0]?.faturamento ?? 0);
     const totalPedidos = Number(kpis[0]?.pedidos ?? 0);
     const ticketMedio = totalPedidos > 0 ? faturamento / totalPedidos : 0;
 
-    console.log("[DASHBOARD] KPIs parsed:", { faturamento, totalPedidos, ticketMedio });
-
-    // Previous month KPIs for comparison
+    // Previous period KPIs for comparison
     const prevKpis = await prisma.$queryRawUnsafe<
       { faturamento: number; pedidos: bigint }[]
     >(`
@@ -190,7 +175,7 @@ export async function GET(req: NextRequest) {
     const prevTicketMedio =
       prevTotalPedidos > 0 ? prevFaturamento / prevTotalPedidos : 0;
 
-    // 2. Faturamento por dia (current month)
+    // 2. Faturamento por dia (current period)
     const faturamentoPorDia = await prisma.$queryRawUnsafe<
       { dia: string; valor: number }[]
     >(`
@@ -203,8 +188,8 @@ export async function GET(req: NextRequest) {
       ORDER BY dia
     `);
 
-    // 3. Faturamento por dia (previous month)
-    const faturamentoMesAnteriorPorDia = await prisma.$queryRawUnsafe<
+    // 3. Faturamento por dia (previous period)
+    const faturamentoPeriodoAnteriorPorDia = await prisma.$queryRawUnsafe<
       { dia: string; valor: number }[]
     >(`
       SELECT
@@ -215,9 +200,6 @@ export async function GET(req: NextRequest) {
       GROUP BY TO_CHAR(p."createdAt", 'YYYY-MM-DD')
       ORDER BY dia
     `);
-
-    console.log("[DASHBOARD] faturamentoPorDia:", faturamentoPorDia.length, "rows");
-    console.log("[DASHBOARD] faturamentoMesAnteriorPorDia:", faturamentoMesAnteriorPorDia.length, "rows");
 
     // 4. Faturamento por canal (origem)
     const faturamentoPorCanal = await prisma.$queryRawUnsafe<
@@ -231,8 +213,6 @@ export async function GET(req: NextRequest) {
       WHERE ${currentWhere}
       GROUP BY COALESCE(p.origem, 'checkout')
     `);
-
-    console.log("[DASHBOARD] faturamentoPorCanal:", JSON.stringify(faturamentoPorCanal, (_, v) => typeof v === 'bigint' ? v.toString() : v));
 
     // 5 & 6. Ranking de produtos (items is JSONB[] — use unnest)
     let rankingProdutos: { nome: string; faturamento: number; quantidade: number }[] = [];
@@ -264,8 +244,6 @@ export async function GET(req: NextRequest) {
         GROUP BY item->>'name'
         ORDER BY quantidade DESC
       `);
-      console.log("[DASHBOARD] rankingProdutos:", JSON.stringify(rankingProdutos, (_, v) => typeof v === 'bigint' ? v.toString() : v));
-      console.log("[DASHBOARD] quantidadePorProduto:", JSON.stringify(quantidadePorProduto, (_, v) => typeof v === 'bigint' ? v.toString() : v));
     } catch (itemsError) {
       console.error("[DASHBOARD] Erro ao buscar ranking de produtos:", itemsError);
     }
@@ -351,9 +329,6 @@ export async function GET(req: NextRequest) {
           }
         }
         margemBrutaMedia = somaFatPond > 0 ? somaMargemPond / somaFatPond : 0;
-
-        console.log("[DASHBOARD] margemProdutos:", margemProdutos);
-        console.log("[DASHBOARD] margemBrutaMedia:", margemBrutaMedia);
       }
     } catch (margemErr) {
       console.error("[DASHBOARD] Erro ao calcular margem:", margemErr);
@@ -370,7 +345,7 @@ export async function GET(req: NextRequest) {
         dia: d.dia,
         valor: Number(d.valor),
       })),
-      faturamentoMesAnteriorPorDia: faturamentoMesAnteriorPorDia.map((d) => ({
+      faturamentoPeriodoAnteriorPorDia: faturamentoPeriodoAnteriorPorDia.map((d) => ({
         dia: d.dia,
         valor: Number(d.valor),
       })),
@@ -391,8 +366,10 @@ export async function GET(req: NextRequest) {
       })),
       margemProdutos,
       margemBrutaMedia,
-      periodo: { mes, ano },
-      periodoAnterior: { mes: prevMonth, ano: prevYear },
+      dataInicio,
+      dataFim,
+      dataInicioAnterior,
+      dataFimAnterior,
     });
   } catch (error) {
     console.error("Erro ao buscar dados do dashboard:", error);

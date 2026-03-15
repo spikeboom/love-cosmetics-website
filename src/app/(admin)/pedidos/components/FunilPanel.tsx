@@ -12,7 +12,8 @@ interface FunnelStep {
 interface FunnelData {
   steps: FunnelStep[];
   totalSessions: number;
-  days: number;
+  dataInicio: string;
+  dataFim: string;
 }
 
 const STEP_COLORS = [
@@ -30,18 +31,36 @@ const STEP_COLORS = [
   "#009142",
 ];
 
+function formatDateISO(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function diffDays(a: string, b: string): number {
+  const da = new Date(a + "T00:00:00");
+  const db = new Date(b + "T00:00:00");
+  return Math.round((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 export function FunilPanel() {
+  const now = new Date();
+  const defaultFim = formatDateISO(now);
+  const defaultInicio = formatDateISO(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000));
+
   const [data, setData] = useState<FunnelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [days, setDays] = useState(30);
+  const [dataInicio, setDataInicio] = useState(defaultInicio);
+  const [dataFim, setDataFim] = useState(defaultFim);
   const [channel, setChannel] = useState("all");
 
   const fetchFunnel = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/funil?days=${days}&channel=${channel}`);
+      const res = await fetch(`/api/admin/funil?dataInicio=${dataInicio}&dataFim=${dataFim}&channel=${channel}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "Erro ao buscar funil");
@@ -57,7 +76,9 @@ export function FunilPanel() {
 
   useEffect(() => {
     fetchFunnel();
-  }, [days, channel]);
+  }, []);
+
+  const numDays = diffDays(dataInicio, dataFim);
 
   if (loading) {
     return (
@@ -108,7 +129,7 @@ export function FunilPanel() {
                 Funil de Conversão
               </p>
               <p className="font-cera-pro font-light text-[12px] text-[#666666]">
-                {totalSessions.toLocaleString("pt-BR")} sessões nos últimos {days} dias
+                {totalSessions.toLocaleString("pt-BR")} sessões ({numDays} dias)
                 {channel !== "all" && (
                   <span className="ml-1 px-2 py-0.5 bg-[#D8F9E7] rounded text-[11px] text-[#254333] font-medium">
                     {({ paid_social: "Paid Social", organic_social: "Social Orgânico", organic_search: "Busca Orgânica", direct: "Direto" } as Record<string, string>)[channel]}
@@ -131,21 +152,39 @@ export function FunilPanel() {
               <option value="direct">Direto</option>
             </select>
 
-            <div className="flex rounded-[8px] overflow-hidden border border-[#d2d2d2]">
-              {[7, 14, 30, 60].map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDays(d)}
-                  className={`px-4 py-2 font-cera-pro font-medium text-[14px] transition-colors ${
-                    days === d
-                      ? "bg-[#254333] text-white"
-                      : "bg-white text-[#333333] hover:bg-[#f8f3ed]"
-                  }`}
-                >
-                  {d}d
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <label className="font-cera-pro font-medium text-[12px] text-[#666666] uppercase tracking-wide">
+                De
+              </label>
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={(e) => setDataInicio(e.target.value)}
+                className="px-3 py-2 border border-[#d2d2d2] rounded-[8px] font-cera-pro font-medium text-[13px] text-[#333333] bg-white outline-none focus:border-[#254333] transition-colors"
+              />
             </div>
+
+            <div className="flex items-center gap-2">
+              <label className="font-cera-pro font-medium text-[12px] text-[#666666] uppercase tracking-wide">
+                Até
+              </label>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={(e) => setDataFim(e.target.value)}
+                className="px-3 py-2 border border-[#d2d2d2] rounded-[8px] font-cera-pro font-medium text-[13px] text-[#333333] bg-white outline-none focus:border-[#254333] transition-colors"
+              />
+            </div>
+
+            <button
+              onClick={fetchFunnel}
+              className="flex items-center gap-2 px-4 py-2 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] transition-colors"
+            >
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span className="font-cera-pro font-medium text-[14px] text-white">Aplicar</span>
+            </button>
 
             <button
               onClick={fetchFunnel}
@@ -251,7 +290,7 @@ export function FunilPanel() {
             <SummaryCard
               label="Total de Compras"
               value={steps[steps.length - 1].count.toLocaleString("pt-BR")}
-              subtitle={`Em ${days} dias`}
+              subtitle={`${numDays} dias`}
               color="#009142"
             />
           </div>

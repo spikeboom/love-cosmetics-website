@@ -23,24 +23,46 @@ const CHANNEL_FILTERS: Record<string, string> = {
     AND (session_medium IS NULL OR session_medium = '(none)')`,
 };
 
+function formatDateBQ(dateStr: string): string {
+  // Expects YYYY-MM-DD, returns YYYYMMDD for BigQuery table suffix
+  return dateStr.replace(/-/g, "");
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const days = Math.min(Number(searchParams.get("days") || 30), 90);
   const channel = searchParams.get("channel") || "all";
   const dataset = process.env.BQ_DATASET_ID || "analytics_468537898";
   const channelFilter = CHANNEL_FILTERS[channel] || "";
+
+  // Support dataInicio/dataFim or fallback to days param for backwards compatibility
+  const now = new Date();
+  let dataFim = searchParams.get("dataFim");
+  let dataInicio = searchParams.get("dataInicio");
+
+  if (!dataFim) {
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    dataFim = `${y}-${m}-${d}`;
+  }
+
+  if (!dataInicio) {
+    const days = Math.min(Number(searchParams.get("days") || 30), 90);
+    const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    const y = startDate.getFullYear();
+    const m = String(startDate.getMonth() + 1).padStart(2, "0");
+    const d = String(startDate.getDate()).padStart(2, "0");
+    dataInicio = `${y}-${m}-${d}`;
+  }
+
+  const startDateBQ = formatDateBQ(dataInicio);
+  const endDateBQ = formatDateBQ(dataFim);
 
   try {
     const bq = getBigQueryClient();
 
     const query = `
-      WITH date_range AS (
-        SELECT
-          FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL @days DAY)) AS start_date,
-          FORMAT_DATE('%Y%m%d', CURRENT_DATE()) AS end_date
-      ),
-
-      raw_events AS (
+      WITH raw_events AS (
         SELECT
           CONCAT(user_pseudo_id, '.', CAST(
             (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS STRING
@@ -49,8 +71,8 @@ export async function GET(req: NextRequest) {
           (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_step') AS checkout_step_name,
           collected_traffic_source.manual_source AS traffic_source,
           collected_traffic_source.manual_medium AS traffic_medium
-        FROM \`${dataset}.events_*\`, date_range
-        WHERE _TABLE_SUFFIX BETWEEN date_range.start_date AND date_range.end_date
+        FROM \`${dataset}.events_*\`
+        WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
       ),
 
       session_traffic AS (
@@ -103,10 +125,7 @@ export async function GET(req: NextRequest) {
       SELECT * FROM funnel
     `;
 
-    const [rows] = await bq.query({
-      query,
-      params: { days },
-    });
+    const [rows] = await bq.query({ query });
 
     const data = rows[0] || {};
 
@@ -127,7 +146,7 @@ export async function GET(req: NextRequest) {
 
     const totalSessions = Number(data.total_sessions || 0);
 
-    return NextResponse.json({ steps, totalSessions, days, channel });
+    return NextResponse.json({ steps, totalSessions, dataInicio, dataFim, channel });
   } catch (err: unknown) {
     console.error("Funil API error:", err);
     const message = err instanceof Error ? err.message : "Erro desconhecido";

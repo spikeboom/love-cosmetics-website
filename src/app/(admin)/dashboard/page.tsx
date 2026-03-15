@@ -25,14 +25,23 @@ interface DashboardData {
   varTicketMedio: number;
   varPedidos: number;
   faturamentoPorDia: { dia: string; valor: number }[];
-  faturamentoMesAnteriorPorDia: { dia: string; valor: number }[];
+  faturamentoPeriodoAnteriorPorDia: { dia: string; valor: number }[];
   faturamentoPorCanal: { origem: string; valor: number; pedidos: number }[];
   rankingProdutos: { nome: string; faturamento: number; quantidade: number }[];
   quantidadePorProduto: { nome: string; quantidade: number; faturamento: number }[];
   margemProdutos: MargemProduto[];
   margemBrutaMedia: number;
-  periodo: { mes: number; ano: number };
-  periodoAnterior: { mes: number; ano: number };
+  dataInicio: string;
+  dataFim: string;
+  dataInicioAnterior: string;
+  dataFimAnterior: string;
+}
+
+function formatDateISO(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function formatCurrency(value: number) {
@@ -86,8 +95,11 @@ function SpinnerIcon({ className }: { className?: string }) {
 
 export default function DashboardPage() {
   const now = new Date();
-  const [mes, setMes] = useState(now.getMonth() + 1);
-  const [ano, setAno] = useState(now.getFullYear());
+  const defaultFim = formatDateISO(now);
+  const defaultInicio = formatDateISO(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000));
+
+  const [dataInicio, setDataInicio] = useState(defaultInicio);
+  const [dataFim, setDataFim] = useState(defaultFim);
   const [origem, setOrigem] = useState("todos");
   const [statusPagamento, setStatusPagamento] = useState("todos");
   const [filterMode, setFilterMode] = useState<"hideTests" | "showOnlyTests">("hideTests");
@@ -101,8 +113,8 @@ export default function DashboardPage() {
     setError("");
     try {
       const params = new URLSearchParams({
-        mes: String(mes),
-        ano: String(ano),
+        dataInicio,
+        dataFim,
         origem,
         statusPagamento,
         filterMode,
@@ -170,13 +182,13 @@ export default function DashboardPage() {
         {/* Filters */}
         <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-4 lg:p-5 mb-6">
           <PeriodoFilter
-            mes={mes}
-            ano={ano}
+            dataInicio={dataInicio}
+            dataFim={dataFim}
             origem={origem}
             statusPagamento={statusPagamento}
             filterMode={filterMode}
-            onMesChange={setMes}
-            onAnoChange={setAno}
+            onDataInicioChange={setDataInicio}
+            onDataFimChange={setDataFim}
             onOrigemChange={setOrigem}
             onStatusChange={setStatusPagamento}
             onFilterModeChange={setFilterMode}
@@ -243,9 +255,11 @@ export default function DashboardPage() {
               <div className="lg:col-span-2">
                 <FaturamentoChart
                   dadosAtual={data.faturamentoPorDia}
-                  dadosAnterior={data.faturamentoMesAnteriorPorDia}
-                  mesAtual={data.periodo.mes}
-                  anoAtual={data.periodo.ano}
+                  dadosAnterior={data.faturamentoPeriodoAnteriorPorDia}
+                  dataInicio={data.dataInicio}
+                  dataFim={data.dataFim}
+                  dataInicioAnterior={data.dataInicioAnterior}
+                  dataFimAnterior={data.dataFimAnterior}
                 />
               </div>
               <div>

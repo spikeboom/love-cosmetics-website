@@ -1,13 +1,13 @@
 "use client";
 
 interface PeriodoFilterProps {
-  mes: number;
-  ano: number;
+  dataInicio: string;
+  dataFim: string;
   origem: string;
   statusPagamento: string;
   filterMode: "hideTests" | "showOnlyTests";
-  onMesChange: (mes: number) => void;
-  onAnoChange: (ano: number) => void;
+  onDataInicioChange: (v: string) => void;
+  onDataFimChange: (v: string) => void;
   onOrigemChange: (origem: string) => void;
   onStatusChange: (status: string) => void;
   onFilterModeChange: (mode: "hideTests" | "showOnlyTests") => void;
@@ -15,37 +15,22 @@ interface PeriodoFilterProps {
   loading: boolean;
 }
 
-const MESES = [
-  { value: 1, label: "Janeiro" },
-  { value: 2, label: "Fevereiro" },
-  { value: 3, label: "Marco" },
-  { value: 4, label: "Abril" },
-  { value: 5, label: "Maio" },
-  { value: 6, label: "Junho" },
-  { value: 7, label: "Julho" },
-  { value: 8, label: "Agosto" },
-  { value: 9, label: "Setembro" },
-  { value: 10, label: "Outubro" },
-  { value: 11, label: "Novembro" },
-  { value: 12, label: "Dezembro" },
-];
-
 export function PeriodoFilter({
-  mes,
-  ano,
+  dataInicio,
+  dataFim,
   origem,
   statusPagamento,
   filterMode,
-  onMesChange,
-  onAnoChange,
+  onDataInicioChange,
+  onDataFimChange,
   onOrigemChange,
   onStatusChange,
   onFilterModeChange,
   onApply,
   loading,
 }: PeriodoFilterProps) {
-  const currentYear = new Date().getFullYear();
-  const anos = Array.from({ length: 3 }, (_, i) => currentYear - i);
+  const inputClasses =
+    "px-3 py-2 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-medium text-[13px] text-[#333333] outline-none focus:border-[#254333] transition-colors";
 
   const selectClasses =
     "px-3 py-2 bg-white border border-[#d2d2d2] rounded-[8px] font-cera-pro font-medium text-[13px] text-[#333333] outline-none focus:border-[#254333] transition-colors cursor-pointer";
@@ -54,30 +39,26 @@ export function PeriodoFilter({
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2">
         <label className="font-cera-pro font-medium text-[12px] text-[#666666] uppercase tracking-wide">
-          Periodo
+          De
         </label>
-        <select
-          value={mes}
-          onChange={(e) => onMesChange(Number(e.target.value))}
-          className={selectClasses}
-        >
-          {MESES.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={ano}
-          onChange={(e) => onAnoChange(Number(e.target.value))}
-          className={selectClasses}
-        >
-          {anos.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </select>
+        <input
+          type="date"
+          value={dataInicio}
+          onChange={(e) => onDataInicioChange(e.target.value)}
+          className={inputClasses}
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label className="font-cera-pro font-medium text-[12px] text-[#666666] uppercase tracking-wide">
+          Até
+        </label>
+        <input
+          type="date"
+          value={dataFim}
+          onChange={(e) => onDataFimChange(e.target.value)}
+          className={inputClasses}
+        />
       </div>
 
       <div className="w-px h-6 bg-[#d2d2d2] hidden lg:block" />
