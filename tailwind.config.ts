@@ -29,11 +29,17 @@ export default {
           "50%": { width: "60%", marginLeft: "20%" },
           "100%": { width: "0%", marginLeft: "100%" },
         },
+        "pulse-once": {
+          "0%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(231,166,58,0.4)" },
+          "50%": { transform: "scale(1.02)", boxShadow: "0 0 0 8px rgba(231,166,58,0)" },
+          "100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(231,166,58,0)" },
+        },
       },
       animation: {
         "slide-up-toast": "slide-up-toast 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
         "fade-in": "fade-in 0.2s ease-out",
         "shimmer": "shimmer 1.5s ease-in-out infinite",
+        "pulse-once": "pulse-once 1.2s ease-in-out infinite",
       },
       fontFamily: {
         lato: ["var(--font-lato)", ...fontFamily.sans],

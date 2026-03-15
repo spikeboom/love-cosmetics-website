@@ -10,6 +10,11 @@ import { ResumoProps } from "./types";
 import { usePagBankPayment } from "@/hooks/checkout";
 import { formatCountdown } from "@/lib/formatters";
 
+interface PreGeneratedPix {
+  qrCode: { text: string; imageUrl: string; expirationDate: string };
+  orderId: string;
+}
+
 interface PagamentoPixRealProps {
   pedidoId: string;
   valorTotal: number;
@@ -20,6 +25,7 @@ interface PagamentoPixRealProps {
   externalError?: string | null;
   onClearExternalError?: () => void;
   resumoProps: ResumoProps;
+  preGenerated?: PreGeneratedPix | null;
 }
 
 export function PagamentoPixReal({
@@ -32,11 +38,12 @@ export function PagamentoPixReal({
   externalError = null,
   onClearExternalError,
   resumoProps,
+  preGenerated = null,
 }: PagamentoPixRealProps) {
   const {
-    loading,
+    loading: hookLoading,
     error,
-    qrCodeData,
+    qrCodeData: hookQrCodeData,
     createPixPayment,
     startPaymentPolling,
     stopPolling,
@@ -53,10 +60,36 @@ export function PagamentoPixReal({
   const [simulatingPayment, setSimulatingPayment] = useState(false);
   const pixGeneratedRef = useRef(false);
 
-  const orderIdRef = useRef<string | null>(null);
+  // Se Pix foi pré-gerado pelo pai, usar esses dados; senão usar do hook
+  const qrCodeData = preGenerated ? preGenerated.qrCode : hookQrCodeData;
+  const loading = preGenerated ? false : hookLoading;
 
-  // Gerar PIX ao montar (com protecao contra StrictMode)
+  const orderIdRef = useRef<string | null>(preGenerated?.orderId ?? null);
+
+  // Gerar PIX ao montar — pula se já foi pré-gerado
   useEffect(() => {
+    if (preGenerated) {
+      // Pix já foi gerado pelo pai, apenas iniciar polling
+      if (pixGeneratedRef.current) return;
+      pixGeneratedRef.current = true;
+      orderIdRef.current = preGenerated.orderId;
+
+      if (pollingEnabled) {
+        startPaymentPolling(
+          preGenerated.orderId,
+          () => onSuccess(),
+          (err) => onError(err),
+          10000,
+          15 * 60 * 1000
+        );
+      }
+
+      return () => {
+        stopPolling();
+      };
+    }
+
+    // Fluxo original: gerar Pix internamente
     if (pixGeneratedRef.current) return;
     pixGeneratedRef.current = true;
 
@@ -70,8 +103,8 @@ export function PagamentoPixReal({
             result.orderId,
             () => onSuccess(),
             (err) => onError(err),
-            10000, // 10 segundos (reduz requisicoes)
-            15 * 60 * 1000 // 15 minutos
+            10000,
+            15 * 60 * 1000
           );
         }
       } else if (result.message) {
@@ -84,7 +117,7 @@ export function PagamentoPixReal({
     return () => {
       stopPolling();
     };
-  }, [pedidoId]);
+  }, [pedidoId, preGenerated]);
 
   // Controlar polling quando toggle muda
   const handleTogglePolling = () => {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
-import { useCreateOrder } from "@/hooks/checkout";
+import { useCreateOrder, usePagBankPayment } from "@/hooks/checkout";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { ucAddPaymentInfo, ucCheckoutStep, ucPurchase } from "../../../../_tracking/uc-ecommerce";
 import {
@@ -24,6 +24,7 @@ export function PagamentoPageClient() {
   const { freightValue } = useShipping();
   const { total, descontos, subtotalOriginal } = useCartTotals();
   const { loading: creatingOrder, error: orderError, errorCode: orderErrorCode, createOrder, clearError } = useCreateOrder();
+  const pagbank = usePagBankPayment();
   const { syncToServer } = useCheckoutSync();
   const firedStepEventRef = useRef(false);
   const firedPaymentInfoRef = useRef<Set<string>>(new Set());
@@ -54,7 +55,11 @@ export function PagamentoPageClient() {
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
   const [telaAtual, setTelaAtual] = useState<TelaAtual>("selecao");
+  const [telaVisivel, setTelaVisivel] = useState<TelaAtual>("selecao");
+  const [transitioning, setTransitioning] = useState(false);
   const [pedidoId, setPedidoId] = useState<string | null>(null);
+  const [pixPreGenerated, setPixPreGenerated] = useState(false);
+  const [pixOrderId, setPixOrderId] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     identificacao: null,
@@ -175,25 +180,51 @@ export function PagamentoPageClient() {
       }`
     : "";
 
+  // Transição suave entre telas (fade-out → troca → fade-in)
+  const transitionTo = (tela: TelaAtual) => {
+    setTransitioning(true);
+    setTimeout(() => {
+      setTelaVisivel(tela);
+      setTelaAtual(tela);
+      // Scroll suave para o topo ao trocar de tela
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => setTransitioning(false), 50);
+    }, 250);
+  };
+
   // Criar pedido antes de ir para pagamento
+  // Para Pix: cria pedido + gera QR code, só transiciona quando pronto
+  // Para Cartão: cria pedido e transiciona direto (usuário precisa preencher form)
   const handleCriarPedidoEPagar = async (metodo: "pix" | "cartao") => {
     setPaymentError(null);
-    if (pedidoId) {
-      // Ja tem pedido criado, ir direto para pagamento
-      setFormaPagamento(metodo);
-      setTelaAtual(metodo);
-      return;
+
+    let currentPedidoId = pedidoId;
+
+    if (!currentPedidoId) {
+      const result = await createOrder();
+      if (result.success && result.pedidoId) {
+        currentPedidoId = result.pedidoId;
+        setPedidoId(result.pedidoId);
+      } else {
+        return;
+      }
     }
 
-    const result = await createOrder();
+    setFormaPagamento(metodo);
 
-    if (result.success && result.pedidoId) {
-      setPedidoId(result.pedidoId);
-      setFormaPagamento(metodo);
-      setTelaAtual(metodo);
+    if (metodo === "pix") {
+      // Pré-gerar Pix antes de transicionar (o pulse continua na seleção)
+      const pixResult = await pagbank.createPixPayment(currentPedidoId);
+      if (pixResult.success && pixResult.orderId) {
+        setPixOrderId(pixResult.orderId);
+        setPixPreGenerated(true);
+        transitionTo("pix");
+      } else {
+        setPaymentError(pixResult.message || "Erro ao gerar PIX");
+      }
     } else {
-      // Erro será exibido pela tela de erro (orderError state)
-      // Não precisa de alert - a UI de erro já trata isso
+      // Cartão: transiciona direto
+      transitionTo("cartao");
     }
   };
 
@@ -206,7 +237,7 @@ export function PagamentoPageClient() {
   };
 
   const voltarParaSelecao = () => {
-    setTelaAtual("selecao");
+    transitionTo("selecao");
   };
 
   const handlePaymentSuccess = () => {
@@ -308,18 +339,6 @@ export function PagamentoPageClient() {
     onAlterarEntrega: () => router.push("/figma/checkout/entrega"),
   };
 
-  // Tela de loading enquanto cria pedido
-  if (creatingOrder) {
-    return (
-      <div className="bg-white flex flex-col w-full flex-1 items-center justify-center min-h-[400px]">
-        <div className="w-12 h-12 border-4 border-[#254333] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="font-cera-pro text-[16px] text-[#333333]">
-          Criando pedido...
-        </p>
-      </div>
-    );
-  }
-
   // Remover cupom e voltar para tela de pagamento
   const handleRemoverCupom = () => {
     if (cupons.length > 0) {
@@ -377,55 +396,69 @@ export function PagamentoPageClient() {
     );
   }
 
-  // Tela de PIX real
-  if (telaAtual === "pix" && pedidoId) {
-    return (
-      <PagamentoPixReal
-        pedidoId={pedidoId}
-        valorTotal={valorTotal}
-        formatPrice={formatPrice}
-        onVoltar={voltarParaSelecao}
-        onSuccess={handlePaymentSuccess}
-        onError={handlePaymentError}
-        externalError={paymentError}
-        onClearExternalError={clearPaymentError}
-        resumoProps={resumoProps}
-      />
-    );
-  }
-
-  // Tela de Cartao real
-  if (telaAtual === "cartao" && pedidoId) {
-    return (
-      <PagamentoCartaoReal
-        pedidoId={pedidoId}
-        valorTotal={valorTotal}
-        formatPrice={formatPrice}
-        onVoltar={voltarParaSelecao}
-        onSuccess={handlePaymentSuccess}
-        onError={handlePaymentError}
-        externalError={paymentError}
-        onClearExternalError={clearPaymentError}
-      />
-    );
-  }
-
   const voltarParaEntrega = () => {
     router.push("/figma/checkout/entrega");
   };
 
-  // Tela de selecao de metodo de pagamento
+  // Renderizar a tela atual com transição fade
+  const renderTela = () => {
+    if (telaVisivel === "pix" && pedidoId) {
+      return (
+        <PagamentoPixReal
+          pedidoId={pedidoId}
+          valorTotal={valorTotal}
+          formatPrice={formatPrice}
+          onVoltar={voltarParaSelecao}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          externalError={paymentError}
+          onClearExternalError={clearPaymentError}
+          resumoProps={resumoProps}
+          preGenerated={
+            pixPreGenerated && pixOrderId && pagbank.qrCodeData
+              ? { qrCode: pagbank.qrCodeData, orderId: pixOrderId }
+              : null
+          }
+        />
+      );
+    }
+
+    if (telaVisivel === "cartao" && pedidoId) {
+      return (
+        <PagamentoCartaoReal
+          pedidoId={pedidoId}
+          valorTotal={valorTotal}
+          formatPrice={formatPrice}
+          onVoltar={voltarParaSelecao}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          externalError={paymentError}
+          onClearExternalError={clearPaymentError}
+        />
+      );
+    }
+
+    return (
+      <PagamentoSelecao
+        valorTotal={valorTotal}
+        formatPrice={formatPrice}
+        onSelecionarPix={handleSelecionarPix}
+        onSelecionarCartao={handleSelecionarCartao}
+        onVoltar={voltarParaEntrega}
+        loading={creatingOrder || pagbank.loading}
+        errorMessage={paymentError}
+        onClearError={clearPaymentError}
+        resumoProps={resumoProps}
+      />
+    );
+  };
+
   return (
-    <PagamentoSelecao
-      valorTotal={valorTotal}
-      formatPrice={formatPrice}
-      onSelecionarPix={handleSelecionarPix}
-      onSelecionarCartao={handleSelecionarCartao}
-      onVoltar={voltarParaEntrega}
-      loading={creatingOrder}
-      errorMessage={paymentError}
-      onClearError={clearPaymentError}
-      resumoProps={resumoProps}
-    />
+    <div
+      className="transition-opacity duration-250 ease-in-out"
+      style={{ opacity: transitioning ? 0 : 1 }}
+    >
+      {renderTela()}
+    </div>
   );
 }

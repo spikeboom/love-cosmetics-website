@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { CheckoutStepper } from "../../CheckoutStepper";
 import { BotaoVoltar } from "./BotaoVoltar";
@@ -32,11 +32,20 @@ export function PagamentoSelecao({
   errorMessage = null,
   onClearError,
 }: PagamentoSelecaoProps) {
-  const [selecionado, setSelecionado] = useState<MetodoPagamento>("pix");
+  const [pulsing, setPulsing] = useState<MetodoPagamento | null>(null);
 
-  const handleFinalizar = () => {
-    if (loading) return;
-    if (selecionado === "pix") {
+  // Resetar pulse quando loading acaba (erro ou transição)
+  useEffect(() => {
+    if (!loading && errorMessage) {
+      setPulsing(null);
+    }
+  }, [loading, errorMessage]);
+
+  const handleSelecionar = (metodo: MetodoPagamento) => {
+    if (loading || pulsing) return;
+    setPulsing(metodo);
+    // Dispara o processamento imediatamente — o pulse roda continuamente
+    if (metodo === "pix") {
       onSelecionarPix();
     } else {
       onSelecionarCartao();
@@ -60,7 +69,7 @@ export function PagamentoSelecao({
                 Pagamento
               </h2>
               <p className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111111]">
-                Informe qual vai ser a forma de pagamento:
+                Selecione a forma de pagamento:
               </p>
             </div>
 
@@ -86,13 +95,14 @@ export function PagamentoSelecao({
               </div>
             ) : null}
 
-            {/* Opcoes de Pagamento */}
+            {/* Opcoes de Pagamento — clique já dispara o processamento */}
             <div className="flex flex-col gap-4">
               {/* PIX */}
               <button
-                onClick={() => setSelecionado("pix")}
-                className={`w-full rounded-[8px] border bg-white p-4 text-left transition-all shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.3),0px_2px_6px_2px_rgba(0,0,0,0.15)] ${
-                  selecionado === "pix" ? "border-[#E7A63A]" : "border-transparent"
+                onClick={() => handleSelecionar("pix")}
+                disabled={loading || !!pulsing}
+                className={`w-full rounded-[8px] border bg-white p-4 text-left transition-all shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.3),0px_2px_6px_2px_rgba(0,0,0,0.15)] border-transparent disabled:opacity-70 ${
+                  pulsing === "pix" ? "animate-pulse-once border-[#E7A63A] !shadow-[0px_0px_0px_3px_rgba(231,166,58,0.3)]" : ""
                 }`}
               >
                 <div className="flex items-center gap-4 flex-wrap">
@@ -108,19 +118,23 @@ export function PagamentoSelecao({
                       Aprovacao imediata
                     </span>
                   </div>
+                  {pulsing === "pix" && (
+                    <div className="w-4 h-4 border-2 border-[#254333] border-t-transparent rounded-full animate-spin ml-auto" />
+                  )}
                 </div>
               </button>
 
               {/* Cartao de Credito */}
               <button
-                onClick={() => setSelecionado("cartao")}
-                className={`w-full rounded-[8px] border bg-white p-4 text-left transition-all shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.3),0px_2px_6px_2px_rgba(0,0,0,0.15)] ${
-                  selecionado === "cartao" ? "border-[#E7A63A]" : "border-transparent"
+                onClick={() => handleSelecionar("cartao")}
+                disabled={loading || !!pulsing}
+                className={`w-full rounded-[8px] border bg-white p-4 text-left transition-all shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] hover:shadow-[0px_2px_4px_0px_rgba(0,0,0,0.3),0px_2px_6px_2px_rgba(0,0,0,0.15)] border-transparent disabled:opacity-70 ${
+                  pulsing === "cartao" ? "animate-pulse-once border-[#E7A63A] !shadow-[0px_0px_0px_3px_rgba(231,166,58,0.3)]" : ""
                 }`}
               >
                 <div className="flex items-start gap-1">
                   <Image src="/icons/card.svg" alt="Cartao" width={24} height={24} />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 flex-1">
                     <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#254333]">
                       Cartao de credito {formatPrice(valorTotal)}
                     </span>
@@ -128,20 +142,12 @@ export function PagamentoSelecao({
                       Ate 3x {formatPrice(valorTotal / 3)} sem juros
                     </span>
                   </div>
+                  {pulsing === "cartao" && (
+                    <div className="w-4 h-4 border-2 border-[#254333] border-t-transparent rounded-full animate-spin self-center" />
+                  )}
                 </div>
               </button>
             </div>
-
-            {/* Botao Finalizar compra */}
-            <button
-              onClick={handleFinalizar}
-              disabled={loading}
-              className="mt-2 w-full h-[56px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a3025] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              <span className="font-cera-pro font-medium text-[16px] text-white">
-                {loading ? "Processando..." : "Finalizar compra"}
-              </span>
-            </button>
           </div>
         </div>
       </div>
