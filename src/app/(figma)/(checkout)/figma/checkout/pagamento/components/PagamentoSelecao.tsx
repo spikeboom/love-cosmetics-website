@@ -124,7 +124,7 @@ export function PagamentoSelecao({
                     <span className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-[#254333]">
                       Cartao de credito {formatPrice(valorTotal)}
                     </span>
-                    <span className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#333333]">
+                    <span className="font-cera-pro font-light text-[16px] lg:text-[16px] text-[#333333]">
                       Ate 3x {formatPrice(valorTotal / 3)} sem juros
                     </span>
                   </div>
@@ -136,7 +136,7 @@ export function PagamentoSelecao({
             <button
               onClick={handleFinalizar}
               disabled={loading}
-              className="w-full h-[56px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a3025] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="mt-2 w-full h-[56px] bg-[#254333] rounded-[8px] flex items-center justify-center hover:bg-[#1a3025] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               <span className="font-cera-pro font-medium text-[16px] text-white">
                 {loading ? "Processando..." : "Finalizar compra"}

@@ -36,7 +36,7 @@ export function CartCouponInput({ onApply, onRemove, cupons }: CartCouponInputPr
   };
 
   return (
-    <div className="flex flex-col gap-[16px] items-start w-full md:w-[447px]">
+    <div className="flex flex-col gap-[12px] items-start w-full md:w-[447px]">
       {/* Title */}
       <h3 className="font-cera-pro font-bold text-[20px] text-black leading-[1.257] w-full">
         Cupom de desconto

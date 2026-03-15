@@ -26,7 +26,7 @@ interface ShippingCalculatorProps {
 }
 
 export function ShippingCalculator({
-  title = "Calcule o frete",
+  title = "Consultar frete",
   buttonLabel = "Calcular",
   placeholder = "Digite seu CEP",
   inputFontSize = 'large',
@@ -165,7 +165,7 @@ export function ShippingCalculator({
   ]);
 
   return (
-    <div className={`flex flex-col gap-[16px] items-start w-full ${width === 'fixed' ? 'md:w-[447px]' : ''}`}>
+    <div className={`flex flex-col gap-[12px] items-start w-full ${width === 'fixed' ? 'md:w-[447px]' : ''}`}>
       {/* Title - Frame 7149 */}
       <p className="font-cera-pro font-bold text-[20px] text-black leading-[1.257] w-full">
         {title}
@@ -273,7 +273,7 @@ export function ShippingCalculator({
                   height={16}
                   className="w-4 h-4 flex-shrink-0"
                 />
-                <p className="font-cera-pro font-light text-[12px] text-[#009142] leading-[1.257]">
+                <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-[1.257]">
                   CEP {cep} - {selectedService.carrier} - Entrega em {selectedService.deliveryTime} {selectedService.deliveryTime === 1 ? 'dia útil' : 'dias úteis'}
                 </p>
               </div>
@@ -293,7 +293,7 @@ export function ShippingCalculator({
               height={16}
               className="w-4 h-4 flex-shrink-0"
             />
-            <p className="font-cera-pro font-light text-[12px] text-[#009142] leading-[1.257]">
+            <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-[1.257]">
               até {selectedService.deliveryTime} dia(s) úteis - {formatPrice(selectedService.price)}
             </p>
           </div>

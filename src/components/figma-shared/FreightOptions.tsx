@@ -34,13 +34,13 @@ export function FreightOptions({
     const combined = `${carrier} ${name}`;
 
     if (combined.includes("correios") && combined.includes("pac")) {
-      return "Entrega Econômica";
+      return "Econômica";
     }
     if (combined.includes("jadlog") && combined.includes("package")) {
-      return "Entrega Padrão";
+      return "Padrão";
     }
     if (combined.includes("correios") && combined.includes("sedex")) {
-      return "Entrega Expressa";
+      return "Expressa";
     }
 
     return `${service.carrier} (${service.service})`;
@@ -61,14 +61,14 @@ export function FreightOptions({
               : "border-[#d2d2d2] hover:border-[#254333]"
           }`}
         >
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <input
-              type="radio"
-              name={radioName}
-              checked={selectedIndex === originalIndex}
-              onChange={() => onSelect(originalIndex)}
-              className="w-4 h-4 text-[#254333] focus:ring-[#254333]"
-            />
+          <input
+            type="radio"
+            name={radioName}
+            checked={selectedIndex === originalIndex}
+            onChange={() => onSelect(originalIndex)}
+            className="sr-only"
+          />
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="font-cera-pro font-bold text-[14px] lg:text-[16px] text-[#111111] truncate">
               {getServiceTitle(service)}
             </span>
@@ -83,7 +83,7 @@ export function FreightOptions({
           </div>
           <div className="ml-3 flex items-center gap-2 flex-shrink-0">
             <span className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#666666] whitespace-nowrap">
-              {service.deliveryTime} dia(s) úteis
+              até {service.deliveryTime} dias úteis
             </span>
             <span
               className={`font-cera-pro font-bold text-[14px] lg:text-[16px] whitespace-nowrap ${

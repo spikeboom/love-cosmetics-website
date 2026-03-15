@@ -179,9 +179,9 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
           <CartHeader />
 
           {/* Conteúdo Principal */}
-          <div className="flex flex-col md:flex-row w-full self-stretch gap-8 md:gap-6 px-4 md:px-6 pb-8 pt-4 md:pt-6">
+          <div className="flex flex-col md:flex-row w-full self-stretch gap-8 md:gap-6 px-4 md:px-6 pb-8 pt-1 md:pt-6">
             {/* Coluna Esquerda/Única - Produtos, Frete e Cupom */}
-            <div className="flex flex-col gap-8 w-full md:flex-1 md:min-w-0">
+            <div className="flex flex-col gap-2 md:gap-4 w-full md:flex-1 md:min-w-0">
               {/* Lista de Produtos */}
               <CartProductsList
                 produtos={cartArray}

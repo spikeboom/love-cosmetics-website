@@ -67,7 +67,7 @@ export function CartProductsList({
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {produtos.map((produto, index) => {
         // Preço atual (preço base, sem cupom — desconto de cupom é no total)
         const precoAtual = produto.preco;

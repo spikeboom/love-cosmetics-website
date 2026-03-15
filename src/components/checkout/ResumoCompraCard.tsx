@@ -59,7 +59,7 @@ export function ResumoCompraCard({
   collapsible = false,
   defaultCollapsed = true,
 }: ResumoCompraCardProps) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(defaultCollapsed);
 
   // Calcular resumo de acordo com o mode
@@ -160,17 +160,34 @@ export function ResumoCompraCard({
           </div>
 
           {/* Total */}
-          <div className="flex justify-between items-stretch self-stretch gap-8">
-            <h2 className={`flex-1 font-cera-pro font-medium leading-[1.257] text-[#111111] ${
-              isMobile ? 'text-base' : 'text-2xl font-bold'
-            }`}>
-              Total
-            </h2>
-            <h2 className={`font-cera-pro font-medium leading-[1.257] text-[#111111] ${
-              isMobile ? 'text-base' : 'text-2xl font-bold'
-            }`}>
-              {formatPrice(resumo.produtosFinal + (freteCalculado ? frete : 0))}
-            </h2>
+          <div className="flex flex-col self-stretch gap-1">
+            <div className="flex justify-between items-stretch self-stretch gap-8">
+              <h2 className={`flex-1 font-cera-pro font-medium leading-[1.257] text-[#111111] ${
+                isMobile ? 'text-base' : 'text-2xl font-bold'
+              }`}>
+                Total
+              </h2>
+              <h2 className={`font-cera-pro font-medium leading-[1.257] text-[#111111] ${
+                isMobile ? 'text-base' : 'text-2xl font-bold'
+              }`}>
+                {formatPrice(resumo.produtosFinal + (freteCalculado ? frete : 0))}
+              </h2>
+            </div>
+            {/* Parcelamento */}
+            {(() => {
+              const total = resumo.produtosFinal + (freteCalculado ? frete : 0);
+              const maxParcelas = total / 3 >= 5 ? 3 : total / 2 >= 5 ? 2 : 0;
+              if (maxParcelas >= 2) {
+                return (
+                  <p className={`font-cera-pro font-light text-[#666666] text-right ${
+                    isMobile ? 'text-[12px]' : 'text-[14px]'
+                  }`}>
+                    ou {maxParcelas}x de {formatPrice(total / maxParcelas)} sem juros
+                  </p>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           {/* Aviso de carrinho desatualizado */}
@@ -362,7 +379,7 @@ export function ResumoCompraCard({
             className="w-full bg-[#f8f3ed] rounded-[8px] p-4 flex items-center justify-between"
           >
             <span className="font-cera-pro font-bold text-[18px] text-[#111111]">
-              {isCollapsed ? 'Ver resumo' : 'Ocultar resumo'}
+              {isCollapsed ? 'Ver resumo' : 'Resumo'}
             </span>
             <div className="flex items-center gap-2">
               <span className="font-cera-pro font-bold text-[18px] text-black">

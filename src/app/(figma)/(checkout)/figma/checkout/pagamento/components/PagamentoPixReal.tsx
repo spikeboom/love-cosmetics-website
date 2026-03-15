@@ -416,7 +416,7 @@ export function PagamentoPixReal({
               <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
                 <button
                   onClick={() => router.push("/figma/design")}
-                  className="flex-1 h-[60px] bg-[#d8f9e7] rounded-[8px] flex items-center justify-center hover:bg-[#c5f0da] transition-colors"
+                  className="py-2 flex-1 h-[60px] bg-[#d8f9e7] rounded-[8px] flex items-center justify-center hover:bg-[#c5f0da] transition-colors"
                 >
                   <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-[#254333]">
                     Ir para pagina inicial
@@ -435,7 +435,7 @@ export function PagamentoPixReal({
                       </span>
                     </>
                   ) : (
-                    <span className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-white">
+                    <span className="py-2 font-cera-pro font-bold text-[20px] lg:text-[24px] text-white">
                       Ja realizei o Pix
                     </span>
                   )}
