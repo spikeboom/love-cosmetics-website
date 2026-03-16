@@ -7,11 +7,17 @@ interface FunnelStep {
   key: string;
   label: string;
   count: number;
+  users: number;
+  events: number;
 }
+
+type ViewMode = "sessions" | "users" | "events";
 
 interface FunnelData {
   steps: FunnelStep[];
   totalSessions: number;
+  totalUsers: number;
+  totalEvents: number;
   dataInicio: string;
   dataFim: string;
 }
@@ -55,6 +61,7 @@ export function FunilPanel() {
   const [dataInicio, setDataInicio] = useState(defaultInicio);
   const [dataFim, setDataFim] = useState(defaultFim);
   const [channel, setChannel] = useState("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("sessions");
 
   const fetchFunnel = async () => {
     setLoading(true);
@@ -110,8 +117,12 @@ export function FunilPanel() {
 
   if (!data) return null;
 
-  const { steps, totalSessions } = data;
-  const maxCount = steps[0]?.count || 1;
+  const { steps, totalSessions, totalUsers, totalEvents } = data;
+  const getValue = (step: FunnelStep) =>
+    viewMode === "users" ? step.users : viewMode === "events" ? step.events : step.count;
+  const maxCount = getValue(steps[0]) || 1;
+  const totalDisplay = viewMode === "users" ? totalUsers : viewMode === "events" ? totalEvents : totalSessions;
+  const viewModeLabel = viewMode === "users" ? "usuários" : viewMode === "events" ? "eventos" : "sessões";
 
   return (
     <div className="space-y-6">
@@ -129,7 +140,7 @@ export function FunilPanel() {
                 Funil de Conversão
               </p>
               <p className="font-cera-pro font-light text-[12px] text-[#666666]">
-                {totalSessions.toLocaleString("pt-BR")} sessões ({numDays} dias)
+                {totalDisplay.toLocaleString("pt-BR")} {viewModeLabel} ({numDays} dias)
                 {channel !== "all" && (
                   <span className="ml-1 px-2 py-0.5 bg-[#D8F9E7] rounded text-[11px] text-[#254333] font-medium">
                     {({ paid_social: "Paid Social", organic_social: "Social Orgânico", organic_search: "Busca Orgânica", direct: "Direto" } as Record<string, string>)[channel]}
@@ -140,6 +151,16 @@ export function FunilPanel() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value as ViewMode)}
+              className="px-4 py-2 border border-[#d2d2d2] rounded-[8px] font-cera-pro font-medium text-[14px] text-[#333333] bg-white hover:bg-[#f8f3ed] transition-colors cursor-pointer"
+            >
+              <option value="sessions">Sessões</option>
+              <option value="users">Usuários únicos</option>
+              <option value="events">Eventos</option>
+            </select>
+
             <select
               value={channel}
               onChange={(e) => setChannel(e.target.value)}
@@ -201,10 +222,12 @@ export function FunilPanel() {
       <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6 lg:p-8">
         <div className="space-y-3">
           {steps.map((step, i) => {
-            const widthPct = maxCount > 0 ? Math.max((step.count / maxCount) * 100, 4) : 4;
-            const prevCount = i > 0 ? steps[i - 1].count : step.count;
-            const dropRate = prevCount > 0 ? ((prevCount - step.count) / prevCount) * 100 : 0;
-            const conversionFromFirst = steps[0].count > 0 ? (step.count / steps[0].count) * 100 : 0;
+            const val = getValue(step);
+            const firstVal = getValue(steps[0]);
+            const prevVal = i > 0 ? getValue(steps[i - 1]) : val;
+            const widthPct = maxCount > 0 ? Math.max((val / maxCount) * 100, 4) : 4;
+            const dropRate = prevVal > 0 ? ((prevVal - val) / prevVal) * 100 : 0;
+            const conversionFromFirst = firstVal > 0 ? (val / firstVal) * 100 : 0;
 
             return (
               <div key={step.key} className="group">
@@ -233,7 +256,7 @@ export function FunilPanel() {
                       }}
                     >
                       <span className="font-cera-pro font-bold text-[13px] text-white whitespace-nowrap">
-                        {step.count.toLocaleString("pt-BR")}
+                        {val.toLocaleString("pt-BR")}
                       </span>
                     </div>
                   </div>
@@ -271,25 +294,25 @@ export function FunilPanel() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard
               label="Taxa de Conversão"
-              value={`${steps[0].count > 0 ? ((steps[steps.length - 1].count / steps[0].count) * 100).toFixed(2) : 0}%`}
+              value={`${getValue(steps[0]) > 0 ? ((getValue(steps[steps.length - 1]) / getValue(steps[0])) * 100).toFixed(2) : 0}%`}
               subtitle="Página → Compra"
               color="#009142"
             />
             <SummaryCard
               label="Carrinho → Compra"
-              value={`${steps[4]?.count > 0 ? ((steps[steps.length - 1].count / steps[4].count) * 100).toFixed(1) : 0}%`}
+              value={`${getValue(steps[4]) > 0 ? ((getValue(steps[steps.length - 1]) / getValue(steps[4])) * 100).toFixed(1) : 0}%`}
               subtitle="Conversão do carrinho"
               color="#254333"
             />
             <SummaryCard
               label="Checkout → Compra"
-              value={`${steps[5]?.count > 0 ? ((steps[steps.length - 1].count / steps[5].count) * 100).toFixed(1) : 0}%`}
+              value={`${getValue(steps[5]) > 0 ? ((getValue(steps[steps.length - 1]) / getValue(steps[5])) * 100).toFixed(1) : 0}%`}
               subtitle="Conversão do checkout"
               color="#254333"
             />
             <SummaryCard
               label="Total de Compras"
-              value={steps[steps.length - 1].count.toLocaleString("pt-BR")}
+              value={getValue(steps[steps.length - 1]).toLocaleString("pt-BR")}
               subtitle={`${numDays} dias`}
               color="#009142"
             />

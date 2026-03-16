@@ -9,6 +9,22 @@ function getDataLayer(): DataLayer | null {
   return w.dataLayer;
 }
 
+import { TEST_EMAIL_PATTERNS } from "@/lib/test-emails";
+
+function markTestUser(email: string): void {
+  const dl = getDataLayer();
+  if (!dl) return;
+  const lower = email.toLowerCase();
+  if (TEST_EMAIL_PATTERNS.some((p) => lower.includes(p))) {
+    dl.push({ is_test_user: true });
+    try { sessionStorage.setItem("is_test_user", "1"); } catch {}
+  }
+}
+
+function isTestUser(): boolean {
+  try { return sessionStorage.getItem("is_test_user") === "1"; } catch { return false; }
+}
+
 function getCheckoutSessionId(): string | undefined {
   if (typeof window === "undefined") return undefined;
   try {
@@ -89,6 +105,7 @@ function pushEcommerceEvent(
     tax: ecommerce.tax,
     coupon: ecommerce.coupon,
     num_items: ecommerce.items?.length,
+    is_test_user: isTestUser() || undefined,
     ...extra,
   });
 }
@@ -199,6 +216,8 @@ export function ucUserDataUpdate(args: {
     street?: string;
   };
 }) {
+  if (args.email) markTestUser(args.email);
+
   const dl = getDataLayer();
   if (!dl) return;
 
@@ -228,6 +247,7 @@ export function ucUserDataUpdate(args: {
     checkout_city: args.address?.city || undefined,
     checkout_region: args.address?.region || undefined,
     checkout_postal_code: args.address?.postal_code || undefined,
+    is_test_user: isTestUser() || undefined,
   });
 }
 
@@ -242,6 +262,7 @@ export function ucCheckoutStep(args: { step: UCCheckoutStep }) {
     checkout_step: args.step,
     checkout_step_number: checkoutStepNumber[args.step],
     url_pagina: window.location.href,
+    is_test_user: isTestUser() || undefined,
   });
 }
 
