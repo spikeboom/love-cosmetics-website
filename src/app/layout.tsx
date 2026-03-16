@@ -57,11 +57,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <GoogleTagManager
-          gtmId="GTM-T7ZMDHZF"
-          gtmScriptUrl="https://gtm.lovecosmetics.com.br/gtm.js"
-        />
-        <GoogleTagManager gtmId="GTM-WQPKGCZ2" />
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <GoogleTagManager
+              gtmId="GTM-T7ZMDHZF"
+              gtmScriptUrl="https://gtm.lovecosmetics.com.br/gtm.js"
+            />
+            <GoogleTagManager gtmId="GTM-WQPKGCZ2" />
+          </>
+        )}
         {/* PagBank SDK para criptografia de cartão */}
         <Script
           src="https://assets.pagseguro.com.br/checkout-sdk-js/rc/dist/browser/pagseguro.min.js"

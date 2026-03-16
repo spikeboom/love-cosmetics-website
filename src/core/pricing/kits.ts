@@ -58,17 +58,8 @@ export function getKitDiscount(product: { nome?: string | null; slug?: string | 
 
   if (!haystack) return null;
 
-  // Regras hard-coded
-  if (haystack.includes("kit uso diario")) {
-    return { percent: 0.1, label: "10% OFF" };
-  }
-
-  // Kit Completo = Kit Full Lové = 15% OFF
-  if (haystack.includes("kit completo") || haystack.includes("kit full")) {
-    return { percent: 0.15, label: "15% OFF" };
-  }
-
-  return null;
+  // 40% OFF em todos os produtos
+  return { percent: 0.4, label: "40% OFF" };
 }
 
 function roundMoney(value: number) {

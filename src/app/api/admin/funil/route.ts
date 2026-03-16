@@ -13,14 +13,14 @@ function getBigQueryClient(): BigQuery {
 
 const CHANNEL_FILTERS: Record<string, string> = {
   all: "",
-  paid_social: `AND session_source IN ('ig', 'facebook', 'fb', 'instagram', 'meta')
-    AND session_medium IN ('paid', 'cpc', 'ppc', 'paidsocial')`,
-  organic_social: `AND session_source IN ('ig', 'facebook', 'fb', 'instagram', 'l.instagram.com', 'm.facebook.com', 'l.facebook.com', 'facebook.com', 'instagram.com')
-    AND session_medium IN ('organic', 'social', 'referral')`,
-  organic_search: `AND session_medium = 'organic'
-    AND session_source IN ('google', 'bing', 'yahoo', 'duckduckgo')`,
-  direct: `AND (session_source IS NULL OR session_source = '(direct)')
-    AND (session_medium IS NULL OR session_medium = '(none)')`,
+  paid_social: `AND user_source IN ('ig', 'facebook', 'fb', 'instagram', 'meta')
+    AND user_medium IN ('paid', 'cpc', 'ppc', 'paidsocial')`,
+  organic_social: `AND user_source IN ('ig', 'facebook', 'fb', 'instagram', 'l.instagram.com', 'm.facebook.com', 'l.facebook.com', 'facebook.com', 'instagram.com')
+    AND user_medium IN ('organic', 'social', 'referral')`,
+  organic_search: `AND user_medium = 'organic'
+    AND user_source IN ('google', 'bing', 'yahoo', 'duckduckgo')`,
+  direct: `AND (user_source IS NULL OR user_source = '(direct)')
+    AND (user_medium IS NULL OR user_medium = '(none)')`,
 };
 
 function formatDateBQ(dateStr: string): string {
@@ -64,25 +64,29 @@ export async function GET(req: NextRequest) {
     const query = `
       WITH raw_events AS (
         SELECT
+          user_pseudo_id,
           CONCAT(user_pseudo_id, '.', CAST(
             (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS STRING
           )) AS session_id,
           event_name,
           (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_step') AS checkout_step_name,
-          collected_traffic_source.manual_source AS traffic_source,
-          collected_traffic_source.manual_medium AS traffic_medium
+          traffic_source.source AS user_source,
+          traffic_source.medium AS user_medium
         FROM \`${dataset}.events_*\`
         WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+          AND IFNULL(
+            (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'),
+            ''
+          ) NOT LIKE '%localhost%'
       ),
 
-      session_traffic AS (
+      user_traffic AS (
         SELECT
-          session_id,
-          ARRAY_AGG(traffic_source IGNORE NULLS ORDER BY traffic_source LIMIT 1)[SAFE_OFFSET(0)] AS session_source,
-          ARRAY_AGG(traffic_medium IGNORE NULLS ORDER BY traffic_medium LIMIT 1)[SAFE_OFFSET(0)] AS session_medium
+          user_pseudo_id,
+          ARRAY_AGG(user_source IGNORE NULLS LIMIT 1)[SAFE_OFFSET(0)] AS user_source,
+          ARRAY_AGG(user_medium IGNORE NULLS LIMIT 1)[SAFE_OFFSET(0)] AS user_medium
         FROM raw_events
-        WHERE session_id IS NOT NULL
-        GROUP BY session_id
+        GROUP BY user_pseudo_id
       ),
 
       session_events AS (
@@ -90,11 +94,12 @@ export async function GET(req: NextRequest) {
           r.session_id,
           ARRAY_AGG(DISTINCT r.event_name) AS events,
           ARRAY_AGG(DISTINCT r.checkout_step_name IGNORE NULLS) AS checkout_steps,
-          t.session_source,
-          t.session_medium
+          t.user_source,
+          t.user_medium
         FROM raw_events r
-        JOIN session_traffic t ON r.session_id = t.session_id
-        GROUP BY r.session_id, t.session_source, t.session_medium
+        JOIN user_traffic t ON r.user_pseudo_id = t.user_pseudo_id
+        WHERE r.session_id IS NOT NULL
+        GROUP BY r.session_id, t.user_source, t.user_medium
       ),
 
       filtered_sessions AS (
