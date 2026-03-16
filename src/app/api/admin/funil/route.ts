@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BigQuery } from "@google-cloud/bigquery";
+import { prisma } from "@/lib/prisma";
 
 function getBigQueryClient(): BigQuery {
   const raw = process.env.BQ_CREDENTIALS;
@@ -61,8 +62,36 @@ export async function GET(req: NextRequest) {
   try {
     const bq = getBigQueryClient();
 
+    // Fetch test checkout_session_ids from DB to exclude internal users
+    const EXCLUDED_EMAIL_PATTERNS = ['teste', 'spikeboom', 'isabellejordanaa', 'adrianofne', 'uconvert'];
+    const testCheckouts = await prisma.checkoutAbandonado.findMany({
+      where: {
+        OR: EXCLUDED_EMAIL_PATTERNS.map((p) => ({
+          email: { contains: p, mode: "insensitive" as const },
+        })),
+      },
+      select: { sessionId: true },
+      distinct: ["sessionId"],
+    });
+    const testSessionIds = [...new Set(testCheckouts.map((r) => r.sessionId))];
+
+    const excludedCTE = testSessionIds.length > 0
+      ? `excluded_users AS (
+        SELECT DISTINCT user_pseudo_id
+        FROM \`${dataset}.events_*\`
+        WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+          AND (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_session_id')
+            IN (${testSessionIds.map((id) => `'${id}'`).join(", ")})
+      ),`
+      : "";
+
+    const excludeFilter = testSessionIds.length > 0
+      ? "AND user_pseudo_id NOT IN (SELECT user_pseudo_id FROM excluded_users)"
+      : "";
+
     const query = `
-      WITH raw_events AS (
+      WITH ${excludedCTE}
+      raw_events AS (
         SELECT
           user_pseudo_id,
           CONCAT(user_pseudo_id, '.', CAST(
@@ -78,6 +107,7 @@ export async function GET(req: NextRequest) {
             (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'),
             ''
           ) NOT LIKE '%localhost%'
+          ${excludeFilter}
       ),
 
       user_traffic AS (
