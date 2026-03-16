@@ -33,6 +33,7 @@ function formatDateBQ(dateStr: string): string {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const channel = searchParams.get("channel") || "all";
+  const excludeTests = searchParams.get("excludeTests") !== "false"; // default true
   const dataset = process.env.BQ_DATASET_ID || "analytics_468537898";
   const channelFilter = CHANNEL_FILTERS[channel] || "";
 
@@ -64,16 +65,21 @@ export async function GET(req: NextRequest) {
     const bq = getBigQueryClient();
 
     // Fetch test checkout_session_ids from DB to exclude internal users
-    const testCheckouts = await prisma.checkoutAbandonado.findMany({
-      where: {
-        OR: TEST_EMAIL_PATTERNS.map((p) => ({
-          email: { contains: p, mode: "insensitive" as const },
-        })),
-      },
-      select: { sessionId: true },
-      distinct: ["sessionId"],
-    });
-    const testSessionIds = [...new Set(testCheckouts.map((r) => r.sessionId))];
+    let testSessionIds: string[] = [];
+    if (excludeTests) {
+      const testCheckouts = await prisma.checkoutAbandonado.findMany({
+        where: {
+          OR: TEST_EMAIL_PATTERNS.map((p) => ({
+            email: { contains: p, mode: "insensitive" as const },
+          })),
+        },
+        select: { sessionId: true },
+        distinct: ["sessionId"],
+      });
+      testSessionIds = [...new Set(
+        testCheckouts.map((r) => r.sessionId).filter((id): id is string => id != null)
+      )];
+    }
 
     const excludedCTE = testSessionIds.length > 0
       ? `excluded_users AS (
@@ -81,12 +87,12 @@ export async function GET(req: NextRequest) {
         FROM \`${dataset}.events_*\`
         WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
           AND (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_session_id')
-            IN (${testSessionIds.map((id) => `'${id}'`).join(", ")})
+            IN UNNEST(@testSessionIds)
       ),`
       : "";
 
     const excludeFilter = testSessionIds.length > 0
-      ? "AND user_pseudo_id NOT IN (SELECT user_pseudo_id FROM excluded_users)"
+      ? "AND NOT EXISTS (SELECT 1 FROM excluded_users ex WHERE ex.user_pseudo_id = events.user_pseudo_id)"
       : "";
 
     const query = `
@@ -101,7 +107,7 @@ export async function GET(req: NextRequest) {
           (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_step') AS checkout_step_name,
           traffic_source.source AS user_source,
           traffic_source.medium AS user_medium
-        FROM \`${dataset}.events_*\`
+        FROM \`${dataset}.events_*\` events
         WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
           AND IFNULL(
             (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'),
@@ -196,7 +202,14 @@ export async function GET(req: NextRequest) {
       FROM funnel f, event_counts e
     `;
 
-    const [rows] = await bq.query({ query });
+    const queryParams: Record<string, unknown> = {};
+    if (testSessionIds.length > 0) {
+      queryParams.testSessionIds = testSessionIds;
+    }
+    const [rows] = await bq.query({
+      query,
+      params: queryParams,
+    });
 
     const data = rows[0] || {};
 
@@ -219,7 +232,7 @@ export async function GET(req: NextRequest) {
     const totalUsers = Number(data.total_users || 0);
     const totalEvents = Number(data.total_events || 0);
 
-    return NextResponse.json({ steps, totalSessions, totalUsers, totalEvents, dataInicio, dataFim, channel });
+    return NextResponse.json({ steps, totalSessions, totalUsers, totalEvents, dataInicio, dataFim, channel, excludeTests });
   } catch (err: unknown) {
     console.error("Funil API error:", err);
     const message = err instanceof Error ? err.message : "Erro desconhecido";

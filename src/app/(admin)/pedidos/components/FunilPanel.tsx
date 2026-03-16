@@ -62,12 +62,13 @@ export function FunilPanel() {
   const [dataFim, setDataFim] = useState(defaultFim);
   const [channel, setChannel] = useState("all");
   const [viewMode, setViewMode] = useState<ViewMode>("sessions");
+  const [excludeTests, setExcludeTests] = useState(true);
 
   const fetchFunnel = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/funil?dataInicio=${dataInicio}&dataFim=${dataFim}&channel=${channel}`);
+      const res = await fetch(`/api/admin/funil?dataInicio=${dataInicio}&dataFim=${dataFim}&channel=${channel}&excludeTests=${excludeTests}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "Erro ao buscar funil");
@@ -162,6 +163,24 @@ export function FunilPanel() {
               <option value="users">Usuários únicos</option>
               <option value="events">Eventos</option>
             </select>
+
+            <button
+              onClick={() => setExcludeTests(!excludeTests)}
+              className={`flex items-center gap-2 px-4 py-2 border rounded-[8px] font-cera-pro font-medium text-[14px] transition-colors cursor-pointer ${
+                excludeTests
+                  ? "border-[#254333] bg-[#D8F9E7] text-[#254333]"
+                  : "border-[#d2d2d2] bg-white text-[#999999]"
+              }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {excludeTests ? (
+                  <><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M9 12l2 2 4-4" /></>
+                ) : (
+                  <rect x="3" y="3" width="18" height="18" rx="3" />
+                )}
+              </svg>
+              Excluir testes
+            </button>
 
             <select
               value={channel}
@@ -304,30 +323,44 @@ export function FunilPanel() {
         {/* Summary */}
         <div className="mt-8 pt-6 border-t border-[#e5e5e5]">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <SummaryCard
-              label="Taxa de Conversão"
-              value={`${getValue(steps[0]) > 0 ? ((getValue(steps[steps.length - 1]) / getValue(steps[0])) * 100).toFixed(2) : 0}%`}
-              subtitle="Página → Compra"
-              color="#009142"
-            />
-            <SummaryCard
-              label="Carrinho → Compra"
-              value={`${getValue(steps[4]) > 0 ? ((getValue(steps[steps.length - 1]) / getValue(steps[4])) * 100).toFixed(1) : 0}%`}
-              subtitle="Conversão do carrinho"
-              color="#254333"
-            />
-            <SummaryCard
-              label="Checkout → Compra"
-              value={`${getValue(steps[5]) > 0 ? ((getValue(steps[steps.length - 1]) / getValue(steps[5])) * 100).toFixed(1) : 0}%`}
-              subtitle="Conversão do checkout"
-              color="#254333"
-            />
-            <SummaryCard
-              label="Total de Compras"
-              value={getValue(steps[steps.length - 1]).toLocaleString("pt-BR")}
-              subtitle={`${numDays} dias`}
-              color="#009142"
-            />
+            {(() => {
+              const purchaseStep = steps.find((s) => s.key === "purchase") || steps[steps.length - 1];
+              const cartStep = steps.find((s) => s.key === "view_cart");
+              const checkoutStep = steps.find((s) => s.key === "begin_checkout");
+              const firstStep = steps[0];
+              const purchaseVal = getValue(purchaseStep);
+              const firstVal = getValue(firstStep);
+              const cartVal = cartStep ? getValue(cartStep) : 0;
+              const checkoutVal = checkoutStep ? getValue(checkoutStep) : 0;
+              return (
+                <>
+                  <SummaryCard
+                    label="Taxa de Conversão"
+                    value={`${firstVal > 0 ? ((purchaseVal / firstVal) * 100).toFixed(2) : 0}%`}
+                    subtitle="Página → Compra"
+                    color="#009142"
+                  />
+                  <SummaryCard
+                    label="Carrinho → Compra"
+                    value={`${cartVal > 0 ? ((purchaseVal / cartVal) * 100).toFixed(1) : 0}%`}
+                    subtitle="Conversão do carrinho"
+                    color="#254333"
+                  />
+                  <SummaryCard
+                    label="Checkout → Compra"
+                    value={`${checkoutVal > 0 ? ((purchaseVal / checkoutVal) * 100).toFixed(1) : 0}%`}
+                    subtitle="Conversão do checkout"
+                    color="#254333"
+                  />
+                  <SummaryCard
+                    label="Total de Compras"
+                    value={purchaseVal.toLocaleString("pt-BR")}
+                    subtitle={`${numDays} dias`}
+                    color="#009142"
+                  />
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>
