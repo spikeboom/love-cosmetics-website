@@ -184,7 +184,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               <div className="flex items-center justify-between w-full">
                 <div className="flex flex-col gap-[8px] items-start leading-[normal] text-nowrap whitespace-pre relative shrink-0">
                   {priceInfo.precoOriginalFormatado && (
-                    <p className="font-cera-pro font-light text-[14px] text-[#333333] line-through decoration-solid leading-[normal] relative shrink-0">
+                    <p className="font-cera-pro font-light text-[16px] text-[#333333] line-through decoration-solid leading-[normal] relative shrink-0">
                       R$ {priceInfo.precoOriginalFormatado}
                     </p>
                   )}
@@ -198,7 +198,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                       </p>
                     )}
                   </div>
-                  <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[normal] relative shrink-0">
+                  <p className="font-cera-pro font-light text-[16px] text-[#333333] leading-[normal] relative shrink-0">
                     {priceInfo.parcelas}
                   </p>
                 </div>

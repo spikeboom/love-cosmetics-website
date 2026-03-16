@@ -26,7 +26,7 @@ export function FloatingProductCTA({
       <div className="flex flex-col gap-[8px]">
         {/* R$ 129,99 - textStyle: Love Offer */}
         {precoDe && (
-          <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.256] line-through decoration-solid">
+          <p className="font-cera-pro font-light text-[16px] text-[#333333] leading-[1.256] line-through decoration-solid">
             R$ {precoDe.toFixed(2).replace('.', ',')}
           </p>
         )}
@@ -40,7 +40,7 @@ export function FloatingProductCTA({
 
           {/* Desconto - textStyle: Love Texto 14 */}
           {desconto && (
-            <p className="font-cera-pro font-light text-[14px] text-[#009142] leading-[1.256]">
+            <p className="font-cera-pro font-light text-[16px] text-[#009142] leading-[1.256]">
               {desconto}
             </p>
           )}
@@ -48,7 +48,7 @@ export function FloatingProductCTA({
 
         {/* 3x R$33,33 sem juros - textStyle: Love Texto 12 */}
         {parcelas && (
-          <p className="font-cera-pro font-light text-[14px] text-[#333333] leading-[1.256]">
+          <p className="font-cera-pro font-light text-[16px] text-[#333333] leading-[1.256]">
             {parcelas}
           </p>
         )}

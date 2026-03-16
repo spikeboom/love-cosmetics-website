@@ -18,6 +18,16 @@ interface BannerSlide {
 const bannerSlides: BannerSlide[] = [
   {
     id: 1,
+    image: "/new-home/banner/banner-semana-do-consumidor-full.png",
+    imageMobile: "/new-home/banner/banner-semana-do-consumidor-mobile.png",
+    discount: "Até 40% OFF",
+    title: "Semana do Consumidor Lovè.",
+    description: "Até 40% OFF em todo o site.",
+    cta: "Aproveitar ofertas",
+    href: "/figma/search?q=kit",
+  },
+  {
+    id: 2,
     image: "/new-home/banner/banner-mes-da-mulher-1-full.png",
     imageMobile: "/new-home/banner/banner-mes-da-mulher-1-mobile.png",
     title: "Respeito não é presente.\nÉ princípio.",
@@ -26,23 +36,13 @@ const bannerSlides: BannerSlide[] = [
     href: "/figma/search",
   },
   {
-    id: 2,
+    id: 3,
     image: "/new-home/banner/banner-tecnologia-amazonia-full.png",
     imageMobile: "/new-home/banner/banner-tecnologia-amazonia-mobile.png",
     title: "Tecnologia & Amazônia",
     description: "Ativos amazônicos com ciência para cuidar da sua pele.",
     cta: "Ver todos os produtos",
     href: "/figma/search",
-  },
-  {
-    id: 3,
-    image: "/new-home/banner/banner-kits-full.png",
-    imageMobile: "/new-home/banner/banner-kits-mobile.png",
-    discount: "Até 15% OFF",
-    title: "Kits Lovè",
-    description: "Hidratação profunda, alívio das inflamações e renovação da pele.",
-    cta: "Ver kits",
-    href: "/figma/search?q=kit",
   },
 ];
 
