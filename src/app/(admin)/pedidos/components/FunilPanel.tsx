@@ -87,7 +87,7 @@ export function FunilPanel() {
 
   const numDays = diffDays(dataInicio, dataFim);
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="flex items-center justify-center py-20">
         <SpinnerIcon className="h-8 w-8 text-[#254333]" />
@@ -120,7 +120,9 @@ export function FunilPanel() {
   const { steps, totalSessions, totalUsers, totalEvents } = data;
   const getValue = (step: FunnelStep) =>
     viewMode === "users" ? step.users : viewMode === "events" ? step.events : step.count;
-  const maxCount = getValue(steps[0]) || 1;
+  // Use the second step as the max reference for bar proportions,
+  // so Home (always much larger) doesn't compress all other bars.
+  const maxCountForBars = Math.max(...steps.slice(1).map(getValue), 1);
   const totalDisplay = viewMode === "users" ? totalUsers : viewMode === "events" ? totalEvents : totalSessions;
   const viewModeLabel = viewMode === "users" ? "usuários" : viewMode === "events" ? "eventos" : "sessões";
 
@@ -199,17 +201,25 @@ export function FunilPanel() {
 
             <button
               onClick={fetchFunnel}
-              className="flex items-center gap-2 px-4 py-2 bg-[#254333] hover:bg-[#1a3226] rounded-[8px] transition-colors"
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-[#254333] hover:bg-[#1a3226] disabled:opacity-60 rounded-[8px] transition-colors"
             >
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              <span className="font-cera-pro font-medium text-[14px] text-white">Aplicar</span>
+              {loading ? (
+                <SpinnerIcon className="w-4 h-4 text-white" />
+              ) : (
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+              <span className="font-cera-pro font-medium text-[14px] text-white">
+                {loading ? "Consultando..." : "Aplicar"}
+              </span>
             </button>
 
             <button
               onClick={fetchFunnel}
-              className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] rounded-[8px] transition-colors"
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-[#D8F9E7] hover:bg-[#c5f0d9] disabled:opacity-60 rounded-[8px] transition-colors"
             >
               <RefreshIcon />
               <span className="font-cera-pro font-medium text-[14px] text-[#254333]">Atualizar</span>
@@ -219,13 +229,15 @@ export function FunilPanel() {
       </div>
 
       {/* Funnel Chart */}
-      <div className="bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6 lg:p-8">
+      <div className={`bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6 lg:p-8 transition-opacity ${loading ? "opacity-50 pointer-events-none" : ""}`}>
         <div className="space-y-3">
           {steps.map((step, i) => {
             const val = getValue(step);
             const firstVal = getValue(steps[0]);
             const prevVal = i > 0 ? getValue(steps[i - 1]) : val;
-            const widthPct = maxCount > 0 ? Math.max((val / maxCount) * 100, 4) : 4;
+            const widthPct = i === 0
+              ? 100
+              : maxCountForBars > 0 ? Math.max((val / maxCountForBars) * 100, 4) : 4;
             const dropRate = prevVal > 0 ? ((prevVal - val) / prevVal) * 100 : 0;
             const conversionFromFirst = firstVal > 0 ? (val / firstVal) * 100 : 0;
 
