@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BigQuery } from "@google-cloud/bigquery";
 import { prisma } from "@/lib/prisma";
-import { TEST_EMAIL_PATTERNS } from "@/lib/test-emails";
 
 function getBigQueryClient(): BigQuery {
   const raw = process.env.BQ_CREDENTIALS;
@@ -28,6 +27,13 @@ const CHANNEL_FILTERS: Record<string, string> = {
 function formatDateBQ(dateStr: string): string {
   // Expects YYYY-MM-DD, returns YYYYMMDD for BigQuery table suffix
   return dateStr.replace(/-/g, "");
+}
+
+function isValidDateISO(value: string): boolean {
+  // Strict YYYY-MM-DD to avoid query injection and invalid table suffixes.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(d.getTime()) && d.toISOString().startsWith(value);
 }
 
 export async function GET(req: NextRequest) {
@@ -58,33 +64,50 @@ export async function GET(req: NextRequest) {
     dataInicio = `${y}-${m}-${d}`;
   }
 
+  if (!isValidDateISO(dataInicio) || !isValidDateISO(dataFim)) {
+    return NextResponse.json({ error: "Datas invalidas" }, { status: 400 });
+  }
+
   const startDateBQ = formatDateBQ(dataInicio);
   const endDateBQ = formatDateBQ(dataFim);
 
   try {
     const bq = getBigQueryClient();
 
-    // Fetch test checkout_session_ids from DB to exclude internal users
+    // Fallback: fetch test checkout_session_ids from DB (scoped by date range)
+    // Two strategies combined:
+    //   1) sessionId starts with "t_" (new test users, post cookie-based system)
+    //   2) email contains known test patterns (historical data, pre cookie-based system)
+    const TEST_EMAIL_PATTERNS = ["teste", "spikeboom", "isabellejordanaa", "adrianofne", "uconvert"];
     let testSessionIds: string[] = [];
     if (excludeTests) {
+      const dateFilter = {
+        updatedAt: {
+          gte: new Date(`${dataInicio}T00:00:00`),
+          lte: new Date(`${dataFim}T23:59:59.999`),
+        },
+      };
       const testCheckouts = await prisma.checkoutAbandonado.findMany({
         where: {
-          OR: TEST_EMAIL_PATTERNS.map((p) => ({
-            email: { contains: p, mode: "insensitive" as const },
-          })),
+          ...dateFilter,
+          OR: [
+            { sessionId: { startsWith: "t_" } },
+            ...TEST_EMAIL_PATTERNS.map((p) => ({
+              email: { contains: p, mode: "insensitive" as const },
+            })),
+          ],
         },
         select: { sessionId: true },
         distinct: ["sessionId"],
+        take: 5000,
       });
-      testSessionIds = [...new Set(
-        testCheckouts.map((r) => r.sessionId).filter((id): id is string => id != null)
-      )];
+      testSessionIds = [...new Set(testCheckouts.map((r) => r.sessionId))];
     }
 
     const excludedCTE = testSessionIds.length > 0
       ? `excluded_users AS (
         SELECT DISTINCT user_pseudo_id
-        FROM \`${dataset}.events_*\`
+        FROM \`${dataset}.events_*\` events
         WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
           AND (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_session_id')
             IN UNNEST(@testSessionIds)
@@ -93,6 +116,13 @@ export async function GET(req: NextRequest) {
 
     const excludeFilter = testSessionIds.length > 0
       ? "AND NOT EXISTS (SELECT 1 FROM excluded_users ex WHERE ex.user_pseudo_id = events.user_pseudo_id)"
+      : "";
+
+    const testEventFilter = excludeTests
+      ? `AND NOT (
+          IFNULL((SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'is_test_user'), 0) = 1
+          OR IFNULL(LOWER((SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'is_test_user')), '') IN ('1', 'true', 'yes')
+        )`
       : "";
 
     const query = `
@@ -113,6 +143,7 @@ export async function GET(req: NextRequest) {
             (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'),
             ''
           ) NOT LIKE '%localhost%'
+          ${testEventFilter}
           ${excludeFilter}
       ),
 
@@ -173,7 +204,7 @@ export async function GET(req: NextRequest) {
           COUNTIF('add_payment_info' IN UNNEST(events)) AS add_payment_info,
           COUNT(DISTINCT IF('add_payment_info' IN UNNEST(events), user_pseudo_id, NULL)) AS add_payment_info_users,
           COUNTIF('purchase' IN UNNEST(events)) AS purchase,
-          COUNT(DISTINCT IF('purchase' IN UNNEST(events), user_pseudo_id, NULL)) AS purchase_users,
+          COUNT(DISTINCT IF('purchase' IN UNNEST(events), user_pseudo_id, NULL)) AS purchase_users
         FROM filtered_sessions
       ),
 
@@ -191,7 +222,7 @@ export async function GET(req: NextRequest) {
           COUNTIF(r.event_name = 'checkout_step' AND r.checkout_step_name = 'pagamento') AS step_pagamento_events,
           COUNTIF(r.event_name = 'add_payment_info') AS add_payment_info_events,
           COUNTIF(r.event_name = 'purchase') AS purchase_events,
-          COUNT(*) AS total_events,
+          COUNT(*) AS total_events
         FROM raw_events r
         JOIN user_traffic t ON r.user_pseudo_id = t.user_pseudo_id
         WHERE 1=1

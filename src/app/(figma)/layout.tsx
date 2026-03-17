@@ -1,5 +1,6 @@
 import { fontClasses } from "@/lib/fonts";
 import { FigmaProvider } from "@/contexts";
+import TestModeIndicator from "./TestModeIndicator";
 
 export default function FigmaRootLayout({
   children,
@@ -9,6 +10,7 @@ export default function FigmaRootLayout({
   return (
     <FigmaProvider>
       <div className={`${fontClasses}`}>
+        <TestModeIndicator />
         {children}
       </div>
     </FigmaProvider>

@@ -96,6 +96,8 @@ function cleanDigits(value: unknown) {
 
 export async function POST(req: NextRequest) {
   try {
+    const isTestUser = req.cookies.get("is_test_user")?.value === "1";
+
     const raw = await req.json();
     const parsed = createPedidoSchema.safeParse(raw);
 
@@ -193,6 +195,7 @@ export async function POST(req: NextRequest) {
       ...body,
       cupom_valor: cupomValorSeguro,
       cupom_descricao: cupomDescricaoSeguro,
+      origem: isTestUser ? "test" : "checkout",
     };
 
     const cupomCodigoParaReserva = validationResult.details?.cupomCodigo ?? null;

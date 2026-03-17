@@ -23,14 +23,43 @@ interface CheckoutSyncData {
   convertido?: boolean;
 }
 
+const TEST_SESSION_PREFIX = "t_";
+
+function isTestUserCookieEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const m = document.cookie.match(/(?:^|; )is_test_user=([^;]+)/);
+    return !!(m && m[1] === "1");
+  } catch {
+    return false;
+  }
+}
+
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "";
   try {
     const existing = sessionStorage.getItem("checkout_session_id");
-    if (existing) return existing;
+    const testMode = isTestUserCookieEnabled();
+    if (existing) {
+      const isPrefixed = existing.startsWith(TEST_SESSION_PREFIX);
+      if (testMode && !isPrefixed) {
+        const uuid = (window as any)?.crypto?.randomUUID?.();
+        const sid = `${TEST_SESSION_PREFIX}${uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`}`;
+        sessionStorage.setItem("checkout_session_id", sid);
+        return sid;
+      }
+      if (!testMode && isPrefixed) {
+        const uuid = (window as any)?.crypto?.randomUUID?.();
+        const sid = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        sessionStorage.setItem("checkout_session_id", sid);
+        return sid;
+      }
+      return existing;
+    }
 
     const uuid = (window as any)?.crypto?.randomUUID?.();
-    const sid = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    const base = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    const sid = testMode ? `${TEST_SESSION_PREFIX}${base}` : base;
     sessionStorage.setItem("checkout_session_id", sid);
     return sid;
   } catch {

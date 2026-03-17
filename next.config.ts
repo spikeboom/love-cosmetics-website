@@ -50,6 +50,7 @@ const nextConfig: NextConfig = {
       { source: '/sobre', destination: '/figma/sobre' },
       { source: '/fale-conosco', destination: '/figma/fale-conosco' },
       { source: '/experimento', destination: '/figma/experimento' },
+      { source: '/test-mode', destination: '/figma/test-mode' },
       // Minha conta
       { source: '/minha-conta/pedidos', destination: '/figma/minha-conta/pedidos' },
       { source: '/minha-conta/pedidos/:id', destination: '/figma/minha-conta/pedidos/:id' },
@@ -77,6 +78,9 @@ const nextConfig: NextConfig = {
       { source: '/figma/sobre', destination: '/sobre', permanent: true },
       { source: '/figma/fale-conosco', destination: '/fale-conosco', permanent: true },
       { source: '/figma/experimento', destination: '/experimento', permanent: true },
+      { source: '/figma/test-mode', destination: '/test-mode', permanent: true },
+      { source: '/test', destination: '/test-mode', permanent: false },
+      { source: '/teste', destination: '/test-mode', permanent: false },
       // Minha conta
       { source: '/figma/minha-conta/pedidos', destination: '/minha-conta/pedidos', permanent: true },
       { source: '/figma/minha-conta/pedidos/:id', destination: '/minha-conta/pedidos/:id', permanent: true },

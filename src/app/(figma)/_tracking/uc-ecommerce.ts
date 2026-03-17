@@ -9,30 +9,53 @@ function getDataLayer(): DataLayer | null {
   return w.dataLayer;
 }
 
-import { TEST_EMAIL_PATTERNS } from "@/lib/test-emails";
-
-function markTestUser(email: string): void {
-  const dl = getDataLayer();
-  if (!dl) return;
-  const lower = email.toLowerCase();
-  if (TEST_EMAIL_PATTERNS.some((p) => lower.includes(p))) {
-    dl.push({ is_test_user: true });
-    try { sessionStorage.setItem("is_test_user", "1"); } catch {}
-  }
-}
+const TEST_COOKIE_NAME = "is_test_user";
+const TEST_SESSION_PREFIX = "t_";
 
 function isTestUser(): boolean {
-  try { return sessionStorage.getItem("is_test_user") === "1"; } catch { return false; }
+  if (typeof window === "undefined") return false;
+
+  let enabled = false;
+  try {
+    const m = document.cookie.match(/(?:^|; )is_test_user=([^;]+)/);
+    enabled = !!(m && m[1] === "1");
+  } catch {}
+
+  // Keep a cached copy for other code paths (best-effort).
+  try {
+    if (enabled) sessionStorage.setItem(TEST_COOKIE_NAME, "1");
+    else sessionStorage.removeItem(TEST_COOKIE_NAME);
+  } catch {}
+
+  return enabled;
 }
 
 function getCheckoutSessionId(): string | undefined {
   if (typeof window === "undefined") return undefined;
   try {
     const existing = sessionStorage.getItem("checkout_session_id");
-    if (existing) return existing;
+    const testMode = isTestUser();
+    if (existing) {
+      const isPrefixed = existing.startsWith(TEST_SESSION_PREFIX);
+      // Keep session ids consistent with current mode to make server-side filtering reliable.
+      if (testMode && !isPrefixed) {
+        const uuid = (window as any)?.crypto?.randomUUID?.();
+        const sid = `${TEST_SESSION_PREFIX}${uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`}`;
+        sessionStorage.setItem("checkout_session_id", sid);
+        return sid;
+      }
+      if (!testMode && isPrefixed) {
+        const uuid = (window as any)?.crypto?.randomUUID?.();
+        const sid = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        sessionStorage.setItem("checkout_session_id", sid);
+        return sid;
+      }
+      return existing;
+    }
 
     const uuid = (window as any)?.crypto?.randomUUID?.();
-    const sid = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    const base = uuid ?? `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    const sid = testMode ? `${TEST_SESSION_PREFIX}${base}` : base;
     sessionStorage.setItem("checkout_session_id", sid);
     return sid;
   } catch {
@@ -105,7 +128,7 @@ function pushEcommerceEvent(
     tax: ecommerce.tax,
     coupon: ecommerce.coupon,
     num_items: ecommerce.items?.length,
-    is_test_user: isTestUser() || undefined,
+    is_test_user: isTestUser() ? 1 : undefined,
     ...extra,
   });
 }
@@ -216,8 +239,6 @@ export function ucUserDataUpdate(args: {
     street?: string;
   };
 }) {
-  if (args.email) markTestUser(args.email);
-
   const dl = getDataLayer();
   if (!dl) return;
 
@@ -247,7 +268,7 @@ export function ucUserDataUpdate(args: {
     checkout_city: args.address?.city || undefined,
     checkout_region: args.address?.region || undefined,
     checkout_postal_code: args.address?.postal_code || undefined,
-    is_test_user: isTestUser() || undefined,
+    is_test_user: isTestUser() ? 1 : undefined,
   });
 }
 
@@ -262,7 +283,7 @@ export function ucCheckoutStep(args: { step: UCCheckoutStep }) {
     checkout_step: args.step,
     checkout_step_number: checkoutStepNumber[args.step],
     url_pagina: window.location.href,
-    is_test_user: isTestUser() || undefined,
+    is_test_user: isTestUser() ? 1 : undefined,
   });
 }
 
@@ -280,6 +301,7 @@ export function ucViewSearchResults(args: {
     search_term: args.searchTerm,
     search_results_count: safeNumber(args.resultsCount),
     url_pagina: window.location.href,
+    is_test_user: isTestUser() ? 1 : undefined,
   });
 }
 
@@ -310,6 +332,7 @@ export function ucShippingCalculate(args: {
     shipping_prazo_minimo: safeNumber(args.prazoMinimo),
     shipping_transportadora: args.transportadora,
     shipping_total_servicos: safeNumber(args.totalServicos),
+    is_test_user: isTestUser() ? 1 : undefined,
   });
 }
 

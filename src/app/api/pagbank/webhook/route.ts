@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
         status_pagamento: true,
         ga_session_id: true,
         ga_session_number: true,
+        origem: true,
         cupomReserva: {
           select: { codigo: true, status: true, expiresAt: true },
         },
@@ -128,21 +129,25 @@ export async function POST(req: NextRequest) {
 
       // Se o pagamento foi confirmado (PAID), enviar evento para GTM
       if (chargeStatus === "PAID") {
-        // Para /charges, criar objeto charge compatível com GTM
-        const chargeForGtm = charge || {
-          id: body.id,
-          status: (body as any).status,
+        if (pedido.origem === "test") {
+          logMessage("Evento Purchase bloqueado (test user)", { pedidoId: pedido.id });
+        } else {
+          // Para /charges, criar objeto charge compatível com GTM
+          const chargeForGtm = charge || {
+            id: body.id,
+            status: (body as any).status,
           paid_at: (body as any).paid_at,
           amount: (body as any).amount,
         };
 
-        const gtmPayload = await buildGtmPurchasePayload({
-          body,
-          charge: chargeForGtm,
-          pedido,
-        });
+          const gtmPayload = await buildGtmPurchasePayload({
+            body,
+            charge: chargeForGtm,
+            pedido,
+          });
 
-        await sendGtmPurchaseEvent(gtmPayload, logMessage);
+          await sendGtmPurchaseEvent(gtmPayload, logMessage);
+        }
       }
 
       // Cupom: consumir no pagamento confirmado (PAID/AUTHORIZED) e liberar em falhas.

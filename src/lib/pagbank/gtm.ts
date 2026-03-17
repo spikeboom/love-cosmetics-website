@@ -10,7 +10,7 @@ export async function buildGtmPurchasePayload({
 }: {
   body: PagBankWebhookNotification;
   charge: any;
-  pedido: { ga_session_id: string | null; ga_session_number: string | null };
+  pedido: { ga_session_id: string | null; ga_session_number: string | null; origem?: string | null };
 }): Promise<Record<string, unknown>> {
   const emailRaw = body.customer?.email ?? "";
   const phoneRaw = [
@@ -40,6 +40,7 @@ export async function buildGtmPurchasePayload({
     user_phone: phoneRaw ? await sha256Hex(phoneRaw) : undefined,
     ga_session_id: pedido.ga_session_id,
     ga_session_number: pedido.ga_session_number,
+    is_test_user: pedido.origem === "test" ? 1 : undefined,
   };
 }
 

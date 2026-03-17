@@ -73,7 +73,7 @@ model Pedido {
   payment_method            String?  // "credit_card", "pix", "boleto"
 
   // Origem do pedido
-  origem                    String   @default("checkout") // "checkout" ou "admin"
+  origem                    String   @default("checkout") // "checkout" | "admin" | "test"
 
   // Status de entrega atual
   status_entrega            String   @default("AGUARDANDO_PAGAMENTO")

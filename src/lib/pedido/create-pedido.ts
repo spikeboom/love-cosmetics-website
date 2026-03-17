@@ -61,6 +61,7 @@ export async function createPedidoFromBody({
       destinatario: body.destinatario,
       ga_session_number: body.ga_session_number,
       ga_session_id: body.ga_session_id,
+      origem: body.origem ?? undefined,
     },
   });
 }

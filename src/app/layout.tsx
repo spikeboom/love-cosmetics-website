@@ -57,6 +57,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <Script id="test-user-flag" strategy="beforeInteractive">{`
+          (function () {
+            try {
+              var isDev = ${JSON.stringify(process.env.NEXT_PUBLIC_DEV_TOOLS === "true")};
+              if (isDev && document.cookie.indexOf("is_test_user=1") === -1) {
+                document.cookie = "is_test_user=1; path=/; max-age=" + (60*60*24*30) + "; SameSite=Lax";
+              }
+              var m = document.cookie.match(/(?:^|; )is_test_user=([^;]+)/);
+              if (m && m[1] === "1") {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ is_test_user: 1 });
+              }
+            } catch {}
+          })();
+        `}</Script>
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager

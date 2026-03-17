@@ -48,6 +48,7 @@ export async function POST(req: Request) {
         select: {
           ga_session_id: true,
           ga_session_number: true,
+          origem: true,
         },
       });
 
@@ -56,6 +57,11 @@ export async function POST(req: Request) {
         ga_session_id: pedido?.ga_session_id,
         ga_session_number: pedido?.ga_session_number,
       });
+
+      if (pedido?.origem === "test") {
+        logMessage("Evento Purchase bloqueado (test user)", { reference_id: body?.reference_id });
+        return NextResponse.json({ ok: true, skipped: "test_user" }, { status: 200 });
+      }
 
       const gtmPayload = {
         event_name: "Purchase",
@@ -79,6 +85,7 @@ export async function POST(req: Request) {
 
         ga_session_id: pedido?.ga_session_id,
         ga_session_number: pedido?.ga_session_number,
+        is_test_user: pedido?.origem === "test" ? 1 : undefined,
       };
 
       await fetch("https://gtm.lovecosmetics.com.br/data?v=2", {
