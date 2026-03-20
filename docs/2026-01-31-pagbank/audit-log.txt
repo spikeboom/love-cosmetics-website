@@ -1350,3 +1350,563 @@ Timestamp: 2026-02-16T23:08:05.386Z
   ]
 }
 
+=== PIX - REQUEST ===
+Timestamp: 2026-03-10T19:16:18.368Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "cf392e3e-7038-4b11-b11e-62858751d4ac",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 1,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-cf392e3e-7038-4b11-b11e-62858751d4ac",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 1194
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 133794,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-03-10T19:31:18.368Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-03-10T19:16:19.693Z
+Status: 201
+
+{
+  "id": "ORDE_5A740ECE-34A5-4594-8506-4080767CD46C",
+  "reference_id": "cf392e3e-7038-4b11-b11e-62858751d4ac",
+  "created_at": "2026-03-10T16:16:19.933-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 1,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-cf392e3e-7038-4b11-b11e-62858751d4ac",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 1194
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_D66E3038-525C-495F-8B70-7E7980876582",
+      "expiration_date": "2026-03-10T16:31:18.000-03:00",
+      "amount": {
+        "value": 133794
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/D66E3038-525C-495F-8B70-7E798087658227600016BR.COM.PAGSEGURO0136D66E3038-525C-495F-8B70-7E798087658252045977530398654071337.945802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304E6EB",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_D66E3038-525C-495F-8B70-7E7980876582/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_D66E3038-525C-495F-8B70-7E7980876582/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_5A740ECE-34A5-4594-8506-4080767CD46C",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_5A740ECE-34A5-4594-8506-4080767CD46C/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-03-10T21:03:39.792Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "cf392e3e-7038-4b11-b11e-62858751d4ac",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 1,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-cf392e3e-7038-4b11-b11e-62858751d4ac",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 1194
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 133794,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-03-10T21:18:39.792Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-03-10T21:03:40.729Z
+Status: 201
+
+{
+  "id": "ORDE_3BB30029-0469-4D4F-B090-AA7CED8DF80C",
+  "reference_id": "cf392e3e-7038-4b11-b11e-62858751d4ac",
+  "created_at": "2026-03-10T18:03:40.991-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 1,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-cf392e3e-7038-4b11-b11e-62858751d4ac",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 1194
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_363C0C4E-9DBB-4B59-BD8B-7EB5B792F9E8",
+      "expiration_date": "2026-03-10T18:18:39.000-03:00",
+      "amount": {
+        "value": 133794
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/363C0C4E-9DBB-4B59-BD8B-7EB5B792F9E827600016BR.COM.PAGSEGURO0136363C0C4E-9DBB-4B59-BD8B-7EB5B792F9E852045977530398654071337.945802BR592242.609.440 CASSIANE MI6006Manaus62070503***630439D0",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_363C0C4E-9DBB-4B59-BD8B-7EB5B792F9E8/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_363C0C4E-9DBB-4B59-BD8B-7EB5B792F9E8/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_3BB30029-0469-4D4F-B090-AA7CED8DF80C",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_3BB30029-0469-4D4F-B090-AA7CED8DF80C/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-03-15T12:41:57.337Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "efc47474-5181-43a9-8c67-c67e5065bc26",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 1,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-efc47474-5181-43a9-8c67-c67e5065bc26",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 132610,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-03-15T12:56:57.336Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-03-15T12:41:58.240Z
+Status: 201
+
+{
+  "id": "ORDE_101102C2-DD1A-4023-A5B0-A25D043BCFC4",
+  "reference_id": "efc47474-5181-43a9-8c67-c67e5065bc26",
+  "created_at": "2026-03-15T09:41:57.781-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 1,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-efc47474-5181-43a9-8c67-c67e5065bc26",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_0A267144-FCBA-459D-9E64-9EB100E0BFF2",
+      "expiration_date": "2026-03-15T09:56:57.000-03:00",
+      "amount": {
+        "value": 132610
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/0A267144-FCBA-459D-9E64-9EB100E0BFF227600016BR.COM.PAGSEGURO01360A267144-FCBA-459D-9E64-9EB100E0BFF252045977530398654071326.105802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304AFF2",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_0A267144-FCBA-459D-9E64-9EB100E0BFF2/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_0A267144-FCBA-459D-9E64-9EB100E0BFF2/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_101102C2-DD1A-4023-A5B0-A25D043BCFC4",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_101102C2-DD1A-4023-A5B0-A25D043BCFC4/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-03-15T16:36:54.676Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "dbbc847e-4a90-49d2-8ead-853df76a12da",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 2,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-dbbc847e-4a90-49d2-8ead-853df76a12da",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 2354
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 181454,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-03-15T16:51:54.675Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-03-15T16:36:55.536Z
+Status: 201
+
+{
+  "id": "ORDE_83768524-B9D9-43B9-9693-E826EF75DE38",
+  "reference_id": "dbbc847e-4a90-49d2-8ead-853df76a12da",
+  "created_at": "2026-03-15T13:36:54.585-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "281",
+      "name": "Kit Completo",
+      "quantity": 2,
+      "unit_amount": 46500
+    },
+    {
+      "reference_id": "282",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 28700
+    },
+    {
+      "reference_id": "frete-dbbc847e-4a90-49d2-8ead-853df76a12da",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 2354
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_0AE00DA8-02D3-4D3E-A23A-2C687791A07B",
+      "expiration_date": "2026-03-15T13:51:54.000-03:00",
+      "amount": {
+        "value": 181454
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/0AE00DA8-02D3-4D3E-A23A-2C687791A07B27600016BR.COM.PAGSEGURO01360AE00DA8-02D3-4D3E-A23A-2C687791A07B52045977530398654071814.545802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304F5FE",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_0AE00DA8-02D3-4D3E-A23A-2C687791A07B/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_0AE00DA8-02D3-4D3E-A23A-2C687791A07B/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_83768524-B9D9-43B9-9693-E826EF75DE38",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_83768524-B9D9-43B9-9693-E826EF75DE38/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+

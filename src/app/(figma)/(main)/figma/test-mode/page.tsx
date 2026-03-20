@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toggleTestMode } from "./actions";
 
 const IS_DEV = process.env.NEXT_PUBLIC_DEV_TOOLS === "true";
 
@@ -14,24 +15,22 @@ export default function TestModePage() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [secret, setSecret] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setEnabled(IS_DEV || getCookie("is_test_user") === "1");
-    const saved = sessionStorage.getItem("__test_secret");
-    if (saved) setSecret(saved);
   }, []);
 
   async function toggle() {
-    if (IS_DEV) return; // em dev é sempre ativo
+    if (IS_DEV) return;
     if (!secret) return;
     setLoading(true);
+    setError("");
     try {
-      sessionStorage.setItem("__test_secret", secret);
       const next = !enabled;
-      const url = `/__test?secret=${encodeURIComponent(secret)}${next ? "" : "&off=1"}`;
-      const res = await fetch(url, { credentials: "same-origin" });
-      if (!res.ok) {
-        alert(res.status === 404 ? "Secret incorreto." : `Erro ${res.status}`);
+      const result = await toggleTestMode(secret, next);
+      if (!result.ok) {
+        setError(result.error || "Erro desconhecido.");
         return;
       }
       setEnabled(next);
@@ -85,6 +84,10 @@ export default function TestModePage() {
               onKeyDown={(e) => e.key === "Enter" && toggle()}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200"
             />
+
+            {error && (
+              <p className="text-sm text-red-500">{error}</p>
+            )}
 
             {/* Toggle */}
             <button
