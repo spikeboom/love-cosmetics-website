@@ -13,7 +13,6 @@ import {
   ResumoProps,
   PagamentoSelecao,
   PagamentoPixReal,
-  PagamentoCartaoReal,
 } from "./components";
 import { formatPrice } from "@/lib/formatters";
 
@@ -125,12 +124,13 @@ export function PagamentoPageClient() {
   const freteGratis = valorFrete === 0;
   const valorTotal = total; // Usar direto do Context
 
-  // Tracking: add_payment_info (GA4) ao iniciar a tela de pagamento (PIX / cartão)
+  // Tracking: add_payment_info (GA4) ao selecionar método de pagamento (PIX / cartão)
+  const paymentMethod = telaAtual === "pix" ? "pix" : formaPagamento === "cartao" ? "cartao" : null;
   useEffect(() => {
     if (!pedidoId) return;
-    if (telaAtual !== "pix" && telaAtual !== "cartao") return;
+    if (!paymentMethod) return;
 
-    const key = `${pedidoId}:${telaAtual}`;
+    const key = `${pedidoId}:${paymentMethod}`;
     if (firedPaymentInfoRef.current.has(key)) return;
     firedPaymentInfoRef.current.add(key);
 
@@ -162,13 +162,39 @@ export function PagamentoPageClient() {
     });
 
     ucAddPaymentInfo({
-      paymentType: telaAtual === "pix" ? "pix" : "credit_card",
+      paymentType: paymentMethod === "pix" ? "pix" : "credit_card",
       items: cartItemsForTracking,
       value: valorTotal,
       shipping: valorFrete,
       coupon,
     });
-  }, [pedidoId, telaAtual, cartArray, cupons, valorFrete, valorTotal]);
+
+    // Early/anticipated Purchase signal for Meta optimization (signal density).
+    // Fires when PIX QR is generated or card accordion opens, before actual payment.
+    // Uses a distinct event_id prefix so it doesn't deduplicate with the real purchase.
+    ucPurchase({
+      transactionId: pedidoId,
+      value: valorTotal,
+      shipping: valorFrete,
+      coupon,
+      items: cartItemsForTracking,
+      user_data: checkoutData?.identificacao
+        ? {
+            email_address: checkoutData.identificacao.email,
+            phone_number: checkoutData.identificacao.telefone,
+            address: checkoutData.entrega
+              ? {
+                  city: checkoutData.entrega.cidade,
+                  region: checkoutData.entrega.estado,
+                  postal_code: checkoutData.entrega.cep,
+                  street: checkoutData.entrega.rua,
+                }
+              : undefined,
+          }
+        : undefined,
+      eventIdPrefix: "purchase_intent",
+    });
+  }, [pedidoId, paymentMethod, cartArray, cupons, valorFrete, valorTotal, checkoutData]);
 
   const enderecoCompleto = checkoutData.entrega
     ? `${checkoutData.entrega.rua}, ${
@@ -223,8 +249,8 @@ export function PagamentoPageClient() {
         setPaymentError(pixResult.message || "Erro ao gerar PIX");
       }
     } else {
-      // Cartão: transiciona direto
-      transitionTo("cartao");
+      // Cartão: order created, PagamentoSelecao handles card form inline
+      setFormaPagamento("cartao");
     }
   };
 
@@ -233,6 +259,7 @@ export function PagamentoPageClient() {
   };
 
   const handleSelecionarCartao = () => {
+    // Card: only create order, PagamentoSelecao handles the rest
     handleCriarPedidoEPagar("cartao");
   };
 
@@ -424,18 +451,8 @@ export function PagamentoPageClient() {
     }
 
     if (telaVisivel === "cartao" && pedidoId) {
-      return (
-        <PagamentoCartaoReal
-          pedidoId={pedidoId}
-          valorTotal={valorTotal}
-          formatPrice={formatPrice}
-          onVoltar={voltarParaSelecao}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-          externalError={paymentError}
-          onClearExternalError={clearPaymentError}
-        />
-      );
+      // Card is now handled inside PagamentoSelecao as accordion
+      // Fall through to selecao
     }
 
     return (
@@ -449,6 +466,9 @@ export function PagamentoPageClient() {
         errorMessage={paymentError}
         onClearError={clearPaymentError}
         resumoProps={resumoProps}
+        pedidoId={pedidoId}
+        onSuccess={handlePaymentSuccess}
+        onError={handlePaymentError}
       />
     );
   };

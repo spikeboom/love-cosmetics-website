@@ -27,22 +27,22 @@ export function ElogiouWidget() {
 
     loadScript("https://app.elogiou.com.br/js/iframeResizer.min.js").then(() => {
       const iframe = document.getElementById(
-        "elogiou-45fbea4a-c290-4aa6-abca-92e2625c2abe"
+        "elogiou-432ecd3b-5218-4314-a770-32bed43030e9"
       ) as HTMLIFrameElement | null;
       if (iframe && typeof (window as any).iFrameResize === "function") {
         (window as any).iFrameResize(
           { log: false, checkOrigin: false },
-          "#elogiou-45fbea4a-c290-4aa6-abca-92e2625c2abe"
+          "#elogiou-432ecd3b-5218-4314-a770-32bed43030e9"
         );
       }
     });
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full max-w-[1440px] mx-auto">
       <iframe
-        id="elogiou-45fbea4a-c290-4aa6-abca-92e2625c2abe"
-        src="https://app.elogiou.com.br/embed/45fbea4a-c290-4aa6-abca-92e2625c2abe"
+        id="elogiou-432ecd3b-5218-4314-a770-32bed43030e9"
+        src="https://app.elogiou.com.br/embed/432ecd3b-5218-4314-a770-32bed43030e9"
         frameBorder="0"
         scrolling="no"
         width="100%"

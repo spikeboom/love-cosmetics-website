@@ -409,13 +409,16 @@ export function ucPurchase(args: {
   shipping?: number;
   tax?: number;
   user_data?: Record<string, unknown>;
+  /** Optional prefix for event_id (default: "purchase"). Use "purchase_intent" for early/anticipated purchase signals. */
+  eventIdPrefix?: string;
 }) {
   const dl = getDataLayer();
   if (!dl) return;
 
   // Deterministic event_id based on pedidoId — must match server-side (gtm.ts)
   // so GA4 (transaction_id) and Meta CAPI (event_id) can deduplicate.
-  const eventId = `purchase_${args.transactionId}`;
+  const prefix = args.eventIdPrefix || "purchase";
+  const eventId = `${prefix}_${args.transactionId}`;
 
   dl.push({ ecommerce: null });
   dl.push({
