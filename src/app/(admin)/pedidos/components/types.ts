@@ -54,4 +54,5 @@ export interface Pedido {
   notaFiscalErro?: string | null;
   status_entrega: string;
   status_pagamento?: string | null;
+  origem?: string | null;
 }

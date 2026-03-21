@@ -98,7 +98,11 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                   {pedido.nome} {pedido.sobrenome}
                 </p>
                 {mainStatus && <StatusBadge status={mainStatus} />}
-                <StatusEntregaBadge status={pedido.status_entrega || "AGUARDANDO_PAGAMENTO"} />
+                <StatusEntregaBadge status={
+                  (pedido.status_entrega || "AGUARDANDO_PAGAMENTO") === "AGUARDANDO_PAGAMENTO" && mainStatus === "PAID"
+                    ? "PAGAMENTO_CONFIRMADO"
+                    : pedido.status_entrega || "AGUARDANDO_PAGAMENTO"
+                } />
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <span className="font-cera-pro font-light text-[12px] text-[#666666]">
@@ -113,6 +117,14 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
+                </span>
+                <span className="text-[#d2d2d2]">*</span>
+                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-[4px] font-cera-pro font-medium text-[11px] ${
+                  (pedido.origem || "checkout") === "admin"
+                    ? "bg-[#F5F0EB] text-[#7B6F5E]"
+                    : "bg-[#F0F9F4] text-[#254333]"
+                }`}>
+                  {(pedido.origem || "checkout") === "admin" ? "Backoffice" : "E-commerce"}
                 </span>
               </div>
             </div>
