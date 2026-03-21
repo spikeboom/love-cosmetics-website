@@ -461,18 +461,28 @@ export function PedidoCard({ pedido, onNotaGerada, onStatusChange }: PedidoCardP
                       <MapPinIcon />
                       <div>
                         <p className="font-cera-pro font-medium text-[14px] text-black">
-                          Endereco de Entrega
+                          {pedido.endereco ? "Endereco de Entrega" : "Retirada"}
                         </p>
-                        <p className="font-cera-pro font-light text-[14px] text-[#333333]">
-                          {pedido.endereco}, {pedido.numero}
-                          {pedido.complemento && `, ${pedido.complemento}`}
-                        </p>
-                        <p className="font-cera-pro font-light text-[14px] text-[#333333]">
-                          {pedido.bairro} - {pedido.cidade}/{pedido.estado}
-                        </p>
-                        <p className="font-cera-pro font-light text-[14px] text-[#333333]">
-                          CEP: {pedido.cep}
-                        </p>
+                        {pedido.endereco ? (
+                          <>
+                            <p className="font-cera-pro font-light text-[14px] text-[#333333]">
+                              {pedido.endereco}, {pedido.numero}
+                              {pedido.complemento && `, ${pedido.complemento}`}
+                            </p>
+                            <p className="font-cera-pro font-light text-[14px] text-[#333333]">
+                              {pedido.bairro} - {pedido.cidade}/{pedido.estado}
+                            </p>
+                            {pedido.cep && (
+                              <p className="font-cera-pro font-light text-[14px] text-[#333333]">
+                                CEP: {pedido.cep}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="font-cera-pro font-light text-[14px] text-[#999]">
+                            Sem endereco — retirada no local
+                          </p>
+                        )}
                       </div>
                     </div>
 

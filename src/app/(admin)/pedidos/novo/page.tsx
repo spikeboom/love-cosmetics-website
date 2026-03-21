@@ -117,6 +117,9 @@ export default function NovoPedidoPage() {
   // Cortesia
   const [cortesia, setCortesia] = useState(false);
 
+  // Retirada
+  const [retirada, setRetirada] = useState(false);
+
   // Cliente
   const [cliente, setCliente] = useState<DadosCliente>({
     nome: "",
@@ -340,8 +343,8 @@ export default function NovoPedidoPage() {
       return;
     }
 
-    if (!cliente.cep || !cliente.endereco || !cliente.numero || !cliente.bairro || !cliente.cidade || !cliente.estado) {
-      setError("Preencha o endereço completo");
+    if (!retirada && (!cliente.cep || !cliente.endereco || !cliente.numero || !cliente.bairro || !cliente.cidade || !cliente.estado)) {
+      setError("Preencha o endereço completo ou marque retirada no local");
       return;
     }
 
@@ -1107,10 +1110,38 @@ export default function NovoPedidoPage() {
                   </div>
                 </div>
 
-                <h3 className="font-cera-pro font-bold text-[16px] text-black mt-6 mb-4">
-                  Endereço de Entrega
-                </h3>
+                <div className="flex items-center justify-between mt-6 mb-4">
+                  <h3 className="font-cera-pro font-bold text-[16px] text-black">
+                    Endereço de Entrega
+                  </h3>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={retirada}
+                      onChange={(e) => {
+                        setRetirada(e.target.checked);
+                        if (e.target.checked) {
+                          setCliente({
+                            ...cliente,
+                            cep: "",
+                            endereco: "",
+                            numero: "",
+                            complemento: "",
+                            bairro: "",
+                            cidade: "",
+                            estado: "",
+                          });
+                        }
+                      }}
+                      className="w-4 h-4 accent-[#254333]"
+                    />
+                    <span className="font-cera-pro font-medium text-[14px] text-[#254333]">
+                      Retirada no local
+                    </span>
+                  </label>
+                </div>
 
+                {!retirada && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="font-cera-pro font-light text-[12px] text-[#666] block mb-1">
@@ -1197,6 +1228,7 @@ export default function NovoPedidoPage() {
                     />
                   </div>
                 </div>
+                )}
               </div>
             </div>
 

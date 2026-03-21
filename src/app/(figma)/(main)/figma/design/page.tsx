@@ -1,6 +1,7 @@
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CupomBanner } from "../components/CupomBanner";
 import { CertificadosSection } from "../components/CertificadosSection";
+import { ElogiouWidget } from "../components/ElogiouWidget";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 
@@ -55,6 +56,11 @@ export default async function FigmaHomePage() {
       {/* Cards de certificados/badges - Full width */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <CertificadosSection />
+      </div>
+
+      {/* Avaliações Elogiou - Full width */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <ElogiouWidget />
       </div>
 
       {/* Vitrine 1 - Comece sua rotina Lovè */}

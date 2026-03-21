@@ -21,14 +21,14 @@ model Pedido {
   telefone                  String
   cpf                       String
   data_nascimento           DateTime?
-  pais                      String
-  cep                       String
-  endereco                  String
-  numero                    String
-  complemento               String?  // Campo opcional
-  bairro                    String
-  cidade                    String
-  estado                    String
+  pais                      String   @default("Brasil")
+  cep                       String?
+  endereco                  String?
+  numero                    String?
+  complemento               String?
+  bairro                    String?
+  cidade                    String?
+  estado                    String?
   cupons                    String[]
   descontos                 Float @default(0)
   total_pedido              Float @default(0)

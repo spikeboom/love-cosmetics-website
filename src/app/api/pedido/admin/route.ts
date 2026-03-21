@@ -33,13 +33,13 @@ interface DadosCliente {
   telefone: string;
   data_nascimento: string;
   pais?: string;
-  cep: string;
-  endereco: string;
-  numero: string;
+  cep?: string;
+  endereco?: string;
+  numero?: string;
   complemento?: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
 }
 
 interface RequestBody {
@@ -152,13 +152,13 @@ export async function POST(req: NextRequest) {
         telefone: cliente.telefone.replace(/\D/g, ""),
         data_nascimento: new Date(cliente.data_nascimento),
         pais: cliente.pais || "Brasil",
-        cep: cliente.cep.replace(/\D/g, ""),
-        endereco: cliente.endereco,
-        numero: cliente.numero,
+        cep: cliente.cep ? cliente.cep.replace(/\D/g, "") : null,
+        endereco: cliente.endereco || null,
+        numero: cliente.numero || null,
         complemento: cliente.complemento || null,
-        bairro: cliente.bairro,
-        cidade: cliente.cidade,
-        estado: cliente.estado,
+        bairro: cliente.bairro || null,
+        cidade: cliente.cidade || null,
+        estado: cliente.estado || null,
         items: itemsParaSalvar,
         cupons: cuponsAplicados,
         descontos: Math.round(descontoValor * 100), // Salvar em centavos
