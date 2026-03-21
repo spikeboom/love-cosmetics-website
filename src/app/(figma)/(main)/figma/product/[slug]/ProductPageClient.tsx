@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
+import { ElogiouWidget } from "../../components/ElogiouWidget";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
 import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
@@ -228,6 +229,9 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                 onShare={handleShare}
                 onAddToCart={handleAddToCart}
               />
+
+              {/* Avaliações Elogiou */}
+              <ElogiouWidget />
 
               {/* Mobile Filters */}
               <ProductFilters

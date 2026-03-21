@@ -1910,3 +1910,167 @@ Status: 201
   ]
 }
 
+=== PIX - REQUEST ===
+Timestamp: 2026-03-21T19:13:29.007Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "f577e36a-377f-4c11-9fdb-0e7bd85fd0fc",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "wm5ftz24v9cm4bqair40550i",
+      "name": "Kit Completo",
+      "quantity": 2,
+      "unit_amount": 32824
+    },
+    {
+      "reference_id": "z2ymswculwwn411yirr8jhn1",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 19133
+    },
+    {
+      "reference_id": "a58cbjhbc8gc6wjxxd1anhmy",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 5940
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 5940
+    },
+    {
+      "reference_id": "frete-f577e36a-377f-4c11-9fdb-0e7bd85fd0fc",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 134937,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-03-21T19:28:29.006Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-03-21T19:13:29.890Z
+Status: 201
+
+{
+  "id": "ORDE_40C22DE0-F37D-4322-ABB4-29EC4DA8223F",
+  "reference_id": "f577e36a-377f-4c11-9fdb-0e7bd85fd0fc",
+  "created_at": "2026-03-21T16:13:29.307-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "wm5ftz24v9cm4bqair40550i",
+      "name": "Kit Completo",
+      "quantity": 2,
+      "unit_amount": 32824
+    },
+    {
+      "reference_id": "z2ymswculwwn411yirr8jhn1",
+      "name": "Kit Uso Diário",
+      "quantity": 3,
+      "unit_amount": 19133
+    },
+    {
+      "reference_id": "a58cbjhbc8gc6wjxxd1anhmy",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 5940
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 5940
+    },
+    {
+      "reference_id": "frete-f577e36a-377f-4c11-9fdb-0e7bd85fd0fc",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_7C9071A4-F9B4-4DBD-A9AB-3362D63BD6BD",
+      "expiration_date": "2026-03-21T16:28:29.000-03:00",
+      "amount": {
+        "value": 134937
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/7C9071A4-F9B4-4DBD-A9AB-3362D63BD6BD27600016BR.COM.PAGSEGURO01367C9071A4-F9B4-4DBD-A9AB-3362D63BD6BD52045977530398654071349.375802BR592242.609.440 CASSIANE MI6006Manaus62070503***63048328",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_7C9071A4-F9B4-4DBD-A9AB-3362D63BD6BD/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_7C9071A4-F9B4-4DBD-A9AB-3362D63BD6BD/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_40C22DE0-F37D-4322-ABB4-29EC4DA8223F",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_40C22DE0-F37D-4322-ABB4-29EC4DA8223F/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
