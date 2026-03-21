@@ -410,9 +410,19 @@ export function ucPurchase(args: {
   tax?: number;
   user_data?: Record<string, unknown>;
 }) {
-  pushEcommerceEvent(
-    "purchase",
-    {
+  const dl = getDataLayer();
+  if (!dl) return;
+
+  // Deterministic event_id based on pedidoId — must match server-side (gtm.ts)
+  // so GA4 (transaction_id) and Meta CAPI (event_id) can deduplicate.
+  const eventId = `purchase_${args.transactionId}`;
+
+  dl.push({ ecommerce: null });
+  dl.push({
+    event: "purchase",
+    event_id: eventId,
+    checkout_session_id: getCheckoutSessionId(),
+    ecommerce: {
       transaction_id: args.transactionId,
       currency: args.currency ?? "BRL",
       value: safeNumber(args.value) ?? 0,
@@ -421,6 +431,15 @@ export function ucPurchase(args: {
       tax: safeNumber(args.tax),
       items: args.items,
     },
-    args.user_data ? { user_data: args.user_data } : undefined
-  );
+    items: args.items,
+    currency: args.currency ?? "BRL",
+    value: safeNumber(args.value) ?? 0,
+    transaction_id: args.transactionId,
+    shipping: safeNumber(args.shipping),
+    tax: safeNumber(args.tax),
+    coupon: args.coupon,
+    num_items: args.items?.length,
+    is_test_user: isTestUser() ? 1 : undefined,
+    ...(args.user_data ? { user_data: args.user_data } : undefined),
+  });
 }

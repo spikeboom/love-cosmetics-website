@@ -19,10 +19,14 @@ export async function buildGtmPurchasePayload({
     body.customer?.phones?.[0]?.number ?? "",
   ].join("");
 
+  // Deterministic IDs based on pedidoId — must match client-side (uc-ecommerce.ts)
+  // so GA4 (transaction_id) and Meta CAPI (event_id) can deduplicate.
+  const pedidoId = body.reference_id ?? body.id ?? "unknown";
+
   return {
     event_name: "Purchase",
-    event_id: `purchase_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    transaction_id: body.id ?? "unknown",
+    event_id: `purchase_${pedidoId}`,
+    transaction_id: pedidoId,
     value: Number(charge.amount?.value ?? 0) / 100,
     currency: charge.amount?.currency ?? "BRL",
     items:
