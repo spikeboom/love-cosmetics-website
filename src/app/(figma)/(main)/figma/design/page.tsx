@@ -59,7 +59,7 @@ export default async function FigmaHomePage() {
       </div>
 
       {/* Avaliações Elogiou - Full width */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+      <div className="w-screen -mx-[calc((100vw-100%)/2)] my-4">
         <ElogiouWidget />
       </div>
 

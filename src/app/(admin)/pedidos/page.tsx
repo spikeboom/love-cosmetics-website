@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AbandonosPanel } from "./components/AbandonosPanel";
 import { ConsultasCepPanel } from "./components/ConsultasCepPanel";
@@ -27,7 +27,15 @@ const MapPinTabIcon = () => (
   </svg>
 );
 
-export default function PedidosPage() {
+export default function PedidosPageWrapper() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <PedidosPage />
+    </Suspense>
+  );
+}
+
+function PedidosPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 

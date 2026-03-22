@@ -291,9 +291,10 @@ export async function validateOrder(
         };
       }
     } else {
-      const services = (isProductionEnv()
-        ? freteResult.services.filter((s) => !isDevFreightService(s))
-        : freteResult.services) as FrenetService[];
+      const devFreightEnabled = process.env.NEXT_PUBLIC_DEV_TOOLS === "true";
+      const services = (devFreightEnabled
+        ? freteResult.services
+        : freteResult.services.filter((s) => !isDevFreightService(s))) as FrenetService[];
 
       const match = findMatchingFreightServiceByPriceCents(services, freteEnviado);
       if (!match) {
