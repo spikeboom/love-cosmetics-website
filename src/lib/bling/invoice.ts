@@ -7,6 +7,33 @@ const logMessage = createLogger();
 
 const BLING_API_BASE_URL = "https://api.bling.com.br/Api/v3";
 
+// Bling API permite no máximo 3 requisições por segundo
+const BLING_RATE_LIMIT_DELAY_MS = 350; // delay entre chamadas para respeitar o rate limit
+const BLING_MAX_RETRIES = 3;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Executa uma função com retry e backoff exponencial para erros 429
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  for (let attempt = 0; attempt < BLING_MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      const is429 = error?.message?.includes("429") || error?.status === 429;
+      if (is429 && attempt < BLING_MAX_RETRIES - 1) {
+        const delayMs = 1000 * Math.pow(2, attempt); // 1s, 2s, 4s
+        logMessage(`Rate limit 429, retry ${attempt + 1}/${BLING_MAX_RETRIES} em ${delayMs}ms`, { label });
+        await sleep(delayMs);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error(`Falha após ${BLING_MAX_RETRIES} tentativas: ${label}`);
+}
+
 // Interface para dados de tributação do produto
 interface TributacaoProduto {
   origem?: number;
@@ -76,23 +103,29 @@ interface BlingNFResponse {
   }>;
 }
 
-// Busca dados fiscais do produto no Bling
+// Busca dados fiscais do produto no Bling (com retry para 429)
 async function getProdutoTributacao(produtoId: number): Promise<TributacaoProduto> {
   try {
-    const response = await makeAuthenticatedRequest(
-      `${BLING_API_BASE_URL}/produtos/${produtoId}`
-    );
+    return await withRetry(async () => {
+      const response = await makeAuthenticatedRequest(
+        `${BLING_API_BASE_URL}/produtos/${produtoId}`
+      );
 
-    if (!response.ok) {
-      logMessage("Erro ao buscar dados do produto", {
-        produtoId,
-        status: response.status
-      });
-      return {};
-    }
+      if (response.status === 429) {
+        throw Object.assign(new Error("429"), { status: 429 });
+      }
 
-    const data: BlingProdutoResponse = await response.json();
-    return data.data?.tributacao || {};
+      if (!response.ok) {
+        logMessage("Erro ao buscar dados do produto", {
+          produtoId,
+          status: response.status
+        });
+        return {};
+      }
+
+      const data: BlingProdutoResponse = await response.json();
+      return data.data?.tributacao || {};
+    }, `getProdutoTributacao(${produtoId})`);
   } catch (error) {
     logMessage("Erro ao buscar tributação do produto", {
       produtoId,
@@ -276,16 +309,19 @@ export async function createInvoice(
     // Explode kits em itens individuais (busca dados do Strapi)
     const expandedItems = await explodeKitItems(orderData.items);
 
-    // Busca dados fiscais de todos os produtos em paralelo
-    const produtosComTributacao = await Promise.all(
-      expandedItems.map(async (item) => {
-        if (!item.bling_number) {
-          throw new Error(`Produto ${item.name} não possui bling_number`);
-        }
-        const tributacao = await getProdutoTributacao(Number(item.bling_number));
-        return { item, tributacao };
-      })
-    );
+    // Busca dados fiscais dos produtos sequencialmente para respeitar rate limit do Bling (3 req/s)
+    const produtosComTributacao: Array<{ item: OrderItem; tributacao: TributacaoProduto }> = [];
+    for (const item of expandedItems) {
+      if (!item.bling_number) {
+        throw new Error(`Produto ${item.name} não possui bling_number`);
+      }
+      const tributacao = await getProdutoTributacao(Number(item.bling_number));
+      produtosComTributacao.push({ item, tributacao });
+      // Delay entre chamadas para não estourar o rate limit
+      if (expandedItems.indexOf(item) < expandedItems.length - 1) {
+        await sleep(BLING_RATE_LIMIT_DELAY_MS);
+      }
+    }
 
     // Monta os itens da nota fiscal
     const items = produtosComTributacao.map(({ item, tributacao }) => {
@@ -381,25 +417,39 @@ export async function createInvoice(
       invoiceData
     });
 
-    // Faz a requisição para criar a nota fiscal
-    const response = await makeAuthenticatedRequest(`${BLING_API_BASE_URL}/nfe`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(invoiceData),
-    });
+    // Delay antes de criar a NF (após buscar tributação dos produtos)
+    await sleep(BLING_RATE_LIMIT_DELAY_MS);
 
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      logMessage("Erro ao criar nota fiscal no Bling", {
-        status: response.status,
-        response: responseData,
-        orderId: orderData.id
+    // Faz a requisição para criar a nota fiscal (com retry para 429)
+    const responseData = await withRetry(async () => {
+      const response = await makeAuthenticatedRequest(`${BLING_API_BASE_URL}/nfe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(invoiceData),
       });
-      throw new Error(`Erro ao criar nota fiscal: ${response.status}`);
-    }
+
+      const data = await response.json();
+
+      if (response.status === 429) {
+        logMessage("Rate limit ao criar nota fiscal no Bling", {
+          orderId: orderData.id
+        });
+        throw Object.assign(new Error("429"), { status: 429 });
+      }
+
+      if (!response.ok) {
+        logMessage("Erro ao criar nota fiscal no Bling", {
+          status: response.status,
+          response: data,
+          orderId: orderData.id
+        });
+        throw new Error(`Erro ao criar nota fiscal: ${response.status}`);
+      }
+
+      return data;
+    }, `createNFe(${orderData.id})`);
 
     logMessage("Nota fiscal criada com sucesso", {
       orderId: orderData.id,

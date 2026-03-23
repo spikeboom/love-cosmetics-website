@@ -1,7 +1,7 @@
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CupomBanner } from "../components/CupomBanner";
 import { CertificadosSection } from "../components/CertificadosSection";
-import { ElogiouWidget } from "../components/ElogiouWidget";
+// import { ElogiouWidget } from "../components/ElogiouWidget";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 
@@ -59,9 +59,9 @@ export default async function FigmaHomePage() {
       </div>
 
       {/* Avaliações Elogiou - Full width */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)] my-4">
+      {/* <div className="w-screen -mx-[calc((100vw-100%)/2)] my-4">
         <ElogiouWidget />
-      </div>
+      </div> */}
 
       {/* Vitrine 1 - Comece sua rotina Lovè */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
