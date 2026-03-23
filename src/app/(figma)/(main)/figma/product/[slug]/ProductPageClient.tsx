@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
-// import { ElogiouWidget } from "../../components/ElogiouWidget";
+import { ElogiouWidget } from "../../components/ElogiouWidget";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
 import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
@@ -134,7 +135,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
     <div className="w-full">
       {/* Main Product Section */}
       <div className="w-full max-w-[1440px] mx-auto">
-        <div className="flex flex-col md:flex-row gap-0 md:gap-[24px] items-start p-0 md:p-[24px]">
+        <div className="flex flex-col md:flex-row gap-0 md:gap-[24px] items-start p-0 md:p-[24px] w-full">
           {/* Left Column: Gallery + Filters */}
           <div className="flex flex-col gap-[24px] items-start w-full md:w-[921px]">
             <ProductGallery
@@ -154,20 +155,26 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
           </div>
 
           {/* Right Column: Product Info */}
-          <div className="bg-white flex flex-col gap-[24px] items-start pb-[24px] pt-0 md:pt-0 px-0 w-full">
+          <div className="bg-white flex flex-col gap-[24px] items-start pb-[24px] pt-0 md:pt-0 px-0 w-full min-w-0">
             {/* Breadcrumbs */}
-            <div className="relative flex gap-[8px] items-end px-[16px] py-[24px] md:py-0 w-full md:w-[380px]">
-              <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
-                lovecosmetics.com.br
-              </p>
-              <BreadcrumbArrow />
-              <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
-                todos produtos
-              </p>
-              <BreadcrumbArrow />
-              <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap">
-                manteiga
-              </p>
+            <div className="relative flex flex-col md:flex-row gap-[4px] md:gap-[8px] md:items-end px-[16px] md:px-0 pt-3 md:py-0 w-full">
+              <div className="flex flex-col items-left md:items-center md:flex-row  gap-[8px]">
+                <div className="flex items-center gap-2">
+                  <Link href="/figma/design" className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
+                    lovecosmetics.com.br
+                  </Link>
+                  <BreadcrumbArrow />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link href="/figma/search" className="font-cera-pro font-light text-[12px] text-black leading-[normal] text-nowrap underline">
+                    todos produtos
+                  </Link>
+                  <BreadcrumbArrow />
+                </div>
+                <p className="font-cera-pro font-light text-[12px] text-black leading-[normal] truncate max-w-[160px] md:max-w-[200px]">
+                  {produto?.nome || "Produto"}
+                </p>
+              </div>
               {/* Share Icon - Mobile only */}
               <button className="md:hidden absolute right-[16px] top-[16px]" onClick={handleShare}>
                 <ShareIcon />
@@ -182,7 +189,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               </p>
 
               {/* Price & Rating */}
-              <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col md:flex-row itens-left md:items-center justify-between w-full">
                 <div className="flex flex-col gap-[8px] items-start leading-[normal] text-nowrap whitespace-pre relative shrink-0">
                   {priceInfo.precoOriginalFormatado && (
                     <p className="font-cera-pro font-light text-[16px] text-[#333333] line-through decoration-solid leading-[normal] relative shrink-0">
@@ -231,7 +238,9 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
               />
 
               {/* Avaliações Elogiou */}
-              {/* <ElogiouWidget /> */}
+              <div className="w-full overflow-hidden mx-[-12px]">
+                <ElogiouWidget />
+              </div>
 
               {/* Mobile Filters */}
               <ProductFilters
@@ -286,7 +295,7 @@ function ShareIcon() {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex gap-[4px] items-center relative shrink-0">
+    <div className="flex gap-[4px] items-center relative shrink-0 mt-4 md:mt-0">
       <div className="flex gap-[2px] items-start relative shrink-0">
         <div className="flex gap-[4px] h-[12px] items-center relative shrink-0">
           {[...Array(5)].map((_, i) => {

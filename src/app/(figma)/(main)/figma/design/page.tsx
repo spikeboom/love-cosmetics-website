@@ -1,7 +1,7 @@
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CupomBanner } from "../components/CupomBanner";
 import { CertificadosSection } from "../components/CertificadosSection";
-// import { ElogiouWidget } from "../components/ElogiouWidget";
+import { ElogiouWidget } from "../components/ElogiouWidget";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 
@@ -53,16 +53,6 @@ export default async function FigmaHomePage() {
         <CupomBanner />
       </div>
 
-      {/* Cards de certificados/badges - Full width */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
-        <CertificadosSection />
-      </div>
-
-      {/* Avaliações Elogiou - Full width */}
-      {/* <div className="w-screen -mx-[calc((100vw-100%)/2)] my-4">
-        <ElogiouWidget />
-      </div> */}
-
       {/* Vitrine 1 - Comece sua rotina Lovè */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <VitrineSection
@@ -72,6 +62,11 @@ export default async function FigmaHomePage() {
           tipo="produto-completo"
           produtos={rotinaOrdenados}
         />
+      </div>
+
+      {/* Avaliações Elogiou */}
+      <div className="w-full py-4">
+        <ElogiouWidget />
       </div>
 
       {/* Vitrine 2 - Kits Lovè */}
@@ -91,6 +86,11 @@ export default async function FigmaHomePage() {
         tipo="produto-completo"
         produtos={tecnologiaOrdenados}
       />
+
+      {/* Cards de certificados/badges - Full width */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <CertificadosSection />
+      </div>
     </div>
   );
 }

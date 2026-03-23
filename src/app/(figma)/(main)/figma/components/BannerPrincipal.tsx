@@ -50,28 +50,84 @@ const TRANSITION_DURATION = 500;
 export function BannerPrincipal() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
+  const [dragOffset, setDragOffset] = useState(0); // offset em px enquanto arrasta
+  const startX = useRef<number>(0);
+  const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  const getContainerWidth = () => containerRef.current?.offsetWidth || 1;
+
+  const finishDrag = (deltaX: number) => {
+    isDragging.current = false;
+    const threshold = getContainerWidth() * 0.15; // 15% do container para avançar
+
+    if (Math.abs(deltaX) > threshold) {
+      if (deltaX > 0 && currentSlide < bannerSlides.length - 1) {
+        setIsTransitioning(true);
+        setDragOffset(0);
+        setCurrentSlide((prev) => prev + 1);
+        setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
+      } else if (deltaX < 0 && currentSlide > 0) {
+        setIsTransitioning(true);
+        setDragOffset(0);
+        setCurrentSlide((prev) => prev - 1);
+        setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
+      } else {
+        // No primeiro/último slide, snap back
+        setIsTransitioning(true);
+        setDragOffset(0);
+        setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
+      }
+    } else {
+      // Snap back
+      setIsTransitioning(true);
+      setDragOffset(0);
+      setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
+    }
+  };
+
+  // Touch handlers (mobile)
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+    if (isTransitioning) return;
+    isDragging.current = true;
+    startX.current = e.touches[0].clientX;
+    setDragOffset(0);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
+    if (!isDragging.current) return;
+    const delta = startX.current - e.touches[0].clientX;
+    setDragOffset(delta);
   };
 
   const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50;
+    if (!isDragging.current) return;
+    finishDrag(dragOffset);
+  };
 
-    if (Math.abs(diff) > minSwipeDistance) {
-      if (diff > 0) {
-        handleNext();
-      } else {
-        handlePrevious();
-      }
-    }
+  // Mouse drag handlers (desktop)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isTransitioning) return;
+    e.preventDefault();
+    isDragging.current = true;
+    startX.current = e.clientX;
+    setDragOffset(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    const delta = startX.current - e.clientX;
+    setDragOffset(delta);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging.current) return;
+    finishDrag(dragOffset);
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging.current) return;
+    finishDrag(dragOffset);
   };
 
   const handlePrevious = () => {
@@ -89,21 +145,29 @@ export function BannerPrincipal() {
   };
 
   const slide = bannerSlides[currentSlide];
-  const slideOffset = -currentSlide * 100;
+  // Combina posição do slide com o drag offset em tempo real
+  const dragPercent = (dragOffset / getContainerWidth()) * 100;
+  const slideOffset = -currentSlide * 100 - dragPercent;
+
+  const isDrag = isDragging.current && dragOffset !== 0;
 
   return (
-    <div className="relative w-full bg-white">
+    <div className="relative w-full bg-white" ref={containerRef}>
       <div className="lg:hidden">
         <div
-          className="relative w-full h-[234px] overflow-hidden"
+          className="relative w-full h-[234px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
         >
           <div
             style={{
               transform: `translateX(${slideOffset}%)`,
-              transition: `transform ${TRANSITION_DURATION}ms ease-in-out`,
+              transition: isDrag ? "none" : `transform ${TRANSITION_DURATION}ms ease-in-out`,
             }}
             className="relative w-full h-full flex"
           >
@@ -165,11 +229,17 @@ export function BannerPrincipal() {
       </div>
 
       <div className="hidden lg:block relative w-full h-[534px]">
-        <div className="relative w-full h-[500px] overflow-hidden">
+        <div
+          className="relative w-full h-[500px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+        >
           <div
             style={{
               transform: `translateX(${slideOffset}%)`,
-              transition: `transform ${TRANSITION_DURATION}ms ease-in-out`,
+              transition: isDrag ? "none" : `transform ${TRANSITION_DURATION}ms ease-in-out`,
             }}
             className="relative w-full h-full flex"
           >

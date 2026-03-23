@@ -23,7 +23,7 @@ export function Footer() {
         {/* Links - Mobile: 2 colunas lado a lado, Desktop: 3 colunas + Logo */}
         <div className="w-full flex lg:flex-row flex-col gap-8 items-start justify-center">
           {/* Mobile: 3 colunas lado a lado */}
-          <div className="lg:hidden flex items-start justify-between w-full max-w-[360px] mx-auto px-4">
+          <div className="lg:hidden flex flex-col md:flex-row items-start gap-6 md:gap-12 w-full mx-auto px-8">
             {/* Coluna 1 - A Lovè */}
             <div className="flex flex-col gap-3 items-start">
               <span className="font-cera-pro font-medium text-[14px] text-[#ba7900] leading-none">
@@ -177,7 +177,7 @@ export function Footer() {
         <div className="lg:hidden w-full h-px bg-[#ba7900]"></div>
 
         {/* Logo e Redes Sociais - Mobile */}
-        <div className="flex flex-row gap-8 items-center lg:hidden">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center lg:hidden">
           <div className="relative w-[102px] h-[58px]">
             <Image
               src="/new-home/header/logo.png"

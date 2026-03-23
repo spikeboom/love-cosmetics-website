@@ -20,7 +20,7 @@ export function ProductFilters({
   };
 
   return (
-    <div className={`flex flex-col gap-0 w-full ${isMobile ? "md:hidden" : "hidden md:flex"} mt-[-140px] md:mt-0`}>
+    <div className={`flex flex-col gap-0 w-full ${isMobile ? "md:hidden" : "hidden md:flex"}`}>
       {/* Ativos presentes */}
       {produto?.o_que_ele_tem?.length > 0 && (
         <ExpandableSection
