@@ -45,7 +45,7 @@ export function VitrineSection({
   }
 
   return (
-    <section className={`${bgColor} w-full flex flex-col gap-4 items-start py-8 px-0`}>
+    <section className={`${bgColor} w-full flex flex-col gap-4 items-start pt-2 md:pt-8 py-8 px-0`}>
       {/* Header */}
       <div className="flex flex-col gap-4 lg:items-center items-start justify-center px-4 w-full">
         <div className="flex gap-2.5 lg:items-center items-start lg:justify-center justify-start">

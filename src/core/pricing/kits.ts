@@ -58,8 +58,8 @@ export function getKitDiscount(product: { nome?: string | null; slug?: string | 
 
   if (!haystack) return null;
 
-  // 40% OFF em todos os produtos
-  return { percent: 0.4, label: "40% OFF" };
+  // 50% OFF nos kits
+  return { percent: 0.5, label: "50% OFF" };
 }
 
 function roundMoney(value: number) {

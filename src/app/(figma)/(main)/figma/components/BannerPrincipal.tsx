@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -47,12 +48,16 @@ const bannerSlides: BannerSlide[] = [
 
 const TRANSITION_DURATION = 500;
 
+const CLICK_THRESHOLD = 5; // px — abaixo disso é clique, acima é drag
+
 export function BannerPrincipal() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0); // offset em px enquanto arrasta
+  const [dragOffset, setDragOffset] = useState(0);
   const startX = useRef<number>(0);
   const isDragging = useRef(false);
+  const hasDragged = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const getContainerWidth = () => containerRef.current?.offsetWidth || 1;
@@ -86,10 +91,15 @@ export function BannerPrincipal() {
     }
   };
 
+  const navigateToSlide = () => {
+    router.push(bannerSlides[currentSlide].href);
+  };
+
   // Touch handlers (mobile)
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isTransitioning) return;
     isDragging.current = true;
+    hasDragged.current = false;
     startX.current = e.touches[0].clientX;
     setDragOffset(0);
   };
@@ -97,11 +107,17 @@ export function BannerPrincipal() {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging.current) return;
     const delta = startX.current - e.touches[0].clientX;
+    if (Math.abs(delta) > CLICK_THRESHOLD) hasDragged.current = true;
     setDragOffset(delta);
   };
 
   const handleTouchEnd = () => {
     if (!isDragging.current) return;
+    if (!hasDragged.current) {
+      isDragging.current = false;
+      navigateToSlide();
+      return;
+    }
     finishDrag(dragOffset);
   };
 
@@ -110,6 +126,7 @@ export function BannerPrincipal() {
     if (isTransitioning) return;
     e.preventDefault();
     isDragging.current = true;
+    hasDragged.current = false;
     startX.current = e.clientX;
     setDragOffset(0);
   };
@@ -117,11 +134,17 @@ export function BannerPrincipal() {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging.current) return;
     const delta = startX.current - e.clientX;
+    if (Math.abs(delta) > CLICK_THRESHOLD) hasDragged.current = true;
     setDragOffset(delta);
   };
 
   const handleMouseUp = () => {
     if (!isDragging.current) return;
+    if (!hasDragged.current) {
+      isDragging.current = false;
+      navigateToSlide();
+      return;
+    }
     finishDrag(dragOffset);
   };
 
@@ -155,7 +178,7 @@ export function BannerPrincipal() {
     <div className="relative w-full bg-white" ref={containerRef}>
       <div className="lg:hidden">
         <div
-          className="relative w-full h-[234px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          className="relative w-full h-[234px] overflow-hidden cursor-pointer select-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -230,7 +253,7 @@ export function BannerPrincipal() {
 
       <div className="hidden lg:block relative w-full h-[534px]">
         <div
-          className="relative w-full h-[500px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          className="relative w-full h-[500px] overflow-hidden cursor-pointer select-none"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
