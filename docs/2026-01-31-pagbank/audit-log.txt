@@ -2530,3 +2530,119 @@ Timestamp: 2026-03-21T23:32:02.654Z
   ]
 }
 
+=== PIX - REQUEST ===
+Timestamp: 2026-04-02T13:12:40.432Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "933c9fe8-b70a-4b88-96e0-14622cbf84a8",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "324",
+      "name": "Sérum Facial",
+      "quantity": 3,
+      "unit_amount": 5460
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 16380,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-02T13:27:40.431Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-02T13:12:41.322Z
+Status: 201
+
+{
+  "id": "ORDE_A55DD2C5-4208-4363-93D8-1DEEEF47A1C2",
+  "reference_id": "933c9fe8-b70a-4b88-96e0-14622cbf84a8",
+  "created_at": "2026-04-02T10:12:40.934-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "324",
+      "name": "Sérum Facial",
+      "quantity": 3,
+      "unit_amount": 5460
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_2E159E8E-A624-4796-AC78-4F40F4EDA863",
+      "expiration_date": "2026-04-02T10:27:40.000-03:00",
+      "amount": {
+        "value": 16380
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/2E159E8E-A624-4796-AC78-4F40F4EDA86327600016BR.COM.PAGSEGURO01362E159E8E-A624-4796-AC78-4F40F4EDA8635204597753039865406163.805802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304CFF4",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_2E159E8E-A624-4796-AC78-4F40F4EDA863/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_2E159E8E-A624-4796-AC78-4F40F4EDA863/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_A55DD2C5-4208-4363-93D8-1DEEEF47A1C2",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_A55DD2C5-4208-4363-93D8-1DEEEF47A1C2/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+

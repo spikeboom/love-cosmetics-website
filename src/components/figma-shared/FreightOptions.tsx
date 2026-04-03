@@ -1,5 +1,7 @@
 'use client';
 
+import { isEconomicaService } from "@/core/pricing/shipping-constants";
+
 interface FreightService {
   carrier: string;
   service: string;
@@ -14,6 +16,8 @@ interface FreightOptionsProps {
   onSelect?: (index: number) => void;
   radioName?: string;
   readOnly?: boolean;
+  freeShippingQualified?: boolean;
+  economicaOriginalPrice?: number | null;
 }
 
 export function FreightOptions({
@@ -22,6 +26,8 @@ export function FreightOptions({
   onSelect,
   radioName = "freight-option",
   readOnly = false,
+  freeShippingQualified = false,
+  economicaOriginalPrice,
 }: FreightOptionsProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -48,17 +54,81 @@ export function FreightOptions({
     return `${service.carrier} (${service.service})`;
   };
 
+  const isEconomica = (service: FreightService) =>
+    isEconomicaService(service.carrier, service.service);
+
   const sortedEntries = services
     .map((service, index) => ({ service, originalIndex: index }))
     .sort((a, b) => b.service.deliveryTime - a.service.deliveryTime);
 
+  const renderPriceArea = (service: FreightService) => {
+    const economica = isEconomica(service);
+    const isFree = service.price === 0;
+
+    if (economica && freeShippingQualified) {
+      return (
+        <div className="flex flex-col items-end gap-[2px]">
+          <div className="flex items-center gap-[6px]">
+            {economicaOriginalPrice != null && economicaOriginalPrice > 0 && (
+              <span className="font-cera-pro font-light text-[12px] text-[#999999] line-through whitespace-nowrap">
+                {formatPrice(economicaOriginalPrice)}
+              </span>
+            )}
+            <span className="font-cera-pro font-bold text-[14px] lg:text-[16px] text-[#009142] whitespace-nowrap">
+              GRÁTIS
+            </span>
+          </div>
+          <span className="font-cera-pro font-light text-[11px] text-[#009142] whitespace-nowrap">
+            Frete grátis aplicado
+          </span>
+        </div>
+      );
+    }
+
+    if (economica && !freeShippingQualified) {
+      return (
+        <div className="flex flex-col items-end gap-[2px]">
+          <span
+            className={`font-cera-pro font-bold text-[14px] lg:text-[16px] whitespace-nowrap ${
+              isFree ? "text-[#009142]" : "text-[#254333]"
+            }`}
+          >
+            {isFree ? "Grátis" : formatPrice(service.price)}
+          </span>
+          <span className="font-cera-pro font-light text-[11px] text-[#009142] whitespace-nowrap">
+            ou grátis acima de R$ 149
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <span
+        className={`font-cera-pro font-bold text-[14px] lg:text-[16px] whitespace-nowrap ${
+          isFree ? "text-[#009142]" : "text-[#254333]"
+        }`}
+      >
+        {isFree ? "Grátis" : formatPrice(service.price)}
+      </span>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-2 w-full">
-      {sortedEntries.map(({ service, originalIndex }) => (
-        readOnly ? (
+      {sortedEntries.map(({ service, originalIndex }) => {
+        const economica = isEconomica(service);
+        const isSelected = selectedIndex === originalIndex;
+        const highlightGreenReadOnly = economica && freeShippingQualified;
+        const highlightGreenInteractive = economica && freeShippingQualified && isSelected;
+
+        return readOnly ? (
           <div
             key={service.serviceCode}
-            className="flex items-center justify-between w-full border border-[#d2d2d2] rounded-lg p-2 lg:p-3"
+            className={`flex items-center justify-between w-full border rounded-lg p-2 lg:p-3 ${
+              highlightGreenReadOnly
+                ? "border-[#009142] bg-[#F0F9F4]"
+                : "border-[#d2d2d2]"
+            }`}
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <span className="font-cera-pro font-bold text-[14px] lg:text-[16px] text-[#111111] truncate">
@@ -77,22 +147,18 @@ export function FreightOptions({
               <span className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#666666] whitespace-nowrap">
                 até {service.deliveryTime} dias úteis
               </span>
-              <span
-                className={`font-cera-pro font-bold text-[14px] lg:text-[16px] whitespace-nowrap ${
-                  service.price === 0 ? "text-[#009142]" : "text-[#254333]"
-                }`}
-              >
-                {service.price === 0 ? "Grátis" : formatPrice(service.price)}
-              </span>
+              {renderPriceArea(service)}
             </div>
           </div>
         ) : (
           <label
             key={service.serviceCode}
             className={`flex items-center justify-between w-full border rounded-lg p-2 lg:p-3 cursor-pointer transition-all ${
-              selectedIndex === originalIndex
-                ? "border-[#254333] bg-[#F0F9F4]"
-                : "border-[#d2d2d2] hover:border-[#254333]"
+              highlightGreenInteractive
+                ? "border-[#009142] bg-[#F0F9F4]"
+                : isSelected
+                  ? "border-[#254333] bg-[#F0F9F4]"
+                  : "border-[#d2d2d2] hover:border-[#254333]"
             }`}
           >
             <input
@@ -119,17 +185,11 @@ export function FreightOptions({
               <span className="font-cera-pro font-light text-[12px] lg:text-[14px] text-[#666666] whitespace-nowrap">
                 até {service.deliveryTime} dias úteis
               </span>
-              <span
-                className={`font-cera-pro font-bold text-[14px] lg:text-[16px] whitespace-nowrap ${
-                  service.price === 0 ? "text-[#009142]" : "text-[#254333]"
-                }`}
-              >
-                {service.price === 0 ? "Grátis" : formatPrice(service.price)}
-              </span>
+              {renderPriceArea(service)}
             </div>
           </label>
-        )
-      ))}
+        );
+      })}
     </div>
   );
 }

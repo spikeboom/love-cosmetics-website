@@ -19,6 +19,7 @@ interface Produto {
   parcelas?: string;
   rating?: number;
   ultimasUnidades?: boolean;
+  esgotado?: boolean;
   // Campos extras para o carrinho
   preco_de?: number;
   bling_number?: string;

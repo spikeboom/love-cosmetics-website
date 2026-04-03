@@ -3,6 +3,7 @@
  */
 
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { isEsgotado } from "@/config/produtos-esgotados";
 
 interface TransformProdutosOptions {
   produtosStrapi: any[];
@@ -64,6 +65,7 @@ export function transformProdutosStrapi({
       rating: produto.nota > 0 ? produto.nota : 4.5,
       // Últimas unidades apenas para Sérum e Espuma
       ultimasUnidades: /s[ée]rum|espuma/i.test(produto.nome || ''),
+      esgotado: isEsgotado(produto.slug),
       // Campos extras para o carrinho
       preco_de: precoOriginal,
       bling_number: produto.bling_number,

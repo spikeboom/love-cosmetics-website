@@ -3,7 +3,11 @@
 import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useCart, useShipping } from "@/contexts";
+import { useCartTotals } from "@/contexts/cart-totals/CartTotalsContext";
 import { FreightOptions } from "@/components/figma-shared";
+import { FreeShippingBanner } from "@/components/figma-shared/FreeShippingBanner";
+import { useFreeShipping } from "@/hooks/useFreeShipping";
+import { isEconomicaService } from "@/core/pricing/shipping-constants";
 
 interface FallbackProduct {
   quantity: number;
@@ -48,6 +52,17 @@ export function ShippingCalculator({
     selectedServiceIndex,
     addressLabel,
   } = useShipping();
+
+  let subtotalAfterCoupons = 0;
+  try {
+    const cartTotals = useCartTotals();
+    subtotalAfterCoupons = cartTotals.subtotalAfterCoupons;
+  } catch {
+    // CartTotalsProvider pode nao estar disponivel em todos os contextos
+  }
+
+  const freeShipping = useFreeShipping(subtotalAfterCoupons, availableServices);
+  const hasFreeShippingEconomica = freeShipping.economicaIndex !== null;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -121,7 +136,8 @@ export function ShippingCalculator({
   const handleSelectService = (index: number) => {
     const service = availableServices[index];
     if (service) {
-      setSelectedFreight(service.price, service.deliveryTime, index);
+      const isFreeEconomica = freeShipping.qualifies && isEconomicaService(service.carrier, service.service);
+      setSelectedFreight(isFreeEconomica ? 0 : service.price, service.deliveryTime, index);
     }
   };
 
@@ -140,12 +156,20 @@ export function ShippingCalculator({
 
   const cleanCep = cep.replace(/\D/g, '');
 
-  // Carrinho: sempre selecionar a opção de menor valor (sem mostrar lista)
+  // Carrinho: sempre selecionar a melhor opcao (Economica gratis se qualifica, senao a mais barata)
   useEffect(() => {
     if (variant !== "cart") return;
     if (!hasCalculated) return;
     if (error) return;
     if (availableServices.length === 0) return;
+
+    // Se qualifica para frete gratis e Economica esta disponivel, selecionar ela
+    if (freeShipping.qualifies && freeShipping.economicaIndex !== null) {
+      if (selectedServiceIndex === freeShipping.economicaIndex) return;
+      const eco = availableServices[freeShipping.economicaIndex];
+      setSelectedFreight(0, eco.deliveryTime, freeShipping.economicaIndex);
+      return;
+    }
 
     const cheapestIndex = availableServices.reduce((minIndex, service, index) => {
       if (service.price < availableServices[minIndex].price) return index;
@@ -162,6 +186,8 @@ export function ShippingCalculator({
     availableServices,
     selectedServiceIndex,
     setSelectedFreight,
+    freeShipping.qualifies,
+    freeShipping.economicaIndex,
   ]);
 
   return (
@@ -248,6 +274,16 @@ export function ShippingCalculator({
         </div>
       )}
 
+      {/* Banner de Frete Gratis */}
+      {hasFreeShippingEconomica && hasCalculated && !error && (
+        <FreeShippingBanner
+          qualifies={freeShipping.qualifies}
+          amountRemaining={freeShipping.amountRemaining}
+          progressPercent={freeShipping.progressPercent}
+          subtotal={subtotalAfterCoupons}
+        />
+      )}
+
       {/* Opções de Frete Disponíveis (PDP: apenas informativo, sem seleção) */}
       {variant !== "cart" && hasCalculated && !error && availableServices.length > 0 && (
         <div className="flex flex-col gap-[8px] items-start w-full">
@@ -258,11 +294,13 @@ export function ShippingCalculator({
           <FreightOptions
             services={availableServices}
             readOnly
+            freeShippingQualified={freeShipping.qualifies}
+            economicaOriginalPrice={freeShipping.economicaOriginalPrice}
           />
         </div>
       )}
 
-      {/* Carrinho: mostrar apenas o menor frete */}
+      {/* Carrinho: mostrar apenas o frete selecionado */}
       {variant === "cart" && hasCalculated && !error && selectedService && (
         <div className="mt-1 p-3 bg-[#F0F9F4] rounded-lg border border-[#009142] w-full">
           <div className="flex items-center gap-2">
@@ -274,7 +312,10 @@ export function ShippingCalculator({
               className="w-4 h-4 flex-shrink-0"
             />
             <p className="font-cera-pro font-bold text-[14px] text-[#009142] leading-[1.257]">
-              até {selectedService.deliveryTime} dia(s) úteis - {formatPrice(selectedService.price)}
+              {freeShipping.qualifies && isEconomicaService(selectedService.carrier, selectedService.service)
+                ? `até ${selectedService.deliveryTime} dia(s) úteis - Frete Grátis`
+                : `até ${selectedService.deliveryTime} dia(s) úteis - ${formatPrice(selectedService.price)}`
+              }
             </p>
           </div>
         </div>

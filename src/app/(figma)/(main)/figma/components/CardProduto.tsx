@@ -17,6 +17,7 @@ interface CardProdutoProps {
   parcelas?: string;
   rating?: number;
   ultimasUnidades?: boolean;
+  esgotado?: boolean;
   tipo?: "mini-banner" | "produto-completo";
   ranking?: number;
   fullWidth?: boolean;
@@ -41,6 +42,7 @@ export function CardProduto({
   parcelas,
   rating = 3.5,
   ultimasUnidades = false,
+  esgotado = false,
   tipo = "produto-completo",
   ranking,
   fullWidth = false,
@@ -58,6 +60,8 @@ export function CardProduto({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (esgotado) return;
 
     if (!id) {
       notify("Erro ao adicionar produto", { variant: "error" });
@@ -140,6 +144,15 @@ export function CardProduto({
             fill
             className="object-cover pointer-events-none"
           />
+
+          {/* Overlay esgotado */}
+          {esgotado && (
+            <div className="absolute inset-0 bg-black/40 rounded-t-[16px] z-10 flex items-center justify-center">
+              <span className="bg-[#666666] text-white font-cera-pro font-bold text-[12px] uppercase px-[12px] py-[4px] rounded-full tracking-wider">
+                Esgotado
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Badge de ranking para mais vendidos */}
@@ -155,8 +168,19 @@ export function CardProduto({
           </div>
         )}
 
-        {/* Tag de últimas unidades */}
-        {ultimasUnidades && (
+        {/* Tag de esgotado ou últimas unidades */}
+        {esgotado ? (
+          <div className="absolute content-stretch flex flex-col gap-[4px] items-center left-1/2 bottom-[8px] w-[90%] max-w-[214px] translate-x-[-50%] z-20">
+            <div className="bg-[#f8f3ed] box-border content-stretch flex flex-col gap-[2px] items-center justify-center px-[16px] py-[4px] relative rounded-[4px] shrink-0 w-full">
+              <p className="font-cera-pro font-medium text-[13px] text-[#333333] leading-normal whitespace-nowrap">
+                Indisponível no momento
+              </p>
+              <p className="font-cera-pro font-light text-[11px] text-[#666666] leading-normal whitespace-nowrap">
+                Reposição em breve
+              </p>
+            </div>
+          </div>
+        ) : ultimasUnidades ? (
           <div className="absolute content-stretch flex flex-col gap-[10px] items-center left-1/2 bottom-[8px] w-[90%] max-w-[214px] translate-x-[-50%]">
             <div className="bg-[#f8f3ed] box-border content-stretch flex gap-[4px] items-center justify-center px-[16px] py-[4px] relative rounded-[4px] shrink-0 w-full">
               <div className="relative shrink-0 size-[16px]">
@@ -173,7 +197,7 @@ export function CardProduto({
               </p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Conteúdo */}
@@ -245,19 +269,28 @@ export function CardProduto({
           </div>
         </div>
 
-        {/* Botão Comprar */}
+        {/* Botão Comprar / Esgotado */}
         {id && (
-          <button
-            onClick={handleAddToCart}
-            className="w-full py-[12px] px-[16px] bg-[#254333] hover:bg-[#1a3025] text-white font-cera-pro font-medium text-[14px] rounded-[8px] transition-all duration-200 flex items-center justify-center gap-[8px]"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Comprar
-          </button>
+          esgotado ? (
+            <button
+              disabled
+              className="w-full py-[12px] px-[16px] bg-[#999999] text-white font-cera-pro font-medium text-[14px] rounded-[8px] cursor-not-allowed flex items-center justify-center"
+            >
+              ESGOTADO
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="w-full py-[12px] px-[16px] bg-[#254333] hover:bg-[#1a3025] text-white font-cera-pro font-medium text-[14px] rounded-[8px] transition-all duration-200 flex items-center justify-center gap-[8px]"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Comprar
+            </button>
+          )
         )}
       </div>
     </div>

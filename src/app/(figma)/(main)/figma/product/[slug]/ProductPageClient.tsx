@@ -15,6 +15,7 @@ import { calculateProductPrices } from "@/utils/calculate-prices";
 import { useCart } from "@/contexts";
 import { useNotifications } from "@/core/notifications/NotificationContext";
 import { ucAddToCart, ucViewItem } from "../../../../_tracking/uc-ecommerce";
+import { isEsgotado } from "@/config/produtos-esgotados";
 
 interface ProductPageClientProps {
   produto: any;
@@ -27,6 +28,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
   const { addProductToCart } = useCart();
   const { enqueueSnackbar } = useNotifications();
   const { handleShare } = useShareProduct({ productName: produto?.nome || "Produto" });
+  const esgotado = isEsgotado(produto?.slug);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
@@ -235,6 +237,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                 onBuy={handleBuy}
                 onShare={handleShare}
                 onAddToCart={handleAddToCart}
+                esgotado={esgotado}
               />
 
               {/* Avaliações Elogiou */}
@@ -269,6 +272,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         desconto={priceInfo.desconto ?? undefined}
         parcelas={priceInfo.parcelas}
         onBuy={handleBuy}
+        esgotado={esgotado}
       />
     </div>
   );

@@ -2,6 +2,8 @@ import { calculateFreightFrenet } from "@/app/actions/freight-actions";
 import { calculateOrderTotals, centsToReais } from "@/core/pricing/order-totals";
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 import { fetchAndValidateCupom, fetchProdutosComFallback, PRICE_TOLERANCE } from "@/lib/strapi";
+import { PRODUTOS_ESGOTADOS_SLUGS } from "@/config/produtos-esgotados";
+import { FREE_SHIPPING_THRESHOLD, isEconomicaService } from "@/core/pricing/shipping-constants";
 
 function formatCupomDescricao(cupons: Array<{ multiplacar?: number; diminuir?: number }>): string | null {
   if (!Array.isArray(cupons) || cupons.length === 0) return null;
@@ -187,6 +189,20 @@ export async function validateOrder(
     }));
     const produtosReais = await fetchProdutosComFallback(itemsParaBusca);
 
+    // 4b. Validar se algum produto esta esgotado
+    for (const item of items) {
+      const produtoReal = produtosReais.get(item.reference_id);
+      if (produtoReal?.slug && PRODUTOS_ESGOTADOS_SLUGS.includes(produtoReal.slug)) {
+        return {
+          valid: false,
+          error: `O produto "${item.name}" está esgotado e não pode ser comprado no momento.`,
+          code: "PRODUCT_OUT_OF_STOCK",
+          calculatedTotal: 0,
+          calculatedDescontos: 0,
+        };
+      }
+    }
+
     // 5. Validar cada item (preco base, sem cupom)
     const validatedItems: Array<{ preco: number; quantity: number }> = [];
     const itemsParaFrete: Array<{
@@ -296,33 +312,76 @@ export async function validateOrder(
         ? freteResult.services
         : freteResult.services.filter((s) => !isDevFreightService(s))) as FrenetService[];
 
-      const match = findMatchingFreightServiceByPriceCents(services, freteEnviado);
-      if (!match) {
-        const cheapest = services.reduce((min, s) => (s.price < min.price ? s : min), services[0]);
-        freteValidado = cheapest?.price ?? freteEnviado;
-
-        const totalsForError = calculateOrderTotals({
+      // 6b. Verificar frete gratis: se frete enviado = 0, validar server-side
+      if (freteEnviado === 0) {
+        // Calcular subtotal apos cupons server-side
+        const totalsForFreeShipping = calculateOrderTotals({
           items: validatedItems,
           cupons: cuponsData,
-          frete: freteValidado,
+          frete: 0,
         });
+        const subtotalAfterCoupons = centsToReais(totalsForFreeShipping.itemsTotalAfterCouponCents);
 
-        return {
-          valid: false,
-          error: "Frete desatualizado. Volte e recalcule o frete para continuar.",
-          code: "FREIGHT_MISMATCH",
-          calculatedTotal: centsToReais(totalsForError.totalCents),
-          calculatedDescontos: centsToReais(totalsForError.couponDiscountCents),
-          details: {
-            itemsSubtotal: centsToReais(totalsForError.itemsSubtotalCents),
-            cupomDesconto: centsToReais(totalsForError.couponDiscountCents),
-            freteValidado,
-          },
-        };
+        // Verificar se Economica existe nos servicos disponiveis
+        const economicaService = services.find((s) => isEconomicaService(s.carrier, s.service));
+
+        if (subtotalAfterCoupons >= FREE_SHIPPING_THRESHOLD && economicaService) {
+          // Frete gratis valido - aceitar 0 e usar servico Economica
+          freteValidado = 0;
+          freteService = economicaService;
+        } else {
+          // Frete gratis nao se aplica - rejeitar
+          const cheapest = services.reduce((min, s) => (s.price < min.price ? s : min), services[0]);
+          freteValidado = cheapest?.price ?? 0;
+
+          const totalsForError = calculateOrderTotals({
+            items: validatedItems,
+            cupons: cuponsData,
+            frete: freteValidado,
+          });
+
+          return {
+            valid: false,
+            error: "Frete grátis não se aplica. Volte e recalcule o frete.",
+            code: "FREIGHT_MISMATCH",
+            calculatedTotal: centsToReais(totalsForError.totalCents),
+            calculatedDescontos: centsToReais(totalsForError.couponDiscountCents),
+            details: {
+              itemsSubtotal: centsToReais(totalsForError.itemsSubtotalCents),
+              cupomDesconto: centsToReais(totalsForError.couponDiscountCents),
+              freteValidado,
+            },
+          };
+        }
+      } else {
+        const match = findMatchingFreightServiceByPriceCents(services, freteEnviado);
+        if (!match) {
+          const cheapest = services.reduce((min, s) => (s.price < min.price ? s : min), services[0]);
+          freteValidado = cheapest?.price ?? freteEnviado;
+
+          const totalsForError = calculateOrderTotals({
+            items: validatedItems,
+            cupons: cuponsData,
+            frete: freteValidado,
+          });
+
+          return {
+            valid: false,
+            error: "Frete desatualizado. Volte e recalcule o frete para continuar.",
+            code: "FREIGHT_MISMATCH",
+            calculatedTotal: centsToReais(totalsForError.totalCents),
+            calculatedDescontos: centsToReais(totalsForError.couponDiscountCents),
+            details: {
+              itemsSubtotal: centsToReais(totalsForError.itemsSubtotalCents),
+              cupomDesconto: centsToReais(totalsForError.couponDiscountCents),
+              freteValidado,
+            },
+          };
+        }
+
+        freteValidado = match.price;
+        freteService = match;
       }
-
-      freteValidado = match.price;
-      freteService = match;
     }
 
     // 7. Usar calculateOrderTotals como fonte de verdade

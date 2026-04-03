@@ -102,7 +102,7 @@ export function SearchBar({ produtos, className = "", mobile = false }: SearchBa
       <form onSubmit={handleSubmit}>
         <div className={`bg-white flex gap-[5px] items-center p-[8px] rounded-[16px] ${mobile ? "w-full" : "w-[550px]"}`}>
           <Search size={16} className="shrink-0 text-black" />
-          {/* <input
+          <input
             ref={inputRef}
             type="text"
             value={query}
@@ -110,7 +110,7 @@ export function SearchBar({ produtos, className = "", mobile = false }: SearchBa
             onFocus={() => setIsOpen(true)}
             placeholder="Buscar produtos..."
             className="flex-1 font-cera-pro font-light text-[12px] text-black outline-none bg-transparent"
-          /> */}
+          />
         </div>
       </form>
 

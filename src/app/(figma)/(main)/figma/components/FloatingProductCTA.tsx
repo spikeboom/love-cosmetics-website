@@ -6,6 +6,7 @@ interface FloatingProductCTAProps {
   desconto?: string;
   parcelas?: string;
   onBuy?: () => void;
+  esgotado?: boolean;
 }
 
 /**
@@ -19,6 +20,7 @@ export function FloatingProductCTA({
   desconto,
   parcelas,
   onBuy = () => {},
+  esgotado = false,
 }: FloatingProductCTAProps) {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 w-screen flex flex-row items-center gap-[32px] px-[24px] py-[16px] bg-white rounded-t-[16px] shadow-[0px_0px_3px_0px_rgba(0,0,0,0.3),0px_2px_8px_3px_rgba(0,0,0,0.15)] z-50">
@@ -54,18 +56,16 @@ export function FloatingProductCTA({
         )}
       </div>
 
-      {/* Button Comprar - layout_1WTDTZ, h: 48 */}
+      {/* Button Comprar / Esgotado - layout_1WTDTZ, h: 48 */}
       <button
-        onClick={onBuy}
+        onClick={esgotado ? undefined : onBuy}
+        disabled={esgotado}
         className="flex flex-row justify-stretch items-stretch flex-1 h-[48px]"
       >
-        {/* Content - layout_4TQZZ0, fill_6K1BZZ */}
-        <div className="flex flex-col justify-center items-center self-stretch flex-1 bg-[#254333] rounded-[8px]">
-          {/* State-layer - layout_FJS0JC */}
+        <div className={`flex flex-col justify-center items-center self-stretch flex-1 rounded-[8px] ${esgotado ? "bg-[#999999] cursor-not-allowed" : "bg-[#254333]"}`}>
           <div className="flex flex-row justify-center items-center gap-[8px] px-[16px] py-[10px]">
-            {/* textStyle: Título H4 */}
             <p className="font-cera-pro font-medium text-[16px] text-white leading-[1.256]">
-              Comprar
+              {esgotado ? "ESGOTADO" : "Comprar"}
             </p>
           </div>
         </div>

@@ -16,6 +16,7 @@ interface Produto {
   parcelas?: string;
   rating?: number;
   ultimasUnidades?: boolean;
+  esgotado?: boolean;
   ranking?: number;
   // Campos extras para o carrinho
   preco_de?: number;
@@ -107,6 +108,7 @@ export function ProductGrid({
               parcelas={produto.parcelas}
               rating={produto.rating}
               ultimasUnidades={produto.ultimasUnidades}
+              esgotado={produto.esgotado}
               ranking={produto.ranking}
               tipo="produto-completo"
               fullWidth={true}

@@ -1,6 +1,7 @@
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { SearchPageClient } from "./SearchPageClient";
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { isEsgotado } from "@/config/produtos-esgotados";
 
 export const metadata = {
   title: "Lové Cosméticos - Busca de Produtos",
@@ -70,6 +71,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       parcelas,
       rating: produto.rating || 4.5,
       ultimasUnidades,
+      esgotado: isEsgotado(produto.slug),
       // Campos extras para o carrinho
       preco_de: precoOriginal,
       bling_number: produto.bling_number,

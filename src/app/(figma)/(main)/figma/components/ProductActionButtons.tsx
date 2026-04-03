@@ -4,6 +4,7 @@ interface ProductActionButtonsProps {
   onBuy?: () => void;
   onShare?: () => void;
   onAddToCart?: () => void;
+  esgotado?: boolean;
 }
 
 /**
@@ -15,7 +16,30 @@ export function ProductActionButtons({
   onBuy = () => {},
   onShare = () => {},
   onAddToCart = () => {},
+  esgotado = false,
 }: ProductActionButtonsProps) {
+  if (esgotado) {
+    return (
+      <div className="flex flex-col items-center gap-[12px] self-stretch w-full">
+        <button
+          disabled
+          className="flex flex-row justify-stretch items-stretch self-stretch w-full"
+        >
+          <div className="flex flex-col justify-center items-center self-stretch flex-1 bg-[#999999] rounded-[8px] cursor-not-allowed">
+            <div className="flex flex-row justify-center items-center gap-[8px] px-[16px] py-[10px]">
+              <p className="font-cera-pro font-bold text-[16px] md:text-[24px] text-white leading-[normal]">
+                ESGOTADO
+              </p>
+            </div>
+          </div>
+        </button>
+        <p className="font-cera-pro font-medium text-[14px] text-[#333333] leading-normal">
+          Indisponível no momento
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Mobile: Frame 2608683 - layout_GFSIOH */}
