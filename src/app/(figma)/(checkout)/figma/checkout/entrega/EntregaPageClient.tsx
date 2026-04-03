@@ -556,12 +556,6 @@ export function EntregaPageClient() {
                     freeShippingQualified={freeShipping.qualifies}
                     economicaOriginalPrice={freeShipping.economicaOriginalPrice}
                   />
-                  {freeShipping.qualifies && freeShipping.economicaIndex !== null && (
-                    <p className="font-cera-pro font-light text-[12px] text-[#666666] leading-normal mt-1">
-                      O frete grátis é válido apenas para a opção &quot;Econômica&quot;.
-                      As opções Padrão e Expressa continuam com cobrança.
-                    </p>
-                  )}
                 </>
               ) : (
                 <p className="font-cera-pro font-light text-[14px] text-[#666] py-2">
