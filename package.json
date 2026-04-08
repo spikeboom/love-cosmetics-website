@@ -9,7 +9,13 @@
     "lint": "next lint",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "security": "bash scripts/security-scan.sh all",
+    "security:deps": "bash scripts/security-scan.sh deps",
+    "security:code": "bash scripts/security-scan.sh code",
+    "security:secrets": "bash scripts/security-scan.sh secrets",
+    "security:docker": "bash scripts/security-scan.sh docker",
+    "security:install": "bash scripts/security-install.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

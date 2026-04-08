@@ -50,3 +50,31 @@ docker build --platform linux/amd64 -t love-cosmetics-dev:latest --build-arg ENV
 ## URLs
 - DEV: https://dev.lovecosmetics.com.br
 - PROD: https://lovecosmetics.com.br
+
+---
+
+## Security Scan Local
+
+Scans de segurança que rodam na máquina local (CVEs, SAST, secrets, Docker). Relatórios salvos em `security-reports/`.
+
+### Setup (uma vez)
+```bash
+npm run security:install
+```
+Instala Trivy, Semgrep, Gitleaks e Hadolint via Docker images.
+
+### Uso
+```bash
+npm run security            # roda tudo
+npm run security:deps       # só CVEs nas dependências
+npm run security:code       # análise estática do código (SAST)
+npm run security:secrets    # detecta senhas/tokens no código
+npm run security:docker     # lint do Dockerfile + scan da imagem
+```
+
+### O que cobre
+- **Dependências**: npm audit + Trivy (CVEs HIGH/CRITICAL)
+- **Código**: Semgrep (XSS, injection, SSRF) + ESLint
+- **Secrets**: Gitleaks (API keys, senhas no código/histórico git)
+- **Docker**: Hadolint (boas práticas) + Trivy (CVEs na imagem)
+- **Checks extras**: Node EOL, .env no Dockerfile, raw SQL, security headers
