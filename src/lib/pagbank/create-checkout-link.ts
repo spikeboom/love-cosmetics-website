@@ -84,11 +84,8 @@ export async function createPagBankCheckoutLink(
       })),
       // URLs de callback
       redirect_url: `${baseURL}/confirmacao`,
-      notification_urls: [
-        `${baseURL}/api/checkout_notification`,
-      ],
       payment_notification_urls: [
-        `${baseURL}/api/payment_notification`,
+        `${baseURL}/api/pagbank/webhook`,
       ],
     };
 

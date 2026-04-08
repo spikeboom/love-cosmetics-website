@@ -1,3 +1,10 @@
+/**
+ * ROTA DEFASADA — mantida apenas para pedidos antigos que ainda têm esta URL
+ * configurada no PagBank. Novos checkouts usam /api/pagbank/webhook.
+ *
+ * Problema: esta rota salva o registro em StatusPagamento mas NÃO atualiza
+ * Pedido.status_pagamento, causando divergência entre os dois.
+ */
 import { createLogger } from "@/utils/logMessage";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
