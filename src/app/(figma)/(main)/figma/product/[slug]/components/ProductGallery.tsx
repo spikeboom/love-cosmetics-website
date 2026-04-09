@@ -8,6 +8,7 @@ import { ImageLightbox } from "./ImageLightbox";
 
 interface ProductGalleryProps {
   imagesMain: string[];
+  imagesZoom?: string[];
   imagesThumbs: string[];
   selectedImage: number;
   onSelectImage: (index: number) => void;
@@ -15,6 +16,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({
   imagesMain,
+  imagesZoom,
   imagesThumbs,
   selectedImage,
   onSelectImage,
@@ -42,11 +44,10 @@ export function ProductGallery({
                 selectedImage === index ? "" : "opacity-50 hover:opacity-100"
               }`}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={image}
                 alt={`Imagem ${index + 1}`}
-                width={94}
-                height={94}
                 className="w-full h-full object-cover"
               />
             </button>
@@ -59,6 +60,7 @@ export function ProductGallery({
           <div className="hidden md:block w-full h-full bg-white overflow-hidden">
             <ImageZoom
               src={imagesMain[selectedImage]}
+              zoomSrc={imagesZoom?.[selectedImage]}
               alt="Produto Love Cosmeticos"
               width={803}
               height={704}

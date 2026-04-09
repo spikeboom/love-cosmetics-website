@@ -5,6 +5,7 @@ import Image from "next/image";
 
 interface ImageZoomProps {
   src: string;
+  zoomSrc?: string;
   alt: string;
   width: number;
   height: number;
@@ -18,6 +19,7 @@ interface ImageZoomProps {
  */
 export function ImageZoom({
   src,
+  zoomSrc,
   alt,
   width,
   height,
@@ -64,7 +66,7 @@ export function ImageZoom({
         <div
           className="absolute inset-0 hidden md:block"
           style={{
-            backgroundImage: `url(${src})`,
+            backgroundImage: `url(${zoomSrc || src})`,
             backgroundSize: `${zoomScale * 100}%`,
             backgroundPosition: bgPos,
             backgroundRepeat: "no-repeat",

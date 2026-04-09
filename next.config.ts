@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'directus.lovecosmeticos.xyz',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.lovecosmetics.com.br',
       },
       {

@@ -55,7 +55,9 @@ export function transformProdutosStrapi({
 
     const produtoTransformado: any = {
       id: produto.id?.toString(),
-      imagem: imagemUrl ? `${baseURL}${imagemUrl}` : "/new-home/produtos/produto-1.png",
+      imagem: imagemUrl
+        ? imagemUrl.startsWith("http") ? imagemUrl : `${baseURL}${imagemUrl}`
+        : "/new-home/produtos/produto-1.png",
       nome: produto.nome || "Produto",
       descricao,
       desconto,

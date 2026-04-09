@@ -15,9 +15,11 @@ export default async function FigmaMainLayout({
     id: p.id,
     slug: p.slug,
     nome: p.nome || "Produto",
-    imagem: p.carouselImagensPrincipal?.[0]?.imagem?.url
-      ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${p.carouselImagensPrincipal[0].imagem.url}`
-      : "/new-home/produtos/produto-1.png",
+    imagem: (() => {
+      const url = p.carouselImagensPrincipal?.[0]?.imagem?.url;
+      if (!url) return "/new-home/produtos/produto-1.png";
+      return url.startsWith("http") ? url : `${process.env.NEXT_PUBLIC_STRAPI_URL}${url}`;
+    })(),
   })) || [];
 
   return (

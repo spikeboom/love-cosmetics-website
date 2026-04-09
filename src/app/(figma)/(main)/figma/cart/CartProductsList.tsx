@@ -63,7 +63,7 @@ export function CartProductsList({
     const imagemUrl =
       produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url ||
       produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
-    return imagemUrl ? `${baseURL}${imagemUrl}` : undefined;
+    return imagemUrl ? (imagemUrl.startsWith("http") ? imagemUrl : `${baseURL}${imagemUrl}`) : undefined;
   };
 
   return (

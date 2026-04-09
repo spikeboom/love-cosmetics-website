@@ -61,7 +61,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       id: produto.id?.toString(),
       slug: produto.slug,
       imagem: imagemUrl
-        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${imagemUrl}`
+        ? (imagemUrl.startsWith("http") ? imagemUrl : `${process.env.NEXT_PUBLIC_STRAPI_URL}${imagemUrl}`)
         : "/new-home/produtos/produto-1.png",
       nome: produto.nome || "Produto",
       descricao,

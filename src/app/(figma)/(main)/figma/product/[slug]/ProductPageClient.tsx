@@ -60,7 +60,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
   const productThumb = produto?.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url
     || produto?.carouselImagensPrincipal?.[0]?.imagem?.url;
-  const productImageUrl = productThumb ? `${baseURL}${productThumb}` : "/new-home/produtos/produto-pdp.png";
+  const productImageUrl = productThumb ? (productThumb.startsWith("http") ? productThumb : `${baseURL}${productThumb}`) : "/new-home/produtos/produto-pdp.png";
 
   const showAddedToCartToast = () => {
     enqueueSnackbar("", {
@@ -120,7 +120,17 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         const imgUrl = item?.imagem?.formats?.large?.url ||
                        item?.imagem?.formats?.xlarge?.url ||
                        item?.imagem?.url;
-        return imgUrl ? `${baseURL}${imgUrl}` : "/new-home/produtos/produto-pdp.png";
+        return imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${baseURL}${imgUrl}`) : "/new-home/produtos/produto-pdp.png";
+      })
+    : Array(5).fill("/new-home/produtos/produto-pdp.png");
+
+  // URLs de alta resolução para zoom (xlarge > large > url original)
+  const productImagesZoom = produto?.carouselImagensPrincipal?.length > 0
+    ? produto.carouselImagensPrincipal.map((item: any) => {
+        const imgUrl = item?.imagem?.formats?.xlarge?.url ||
+                       item?.imagem?.formats?.large?.url ||
+                       item?.imagem?.url;
+        return imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${baseURL}${imgUrl}`) : "/new-home/produtos/produto-pdp.png";
       })
     : Array(5).fill("/new-home/produtos/produto-pdp.png");
 
@@ -129,7 +139,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         const imgUrl = item?.imagem?.formats?.thumbnail?.url ||
                        item?.imagem?.formats?.small?.url ||
                        item?.imagem?.url;
-        return imgUrl ? `${baseURL}${imgUrl}` : "/new-home/produtos/produto-pdp.png";
+        return imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${baseURL}${imgUrl}`) : "/new-home/produtos/produto-pdp.png";
       })
     : Array(5).fill("/new-home/produtos/produto-pdp.png");
 
@@ -142,6 +152,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
           <div className="flex flex-col gap-[24px] items-start w-full md:w-[921px]">
             <ProductGallery
               imagesMain={productImagesMain}
+              imagesZoom={productImagesZoom}
               imagesThumbs={productImagesThumbs}
               selectedImage={selectedImage}
               onSelectImage={setSelectedImage}
@@ -355,8 +366,8 @@ function ProductDescription({ produto }: { produto: any }) {
 
           {produto?.listaDescricao?.length > 0 && (
             <ul className="list-disc list-inside space-y-[4px]">
-              {produto.listaDescricao.map((item: any) => (
-                <li key={item.id}>{item.texto}</li>
+              {produto.listaDescricao.map((item: any, idx: number) => (
+                <li key={item.id ?? idx}>{item.descricao ?? item.texto}</li>
               ))}
             </ul>
           )}

@@ -3,6 +3,7 @@
 import qs from "qs";
 import { fetchCupom } from "../cupom/domain";
 import { formatPrice } from "@/utils/format-price";
+import { getCmsProvider } from "@/lib/cms/client";
 
 // Common populate items used across all product queries
 const COMMON_POPULATE_ITEMS = [
@@ -100,6 +101,11 @@ export const fetchProdutoBySlug = async ({
 }: {
   slug: string;
 }): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutoBySlug: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect(slug));
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   const query = qs.stringify(
@@ -121,7 +127,7 @@ export const fetchProdutoBySlug = async ({
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
     },
-    cache: "no-store", // Ajuste conforme necessário: "no-store" para evitar cache em SSR
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -132,6 +138,11 @@ export const fetchProdutoBySlug = async ({
 };
 
 export const fetchProdutosForHome_Kit = async (): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutosForHome_Kit: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect());
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   const query = qs.stringify(
@@ -170,6 +181,11 @@ export const fetchProdutosForHome_Kit = async (): Promise<any> => {
 };
 
 export const fetchProdutosForHome_NotKit = async (): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutosForHome_NotKit: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect());
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   const query = qs.stringify(
@@ -212,6 +228,11 @@ export const fetchProdutosForHome_NotKit = async (): Promise<any> => {
 };
 
 export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutosForCarouselPDP: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect());
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   const query = qs.stringify(
@@ -249,6 +270,11 @@ export const fetchProdutosForCarouselPDP = async (): Promise<any> => {
 };
 
 export const fetchProdutosSugeridosCarrinho = async (): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutosSugeridosCarrinho: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect());
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   const query = qs.stringify(
@@ -283,6 +309,11 @@ export const fetchProdutosSugeridosCarrinho = async (): Promise<any> => {
 };
 
 export const fetchProdutosForDesign = async (): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutosForDesign: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect());
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   const query = qs.stringify(
@@ -330,6 +361,11 @@ export const fetchProdutosForSearch = async ({
   q?: string;
   termos?: string[];
 }): Promise<any> => {
+  if (getCmsProvider() === "directus") {
+    const { fetchProdutosForSearch: fetchDirect } = await import("@/lib/cms/directus/produtos");
+    return processProdutosNothing(await fetchDirect({ q, termos }));
+  }
+
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 
   // Monta os filtros baseado na query de busca

@@ -109,6 +109,7 @@ export function CardProduto({
           src={imagem}
           alt={nome}
           fill
+          sizes="(max-width: 1024px) 77vw, 230px"
           className="object-cover rounded-t-2xl"
         />
       </div>
@@ -142,6 +143,7 @@ export function CardProduto({
             src={imagem}
             alt={nome}
             fill
+            sizes="(max-width: 1024px) 77vw, 230px"
             className="object-cover pointer-events-none"
           />
 
