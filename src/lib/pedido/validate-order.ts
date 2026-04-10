@@ -3,7 +3,8 @@ import { calculateOrderTotals, centsToReais } from "@/core/pricing/order-totals"
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 import { fetchAndValidateCupom, fetchProdutosComFallback, PRICE_TOLERANCE } from "@/lib/strapi";
 import { PRODUTOS_ESGOTADOS_SLUGS } from "@/config/produtos-esgotados";
-import { FREE_SHIPPING_THRESHOLD, isEconomicaService } from "@/core/pricing/shipping-constants";
+import { isEconomicaService } from "@/core/pricing/shipping-constants";
+import { fetchConfiguracoesLoja } from "@/lib/cms/directus/configuracoes";
 
 function formatCupomDescricao(cupons: Array<{ multiplacar?: number; diminuir?: number }>): string | null {
   if (!Array.isArray(cupons) || cupons.length === 0) return null;
@@ -325,7 +326,8 @@ export async function validateOrder(
         // Verificar se Economica existe nos servicos disponiveis
         const economicaService = services.find((s) => isEconomicaService(s.carrier, s.service));
 
-        if (subtotalAfterCoupons >= FREE_SHIPPING_THRESHOLD && economicaService) {
+        const { freteGratisValor } = await fetchConfiguracoesLoja();
+        if (subtotalAfterCoupons >= freteGratisValor && economicaService) {
           // Frete gratis valido - aceitar 0 e usar servico Economica
           freteValidado = 0;
           freteService = economicaService;

@@ -1,3 +1,7 @@
+/**
+ * Valor de fallback hardcoded para o threshold de frete grátis.
+ * O valor dinâmico é controlado pelo Directus via fetchConfiguracoesLoja().
+ */
 export const FREE_SHIPPING_THRESHOLD = 149;
 
 export function isEconomicaService(carrier: string, service: string): boolean {

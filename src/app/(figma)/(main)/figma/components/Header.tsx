@@ -8,16 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Gift, Sparkles, LayoutGrid, BookOpen } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import RotatingAnnouncementBar from "./RotatingAnnouncementBar";
-
-const ANNOUNCEMENT_MESSAGES = [
-  {
-    text: "Ciência da Amazônia na sua pele",
-    icon: "/new-home/header/eco.svg",
-  },
-  {
-    text: "🚚 Frete grátis acima de R$ 149",
-  },
-];
+import { useLojaConfig } from "@/contexts/LojaConfigContext";
 
 interface Produto {
   id: number;
@@ -33,6 +24,16 @@ interface HeaderProps {
 export function Header({ produtos = [] }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { qtdItemsCart } = useCart();
+  const { freteGratisValor } = useLojaConfig();
+  const ANNOUNCEMENT_MESSAGES = [
+    {
+      text: "Ciência da Amazônia na sua pele",
+      icon: "/new-home/header/eco.svg",
+    },
+    {
+      text: `🚚 Frete grátis acima de R$ ${Math.floor(freteGratisValor)}`,
+    },
+  ];
   const { isLoggedIn } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);

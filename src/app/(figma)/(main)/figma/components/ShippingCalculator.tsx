@@ -8,6 +8,7 @@ import { FreightOptions } from "@/components/figma-shared";
 import { FreeShippingBanner } from "@/components/figma-shared/FreeShippingBanner";
 import { useFreeShipping } from "@/hooks/useFreeShipping";
 import { isEconomicaService } from "@/core/pricing/shipping-constants";
+import { useLojaConfig } from "@/contexts/LojaConfigContext";
 
 interface FallbackProduct {
   quantity: number;
@@ -39,6 +40,7 @@ export function ShippingCalculator({
   variant = 'pdp',
 }: ShippingCalculatorProps) {
   const { cart } = useCart();
+  const { freteGratisValor } = useLojaConfig();
   const {
     cep,
     setCep,
@@ -61,7 +63,7 @@ export function ShippingCalculator({
     // CartTotalsProvider pode nao estar disponivel em todos os contextos
   }
 
-  const freeShipping = useFreeShipping(subtotalAfterCoupons, availableServices);
+  const freeShipping = useFreeShipping(subtotalAfterCoupons, availableServices, freteGratisValor);
   const hasFreeShippingEconomica = freeShipping.economicaIndex !== null;
 
   const formatPrice = (price: number) => {
@@ -281,6 +283,7 @@ export function ShippingCalculator({
           amountRemaining={freeShipping.amountRemaining}
           progressPercent={freeShipping.progressPercent}
           subtotal={subtotalAfterCoupons}
+          threshold={freteGratisValor}
         />
       )}
 

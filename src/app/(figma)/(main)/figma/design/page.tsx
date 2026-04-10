@@ -3,6 +3,7 @@ import { CertificadosSection } from "../components/CertificadosSection";
 import { ElogiouWidget } from "../components/ElogiouWidget";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
+import { fetchBannersHome } from "@/lib/cms/directus/banners";
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
@@ -24,6 +25,9 @@ function ordenarProdutos(produtos: any[], ordem: string[]) {
 }
 
 export default async function FigmaHomePage() {
+  // Banners da home via Directus (com fallback hardcoded)
+  const banners = await fetchBannersHome();
+
   // Vitrine 1 - Comece sua rotina Lovè: Espuma, Sérum, Hidratante
   const { data: produtosRotina } = await fetchProdutosForSearch({
     termos: ["espuma", "sérum", "serum", "hidratante"]
@@ -45,7 +49,7 @@ export default async function FigmaHomePage() {
   return (
     <div className="w-full max-w-[1440px] mx-auto">
       {/* Banner principal com produto em destaque */}
-      <BannerPrincipal />
+      <BannerPrincipal slides={banners} />
 
       {/* Vitrine 1 - Comece sua rotina Lovè */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">

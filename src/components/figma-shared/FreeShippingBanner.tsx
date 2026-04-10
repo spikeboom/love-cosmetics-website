@@ -7,6 +7,7 @@ interface FreeShippingBannerProps {
   amountRemaining: number;
   progressPercent: number;
   subtotal: number;
+  threshold?: number;
 }
 
 export function FreeShippingBanner({
@@ -14,8 +15,8 @@ export function FreeShippingBanner({
   amountRemaining,
   progressPercent,
   subtotal,
+  threshold = FREE_SHIPPING_THRESHOLD,
 }: FreeShippingBannerProps) {
-  const threshold = FREE_SHIPPING_THRESHOLD;
   const formatBRL = (v: number) =>
     v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 

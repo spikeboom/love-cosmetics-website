@@ -4,53 +4,17 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-
-interface BannerSlide {
-  id: number;
-  image: string;
-  imageMobile?: string;
-  title: string;
-  discount?: string;
-  description: string;
-  cta: string;
-  href: string;
-}
-
-const bannerSlides: BannerSlide[] = [
-  {
-    id: 1,
-    image: "/new-home/banner/banner-desconto-50-full.jpg",
-    imageMobile: "/new-home/banner/banner-desconto-50-mobile.jpg",
-    title: "Sua rotina de skincare com até 50% OFF.",
-    description: "",
-    cta: "Compre agora",
-    href: "/figma/search",
-  },
-  {
-    id: 2,
-    image: "/new-home/banner/banner-frete-gratis-full.jpg",
-    imageMobile: "/new-home/banner/banner-frete-gratis-mobile.jpg",
-    title: "Frete grátis para todo o Brasil",
-    description: "Em compras acima de R$149.",
-    cta: "Aproveitar ofertas",
-    href: "/figma/search",
-  },
-  {
-    id: 3,
-    image: "/new-home/banner/banner-tecnologia-amazonia-full.png",
-    imageMobile: "/new-home/banner/banner-tecnologia-amazonia-mobile.png",
-    title: "Tecnologia & Amazônia",
-    description: "Ativos amazônicos com ciência para cuidar da sua pele.",
-    cta: "Ver todos os produtos",
-    href: "/figma/search",
-  },
-];
+import type { BannerHome } from "@/lib/cms/directus/banners";
 
 const TRANSITION_DURATION = 500;
 
 const CLICK_THRESHOLD = 5; // px — abaixo disso é clique, acima é drag
 
-export function BannerPrincipal() {
+interface BannerPrincipalProps {
+  slides: BannerHome[];
+}
+
+export function BannerPrincipal({ slides }: BannerPrincipalProps) {
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -60,6 +24,8 @@ export function BannerPrincipal() {
   const hasDragged = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  if (slides.length === 0) return null;
+
   const getContainerWidth = () => containerRef.current?.offsetWidth || 1;
 
   const finishDrag = (deltaX: number) => {
@@ -67,7 +33,7 @@ export function BannerPrincipal() {
     const threshold = getContainerWidth() * 0.15; // 15% do container para avançar
 
     if (Math.abs(deltaX) > threshold) {
-      if (deltaX > 0 && currentSlide < bannerSlides.length - 1) {
+      if (deltaX > 0 && currentSlide < slides.length - 1) {
         setIsTransitioning(true);
         setDragOffset(0);
         setCurrentSlide((prev) => prev + 1);
@@ -92,7 +58,7 @@ export function BannerPrincipal() {
   };
 
   const navigateToSlide = () => {
-    router.push(bannerSlides[currentSlide].href);
+    router.push(slides[currentSlide].ctaUrl);
   };
 
   // Touch handlers (mobile)
@@ -156,18 +122,18 @@ export function BannerPrincipal() {
   const handlePrevious = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev === 0 ? bannerSlides.length - 1 : prev - 1));
+    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
     setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
   };
 
   const handleNext = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev === bannerSlides.length - 1 ? 0 : prev + 1));
+    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsTransitioning(false), TRANSITION_DURATION);
   };
 
-  const slide = bannerSlides[currentSlide];
+  const slide = slides[currentSlide];
   // Combina posição do slide com o drag offset em tempo real
   const dragPercent = (dragOffset / getContainerWidth()) * 100;
   const slideOffset = -currentSlide * 100 - dragPercent;
@@ -194,11 +160,11 @@ export function BannerPrincipal() {
             }}
             className="relative w-full h-full flex"
           >
-            {bannerSlides.map((item) => (
+            {slides.map((item) => (
               <div key={item.id} className="relative w-full h-full flex-shrink-0">
                 <Image
-                  src={item.imageMobile || item.image}
-                  alt={item.title}
+                  src={item.imagemMobile || item.imagemDesktop}
+                  alt={item.titulo}
                   fill
                   className="object-cover"
                   priority
@@ -210,7 +176,7 @@ export function BannerPrincipal() {
 
         <div className="flex flex-col gap-4 px-4 pb-6 pt-4">
           <div className="flex gap-1">
-            {bannerSlides.map((_, index) => (
+            {slides.map((_, index) => (
               <Image
                 key={index}
                 src={
@@ -227,25 +193,22 @@ export function BannerPrincipal() {
           </div>
 
           <div className="flex flex-col gap-4">
-            {slide.discount && (
-              <p className="font-cera-pro font-bold text-[20px] text-[#254333] leading-none">
-                {slide.discount}
+            <p className="font-times font-bold text-[32px] text-black leading-none whitespace-pre-line">
+              {slide.titulo}
+            </p>
+            {slide.descricao && (
+              <p className="font-cera-pro font-light text-[14px] text-black leading-none">
+                {slide.descricao}
               </p>
             )}
-            <p className="font-times font-bold text-[32px] text-black leading-none whitespace-pre-line">
-              {slide.title}
-            </p>
-            <p className="font-cera-pro font-light text-[14px] text-black leading-none">
-              {slide.description}
-            </p>
           </div>
 
           <div className="flex gap-2 items-center">
             <Link
-              href={slide.href}
+              href={slide.ctaUrl}
               className="font-cera-pro font-normal text-sm bg-[#254333] text-white rounded-lg px-4 py-2.5 hover:bg-[#1a3024] transition-colors tracking-[0.1px] leading-5"
             >
-              {slide.cta}
+              {slide.ctaTexto}
             </Link>
           </div>
         </div>
@@ -266,11 +229,11 @@ export function BannerPrincipal() {
             }}
             className="relative w-full h-full flex"
           >
-            {bannerSlides.map((item) => (
+            {slides.map((item) => (
               <div key={item.id} className="relative w-full h-full flex-shrink-0">
                 <Image
-                  src={item.image}
-                  alt={item.title}
+                  src={item.imagemDesktop}
+                  alt={item.titulo}
                   fill
                   className="object-cover"
                   priority
@@ -282,32 +245,29 @@ export function BannerPrincipal() {
 
         <div className="absolute top-[97px] right-[32px] xl:right-[80px] w-[600px] max-w-[calc(100%-64px)] bg-white/75 backdrop-blur-sm p-8 flex flex-col gap-8">
           <div className="flex flex-col gap-8">
-            {slide.discount && (
-              <p className="font-cera-pro font-bold text-[32px] text-[#254333] leading-none">
-                {slide.discount}
+            <p className="font-times font-bold text-[56px] text-black leading-none break-words whitespace-pre-line">
+              {slide.titulo}
+            </p>
+            {slide.descricao && (
+              <p className="font-cera-pro font-light text-[32px] text-black leading-none">
+                {slide.descricao}
               </p>
             )}
-            <p className="font-times font-bold text-[56px] text-black leading-none break-words whitespace-pre-line">
-              {slide.title}
-            </p>
-            <p className="font-cera-pro font-light text-[32px] text-black leading-none">
-              {slide.description}
-            </p>
           </div>
 
           <div className="flex gap-2 items-center w-full">
             <Link
-              href={slide.href}
+              href={slide.ctaUrl}
               className="font-cera-pro font-normal text-base bg-[#254333] text-white rounded-2xl px-6 py-4 hover:bg-[#1a3024] transition-colors tracking-[0.15px] leading-6"
             >
-              {slide.cta}
+              {slide.ctaTexto}
             </Link>
           </div>
         </div>
 
         <div className="absolute bottom-0 w-full flex flex-col gap-2.5 items-center py-4">
           <div className="flex gap-1 items-start justify-center">
-            {bannerSlides.map((_, index) => (
+            {slides.map((_, index) => (
               <Image
                 key={index}
                 src={

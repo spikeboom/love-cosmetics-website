@@ -13,11 +13,12 @@ interface FreeShippingResult {
 export function useFreeShipping(
   subtotalAfterCoupons: number,
   availableServices: FreightService[],
+  threshold: number = FREE_SHIPPING_THRESHOLD,
 ): FreeShippingResult {
   return useMemo(() => {
-    const qualifies = subtotalAfterCoupons >= FREE_SHIPPING_THRESHOLD;
-    const amountRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotalAfterCoupons);
-    const progressPercent = Math.min(100, (subtotalAfterCoupons / FREE_SHIPPING_THRESHOLD) * 100);
+    const qualifies = subtotalAfterCoupons >= threshold;
+    const amountRemaining = Math.max(0, threshold - subtotalAfterCoupons);
+    const progressPercent = Math.min(100, (subtotalAfterCoupons / threshold) * 100);
 
     let economicaIndex: number | null = null;
     let economicaOriginalPrice: number | null = null;
@@ -38,5 +39,5 @@ export function useFreeShipping(
       economicaIndex,
       economicaOriginalPrice,
     };
-  }, [subtotalAfterCoupons, availableServices]);
+  }, [subtotalAfterCoupons, availableServices, threshold]);
 }
