@@ -55,8 +55,12 @@ export function CartProductsList({
   );
   const getImageUrl = (produto: any) => {
     // Primeiro tenta usar imagem direta (do CardProduto)
+    // Reescreve a resolução para 480px para cobrir DPR 2-3 em slots de 80-160px,
+    // corrigindo também URLs antigas (320px) já persistidas no localStorage.
     if (produto.imagem) {
-      return produto.imagem;
+      return produto.imagem
+        .replace(/width=\d+/, 'width=480')
+        .replace(/quality=\d+/, 'quality=85');
     }
     // Fallback para carouselImagensPrincipal (do ProductPageClient)
     const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';

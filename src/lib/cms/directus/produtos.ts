@@ -118,8 +118,8 @@ function normalizeProduto(p: any, config: ReturnType<typeof getDirectusConfig>) 
           xlarge: { url: appendQuery(imageUrl, "width=1600&quality=90&format=webp") },
           // large: imagem principal da PDP (803px renderizado) — next/image otimiza
           large: { url: appendQuery(imageUrl, "width=900&quality=85&format=webp") },
-          // medium: carrinho (80px) e vitrine hover
-          medium: { url: appendQuery(imageUrl, "width=320&quality=80&format=webp") },
+          // medium: carrinho e vitrine hover (480px base para DPR 2-3 em slots 80-160px)
+          medium: { url: appendQuery(imageUrl, "width=480&quality=85&format=webp") },
           // small: vitrine cards (230px) — next/image otimiza a partir daqui
           small: { url: appendQuery(imageUrl, "width=320&quality=80&format=webp") },
           // thumbnail: <img> direto nos thumbs da PDP (94px)

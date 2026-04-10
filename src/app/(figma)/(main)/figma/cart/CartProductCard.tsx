@@ -192,8 +192,7 @@ export function CartProductCard({
                 alt={nome}
                 width={80}
                 height={80}
-                sizes="80px"
-                quality={85}
+                unoptimized
                 className="object-cover w-full h-full"
                 priority
               />
