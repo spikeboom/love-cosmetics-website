@@ -80,6 +80,8 @@ export function ProductGallery({
               alt="Produto Love Cosmeticos"
               width={803}
               height={704}
+              sizes="100vw"
+              quality={85}
               className="w-full h-full object-cover"
               priority
             />

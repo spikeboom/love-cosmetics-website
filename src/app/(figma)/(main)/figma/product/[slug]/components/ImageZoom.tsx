@@ -57,6 +57,8 @@ export function ImageZoom({
         alt={alt}
         width={width}
         height={height}
+        sizes="(max-width: 768px) 100vw, 803px"
+        quality={88}
         className="w-full h-full object-cover"
         priority
       />

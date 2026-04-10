@@ -22,6 +22,7 @@ interface CardProdutoProps {
   ranking?: number;
   fullWidth?: boolean;
   slug?: string;
+  imageSizes?: string;
   // Campos extras para o carrinho
   preco_de?: number;
   bling_number?: string;
@@ -47,6 +48,7 @@ export function CardProduto({
   ranking,
   fullWidth = false,
   slug,
+  imageSizes,
   preco_de,
   bling_number,
   peso_gramas,
@@ -54,6 +56,11 @@ export function CardProduto({
   largura,
   comprimento,
 }: CardProdutoProps) {
+  // vitrine fixa: 230px no desktop; grid fullWidth: ocupa 1/3 do container (~460px) ou 1/2 em sm
+  const defaultSizes = fullWidth
+    ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+    : "(max-width: 1024px) 77vw, 230px";
+  const resolvedSizes = imageSizes ?? defaultSizes;
   const { addProductToCart } = useCart();
   const { notify, enqueueSnackbar } = useNotifications();
 
@@ -109,7 +116,8 @@ export function CardProduto({
           src={imagem}
           alt={nome}
           fill
-          sizes="(max-width: 1024px) 77vw, 230px"
+          sizes={resolvedSizes}
+          quality={82}
           className="object-cover rounded-t-2xl"
         />
       </div>
@@ -143,7 +151,8 @@ export function CardProduto({
             src={imagem}
             alt={nome}
             fill
-            sizes="(max-width: 1024px) 77vw, 230px"
+            sizes={resolvedSizes}
+            quality={82}
             className="object-cover pointer-events-none"
           />
 

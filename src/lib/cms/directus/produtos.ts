@@ -122,13 +122,16 @@ function normalizeProduto(p: any, config: ReturnType<typeof getDirectusConfig>) 
         id: fileId,
         url: imageUrl,
         formats: {
-          // URLs limpas para next/image (ele otimiza por conta, params conflitam)
-          xlarge: { url: imageUrl },
-          large: { url: imageUrl },
-          medium: { url: imageUrl },
-          small: { url: imageUrl },
-          // thumbnail usa <img> direto, pode ter params do Directus
-          thumbnail: { url: appendQuery(imageUrl, "width=200&height=200&fit=cover") },
+          // xlarge: zoom na PDP (CSS background, sem next/image) — alta resolução
+          xlarge: { url: appendQuery(imageUrl, "width=1600&quality=90&format=webp") },
+          // large: imagem principal da PDP (803px renderizado) — next/image otimiza
+          large: { url: appendQuery(imageUrl, "width=900&quality=85&format=webp") },
+          // medium: carrinho (80px) e vitrine hover
+          medium: { url: appendQuery(imageUrl, "width=320&quality=80&format=webp") },
+          // small: vitrine cards (230px) — next/image otimiza a partir daqui
+          small: { url: appendQuery(imageUrl, "width=320&quality=80&format=webp") },
+          // thumbnail: <img> direto nos thumbs da PDP (94px)
+          thumbnail: { url: appendQuery(imageUrl, "width=200&height=200&fit=cover&quality=75&format=webp") },
         },
       },
     };

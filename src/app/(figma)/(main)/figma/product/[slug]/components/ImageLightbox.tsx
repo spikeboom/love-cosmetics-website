@@ -344,6 +344,8 @@ export function ImageLightbox({
             alt={`Imagem ${currentIndex + 1}`}
             width={1200}
             height={1200}
+            sizes="(max-width: 768px) 100vw, 90vw"
+            quality={88}
             className="w-[100vw] md:max-w-[90vw] max-h-[85vh] md:w-auto h-auto object-contain pointer-events-none"
             draggable={false}
             priority
