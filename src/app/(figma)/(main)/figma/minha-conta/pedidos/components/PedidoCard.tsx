@@ -120,6 +120,8 @@ export function PedidoCard({ pedido }: PedidoCardProps) {
                   src={produto.image_url}
                   alt={produto.name}
                   fill
+                  sizes="80px"
+                  quality={70}
                   className="object-cover"
                 />
               ) : (

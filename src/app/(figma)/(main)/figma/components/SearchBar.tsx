@@ -151,6 +151,8 @@ export function SearchBar({ produtos, className = "", mobile = false }: SearchBa
                     src={produto.imagem}
                     alt={produto.nome}
                     fill
+                    sizes="32px"
+                    quality={70}
                     className="object-cover"
                   />
                 </div>
