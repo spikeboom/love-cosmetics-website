@@ -20,7 +20,8 @@ export function transformProdutosStrapi({
 
   return produtosStrapi.slice(0, limite).map((produto: any) => {
     const imagemUrl = produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
-      || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
+      || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.small?.url
+      || produto.carouselImagensPrincipal?.[0]?.imagem?.url;
 
     // Preço vindo do Strapi (já é o preço final)
     const precoStrapi = produto.preco || 0;

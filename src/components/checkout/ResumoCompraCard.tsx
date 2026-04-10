@@ -466,7 +466,7 @@ export function ResumoCompraCard({
                       alt={item.name || item.nome}
                       fill
                       sizes="48px"
-                      quality={70}
+                      quality={80}
                       className="object-cover"
                     />
                   </div>

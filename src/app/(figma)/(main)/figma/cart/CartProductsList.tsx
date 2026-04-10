@@ -62,7 +62,8 @@ export function CartProductsList({
     const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
     const imagemUrl =
       produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url ||
-      produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
+      produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.small?.url ||
+      produto.carouselImagensPrincipal?.[0]?.imagem?.url;
     return imagemUrl ? (imagemUrl.startsWith("http") ? imagemUrl : `${baseURL}${imagemUrl}`) : undefined;
   };
 
