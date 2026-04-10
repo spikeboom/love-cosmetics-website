@@ -3,7 +3,7 @@
  */
 
 import { getDirectusConfig } from "../client";
-import type { CupomCms, CupomValidationResult } from "../types";
+import type { CupomValidationResult } from "../types";
 
 export async function fetchAndValidateCupom(codigo: string): Promise<CupomValidationResult> {
   const config = getDirectusConfig();

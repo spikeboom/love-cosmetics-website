@@ -3,12 +3,12 @@
  */
 
 import { getStrapiConfig } from "../client";
-import type { CupomCms, CupomValidationResult } from "../types";
+import type { CupomValidationResult } from "../types";
 
 export async function fetchAndValidateCupom(codigo: string): Promise<CupomValidationResult> {
   const { baseUrl, getHeaders } = getStrapiConfig();
 
-  const endpoint = `${baseUrl}/api/cupoms?filters[codigo][$eq]=${codigo}&populate=*`;
+  const endpoint = `${baseUrl}/api/cupoms?filters[codigo][$eq]=${encodeURIComponent(codigo)}&populate=*`;
 
   const response = await fetch(endpoint, {
     method: "GET",

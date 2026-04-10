@@ -12,6 +12,12 @@ function buildQs(params: Record<string, any>): string {
   return qs.stringify(params, { encode: true, arrayFormat: "indices", allowDots: false });
 }
 
+function appendQuery(url: string, query: string): string {
+  if (!url) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}${query}`;
+}
+
 // Filtro base: status published + backgroundFlags não hidden (inclui nulos)
 // Usa _and para evitar conflito entre status e _or no mesmo nível (Directus rejeita isso)
 const BASE_FILTER = {
@@ -122,7 +128,7 @@ function normalizeProduto(p: any, config: ReturnType<typeof getDirectusConfig>) 
           medium: { url: imageUrl },
           small: { url: imageUrl },
           // thumbnail usa <img> direto, pode ter params do Directus
-          thumbnail: { url: `${config.getImageUrl(fileId)}&width=200&height=200&fit=cover` },
+          thumbnail: { url: appendQuery(imageUrl, "width=200&height=200&fit=cover") },
         },
       },
     };
@@ -216,31 +222,6 @@ function normalizeProduto(p: any, config: ReturnType<typeof getDirectusConfig>) 
     resultados,
     detalhe_notas,
     avaliacoes,
-  };
-}
-
-async function fetchFromDirectus(params: Record<string, string>, useFullFields = false): Promise<any> {
-  const config = getDirectusConfig();
-  const queryParams = new URLSearchParams({
-    ...params,
-    fields: useFullFields ? FULL_FIELDS : SIMPLE_FIELDS,
-    "limit": "100",
-  });
-
-  const response = await fetch(`${config.baseUrl}/items/produtos?${queryParams}`, {
-    method: "GET",
-    headers: config.getHeaders(),
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Directus fetch falhou: ${response.status}`);
-  }
-
-  const result = await response.json();
-  const config2 = getDirectusConfig();
-  return {
-    data: (result.data || []).map((p: any) => normalizeProduto(p, config2)),
   };
 }
 
