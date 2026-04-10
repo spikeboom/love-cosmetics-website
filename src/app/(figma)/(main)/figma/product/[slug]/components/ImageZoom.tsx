@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 interface ImageZoomProps {
@@ -29,6 +29,16 @@ export function ImageZoom({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isZooming, setIsZooming] = useState(false);
   const [bgPos, setBgPos] = useState("0% 0%");
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [zoomImageLoaded, setZoomImageLoaded] = useState(false);
+
+  // Pré-carrega a imagem de zoom em background para evitar delay no hover
+  useEffect(() => {
+    const zoomUrl = zoomSrc || src;
+    const img = new window.Image();
+    img.onload = () => setZoomImageLoaded(true);
+    img.src = zoomUrl;
+  }, [zoomSrc, src]);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -52,6 +62,11 @@ export function ImageZoom({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Skeleton enquanto a imagem principal carrega */}
+      {!imageLoaded && (
+        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+      )}
+
       <Image
         src={src}
         alt={alt}
@@ -59,8 +74,9 @@ export function ImageZoom({
         height={height}
         sizes="(max-width: 768px) 100vw, 803px"
         quality={88}
-        className="w-full h-full object-cover"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
         priority
+        onLoad={() => setImageLoaded(true)}
       />
 
       {/* Overlay de zoom - desktop only */}
@@ -72,8 +88,20 @@ export function ImageZoom({
             backgroundSize: `${zoomScale * 100}%`,
             backgroundPosition: bgPos,
             backgroundRepeat: "no-repeat",
+            opacity: zoomImageLoaded ? 1 : 0,
+            transition: "opacity 0.15s ease",
           }}
         />
+      )}
+
+      {/* Indicador de carregamento do zoom - aparece no hover enquanto zoom não carregou */}
+      {isZooming && !zoomImageLoaded && (
+        <div className="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none">
+          <div className="bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-2">
+            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span className="text-white text-xs font-cera-pro">Carregando zoom...</span>
+          </div>
+        </div>
       )}
     </div>
   );

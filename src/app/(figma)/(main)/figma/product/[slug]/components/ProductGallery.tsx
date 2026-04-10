@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { NavigationArrows } from "../../../components/NavigationArrows";
 import { ImageZoom } from "./ImageZoom";
@@ -22,6 +22,12 @@ export function ProductGallery({
   onSelectImage,
 }: ProductGalleryProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [mobileImageLoaded, setMobileImageLoaded] = useState(false);
+
+  // Reset skeleton ao trocar imagem
+  useEffect(() => {
+    setMobileImageLoaded(false);
+  }, [selectedImage]);
 
   const handlePrevious = () => {
     onSelectImage(selectedImage === 0 ? imagesMain.length - 1 : selectedImage - 1);
@@ -71,10 +77,14 @@ export function ProductGallery({
           {/* Mobile: tap abre lightbox */}
           <button
             type="button"
-            className="md:hidden w-full h-full bg-white overflow-hidden"
+            className="md:hidden w-full h-full bg-white overflow-hidden relative"
             onClick={() => setLightboxOpen(true)}
             aria-label="Ampliar imagem"
           >
+            {/* Skeleton mobile */}
+            <div
+              className={`absolute inset-0 bg-gray-100 animate-pulse transition-opacity duration-300 ${mobileImageLoaded ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+            />
             <Image
               src={imagesMain[selectedImage]}
               alt="Produto Love Cosmeticos"
@@ -82,8 +92,9 @@ export function ProductGallery({
               height={704}
               sizes="100vw"
               quality={85}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity duration-300 ${mobileImageLoaded ? "opacity-100" : "opacity-0"}`}
               priority
+              onLoad={() => setMobileImageLoaded(true)}
             />
             {/* Ícone de zoom - mobile */}
             <div className="absolute bottom-3 right-3 w-8 h-8 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center pointer-events-none">
