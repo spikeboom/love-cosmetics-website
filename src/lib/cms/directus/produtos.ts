@@ -30,19 +30,9 @@ const BASE_FILTER = {
   ],
 };
 
-// Remove acentos de uma string
+// Remove acentos — usado para normalizar o termo de busca antes de comparar com nome_busca
 function removeAcentos(str: string): string {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-// Gera variações de busca para cobrir casos com e sem acento.
-// Problema: Directus _icontains não ignora acentos — "mascara" não encontra "Máscara".
-// Estratégia: apenas original + sem acento (2 variações por termo, nunca estoura limite do Directus).
-function expandirTermoBusca(q: string): string[] {
-  const original = q.trim();
-  const semAcento = removeAcentos(original).toLowerCase();
-  if (original.toLowerCase() === semAcento) return [semAcento]; // já sem acento, só 1
-  return [original, semAcento];
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 // Campos a solicitar para queries simples (sem relações)
@@ -51,6 +41,7 @@ const SIMPLE_FIELDS = [
   "strapi_id",
   "strapi_document_id",
   "nome",
+  "nome_busca",
   "slug",
   "preco",
   "preco_de",
@@ -67,6 +58,7 @@ const FULL_FIELDS = [
   "strapi_id",
   "strapi_document_id",
   "nome",
+  "nome_busca",
   "slug",
   "preco",
   "preco_de",
@@ -433,32 +425,31 @@ export async function fetchProdutosForDesign(): Promise<any> {
 export async function fetchProdutosForSearch({ q, termos }: { q?: string; termos?: string[] }): Promise<any> {
   const config = getDirectusConfig();
 
-  // Monta variações de termos para cobrir acentos
-  let nomeVariações: string[] = [];
+  // Normaliza o termo de busca (sem acentos, minúsculas) para comparar com nome_busca
+  // O campo nome_busca no Directus armazena o nome já normalizado de cada produto
+  const termosNormalizados: string[] = termos?.length
+    ? termos.map(t => removeAcentos(t.trim())).filter(Boolean)
+    : q?.trim()
+    ? [removeAcentos(q.trim())]
+    : [];
 
-  if (termos && termos.length > 0) {
-    nomeVariações = termos.flatMap(t => expandirTermoBusca(t));
-  } else if (q && q.toLowerCase().includes("rotina-essencial") || q?.toLowerCase().includes("rotina essencial")) {
-    nomeVariações = ["kit uso diário", "kit uso diario", "manteiga corporal", "máscara de argila", "mascara de argila"];
-  } else if (q && q.trim() !== "") {
-    nomeVariações = expandirTermoBusca(q.trim());
+  // "rotina essencial" é um alias para a rotina de cuidados — busca pelos componentes da rotina
+  const rotinaEssencial = termosNormalizados.some(t =>
+    t.includes("rotina-essencial") || t.includes("rotina essencial")
+  );
+  if (rotinaEssencial) {
+    termosNormalizados.splice(0, termosNormalizados.length,
+      "kit uso diario", "manteiga corporal", "mascara de argila"
+    );
   }
 
-  // Constrói filtro como _and para evitar conflito entre status e _or no nível raiz
-  let filter: Record<string, any>;
+  const buscaFilter = termosNormalizados.length === 0
+    ? []
+    : termosNormalizados.length === 1
+    ? [{ nome_busca: { _icontains: termosNormalizados[0] } }]
+    : [{ _or: termosNormalizados.map(t => ({ nome_busca: { _icontains: t } })) }];
 
-  if (nomeVariações.length === 0) {
-    filter = { status: { _eq: "published" } };
-  } else if (nomeVariações.length === 1) {
-    filter = { _and: [{ status: { _eq: "published" } }, { nome: { _icontains: nomeVariações[0] } }] };
-  } else {
-    filter = {
-      _and: [
-        { status: { _eq: "published" } },
-        { _or: nomeVariações.map(t => ({ nome: { _icontains: t } })) },
-      ],
-    };
-  }
+  const filter = { _and: [{ status: { _eq: "published" } }, ...buscaFilter] };
 
   const queryParams = buildQs({ filter, fields: FULL_FIELDS, sort: "-sort", limit: 100 });
 
