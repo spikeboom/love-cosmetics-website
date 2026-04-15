@@ -81,6 +81,7 @@ export function AbandonosPanel() {
   const [refreshing, setRefreshing] = useState(false);
   const [filtro, setFiltro] = useState<"abandonados" | "convertidos" | "todos">("abandonados");
   const [busca, setBusca] = useState("");
+  const [incluirTestes, setIncluirTestes] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -97,6 +98,7 @@ export function AbandonosPanel() {
         pageSize: String(pageSize),
         filtro,
         busca,
+        incluirTestes: String(incluirTestes),
       });
       const res = await fetch(`/api/admin/abandonos?${params}`);
       if (!res.ok) throw new Error("Erro ao buscar abandonos");
@@ -110,7 +112,7 @@ export function AbandonosPanel() {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
     }
-  }, [page, filtro, busca]);
+  }, [page, filtro, busca, incluirTestes]);
 
   useEffect(() => {
     fetchAbandonos(false);
@@ -189,6 +191,16 @@ export function AbandonosPanel() {
             onChange={(e) => { setBusca(e.target.value); setPage(1); }}
             className="flex-1 px-4 py-2 border border-[#d2d2d2] rounded-[8px] font-cera-pro text-[14px] text-[#333333] placeholder:text-[#999999] focus:outline-none focus:border-[#254333]"
           />
+
+          <label className="flex items-center gap-2 cursor-pointer select-none whitespace-nowrap">
+            <input
+              type="checkbox"
+              checked={incluirTestes}
+              onChange={(e) => { setIncluirTestes(e.target.checked); setPage(1); }}
+              className="h-4 w-4 accent-[#254333] cursor-pointer"
+            />
+            <span className="font-cera-pro font-medium text-[13px] text-[#333333]">Ver testes</span>
+          </label>
 
           <button
             onClick={() => fetchAbandonos(true)}

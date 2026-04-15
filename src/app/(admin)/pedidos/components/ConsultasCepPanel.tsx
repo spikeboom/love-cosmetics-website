@@ -86,6 +86,7 @@ export function ConsultasCepPanel() {
   const [refreshing, setRefreshing] = useState(false);
   const [busca, setBusca] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("");
+  const [incluirTestes, setIncluirTestes] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -102,6 +103,7 @@ export function ConsultasCepPanel() {
         pageSize: String(pageSize),
         busca,
         estado: estadoFiltro,
+        incluirTestes: String(incluirTestes),
       });
       const res = await fetch(`/api/admin/consultas-cep?${params}`);
       if (!res.ok) throw new Error("Erro ao buscar consultas");
@@ -115,7 +117,7 @@ export function ConsultasCepPanel() {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
     }
-  }, [page, busca, estadoFiltro]);
+  }, [page, busca, estadoFiltro, incluirTestes]);
 
   useEffect(() => {
     fetchConsultas(false);
@@ -202,6 +204,16 @@ export function ConsultasCepPanel() {
               {estadoFiltro} &times;
             </button>
           )}
+
+          <label className="flex items-center gap-2 cursor-pointer select-none whitespace-nowrap">
+            <input
+              type="checkbox"
+              checked={incluirTestes}
+              onChange={(e) => { setIncluirTestes(e.target.checked); setPage(1); }}
+              className="h-4 w-4 accent-[#254333] cursor-pointer"
+            />
+            <span className="font-cera-pro font-medium text-[13px] text-[#333333]">Ver testes</span>
+          </label>
 
           <button
             onClick={() => fetchConsultas(true)}
