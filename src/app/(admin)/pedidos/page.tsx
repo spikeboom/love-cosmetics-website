@@ -7,9 +7,10 @@ import { ConsultasCepPanel } from "./components/ConsultasCepPanel";
 import { FunilPanel } from "./components/FunilPanel";
 import { DashboardPanel } from "./components/DashboardPanel";
 import { PedidosListPanel } from "./components/PedidosListPanel";
+import { InstagramPanel } from "./components/InstagramPanel";
 import { PackageIcon } from "./components/Icons";
 
-const TABS = ["pedidos", "abandonos", "ceps", "funil", "dashboard"] as const;
+const TABS = ["pedidos", "abandonos", "ceps", "funil", "dashboard", "instagram"] as const;
 type TabKey = (typeof TABS)[number];
 
 const ShoppingCartIcon = () => (
@@ -142,6 +143,21 @@ function PedidosPage() {
               </svg>
               Dashboard
             </button>
+            <button
+              onClick={() => switchTab("instagram")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
+                activeTab === "instagram"
+                  ? "bg-[#f8f3ed] text-[#254333]"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+              </svg>
+              Instagram
+            </button>
           </div>
         </div>
       </div>
@@ -162,6 +178,9 @@ function PedidosPage() {
         </div>
         <div className={activeTab !== "dashboard" ? "hidden" : ""}>
           {visitedTabs.has("dashboard") && <DashboardPanel />}
+        </div>
+        <div className={activeTab !== "instagram" ? "hidden" : ""}>
+          {visitedTabs.has("instagram") && <InstagramPanel />}
         </div>
       </div>
     </div>

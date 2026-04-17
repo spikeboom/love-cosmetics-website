@@ -1,9 +1,11 @@
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { ElogiouWidget } from "../components/ElogiouWidget";
+import { InstagramCarousel } from "../components/InstagramCarousel";
 import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { fetchBannersHome } from "@/lib/cms/directus/banners";
+import { fetchInstagramPosts } from "@/lib/cms/directus/instagram";
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
@@ -27,6 +29,9 @@ function ordenarProdutos(produtos: any[], ordem: string[]) {
 export default async function FigmaHomePage() {
   // Banners da home via Directus (com fallback hardcoded)
   const banners = await fetchBannersHome();
+
+  // Posts do Instagram via Directus
+  const instagramPosts = await fetchInstagramPosts();
 
   // Vitrine 1 - Comece sua rotina Lovè: Espuma, Sérum, Hidratante
   const { data: produtosRotina } = await fetchProdutosForSearch({
@@ -84,6 +89,11 @@ export default async function FigmaHomePage() {
         tipo="produto-completo"
         produtos={tecnologiaOrdenados}
       />
+
+      {/* Carrossel Instagram */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <InstagramCarousel posts={instagramPosts} />
+      </div>
 
       {/* Cards de certificados/badges - Full width */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
