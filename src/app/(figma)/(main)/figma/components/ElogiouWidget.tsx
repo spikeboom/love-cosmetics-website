@@ -2,80 +2,11 @@
 
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import type { Depoimento } from "@/lib/cms/directus/depoimentos";
 
-interface Depoimento {
-  name: string;
-  text: string;
-  date: string;
-  stars: number;
-  avatar: string | null;
+interface ElogiouWidgetProps {
+  depoimentos: Depoimento[];
 }
-
-const depoimentos: Depoimento[] = [
-  {
-    name: "Kataryne Ximenes",
-    text: "Gostei muito da experiência no site da Louve Cosméticos. É bem intuitivo, fácil de navegar e encontrar os produtos. Tudo é organizado de forma clara, o que torna a compra rápida e prática. Com certeza voltarei a comprar pelo site!",
-    date: "16 de Mar, 2026",
-    stars: 5,
-    avatar: "/depoimentos/kataryne.jpg",
-  },
-  {
-    name: "Kelyane",
-    text: "Lovè pra mim é rotina diária indispensável! É a base do meu skin Care, eu uso com frequência, inclusive em dias de aplicação de ácidos. Os produtos equilibram minha pele por isso não abro mão deles. Faço uso há 2 ano, amo e recomendo!",
-    date: "16 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Luiza",
-    text: "O creme facial que eu usei é muito hidratante, confortável e cheiroso!",
-    date: "17 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Renata",
-    text: "A espuma é muito maravilhosa, a pele fica extremamente aveludada após o uso.",
-    date: "17 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Cassiane",
-    text: "AMEI!",
-    date: "16 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Ceiça",
-    text: "Marca maravilhosa, indico muito!",
-    date: "17 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Gerilza Nazaré",
-    text: "Uso e aprovo os produtos da Lovè, em especial ao hidratante facial feito com a semente do Tucumã, deixou a pele do meu rosto macia e aveludada. Super recomendo!!",
-    date: "17 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Lorena",
-    text: "Amo os produtos, minha pele ficou outra depois de começar a usar! 😍",
-    date: "17 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-  {
-    name: "Kleyciane Monteiro",
-    text: "Produtos incríveis! Ótima qualidade! Não consigo dizer qual o meu preferido. Amo todos!",
-    date: "16 de Mar, 2026",
-    stars: 5,
-    avatar: null,
-  },
-];
 
 function StarIcon() {
   return (
@@ -110,7 +41,7 @@ function AvatarInitial({ name }: { name: string }) {
   );
 }
 
-export function ElogiouWidget() {
+export function ElogiouWidget({ depoimentos }: ElogiouWidgetProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -156,6 +87,8 @@ export function ElogiouWidget() {
   const handleMouseUp = () => setIsDragging(false);
   const handleMouseLeave = () => setIsDragging(false);
 
+  if (!depoimentos || depoimentos.length === 0) return null;
+
   return (
     <section className="w-full max-w-[1440px] mx-auto min-w-0 px-4 lg:px-4">
       {/* Header */}
@@ -179,41 +112,41 @@ export function ElogiouWidget() {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
-        {depoimentos.map((d, i) => (
+        {depoimentos.map((d) => (
           <div
-            key={i}
+            key={d.id}
             className="flex-shrink-0 w-[calc(100%-48px)] sm:w-[300px] lg:w-[320px] bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3"
             style={{ scrollSnapAlign: "start" }}
           >
             {/* Avatar + Name */}
             <div className="flex items-center gap-3">
-              {d.avatar ? (
+              {d.avatarUrl ? (
                 <Image
-                  src={d.avatar}
-                  alt={d.name}
+                  src={d.avatarUrl}
+                  alt={d.nome}
                   width={40}
                   height={40}
                   className="rounded-full object-cover w-10 h-10"
                 />
               ) : (
-                <AvatarInitial name={d.name} />
+                <AvatarInitial name={d.nome} />
               )}
               <span className="font-cera-pro font-bold text-sm text-gray-900 line-clamp-1">
-                {d.name}
+                {d.nome}
               </span>
             </div>
 
             {/* Stars */}
-            <Stars count={d.stars} />
+            <Stars count={d.estrelas} />
 
             {/* Text */}
             <p className="font-cera-pro text-sm text-gray-700 leading-relaxed flex-1">
-              {d.text}
+              {d.texto}
             </p>
 
             {/* Date */}
             <span className="font-cera-pro text-xs text-gray-400 mt-auto">
-              {d.date}
+              {d.data}
             </span>
           </div>
         ))}

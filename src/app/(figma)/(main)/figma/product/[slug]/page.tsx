@@ -1,4 +1,5 @@
 import { fetchProdutoBySlug, fetchProdutosForDesign } from "@/modules/produto/domain";
+import { fetchDepoimentos } from "@/lib/cms/directus/depoimentos";
 import { ProductPageClient } from "./ProductPageClient";
 import { notFound } from "next/navigation";
 
@@ -48,7 +49,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
     // Busca produtos para a seção "Você pode gostar"
     const { data: produtosVitrine } = await fetchProdutosForDesign();
 
-    return <ProductPageClient produto={produto} produtosVitrine={produtosVitrine} />;
+    // Depoimentos via Directus
+    const depoimentos = await fetchDepoimentos();
+
+    return (
+      <ProductPageClient
+        produto={produto}
+        produtosVitrine={produtosVitrine}
+        depoimentos={depoimentos}
+      />
+    );
   } catch (error) {
     console.error("Erro ao buscar produto:", error);
     notFound();

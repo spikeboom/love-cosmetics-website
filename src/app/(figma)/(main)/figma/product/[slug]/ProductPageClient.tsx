@@ -16,13 +16,15 @@ import { useCart } from "@/contexts";
 import { useNotifications } from "@/core/notifications/NotificationContext";
 import { ucAddToCart, ucViewItem } from "../../../../_tracking/uc-ecommerce";
 import { isEsgotado } from "@/config/produtos-esgotados";
+import type { Depoimento } from "@/lib/cms/directus/depoimentos";
 
 interface ProductPageClientProps {
   produto: any;
   produtosVitrine: any[];
+  depoimentos: Depoimento[];
 }
 
-export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
+export function ProductPageClient({ produto, produtosVitrine, depoimentos }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
   const router = useRouter();
   const { addProductToCart } = useCart();
@@ -253,7 +255,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
               {/* Avaliações Elogiou */}
               <div className="w-full overflow-hidden mx-[-12px]">
-                <ElogiouWidget />
+                <ElogiouWidget depoimentos={depoimentos} />
               </div>
 
               {/* Mobile Filters */}

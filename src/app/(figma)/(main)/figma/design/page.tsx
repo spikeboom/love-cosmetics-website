@@ -6,6 +6,7 @@ import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { fetchBannersHome } from "@/lib/cms/directus/banners";
 import { fetchInstagramPosts } from "@/lib/cms/directus/instagram";
+import { fetchDepoimentos } from "@/lib/cms/directus/depoimentos";
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
@@ -32,6 +33,9 @@ export default async function FigmaHomePage() {
 
   // Posts do Instagram via Directus
   const instagramPosts = await fetchInstagramPosts();
+
+  // Depoimentos via Directus
+  const depoimentos = await fetchDepoimentos();
 
   // Vitrine 1 - Comece sua rotina Lovè: Espuma, Sérum, Hidratante
   const { data: produtosRotina } = await fetchProdutosForSearch({
@@ -69,7 +73,7 @@ export default async function FigmaHomePage() {
 
       {/* Avaliações Elogiou */}
       <div className="w-full py-4">
-        <ElogiouWidget />
+        <ElogiouWidget depoimentos={depoimentos} />
       </div>
 
       {/* Vitrine 2 - Kits Lovè */}
