@@ -42,6 +42,7 @@ export function InstagramPanel() {
   const [importing, setImporting] = useState(false);
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [refreshingToken, setRefreshingToken] = useState(false);
+  const [revalidating, setRevalidating] = useState(false);
 
   const loadPosts = useCallback(async () => {
     setLoading(true);
@@ -162,6 +163,20 @@ export function InstagramPanel() {
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (e) {
       alert("Erro ao remover: " + (e instanceof Error ? e.message : String(e)));
+    }
+  };
+
+  const revalidate = async () => {
+    if (revalidating) return;
+    setRevalidating(true);
+    try {
+      const res = await fetch("/api/admin/instagram/revalidate", { method: "POST" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      alert("Cache da home/PDP limpo. A próxima visita vai buscar a ordem atualizada do Directus.");
+    } catch (e) {
+      alert("Erro ao revalidar: " + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setRevalidating(false);
     }
   };
 
@@ -290,14 +305,25 @@ export function InstagramPanel() {
           <div className="text-[14px] font-cera-pro font-medium text-[#254333]">
             Posts no Directus ({posts.length})
           </div>
-          <button
-            onClick={loadPosts}
-            disabled={loading}
-            className="flex items-center gap-1 px-3 py-1.5 text-[12px] text-[#254333] hover:bg-gray-50 rounded"
-          >
-            {loading ? <SpinnerIcon /> : <RefreshIcon />}
-            Atualizar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={revalidate}
+              disabled={revalidating}
+              className="flex items-center gap-1 px-3 py-1.5 text-[12px] font-cera-pro bg-[#254333] text-white rounded hover:bg-[#1a3326] disabled:opacity-50"
+              title="Limpa o cache da home/PDP para refletir alterações feitas direto no Directus (ex: reordenação via sort)"
+            >
+              {revalidating ? <SpinnerIcon /> : <RefreshIcon />}
+              Revalidar site
+            </button>
+            <button
+              onClick={loadPosts}
+              disabled={loading}
+              className="flex items-center gap-1 px-3 py-1.5 text-[12px] text-[#254333] hover:bg-gray-50 rounded"
+            >
+              {loading ? <SpinnerIcon /> : <RefreshIcon />}
+              Atualizar
+            </button>
+          </div>
         </div>
 
         {error && <div className="text-red-600 text-[13px] mb-2">{error}</div>}
