@@ -53,7 +53,7 @@ export default async function FigmaHomePage() {
   const { data: produtosTecnologia } = await fetchProdutosForSearch({
     termos: ["máscara", "mascara", "manteiga"]
   });
-  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["máscara", "mascara", "manteiga"]);
+  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["manteiga", "máscara", "mascara"]);
 
   return (
     <div className="w-full max-w-[1440px] mx-auto">
