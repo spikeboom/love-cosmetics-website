@@ -7,6 +7,7 @@ import Link from "next/link";
 import { YouMayLikeSection } from "../../components/YouMayLikeSection";
 import { CertificadosSection } from "../../components/CertificadosSection";
 import { ElogiouWidget } from "../../components/ElogiouWidget";
+import { InstagramCarousel } from "../../components/InstagramCarousel";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
 import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
@@ -17,14 +18,16 @@ import { useNotifications } from "@/core/notifications/NotificationContext";
 import { ucAddToCart, ucViewItem } from "../../../../_tracking/uc-ecommerce";
 import { isEsgotado } from "@/config/produtos-esgotados";
 import type { Depoimento } from "@/lib/cms/directus/depoimentos";
+import type { InstagramPost } from "@/lib/cms/directus/instagram";
 
 interface ProductPageClientProps {
   produto: any;
   produtosVitrine: any[];
   depoimentos: Depoimento[];
+  instagramPosts: InstagramPost[];
 }
 
-export function ProductPageClient({ produto, produtosVitrine, depoimentos }: ProductPageClientProps) {
+export function ProductPageClient({ produto, produtosVitrine, depoimentos, instagramPosts }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
   const router = useRouter();
   const { addProductToCart } = useCart();
@@ -272,6 +275,11 @@ export function ProductPageClient({ produto, produtosVitrine, depoimentos }: Pro
 
       {/* Voce pode gostar Section */}
       <YouMayLikeSection produtos={produtosVitrine} />
+
+      {/* Carrossel Instagram */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <InstagramCarousel posts={instagramPosts} />
+      </div>
 
       {/* Cards de certificados */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
