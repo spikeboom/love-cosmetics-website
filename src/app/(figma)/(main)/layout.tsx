@@ -3,6 +3,7 @@ import { Footer } from "./figma/components/Footer";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { fetchConfiguracoesLoja } from "@/lib/cms/directus/configuracoes";
 import { LojaConfigProvider } from "@/contexts/LojaConfigContext";
+import { FloatingWhatsApp } from "./figma/components/FloatingWhatsApp";
 
 export default async function FigmaMainLayout({
   children,
@@ -35,6 +36,7 @@ export default async function FigmaMainLayout({
           {children}
         </main>
         <Footer />
+        <FloatingWhatsApp />
       </div>
     </LojaConfigProvider>
   );
