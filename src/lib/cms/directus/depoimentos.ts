@@ -46,7 +46,7 @@ export async function fetchDepoimentos(): Promise<Depoimento[]> {
     const publicUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL || cfg.baseUrl;
     const qs =
       "filter[status][_eq]=published" +
-      "&sort[]=sort&sort[]=date_created" +
+      "&sort[]=sort" +
       "&fields[]=id&fields[]=nome&fields[]=texto&fields[]=data&fields[]=estrelas&fields[]=avatar" +
       "&limit=100";
     const res = await fetch(`${cfg.baseUrl}/items/depoimentos?${qs}`, {

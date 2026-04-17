@@ -60,6 +60,16 @@ export default async function FigmaHomePage() {
       {/* Banner principal com produto em destaque */}
       <BannerPrincipal slides={banners} />
 
+      {/* Carrossel Instagram */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <InstagramCarousel posts={instagramPosts} />
+      </div>
+
+      {/* Avaliações Elogiou */}
+      <div className="w-full py-4">
+        <ElogiouWidget depoimentos={depoimentos} />
+      </div>
+
       {/* Vitrine 1 - Comece sua rotina Lovè */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <VitrineSection
@@ -69,11 +79,6 @@ export default async function FigmaHomePage() {
           tipo="produto-completo"
           produtos={rotinaOrdenados}
         />
-      </div>
-
-      {/* Avaliações Elogiou */}
-      <div className="w-full py-4">
-        <ElogiouWidget depoimentos={depoimentos} />
       </div>
 
       {/* Vitrine 2 - Kits Lovè */}
@@ -93,11 +98,6 @@ export default async function FigmaHomePage() {
         tipo="produto-completo"
         produtos={tecnologiaOrdenados}
       />
-
-      {/* Carrossel Instagram */}
-      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
-        <InstagramCarousel posts={instagramPosts} />
-      </div>
 
       {/* Cards de certificados/badges - Full width */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">

@@ -99,7 +99,7 @@ export function InstagramCarousel({ posts }: { posts: InstagramPost[] }) {
               <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
             </svg>
             <h2 className="font-cera-pro font-bold text-[20px] lg:text-[24px] text-black leading-normal">
-              Nossas clientes no Instagram
+              Nossa comunidade. Resultados reais na pele
             </h2>
           </div>
 
