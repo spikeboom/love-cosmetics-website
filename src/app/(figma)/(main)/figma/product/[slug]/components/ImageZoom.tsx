@@ -29,15 +29,24 @@ export function ImageZoom({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isZooming, setIsZooming] = useState(false);
   const [bgPos, setBgPos] = useState("0% 0%");
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [zoomImageLoaded, setZoomImageLoaded] = useState(false);
 
-  // Pré-carrega a imagem de zoom em background para evitar delay no hover
+  // Pré-carrega a imagem de zoom em background apenas no desktop, após idle,
+  // para evitar competir com a LCP mobile.
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 767px)").matches) return;
     const zoomUrl = zoomSrc || src;
-    const img = new window.Image();
-    img.onload = () => setZoomImageLoaded(true);
-    img.src = zoomUrl;
+    const load = () => {
+      const img = new window.Image();
+      img.onload = () => setZoomImageLoaded(true);
+      img.src = zoomUrl;
+    };
+    if ("requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(load, { timeout: 2000 });
+    } else {
+      setTimeout(load, 1500);
+    }
   }, [zoomSrc, src]);
 
   const handleMouseMove = useCallback(
@@ -62,21 +71,15 @@ export function ImageZoom({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Skeleton enquanto a imagem principal carrega */}
-      {!imageLoaded && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
-      )}
-
       <Image
         src={src}
         alt={alt}
         width={width}
         height={height}
-        sizes="(max-width: 768px) 100vw, 803px"
+        sizes="803px"
         quality={88}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
-        priority
-        onLoad={() => setImageLoaded(true)}
+        loading="lazy"
+        className="w-full h-full object-cover"
       />
 
       {/* Overlay de zoom - desktop only */}
