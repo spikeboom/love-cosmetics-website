@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Geist,
-  Geist_Mono,
-  Lato,
-  Poppins,
-  Playfair_Display,
-} from "next/font/google";
+import { Poppins } from "next/font/google";
 import Script from "next/script";
 import "./_global/globals.css";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -15,32 +9,11 @@ import { UIContextProvider } from "@/core/ui/UIContext";
 import { NotificationProvider } from "@/core/notifications/NotificationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const lato = Lato({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-lato",
-});
-
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "900"],
   variable: "--font-poppins",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "900"],
-  variable: "--font-playfair",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -83,7 +56,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}
+        className={`${poppins.variable} bg-white text-[#333] antialiased`}
       >
         <div id="top"></div>
         <SnackbarProviderComponent>

@@ -58,26 +58,44 @@ export default async function FigmaHomePage() {
 
   const heroBanner = banners[0];
 
+  // Gera srcset/href compatíveis com o que <Image sizes="100vw" fill /> solicita,
+  // para que o preload bata na mesma URL do fetch real.
+  const nextImg = (url: string, w: number, q = 75) =>
+    `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=${q}`;
+  const mobileWidths = [640, 750, 828, 1080, 1200, 1920];
+  const desktopWidths = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+  const buildSrcSet = (url: string, widths: number[]) =>
+    widths.map((w) => `${nextImg(url, w)} ${w}w`).join(", ");
+
+  const heroMobileUrl = heroBanner?.imagemMobile || heroBanner?.imagemDesktop;
+  const heroDesktopUrl = heroBanner?.imagemDesktop;
+
   return (
     <div className="w-full max-w-[1440px] mx-auto">
       {heroBanner && (
         <>
-          {heroBanner.imagemMobile && (
+          {heroMobileUrl && (
             <link
               rel="preload"
               as="image"
-              href={heroBanner.imagemMobile}
+              href={nextImg(heroMobileUrl, 1080)}
+              imageSrcSet={buildSrcSet(heroMobileUrl, mobileWidths)}
+              imageSizes="100vw"
               media="(max-width: 1023px)"
               fetchPriority="high"
             />
           )}
-          <link
-            rel="preload"
-            as="image"
-            href={heroBanner.imagemDesktop}
-            media="(min-width: 1024px)"
-            fetchPriority="high"
-          />
+          {heroDesktopUrl && (
+            <link
+              rel="preload"
+              as="image"
+              href={nextImg(heroDesktopUrl, 1920)}
+              imageSrcSet={buildSrcSet(heroDesktopUrl, desktopWidths)}
+              imageSizes="(min-width: 1440px) 1440px, 100vw"
+              media="(min-width: 1024px)"
+              fetchPriority="high"
+            />
+          )}
         </>
       )}
       {/* Banner principal com produto em destaque */}
