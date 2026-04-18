@@ -375,3 +375,20 @@ model AuthToken {
   @@unique([provider], name: "unique_active_provider")
 }
 
+/**
+ * Cache de DRE calculado por mês/ano.
+ * Evita bater ~N+1 vezes na API do Bling a cada carregamento do painel.
+ * Invalidar manualmente via botão "Recalcular" na UI quando houver novos lançamentos.
+ */
+model DreCache {
+  id          String   @id @default(uuid())
+  mes         Int      // 1..12
+  ano         Int
+  resultado   Json     // output de calcularDRE()
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([mes, ano])
+  @@index([mes, ano])
+}
+

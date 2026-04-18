@@ -6,11 +6,12 @@ import { AbandonosPanel } from "./components/AbandonosPanel";
 import { ConsultasCepPanel } from "./components/ConsultasCepPanel";
 import { FunilPanel } from "./components/FunilPanel";
 import { DashboardPanel } from "./components/DashboardPanel";
+import { DREPanel } from "./components/DREPanel";
 import { PedidosListPanel } from "./components/PedidosListPanel";
 import { InstagramPanel } from "./components/InstagramPanel";
 import { PackageIcon } from "./components/Icons";
 
-const TABS = ["pedidos", "abandonos", "ceps", "funil", "dashboard", "instagram"] as const;
+const TABS = ["pedidos", "abandonos", "ceps", "funil", "dashboard", "dre", "instagram"] as const;
 type TabKey = (typeof TABS)[number];
 
 const ShoppingCartIcon = () => (
@@ -144,6 +145,20 @@ function PedidosPage() {
               Dashboard
             </button>
             <button
+              onClick={() => switchTab("dre")}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
+                activeTab === "dre"
+                  ? "bg-[#f8f3ed] text-[#254333]"
+                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 3v18h18" />
+                <path d="M7 14l4-4 4 4 5-5" />
+              </svg>
+              DRE
+            </button>
+            <button
               onClick={() => switchTab("instagram")}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-t-[10px] font-cera-pro font-medium text-[14px] transition-colors ${
                 activeTab === "instagram"
@@ -178,6 +193,9 @@ function PedidosPage() {
         </div>
         <div className={activeTab !== "dashboard" ? "hidden" : ""}>
           {visitedTabs.has("dashboard") && <DashboardPanel />}
+        </div>
+        <div className={activeTab !== "dre" ? "hidden" : ""}>
+          {visitedTabs.has("dre") && <DREPanel />}
         </div>
         <div className={activeTab !== "instagram" ? "hidden" : ""}>
           {visitedTabs.has("instagram") && <InstagramPanel />}
