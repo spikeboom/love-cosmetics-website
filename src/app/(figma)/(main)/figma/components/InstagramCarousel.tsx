@@ -19,9 +19,14 @@ function PlayIcon() {
 
 function InstagramCard({ post }: { post: InstagramPost }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [hasActivated, setHasActivated] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const togglePlay = () => {
+  const handleActivate = () => {
+    if (!hasActivated) {
+      setHasActivated(true);
+      return;
+    }
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
@@ -33,33 +38,9 @@ function InstagramCard({ post }: { post: InstagramPost }) {
     }
   };
 
-  return (
-    <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
-      {post.videoUrl ? (
-        <>
-          <video
-            ref={videoRef}
-            src={post.videoUrl}
-            poster={post.thumbnailUrl}
-            className="w-full h-full object-cover"
-            playsInline
-            preload="metadata"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
-          />
-          <button
-            type="button"
-            onClick={togglePlay}
-            aria-label={isPlaying ? "Pausar" : "Reproduzir"}
-            className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-              isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
-            }`}
-          >
-            <PlayIcon />
-          </button>
-        </>
-      ) : (
+  if (!post.videoUrl) {
+    return (
+      <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
         <Image
           src={post.thumbnailUrl}
           alt={post.descricao || "Post do Instagram"}
@@ -67,7 +48,44 @@ function InstagramCard({ post }: { post: InstagramPost }) {
           sizes="(max-width: 1024px) 80vw, 320px"
           className="object-cover"
         />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+      {hasActivated ? (
+        <video
+          ref={videoRef}
+          src={post.videoUrl}
+          poster={post.thumbnailUrl}
+          className="w-full h-full object-cover"
+          playsInline
+          preload="metadata"
+          autoPlay
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+        />
+      ) : (
+        <Image
+          src={post.thumbnailUrl}
+          alt={post.descricao || "Reel do Instagram"}
+          fill
+          sizes="(max-width: 1024px) 80vw, 320px"
+          className="object-cover"
+        />
       )}
+      <button
+        type="button"
+        onClick={handleActivate}
+        aria-label={isPlaying ? "Pausar" : "Reproduzir"}
+        className={`absolute inset-0 flex items-center justify-center transition-opacity ${
+          hasActivated && isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
+        }`}
+      >
+        <PlayIcon />
+      </button>
     </div>
   );
 }
