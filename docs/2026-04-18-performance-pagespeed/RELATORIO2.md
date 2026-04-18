@@ -100,9 +100,77 @@ Script Evaluation 1358ms, Other 537ms, Style & Layout 333ms, Parsing 254ms, Rend
   no RELATORIO.md da home, tratamento é global (next.config.ts +
   browserslist).
 
+## Segunda rodada — regressão de LCP (pós-deploy)
+
+Novo PageSpeed após o commit `0d1ffd6`:
+https://pagespeed.web.dev/analysis/https-dev-lovecosmetics-com-br-product-espuma-facial/qqkmyatonp
+
+- Performance: **60** (era 62)
+- LCP: **10,4s** (era 2,0s) — piorou 5x
+- TBT 340ms · FCP 1,1s · CLS 0 · SI 7,6s
+
+### LCP breakdown (via `window.__LIGHTHOUSE_MOBILE_JSON__`)
+
+| Fase | Duração |
+|---|---|
+| Time to first byte | 1ms |
+| **Resource load delay** | **1.006ms** |
+| Resource load duration | 473ms |
+| **Element render delay** | **2.452ms** |
+
+Elemento LCP confirmado: `<img alt="Produto Love Cosmeticos">` — a galeria mobile da PDP.
+
+### Causas reais
+
+**1. Preload custom não batia com a URL do `<Image>`**
+
+O `<link rel="preload" imageSrcSet>` que adicionei em `page.tsx` gerava
+URLs `/_next/image?...&w=1080&q=85`, mas o `<Image>` mobile tem
+`width={803} height={704}` (sem `fill`) e `sizes="100vw"` — o Next calcula
+srcset de forma diferente nesse caso. URLs não casavam → preload virou
+request desperdiçado + download duplicado. Resource load delay de 1s
+veio daí: o browser só descobriu a URL real depois que o React renderizou
+o `<Image>`.
+
+**2. `opacity-0` + `onLoad` travavam o LCP**
+
+`ProductGallery.tsx` tinha um skeleton mobile que mantinha o `<Image>`
+com `opacity-0` até `setMobileImageLoaded(true)` disparar via `onLoad`.
+**LCP só conta o elemento quando ele fica visível pro usuário** — com
+`opacity:0` ele não conta. Resultado: a imagem já estava baixada aos
+~1,5s, mas o LCP registrou 4s depois quando o `onLoad` rodou e o
+`transition-opacity` completou. Isso explica o element render delay de
+2,5s que antes era quase zero.
+
+Esse bug era **pré-existente**, mas na primeira auditoria (score 62) o
+Lighthouse variou diferente e calhou de marcar LCP=2s. Os dynamic imports
++ hidratação mais tardia pós-commit apenas expuseram o problema real.
+
+### Correções aplicadas — commit `96e8969`
+
+**`src/app/(figma)/(main)/figma/product/[slug]/page.tsx`**
+- Removido todo o bloco de preload manual (`<link rel="preload">` + helpers
+  `nextImg`/`buildSrcSet`/`mobileWidths`). Com `priority` no `<Image>`,
+  o Next 15 já injeta o preload correto automaticamente — casando 100%
+  com a URL real do request.
+
+**`src/app/(figma)/(main)/figma/product/[slug]/components/ProductGallery.tsx`**
+- Removido `mobileImageLoaded` state, `useEffect` de reset, skeleton
+  div e classes de `opacity`/`transition` do `<Image>` mobile. Imagem
+  renderiza imediatamente.
+- `priority` passou a ser condicional (`selectedImage === 0`) — só o
+  primeiro slide precisa, os outros carregam sob demanda do swipe.
+- `useEffect` import removido (não é mais usado).
+
+### Lição
+
+`priority` do `next/image` + qualquer `opacity:0` inicial na mesma tag
+quebra LCP silenciosamente. O preload do Next só funciona se você não
+competir com ele manualmente.
+
 ## Commits
 
-A aplicar (ainda não commitado):
-- perf: paralelizar fetches, dynamic imports e preload LCP na PDP
+- `0d1ffd6` — perf: paralelizar fetches, dynamic imports e preload LCP na PDP
+- `96e8969` — fix: LCP da PDP — remover opacity-0 inicial e preload manual
 
 Branch `master`, sem push.
