@@ -71,8 +71,8 @@ export function Header({ produtos = [] }: HeaderProps) {
             src="/new-home/header/logo.png"
             alt="Lové Cosméticos"
             fill
+            sizes="(max-width: 1024px) 60px, 120px"
             className="object-contain"
-            priority
           />
         </Link>
 

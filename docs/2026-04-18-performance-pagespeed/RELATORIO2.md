@@ -234,10 +234,108 @@ variantes mobile/desktop renderizadas lado a lado com `hidden md:block`,
 corresponde ao form factor auditado (neste caso, mobile). A outra
 precisa de `loading="lazy"` explícito pra evitar request duplicado.
 
+## Quarta rodada — o vilão real eram as FONTES
+
+Novo PageSpeed após `a77afce`:
+https://pagespeed.web.dev/analysis/https-dev-lovecosmetics-com-br-product-espuma-facial/xvryix1uu7
+
+- Performance: **68** (melhorou de 51)
+- LCP **5,7s** · TBT **380ms** · FCP 1,1s · CLS 0 · SI 4,0s
+- Resource load delay ainda **794ms**
+
+Ainda longe do ideal. O usuário apontou: "não precisa todas as imagens em
+boa qualidade no início". Verdade, mas o diagnóstico network revelou que
+o dominante não eram imagens, e sim **fontes**.
+
+### Inventário de fontes servidas na PDP
+
+Extraído via `network-requests` audit, agrupado por priority:
+
+| Tipo | Qtd | KB |
+|---|---|---|
+| Fontes `.ttf` (Cera Pro) | 6 | ~380 KB |
+| Fontes `.otf` (Cera Pro Italic) | 2 | ~200 KB |
+| Fontes `.woff2` (Poppins/Roboto/Baskerville) | 9 | ~108 KB |
+| **Total fontes** | **15** | **~688 KB** |
+| Imagem LCP (única relevante) | 1 | 52 KB |
+
+**688 KB de fontes com `priority=High` render-blocking** competindo com
+52 KB da imagem LCP. O browser prioriza fontes → imagem LCP entra na
+fila atrás → `resource load delay` de 794ms.
+
+### Causa raiz — `src/lib/fonts/index.ts`
+
+Arquivo definia Cera Pro em **9 variantes** (Thin 100, Light 300,
+Regular 400, Medium 500, Bold 600, Bold 700, Black 900, Italic 400,
+Italic 900) carregadas via `next/font/local`. Problemas:
+
+1. Os arquivos no disco eram `.ttf` (e 2 `.otf`), não `.woff2`.
+   `next/font/local` não converte automaticamente — serve o que
+   estiver no disco. TTFs têm ~72% mais bytes que woff2 equivalentes.
+2. Variantes nunca usadas (Thin, Black, Bold 600 duplicado, italics)
+   foram identificadas via grep no codebase: italic aparece só em
+   `sobre/page.tsx`, Thin/Black/Semibold (600) em zero arquivos de
+   produção.
+3. `layout.tsx` do grupo `(figma)` importa `fontClasses` que dispara
+   **todas as 9 variantes em toda PDP**, mesmo as não referenciadas
+   no CSS.
+
+### Correções aplicadas — commit `_` (próximo)
+
+**Frente 1 — Conversão `.ttf` → `.woff2`**
+
+Script `scripts/convert-fonts.py` usa `fontTools` (Python) + `brotli`
+para converter 4 fontes essenciais:
+
+| Arquivo | TTF | WOFF2 | Redução |
+|---|---|---|---|
+| CeraPro-Light | 159 KB | 45 KB | 72% |
+| CeraPro-Regular | 159 KB | 45 KB | 72% |
+| CeraPRO-Medium | 70 KB | 23 KB | 68% |
+| Cera Pro Bold | 156 KB | 45 KB | 72% |
+| **Total** | **546 KB** | **159 KB** | **71%** |
+
+**Frente 2 — `src/lib/fonts/index.ts`**
+
+- Removidas variantes Thin (100), Bold 600 (duplicado de 700), Black
+  (900), Italic 400, Italic 900. Restam apenas `300/400/500/700`
+  normal.
+- Apontadas pros novos `.woff2`.
+- Italic nos 2 locais de `sobre/page.tsx` ficam via `font-style:italic`
+  CSS (browser sintetiza oblique a partir do regular) — diferença
+  visual mínima, ninguém reclama em block de texto curto.
+
+**Frente 3 — `Header.tsx`**
+
+- `priority` removido do logo do header. Logo é pequeno (<5 KB),
+  aparece em todas as páginas, estava competindo com a imagem LCP
+  da PDP mobile. Mantém `sizes` para o Next escolher o tamanho certo.
+
+Resultado esperado na próxima rodada:
+
+| Métrica | Antes | Esperado |
+|---|---|---|
+| Bytes de fontes | 688 KB | ~200 KB |
+| Fontes render-blocking | 15 | ~9 |
+| Resource load delay LCP | 794ms | <200ms |
+| LCP | 5,7s | 1,5-2s |
+| Score | 68 | 85-95 |
+
+### Nota sobre a intuição do usuário
+
+O palpite "não precisa todas as imagens em boa qualidade no início" era
+direcionalmente correto, e já tínhamos consertado a galeria no commit
+`a77afce`. Mas o dado de network mostrou que **a galeria já estava
+correta** (1 imagem de 52 KB com priority), e o gargalo ficou
+invisível até a gente olhar todos os requests agrupados por tipo. Lição:
+sempre olhar `network-requests` agrupado por `resourceType`, não só as
+auditorias de imagem.
+
 ## Commits
 
 - `0d1ffd6` — perf: paralelizar fetches, dynamic imports e preload LCP na PDP
 - `96e8969` — fix: LCP da PDP — remover opacity-0 inicial e preload manual
 - `a77afce` — fix: ImageZoom não compete mais com LCP mobile
+- a commitar — perf: converter fontes para woff2, remover variantes e priority do logo
 
 Branch `master`, sem push.
