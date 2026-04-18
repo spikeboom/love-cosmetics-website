@@ -50,10 +50,13 @@ export function ProductGallery({
                 selectedImage === index ? "" : "opacity-50 hover:opacity-100"
               }`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={image}
                 alt={`Imagem ${index + 1}`}
+                width={94}
+                height={94}
+                sizes="94px"
+                quality={80}
                 className="w-full h-full object-cover"
               />
             </button>

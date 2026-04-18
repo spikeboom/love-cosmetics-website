@@ -1,14 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import { YouMayLikeSection } from "../../components/YouMayLikeSection";
-import { CertificadosSection } from "../../components/CertificadosSection";
 import { ElogiouWidget } from "../../components/ElogiouWidget";
-import { InstagramCarousel } from "../../components/InstagramCarousel";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
+
+const YouMayLikeSection = dynamic(
+  () => import("../../components/YouMayLikeSection").then((m) => m.YouMayLikeSection),
+  { loading: () => <div className="w-full h-[480px]" /> },
+);
+const InstagramCarousel = dynamic(
+  () => import("../../components/InstagramCarousel").then((m) => m.InstagramCarousel),
+  { loading: () => <div className="w-full h-[360px]" /> },
+);
+const CertificadosSection = dynamic(
+  () => import("../../components/CertificadosSection").then((m) => m.CertificadosSection),
+  { loading: () => <div className="w-full h-[200px]" /> },
+);
 import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
 import { ProductGallery, ProductFilters, useShareProduct } from "./components";
