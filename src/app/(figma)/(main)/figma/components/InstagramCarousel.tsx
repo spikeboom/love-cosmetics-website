@@ -84,7 +84,9 @@ function InstagramCard({ post }: { post: InstagramPost }) {
         onClick={handleActivate}
         aria-label={isPlaying ? "Pausar" : "Reproduzir"}
         className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-          showOverlay ? "opacity-100" : "opacity-0 lg:hover:opacity-100"
+          showOverlay
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none lg:hover:opacity-100 lg:hover:pointer-events-auto"
         }`}
       >
         <PlayIcon />
