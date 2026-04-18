@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import Image from "next/image";
 import type { InstagramPost } from "@/lib/cms/directus/instagram";
 
 import "swiper/css";
+
+const DRAG_THRESHOLD_PX = 8;
 
 function PlayIcon() {
   return (
@@ -17,12 +19,24 @@ function PlayIcon() {
   );
 }
 
-function InstagramCard({ post }: { post: InstagramPost }) {
+type CardProps = {
+  post: InstagramPost;
+  registerVideo: (el: HTMLVideoElement | null) => void;
+  onPlayRequest: (el: HTMLVideoElement) => void;
+};
+
+function InstagramCard({ post, registerVideo, onPlayRequest }: CardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasActivated, setHasActivated] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  const handleActivate = () => {
+  useEffect(() => {
+    registerVideo(videoRef.current);
+    return () => registerVideo(null);
+  }, [hasActivated, registerVideo]);
+
+  const togglePlayback = () => {
     if (!hasActivated) {
       setHasActivated(true);
       setIsPlaying(true);
@@ -31,12 +45,27 @@ function InstagramCard({ post }: { post: InstagramPost }) {
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
+      onPlayRequest(v);
       v.play();
       setIsPlaying(true);
     } else {
       v.pause();
       setIsPlaying(false);
     }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
+    if (!start) return;
+    const dx = Math.abs(e.clientX - start.x);
+    const dy = Math.abs(e.clientY - start.y);
+    if (dx > DRAG_THRESHOLD_PX || dy > DRAG_THRESHOLD_PX) return;
+    togglePlayback();
   };
 
   if (!post.videoUrl) {
@@ -56,7 +85,12 @@ function InstagramCard({ post }: { post: InstagramPost }) {
   const showOverlay = !hasActivated || !isPlaying;
 
   return (
-    <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+    <div
+      className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => (pointerStartRef.current = null)}
+    >
       {hasActivated ? (
         <video
           ref={videoRef}
@@ -66,7 +100,10 @@ function InstagramCard({ post }: { post: InstagramPost }) {
           playsInline
           preload="metadata"
           autoPlay
-          onPlay={() => setIsPlaying(true)}
+          onPlay={(e) => {
+            onPlayRequest(e.currentTarget);
+            setIsPlaying(true);
+          }}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
         />
@@ -79,18 +116,14 @@ function InstagramCard({ post }: { post: InstagramPost }) {
           className="object-cover pointer-events-none"
         />
       )}
-      <button
-        type="button"
-        onClick={handleActivate}
-        aria-label={isPlaying ? "Pausar" : "Reproduzir"}
-        className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-          showOverlay
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none lg:hover:opacity-100 lg:hover:pointer-events-auto"
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 flex items-center justify-center transition-opacity pointer-events-none ${
+          showOverlay ? "opacity-100" : "opacity-0"
         }`}
       >
         <PlayIcon />
-      </button>
+      </div>
     </div>
   );
 }
@@ -99,6 +132,22 @@ export function InstagramCarousel({ posts }: { posts: InstagramPost[] }) {
   const swiperRef = useRef<SwiperType | null>(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
+  const videosRef = useRef<Set<HTMLVideoElement>>(new Set());
+
+  const registerVideo = useCallback((el: HTMLVideoElement | null) => {
+    const set = videosRef.current;
+    if (el) set.add(el);
+    else {
+      // limpa referências soltas
+      for (const v of set) if (!document.contains(v)) set.delete(v);
+    }
+  }, []);
+
+  const handlePlayRequest = useCallback((current: HTMLVideoElement) => {
+    for (const v of videosRef.current) {
+      if (v !== current && !v.paused) v.pause();
+    }
+  }, []);
 
   if (posts.length === 0) return null;
 
@@ -159,7 +208,11 @@ export function InstagramCarousel({ posts }: { posts: InstagramPost[] }) {
                 className="!h-auto"
               >
                 <div className="aspect-[9/14] w-full">
-                  <InstagramCard post={post} />
+                  <InstagramCard
+                    post={post}
+                    registerVideo={registerVideo}
+                    onPlayRequest={handlePlayRequest}
+                  />
                 </div>
               </SwiperSlide>
             ))}
