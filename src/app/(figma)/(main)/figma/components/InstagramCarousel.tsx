@@ -25,6 +25,7 @@ function InstagramCard({ post }: { post: InstagramPost }) {
   const handleActivate = () => {
     if (!hasActivated) {
       setHasActivated(true);
+      setIsPlaying(true);
       return;
     }
     const v = videoRef.current;
@@ -52,6 +53,8 @@ function InstagramCard({ post }: { post: InstagramPost }) {
     );
   }
 
+  const showOverlay = !hasActivated || !isPlaying;
+
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
       {hasActivated ? (
@@ -59,7 +62,7 @@ function InstagramCard({ post }: { post: InstagramPost }) {
           ref={videoRef}
           src={post.videoUrl}
           poster={post.thumbnailUrl}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover pointer-events-none"
           playsInline
           preload="metadata"
           autoPlay
@@ -73,7 +76,7 @@ function InstagramCard({ post }: { post: InstagramPost }) {
           alt={post.descricao || "Reel do Instagram"}
           fill
           sizes="(max-width: 1024px) 80vw, 320px"
-          className="object-cover"
+          className="object-cover pointer-events-none"
         />
       )}
       <button
@@ -81,7 +84,7 @@ function InstagramCard({ post }: { post: InstagramPost }) {
         onClick={handleActivate}
         aria-label={isPlaying ? "Pausar" : "Reproduzir"}
         className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-          hasActivated && isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
+          showOverlay ? "opacity-100" : "opacity-0 lg:hover:opacity-100"
         }`}
       >
         <PlayIcon />
