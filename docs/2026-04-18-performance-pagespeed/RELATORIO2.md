@@ -168,9 +168,76 @@ Lighthouse variou diferente e calhou de marcar LCP=2s. Os dynamic imports
 quebra LCP silenciosamente. O preload do Next só funciona se você não
 competir com ele manualmente.
 
+## Terceira rodada — ImageZoom sabotando LCP mobile
+
+Novo PageSpeed após `96e8969`:
+https://pagespeed.web.dev/analysis/https-dev-lovecosmetics-com-br-product-espuma-facial/wxe2wgp10q
+
+- Performance: **51** (piorou mais)
+- LCP **5,3s** · TBT **1.320ms** · FCP 1,1s · CLS 0 · SI 5,2s
+
+### Novo breakdown LCP
+
+| Fase | Duração |
+|---|---|
+| TTFB | 1ms |
+| **Resource load delay** | **1.192ms** |
+| **Resource load duration** | **1.173ms** |
+| Element render delay | 54ms ✅ (o fix do opacity funcionou) |
+
+O fix anterior resolveu o render delay (2,5s → 54ms). Mas dois novos
+sintomas apareceram: a imagem demora 1,2s pra começar a baixar, e mais
+1,2s pra completar o download. Com LCP rotulada como `Low` priority no
+`network-requests`, ficou claro que o preload do `priority` não estava
+valendo.
+
+### Causa raiz — `ImageZoom.tsx` (galeria desktop)
+
+Mesmo o container `<div className="hidden md:block">` escondendo a
+galeria desktop no mobile, o `<Image>` dentro dele ainda estava no DOM.
+Três comportamentos combinados sabotavam o LCP:
+
+1. **`priority` no `<Image>` desktop**: injetava `<link rel="preload">`
+   da versão desktop no `<head>` do mobile — competindo com o preload
+   da imagem mobile real.
+2. **`new Image()` em `useEffect`**: pré-carregava a versão zoom/xlarge
+   sincronamente na hidratação, rodando mesmo em mobile.
+3. **`opacity-0` + `onLoad`** no `<Image>` desktop: réplica exata do
+   bug do mobile que já corrigimos — se a imagem desktop fosse a LCP
+   (em desktop), o mesmo render delay aconteceria lá.
+
+Resultado: 3 requests concorrentes da mesma imagem em variantes (large
+mobile + large desktop + xlarge zoom), saturando a conexão do mobile
+throttled do Lighthouse.
+
+### Correções — commit `a77afce`
+
+**`src/app/(figma)/(main)/figma/product/[slug]/components/ImageZoom.tsx`**
+
+- Removido `priority` (desktop nunca é LCP no form factor mobile).
+- Adicionado `loading="lazy"` — browser pula o request quando o
+  container está `display:none` via CSS.
+- Removido `opacity-0` / `transition-opacity` / `onLoad` / `imageLoaded`
+  state / skeleton fade (mesmo fix do mobile).
+- `new Image()` do zoom agora:
+  - Guardado por `matchMedia("(max-width: 767px)").matches` → não roda
+    em mobile.
+  - Envolto em `requestIdleCallback` (fallback `setTimeout 1500ms`) →
+    não compete com hidratação nem com LCP em desktop.
+
+### Lição acumulada
+
+O `next/image` `priority` é global — ele injeta preload no `<head>`
+independentemente de o componente estar visível ou não. Em galerias com
+variantes mobile/desktop renderizadas lado a lado com `hidden md:block`,
+**apenas uma** das tags pode ter `priority`, e deve ser a que
+corresponde ao form factor auditado (neste caso, mobile). A outra
+precisa de `loading="lazy"` explícito pra evitar request duplicado.
+
 ## Commits
 
 - `0d1ffd6` — perf: paralelizar fetches, dynamic imports e preload LCP na PDP
 - `96e8969` — fix: LCP da PDP — remover opacity-0 inicial e preload manual
+- `a77afce` — fix: ImageZoom não compete mais com LCP mobile
 
 Branch `master`, sem push.
