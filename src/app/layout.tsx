@@ -81,11 +81,6 @@ export default function RootLayout({
             <GoogleTagManager gtmId="GTM-WQPKGCZ2" />
           </>
         )}
-        {/* PagBank SDK para criptografia de cartão */}
-        <Script
-          src="https://assets.pagseguro.com.br/checkout-sdk-js/rc/dist/browser/pagseguro.min.js"
-          strategy="beforeInteractive"
-        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${lato.variable} ${poppins.variable} bg-white text-[#333] antialiased`}

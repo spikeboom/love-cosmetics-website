@@ -26,8 +26,8 @@ const FALLBACK_BANNERS: BannerHome[] = [
     descricao: "",
     ctaTexto: "Compre agora",
     ctaUrl: "/figma/search",
-    imagemDesktop: fallbackAsset("3130f514-ac50-40a3-9094-8f7e5fb61260", 2880),
-    imagemMobile: fallbackAsset("7e0a6cb9-ccfc-4567-9c6d-06f0a4cf041e", 960),
+    imagemDesktop: fallbackAsset("3130f514-ac50-40a3-9094-8f7e5fb61260", 1600),
+    imagemMobile: fallbackAsset("7e0a6cb9-ccfc-4567-9c6d-06f0a4cf041e", 800),
   },
   {
     id: "fallback-2",
@@ -35,8 +35,8 @@ const FALLBACK_BANNERS: BannerHome[] = [
     descricao: "Em compras acima de R$149.",
     ctaTexto: "Aproveitar ofertas",
     ctaUrl: "/figma/search",
-    imagemDesktop: fallbackAsset("5c57bc6f-1d16-4fa9-ad78-9d6801a3d273", 2880),
-    imagemMobile: fallbackAsset("6f6f6c8f-9804-4a8c-b228-3b915c5bf5c4", 960),
+    imagemDesktop: fallbackAsset("5c57bc6f-1d16-4fa9-ad78-9d6801a3d273", 1600),
+    imagemMobile: fallbackAsset("6f6f6c8f-9804-4a8c-b228-3b915c5bf5c4", 800),
   },
   {
     id: "fallback-3",
@@ -44,8 +44,8 @@ const FALLBACK_BANNERS: BannerHome[] = [
     descricao: "Ativos amazônicos com ciência para cuidar da sua pele.",
     ctaTexto: "Ver todos os produtos",
     ctaUrl: "/figma/search",
-    imagemDesktop: fallbackAsset("7e507a3b-0476-4faa-a028-c4119415e917", 2880),
-    imagemMobile: fallbackAsset("5eda0e4e-b0af-4d38-9aa2-753219322bea", 960),
+    imagemDesktop: fallbackAsset("7e507a3b-0476-4faa-a028-c4119415e917", 1600),
+    imagemMobile: fallbackAsset("5eda0e4e-b0af-4d38-9aa2-753219322bea", 800),
   },
 ];
 
@@ -90,8 +90,8 @@ export async function fetchBannersHome(): Promise<BannerHome[]> {
       descricao: r.descricao ?? undefined,
       ctaTexto: r.cta_texto ?? "",
       ctaUrl: r.cta_url ?? "/figma/search",
-      imagemDesktop: assetUrl(r.imagem_desktop, 2880, publicUrl) ?? "",
-      imagemMobile: assetUrl(r.imagem_mobile ?? r.imagem_desktop, 960, publicUrl),
+      imagemDesktop: assetUrl(r.imagem_desktop, 1600, publicUrl) ?? "",
+      imagemMobile: assetUrl(r.imagem_mobile ?? r.imagem_desktop, 800, publicUrl),
     }));
   } catch (e) {
     console.warn("[banners_home] Directus indisponível, usando fallback hardcoded:", e);

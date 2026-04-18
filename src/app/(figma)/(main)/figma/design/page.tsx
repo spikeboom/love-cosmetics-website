@@ -1,12 +1,20 @@
+import dynamic from "next/dynamic";
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { ElogiouWidget } from "../components/ElogiouWidget";
-import { InstagramCarousel } from "../components/InstagramCarousel";
-import { VitrineSection } from "../components/VitrineSection";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { fetchBannersHome } from "@/lib/cms/directus/banners";
 import { fetchInstagramPosts } from "@/lib/cms/directus/instagram";
 import { fetchDepoimentos } from "@/lib/cms/directus/depoimentos";
+
+const InstagramCarousel = dynamic(() =>
+  import("../components/InstagramCarousel").then((m) => m.InstagramCarousel),
+  { loading: () => <div className="w-full h-[360px]" /> }
+);
+const VitrineSection = dynamic(() =>
+  import("../components/VitrineSection").then((m) => m.VitrineSection),
+  { loading: () => <div className="w-full h-[480px]" /> }
+);
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
@@ -28,35 +36,50 @@ function ordenarProdutos(produtos: any[], ordem: string[]) {
 }
 
 export default async function FigmaHomePage() {
-  // Banners da home via Directus (com fallback hardcoded)
-  const banners = await fetchBannersHome();
+  const [
+    banners,
+    instagramPosts,
+    depoimentos,
+    rotinaResult,
+    kitsResult,
+    tecnologiaResult,
+  ] = await Promise.all([
+    fetchBannersHome(),
+    fetchInstagramPosts(),
+    fetchDepoimentos(),
+    fetchProdutosForSearch({ termos: ["espuma", "sérum", "serum", "hidratante"] }),
+    fetchProdutosForSearch({ termos: ["kit"] }),
+    fetchProdutosForSearch({ termos: ["máscara", "mascara", "manteiga"] }),
+  ]);
 
-  // Posts do Instagram via Directus
-  const instagramPosts = await fetchInstagramPosts();
+  const rotinaOrdenados = ordenarProdutos(rotinaResult.data || [], ["espuma", "sérum", "serum", "hidratante"]);
+  const kitsOrdenados = ordenarProdutos(kitsResult.data || [], ["kit uso diário", "kit full"]);
+  const tecnologiaOrdenados = ordenarProdutos(tecnologiaResult.data || [], ["manteiga", "máscara", "mascara"]);
 
-  // Depoimentos via Directus
-  const depoimentos = await fetchDepoimentos();
-
-  // Vitrine 1 - Comece sua rotina Lovè: Espuma, Sérum, Hidratante
-  const { data: produtosRotina } = await fetchProdutosForSearch({
-    termos: ["espuma", "sérum", "serum", "hidratante"]
-  });
-  const rotinaOrdenados = ordenarProdutos(produtosRotina || [], ["espuma", "sérum", "serum", "hidratante"]);
-
-  // Vitrine 2 - Kits Lovè: Kit Uso Diário, Kit Full Lovè
-  const { data: produtosKits } = await fetchProdutosForSearch({
-    termos: ["kit"]
-  });
-  const kitsOrdenados = ordenarProdutos(produtosKits || [], ["kit uso diário", "kit full"]);
-
-  // Vitrine 3 - Tecnologia & Amazônia: Máscara de Argila, Manteiga Corporal
-  const { data: produtosTecnologia } = await fetchProdutosForSearch({
-    termos: ["máscara", "mascara", "manteiga"]
-  });
-  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["manteiga", "máscara", "mascara"]);
+  const heroBanner = banners[0];
 
   return (
     <div className="w-full max-w-[1440px] mx-auto">
+      {heroBanner && (
+        <>
+          {heroBanner.imagemMobile && (
+            <link
+              rel="preload"
+              as="image"
+              href={heroBanner.imagemMobile}
+              media="(max-width: 1023px)"
+              fetchPriority="high"
+            />
+          )}
+          <link
+            rel="preload"
+            as="image"
+            href={heroBanner.imagemDesktop}
+            media="(min-width: 1024px)"
+            fetchPriority="high"
+          />
+        </>
+      )}
       {/* Banner principal com produto em destaque */}
       <BannerPrincipal slides={banners} />
 

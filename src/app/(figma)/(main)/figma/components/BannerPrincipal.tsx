@@ -160,14 +160,16 @@ export function BannerPrincipal({ slides }: BannerPrincipalProps) {
             }}
             className="relative w-full h-full flex"
           >
-            {slides.map((item) => (
+            {slides.map((item, idx) => (
               <div key={item.id} className="relative w-full h-full flex-shrink-0">
                 <Image
                   src={item.imagemMobile || item.imagemDesktop}
                   alt={item.titulo}
                   fill
                   className="object-cover"
-                  priority
+                  sizes="100vw"
+                  priority={idx === 0}
+                  fetchPriority={idx === 0 ? "high" : "auto"}
                 />
               </div>
             ))}
@@ -229,14 +231,16 @@ export function BannerPrincipal({ slides }: BannerPrincipalProps) {
             }}
             className="relative w-full h-full flex"
           >
-            {slides.map((item) => (
+            {slides.map((item, idx) => (
               <div key={item.id} className="relative w-full h-full flex-shrink-0">
                 <Image
                   src={item.imagemDesktop}
                   alt={item.titulo}
                   fill
                   className="object-cover"
-                  priority
+                  sizes="(min-width: 1440px) 1440px, 100vw"
+                  priority={idx === 0}
+                  fetchPriority={idx === 0 ? "high" : "auto"}
                 />
               </div>
             ))}
