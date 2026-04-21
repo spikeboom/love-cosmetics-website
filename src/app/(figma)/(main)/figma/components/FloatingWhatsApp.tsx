@@ -3,7 +3,8 @@ import { FaWhatsapp } from "react-icons/fa6";
 import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 
 const MESSAGE = "Olá! Gostaria de saber mais sobre os produtos Love Cosméticos.";
-const WHATSAPP_URL = `https://wa.me/message/JPCGPYCZS7ENN1?text=${encodeURIComponent(MESSAGE)}`;
+const WHATSAPP_PHONE = "5592981918872";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(MESSAGE)}`;
 
 export function FloatingWhatsApp({ bottomPx = 140 }: { bottomPx?: number }) {
   const handleClick = () => {
