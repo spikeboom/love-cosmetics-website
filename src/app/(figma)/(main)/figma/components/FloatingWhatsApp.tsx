@@ -1,5 +1,7 @@
 "use client";
 import { FaWhatsapp } from "react-icons/fa6";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { waitForGTMReady } from "@/utils/gtm-ready-helper";
 
 const MESSAGE = "Olá! Gostaria de saber mais sobre os produtos Love Cosméticos.";
@@ -7,6 +9,18 @@ const WHATSAPP_PHONE = "5592981918872";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(MESSAGE)}`;
 
 export function FloatingWhatsApp({ bottomPx = 140 }: { bottomPx?: number }) {
+  const pathname = usePathname();
+  const isCartPage = pathname?.endsWith("/cart") || pathname?.includes("/cart");
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const handleClick = () => {
     if (typeof window === "undefined") return;
     // Fire-and-forget — não pode usar await antes de abrir a URL,
@@ -26,11 +40,15 @@ export function FloatingWhatsApp({ bottomPx = 140 }: { bottomPx?: number }) {
     })();
   };
 
+  // No mobile, na página do carrinho, o resumo fixo no rodapé colide com o
+  // botão — subimos só nesse caso. No desktop o resumo fica na lateral.
+  const effectiveBottom = isMobile && isCartPage ? 300 : bottomPx;
+
   return (
     <div
       style={{
         position: "fixed",
-        bottom: `${bottomPx}px`,
+        bottom: `${effectiveBottom}px`,
         right: "24px",
         left: "auto",
         zIndex: 1000,
