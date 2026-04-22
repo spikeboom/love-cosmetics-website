@@ -76,7 +76,7 @@ export function PagamentoPixReal({
 
       if (pollingEnabled) {
         startPaymentPolling(
-          preGenerated.orderId,
+          { pedidoId, pagbankOrderId: preGenerated.orderId },
           () => onSuccess(),
           (err) => onError(err),
           10000,
@@ -86,6 +86,7 @@ export function PagamentoPixReal({
 
       return () => {
         stopPolling();
+        pixGeneratedRef.current = false;
       };
     }
 
@@ -100,7 +101,7 @@ export function PagamentoPixReal({
         orderIdRef.current = result.orderId;
         if (pollingEnabled) {
           startPaymentPolling(
-            result.orderId,
+            { pedidoId, pagbankOrderId: result.orderId },
             () => onSuccess(),
             (err) => onError(err),
             10000,
@@ -116,8 +117,10 @@ export function PagamentoPixReal({
 
     return () => {
       stopPolling();
+      pixGeneratedRef.current = false;
     };
-  }, [pedidoId, preGenerated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedidoId, preGenerated?.orderId]);
 
   // Controlar polling quando toggle muda
   const handleTogglePolling = () => {
@@ -128,7 +131,7 @@ export function PagamentoPixReal({
       setPollingEnabled(true);
       if (orderIdRef.current) {
         startPaymentPolling(
-          orderIdRef.current,
+          { pedidoId, pagbankOrderId: orderIdRef.current },
           () => onSuccess(),
           (err) => onError(err),
           10000,
@@ -231,7 +234,7 @@ export function PagamentoPixReal({
     if (result.success && result.orderId) {
       orderIdRef.current = result.orderId;
       startPaymentPolling(
-        result.orderId,
+        { pedidoId, pagbankOrderId: result.orderId },
         () => onSuccess(),
         (err) => onError(err),
         10000,

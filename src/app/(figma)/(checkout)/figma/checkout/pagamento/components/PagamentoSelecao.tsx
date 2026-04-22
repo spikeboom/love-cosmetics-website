@@ -174,7 +174,7 @@ export function PagamentoSelecao({
           onSuccess?.();
         } else {
           pagbank.startPaymentPolling(
-            result.orderId,
+            { pedidoId, pagbankOrderId: result.orderId },
             () => onSuccess?.(),
             (err) => onError?.(err),
             3000,

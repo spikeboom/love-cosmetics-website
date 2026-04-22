@@ -26,6 +26,14 @@ interface PaymentResult {
   qrCode?: QrCodeData;
 }
 
+export interface PollingTarget {
+  pedidoId?: string;
+  pagbankOrderId: string;
+}
+
+const PAID_STATUSES = new Set(["PAID", "AUTHORIZED"]);
+const FAILURE_STATUSES = new Set(["DECLINED", "CANCELED", "PAYMENT_FAILED"]);
+
 interface UsePagBankPaymentReturn {
   // Estado
   loading: boolean;
@@ -43,11 +51,12 @@ interface UsePagBankPaymentReturn {
   ) => Promise<PaymentResult>;
   createPixPayment: (pedidoId: string) => Promise<PaymentResult>;
   startPaymentPolling: (
-    orderId: string,
+    target: string | PollingTarget,
     onSuccess: (result: PaymentResult) => void,
     onError: (error: string) => void,
     intervalMs?: number,
-    timeoutMs?: number
+    timeoutMs?: number,
+    pagbankFallbackEvery?: number
   ) => void;
   stopPolling: () => void;
   checkOrderStatus: (pedidoId: string) => Promise<{ isPaid: boolean; status: string }>;
@@ -269,74 +278,128 @@ export function usePagBankPayment(): UsePagBankPaymentReturn {
 
   const startPaymentPolling = useCallback(
     (
-      orderId: string,
+      target: string | PollingTarget,
       onSuccess: (result: PaymentResult) => void,
       onError: (error: string) => void,
       intervalMs = 5000,
-      timeoutMs = 15 * 60 * 1000
+      timeoutMs = 15 * 60 * 1000,
+      pagbankFallbackEvery = 6
     ) => {
       setCheckingPayment(true);
 
+      // Backward compat: string = so PagBank (comportamento antigo).
+      const normalized: PollingTarget =
+        typeof target === "string" ? { pagbankOrderId: target } : target;
+      const { pedidoId, pagbankOrderId } = normalized;
+      const useLocalFirst = !!pedidoId;
+
+      let tickCount = 0;
+
+      const resolvePaidPix = () => {
+        stopPolling();
+        onSuccess({
+          success: true,
+          status: "PAID",
+          message: "Pagamento PIX confirmado!",
+        });
+      };
+
+      const resolvePaidCharge = (status: string) => {
+        stopPolling();
+        onSuccess({
+          success: true,
+          status,
+          message: status === "PAID" ? "Pagamento aprovado!" : "Pagamento autorizado!",
+        });
+      };
+
+      const resolveFailure = (status: string, isPix: boolean) => {
+        stopPolling();
+        if (isPix) {
+          onError("Pagamento PIX cancelado ou expirado.");
+        } else {
+          onError(
+            status === "DECLINED"
+              ? "Pagamento recusado. Verifique os dados e tente novamente."
+              : "Pagamento cancelado."
+          );
+        }
+      };
+
+      // Tick rapido: le o banco local.
+      const tickLocal = async () => {
+        const response = await fetch(`/api/pagbank/payment-status?pedidoId=${pedidoId}`);
+        const result = await response.json();
+
+        if (!result.success) return false;
+        const status: string | null = result.status;
+        if (!status) return false;
+
+        if (PAID_STATUSES.has(status)) {
+          resolvePaidCharge(status);
+          return true;
+        }
+        if (FAILURE_STATUSES.has(status)) {
+          resolveFailure(status, false);
+          return true;
+        }
+        return false;
+      };
+
+      // Tick lento / fallback: consulta o PagBank direto (fonte de verdade).
+      const tickPagBank = async () => {
+        const response = await fetch(`/api/pagbank/webhook?orderId=${pagbankOrderId}`);
+        const result = await response.json();
+
+        if (!result.success || !result.order) return false;
+        const order = result.order;
+        const charge = order.charges?.[0];
+
+        console.log("Polling status (PagBank):", {
+          pagbankOrderId,
+          orderStatus: order.status,
+          chargeStatus: charge?.status,
+          hasQrCodes: !!order.qr_codes?.length,
+        });
+
+        if (charge) {
+          if (PAID_STATUSES.has(charge.status)) {
+            resolvePaidCharge(charge.status);
+            return true;
+          }
+          if (FAILURE_STATUSES.has(charge.status)) {
+            resolveFailure(charge.status, false);
+            return true;
+          }
+        }
+
+        if (order.qr_codes && order.qr_codes.length > 0) {
+          if (order.status === "PAID") {
+            resolvePaidPix();
+            return true;
+          }
+          if (order.status === "CANCELED") {
+            resolveFailure("CANCELED", true);
+            return true;
+          }
+        }
+
+        return false;
+      };
+
       pollingIntervalRef.current = setInterval(async () => {
+        tickCount += 1;
         try {
-          const response = await fetch(`/api/pagbank/webhook?orderId=${orderId}`);
-          const result = await response.json();
-
-          if (result.success && result.order) {
-            const order = result.order;
-            const charge = order.charges?.[0];
-
-            // Log para debug
-            console.log("Polling status:", {
-              orderId,
-              orderStatus: order.status,
-              chargeStatus: charge?.status,
-              hasQrCodes: !!order.qr_codes?.length,
-            });
-
-            // Para cartao: verificar status do charge
-            if (charge) {
-              if (charge.status === "PAID" || charge.status === "AUTHORIZED") {
-                stopPolling();
-                onSuccess({
-                  success: true,
-                  status: charge.status,
-                  message:
-                    charge.status === "PAID"
-                      ? "Pagamento aprovado!"
-                      : "Pagamento autorizado!",
-                });
-                return;
-              } else if (charge.status === "DECLINED" || charge.status === "CANCELED") {
-                stopPolling();
-                onError(
-                  charge.status === "DECLINED"
-                    ? "Pagamento recusado. Verifique os dados e tente novamente."
-                    : "Pagamento cancelado."
-                );
-                return;
-              }
-            }
-
-            // Para PIX: verificar status geral do pedido
-            // No sandbox, quando PIX e pago, o status muda para PAID
-            if (order.qr_codes && order.qr_codes.length > 0) {
-              // Verificar se existe um charge criado apos o pagamento do PIX
-              // ou se o status geral indica pagamento
-              if (order.status === "PAID") {
-                stopPolling();
-                onSuccess({
-                  success: true,
-                  status: "PAID",
-                  message: "Pagamento PIX confirmado!",
-                });
-                return;
-              } else if (order.status === "CANCELED") {
-                stopPolling();
-                onError("Pagamento PIX cancelado ou expirado.");
-                return;
-              }
-            }
+          if (!useLocalFirst) {
+            await tickPagBank();
+            return;
+          }
+          const shouldFallback = tickCount % pagbankFallbackEvery === 0;
+          if (shouldFallback) {
+            const resolved = await tickPagBank();
+            if (!resolved) await tickLocal();
+          } else {
+            await tickLocal();
           }
         } catch (err) {
           console.error("Erro ao verificar pagamento:", err);
