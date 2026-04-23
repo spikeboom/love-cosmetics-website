@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "./_global/globals.css";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -9,9 +9,14 @@ import { UIContextProvider } from "@/core/ui/UIContext";
 import { NotificationProvider } from "@/core/notifications/NotificationContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "900"],
+const poppins = localFont({
+  src: [
+    { path: "../../public/fonts/downloaded/Poppins-400.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/downloaded/Poppins-500.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/downloaded/Poppins-600.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/downloaded/Poppins-700.woff2", weight: "700", style: "normal" },
+    { path: "../../public/fonts/downloaded/Poppins-900.woff2", weight: "900", style: "normal" },
+  ],
   variable: "--font-poppins",
   display: "swap",
 });

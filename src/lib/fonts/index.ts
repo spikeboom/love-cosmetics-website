@@ -1,4 +1,3 @@
-import { Roboto, Libre_Baskerville } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
@@ -46,18 +45,28 @@ export const ceraPro = localFont({
   display: "swap",
 });
 
-// Roboto - para elementos Material Design
-export const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["500"],
+// Roboto - para elementos Material Design (baixado localmente para evitar dependência de rede no build)
+export const roboto = localFont({
+  src: [
+    {
+      path: "../../../public/fonts/downloaded/Roboto-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
   variable: "--font-roboto",
   display: "swap",
 });
 
-// Libre Baskerville - substitui Times para títulos grandes
-export const libreBaskerville = Libre_Baskerville({
-  subsets: ["latin"],
-  weight: ["700"],
+// Libre Baskerville - substitui Times para títulos grandes (baixado localmente)
+export const libreBaskerville = localFont({
+  src: [
+    {
+      path: "../../../public/fonts/downloaded/LibreBaskerville-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-libre-baskerville",
   display: "swap",
 });
