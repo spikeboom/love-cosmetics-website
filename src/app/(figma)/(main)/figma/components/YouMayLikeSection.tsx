@@ -17,7 +17,7 @@ export function YouMayLikeSection({
     produtosStrapi,
     limite: 10,
     incluirSlug: true,
-  });
+  }).sort((a, b) => Number(!!a.esgotado) - Number(!!b.esgotado));
 
   const [currentPosition, setCurrentPosition] = useState(0);
   const cardWidth = 230;
