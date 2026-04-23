@@ -78,6 +78,7 @@ export function YouMayLikeSection({
                   parcelas={produto.parcelas}
                   rating={produto.rating}
                   ultimasUnidades={produto.ultimasUnidades}
+                  esgotado={produto.esgotado}
                   tipo="produto-completo"
                   slug={produto.slug}
                   preco_de={produto.preco_de}
@@ -117,6 +118,7 @@ export function YouMayLikeSection({
                 parcelas={produto.parcelas}
                 rating={produto.rating}
                 ultimasUnidades={produto.ultimasUnidades}
+                esgotado={produto.esgotado}
                 tipo="produto-completo"
                 slug={produto.slug}
                 preco_de={produto.preco_de}
