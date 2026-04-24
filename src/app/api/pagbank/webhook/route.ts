@@ -117,6 +117,11 @@ export async function POST(req: NextRequest) {
       // era PAID/AUTHORIZED. Em webhooks reenviados ou concorrentes (race), so
       // UM dos updates retorna count=1 — o resto retorna 0 e nao dispara GTM.
       // Sem isso, GA4 conta a mesma compra varias vezes.
+      //
+      // Failure events (DECLINED/CANCELED) tambem usam updateMany com guard:
+      // se o pedido ja transicionou para PAID/AUTHORIZED por uma retentativa
+      // bem sucedida, webhooks tardios da tentativa antiga NAO devem sobrescrever
+      // — senao um pedido ja pago vira "recusado" e a entrega nao sai.
       const isPaidEvent = chargeStatus === "PAID" || chargeStatus === "AUTHORIZED";
       let didTransitionToPaid = false;
       if (isPaidEvent) {
@@ -129,8 +134,12 @@ export async function POST(req: NextRequest) {
         });
         didTransitionToPaid = result.count > 0;
       } else {
-        await prisma.pedido.update({
-          where: { id: body.reference_id },
+        // Failure events nao sobrescrevem um pedido ja pago (race com retentativa).
+        await prisma.pedido.updateMany({
+          where: {
+            id: body.reference_id,
+            status_pagamento: { notIn: ["PAID", "AUTHORIZED"] },
+          },
           data: { status_pagamento: chargeStatus },
         });
       }

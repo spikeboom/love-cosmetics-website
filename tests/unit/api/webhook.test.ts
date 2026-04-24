@@ -154,8 +154,13 @@ describe("POST /api/pagbank/webhook — atualizacao de status", () => {
         charges: [{ id: "CHAR_F", status: "DECLINED" }],
       }) as any,
     );
-    expect(prismaMock.pedido.update).toHaveBeenCalledWith({
-      where: { id: "pedido-1" },
+    // DECLINED tambem usa updateMany com guard, para nao sobrescrever um
+    // pedido que ja foi PAID via retentativa concorrente.
+    expect(prismaMock.pedido.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "pedido-1",
+        status_pagamento: { notIn: ["PAID", "AUTHORIZED"] },
+      },
       data: { status_pagamento: "DECLINED" },
     });
     expect(sendGtmPurchaseEvent).not.toHaveBeenCalled();
@@ -285,6 +290,35 @@ describe("GET /api/pagbank/webhook — consulta de status no PagBank", () => {
 });
 
 describe("POST /api/pagbank/webhook — IDEMPOTÊNCIA (PagBank pode reenviar)", () => {
+  it("[REGRESSAO] webhook DECLINED tardio NAO deve sobrescrever PAID ja confirmado", async () => {
+    // Cenario: 1a tentativa recusada, cliente retenta rapido com outro cartao,
+    // paga. Webhook PAID chega. DEPOIS chega webhook DECLINED tardio da 1a
+    // tentativa. Sem guard, pedido vira DECLINED — entrega bloqueada e cliente
+    // fica PAGO mas com pedido marcado como recusado.
+    prismaMock.pedido.findUnique.mockResolvedValue({
+      ...basePedido,
+      status_pagamento: "PAID", // ja foi pago via retentativa
+    });
+
+    const res = await POST(
+      makeRequest({
+        id: "ORDE_LATE",
+        reference_id: "pedido-1",
+        charges: [{ id: "CHAR_OLD", status: "DECLINED" }],
+      }) as any,
+    );
+
+    expect(res.status).toBe(200);
+    // O update de status NAO deve trocar PAID por DECLINED
+    const updateCalls = prismaMock.pedido.update.mock.calls;
+    const sobrescreveuPaid = updateCalls.some(
+      (call: any) =>
+        call[0]?.where?.id === "pedido-1" &&
+        call[0]?.data?.status_pagamento === "DECLINED",
+    );
+    expect(sobrescreveuPaid).toBe(false);
+  });
+
   it("[REGRESSAO] webhooks PAID concorrentes (race) — so um dispara GTM", async () => {
     // Race real: dois POSTs simultaneos. Ambos leem o mesmo pedido em
     // AWAITING_PAYMENT no findUnique (snapshot). O updateMany e atomico no

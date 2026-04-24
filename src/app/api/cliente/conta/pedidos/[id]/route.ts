@@ -66,21 +66,21 @@ export async function GET(
       }
     });
 
-    // Determinar status do pagamento
+    // Determinar status do pagamento.
+    //
+    // Fonte de verdade e pedido.status_pagamento (atualizado de forma atomica
+    // pelo webhook com guard anti-sobrescricao). StatusPagamento e log de
+    // auditoria — pode ter webhooks tardios fora de ordem (ex.: PAID seguido
+    // de DECLINED da tentativa anterior). Usar o ultimo log por id geraria
+    // status visivel ao cliente divergente do banco.
     let status = 'Pendente';
-    if (pagamentos && pagamentos.length > 0) {
-      const ultimoPagamento = pagamentos[0];
-      const paymentInfo = ultimoPagamento?.info as Record<string, unknown>;
-      const charges = paymentInfo?.charges as Array<{ status: string }> | undefined;
-      const charge = charges?.[0];
-
-      if (charge?.status === 'PAID') {
-        status = 'Pago';
-      } else if (charge?.status === 'IN_ANALYSIS') {
-        status = 'Em Análise';
-      } else if (charge?.status === 'DECLINED' || charge?.status === 'CANCELED') {
-        status = 'Cancelado';
-      }
+    const sp = pedido.status_pagamento;
+    if (sp === 'PAID' || sp === 'AUTHORIZED') {
+      status = 'Pago';
+    } else if (sp === 'IN_ANALYSIS') {
+      status = 'Em Análise';
+    } else if (sp === 'DECLINED' || sp === 'CANCELED' || sp === 'PAYMENT_FAILED') {
+      status = 'Cancelado';
     }
 
     // Formatar itens

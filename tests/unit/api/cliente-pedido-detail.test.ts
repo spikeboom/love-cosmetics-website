@@ -66,68 +66,85 @@ describe("GET /api/cliente/conta/pedidos/[id] — auth/security", () => {
 });
 
 describe("GET /api/cliente/conta/pedidos/[id] — mapeamento de status", () => {
+  // Fonte de verdade e pedido.status_pagamento (nao mais o ultimo StatusPagamento).
+  function mockPedidoStatus(s: string) {
+    prismaMock.pedidoCliente.findFirst.mockResolvedValue({
+      pedido: { ...basePedido, status_pagamento: s },
+    });
+  }
+
   it("PAID -> 'Pago'", async () => {
-    prismaMock.statusPagamento.findMany.mockResolvedValue([
-      { info: { reference_id: "pedido-1", charges: [{ status: "PAID" }] } },
-    ]);
+    mockPedidoStatus("PAID");
+    const res = await callGet("pedido-1");
+    const json = await res.json();
+    expect(json.pedido.status).toBe("Pago");
+  });
+
+  it("AUTHORIZED -> 'Pago'", async () => {
+    mockPedidoStatus("AUTHORIZED");
     const res = await callGet("pedido-1");
     const json = await res.json();
     expect(json.pedido.status).toBe("Pago");
   });
 
   it("IN_ANALYSIS -> 'Em Análise'", async () => {
-    prismaMock.statusPagamento.findMany.mockResolvedValue([
-      { info: { reference_id: "pedido-1", charges: [{ status: "IN_ANALYSIS" }] } },
-    ]);
+    mockPedidoStatus("IN_ANALYSIS");
     const res = await callGet("pedido-1");
     const json = await res.json();
     expect(json.pedido.status).toBe("Em Análise");
   });
 
   it("DECLINED -> 'Cancelado' (TODO: trocar para 'Recusado')", async () => {
-    // Documenta o comportamento atual; quando o passo #2 da roadmap for feito,
-    // este teste vai falhar e precisar ser atualizado pra 'Recusado'.
-    prismaMock.statusPagamento.findMany.mockResolvedValue([
-      { info: { reference_id: "pedido-1", charges: [{ status: "DECLINED" }] } },
-    ]);
+    mockPedidoStatus("DECLINED");
     const res = await callGet("pedido-1");
     const json = await res.json();
     expect(json.pedido.status).toBe("Cancelado");
   });
 
-  it("CANCELED tambem mapeia para 'Cancelado'", async () => {
-    prismaMock.statusPagamento.findMany.mockResolvedValue([
-      { info: { reference_id: "pedido-1", charges: [{ status: "CANCELED" }] } },
-    ]);
+  it("CANCELED -> 'Cancelado'", async () => {
+    mockPedidoStatus("CANCELED");
+    const res = await callGet("pedido-1");
+    const json = await res.json();
+    expect(json.pedido.status).toBe("Cancelado");
+  });
+
+  it("PAYMENT_FAILED -> 'Cancelado'", async () => {
+    mockPedidoStatus("PAYMENT_FAILED");
     const res = await callGet("pedido-1");
     const json = await res.json();
     expect(json.pedido.status).toBe("Cancelado");
   });
 
   it("status desconhecido fica 'Pendente'", async () => {
-    prismaMock.statusPagamento.findMany.mockResolvedValue([
-      { info: { reference_id: "pedido-1", charges: [{ status: "WAITING" }] } },
-    ]);
+    mockPedidoStatus("WAITING");
     const res = await callGet("pedido-1");
     const json = await res.json();
     expect(json.pedido.status).toBe("Pendente");
   });
 
-  it("sem registro em StatusPagamento -> 'Pendente'", async () => {
-    prismaMock.statusPagamento.findMany.mockResolvedValue([]);
+  it("status null/AWAITING_PAYMENT -> 'Pendente'", async () => {
+    mockPedidoStatus("AWAITING_PAYMENT");
     const res = await callGet("pedido-1");
     const json = await res.json();
     expect(json.pedido.status).toBe("Pendente");
   });
 
-  it("ultimo registro vence (ordenado desc por id)", async () => {
+  it("[REGRESSAO] PAID no Pedido + DECLINED tardio em StatusPagamento -> 'Pago'", async () => {
+    // Cenario do bug: cliente pagou (Pedido.status_pagamento = PAID), mas
+    // chegou um webhook DECLINED tardio depois (da tentativa anterior).
+    // StatusPagamento guarda TODOS os webhooks pra auditoria — o ultimo
+    // por id desc nao reflete a verdade do pedido. Fonte de verdade e
+    // Pedido.status_pagamento, nao o ultimo webhook arquivado.
+    prismaMock.pedidoCliente.findFirst.mockResolvedValue({
+      pedido: { ...basePedido, status_pagamento: "PAID" },
+    });
     prismaMock.statusPagamento.findMany.mockResolvedValue([
-      // findMany retorna em desc por id — primeiro = mais recente
+      // Webhook DECLINED tardio chegou depois e e o ultimo por id
       { info: { reference_id: "pedido-1", charges: [{ status: "DECLINED" }] } },
       { info: { reference_id: "pedido-1", charges: [{ status: "PAID" }] } },
     ]);
     const res = await callGet("pedido-1");
     const json = await res.json();
-    expect(json.pedido.status).toBe("Cancelado");
+    expect(json.pedido.status).toBe("Pago");
   });
 });
