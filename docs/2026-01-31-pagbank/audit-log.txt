@@ -4587,3 +4587,3465 @@ Timestamp: 2026-04-22T01:17:16.009Z
   ]
 }
 
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:13:22.908Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "XEY3iTQ1ntjQc0OmV+oFQdSqrMNWnowvZae+BfJVI0nJOb0v1rpp0jlE3ERBV2dHcLUeW1qyGjMXLIxbe/aodoJ/P4MKgtzOZt3yB6h2IemInlZJkfRe1asVCUp8ZCVCKitBGrjPcCHsbar9Wt09WIYGRl6lAfQqSljbDMybR7cWjkY6wdLjYSVwFdJNseDPHQ0GvIAFRXyQ1v648GPF/quFmtj0ORJ397ulfM+lP1dP8hJbygNmwAlS+71CY8m3ZgnK9UKVmPim+aHm47AF592IVle61Z/brpOq3lQa/+ncqXrP3s8atQKC6Oy43sdZBRNlANwivnTWKt5Orf6jQA==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:13:27.821Z
+Status: 201
+
+{
+  "id": "ORDE_0262EF59-EE00-455E-A919-2E952227F598",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:13:25.152-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_8F57CFE4-AC0A-43D2-A69F-A7D66F4EA401",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:13:25.746-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_0262EF59-EE00-455E-A919-2E952227F598"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_8F57CFE4-AC0A-43D2-A69F-A7D66F4EA401",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_0262EF59-EE00-455E-A919-2E952227F598",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_0262EF59-EE00-455E-A919-2E952227F598/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:13:30.329Z
+
+{
+  "id": "ORDE_0262EF59-EE00-455E-A919-2E952227F598",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:13:25.152-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_8F57CFE4-AC0A-43D2-A69F-A7D66F4EA401",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:13:25.746-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_8F57CFE4-AC0A-43D2-A69F-A7D66F4EA401",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_0262EF59-EE00-455E-A919-2E952227F598"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_0262EF59-EE00-455E-A919-2E952227F598",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_0262EF59-EE00-455E-A919-2E952227F598/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:18:08.000Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "JPc9vDqBJEZWAyePvIYqO6Rs+3uKNU/FX8uwDfxa90kBi+W0CAcC6UNajq7vUwKXkFjQh/PxZXVlXa/pnVBNqsFTP0pHGHkGhpp+HKZnHF91RztutNGEJnOmWTdXMVyJ/F/c23rVidZM4NCMKAqwUPzA+9a60h5/jkkamC2rHmCPn2CwOmqWU2/G/EwZuzhZBDKCSIzMtL9g+HzT5WbjYBzpHii5XGXRhvtk9JOrI0Nsi6MlV1oFP0X+IPv0GWZCiMUAw+Q9GKJkl4jFJFIRabCv98yJ7I+xu0pD/gxkfkr3f//VCBSyb+/rAbp6/vwjW/ZCnAiOYmAxvFBv+6kjuA==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:18:11.023Z
+Status: 201
+
+{
+  "id": "ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:18:08.762-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_7A44B7C7-E2DC-40BD-8D08-DDB2E5674734",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:18:09.373-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_7A44B7C7-E2DC-40BD-8D08-DDB2E5674734",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:18:13.541Z
+
+{
+  "id": "ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:18:08.762-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_7A44B7C7-E2DC-40BD-8D08-DDB2E5674734",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:18:09.373-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_7A44B7C7-E2DC-40BD-8D08-DDB2E5674734",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_B1BA68C7-0D12-498D-806C-B64A86888B97/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:18:19.874Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "E4hrwOfn3BIQaPVTuqwK2m/V7pAQbDObldA1iF5ieXkQOqgJHTx9Gd7PqKWud18vychvb+3deU2NJMBqWi0qLmn8W2H2BN8gk218FhLbjGGPi9J99/BQAbML6HbXBzVpNmjPiPvT2DjdZEg2iIKpoVWNkK/r2+feTBA6YRpAWclbV12atFM/8yZMsvCQ3YQmeVCO4PBllJp7PG5aRxjFYZ2LhCeXKfkK9mvCsxeSTNsvjfUAxCXJNcykxMIIZFw7mM7BI5/njtHh64+jpFsXCWlkJgc73S/DJrSugkqI4JrjY1bSp0ebjhjJdAevG+hJwfvae72dFaKLBYJpV3jRwQ==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:18:22.240Z
+Status: 201
+
+{
+  "id": "ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:18:20.136-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_EEB667FB-648E-4EA2-82C8-33C4CA441275",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:18:20.753-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_EEB667FB-648E-4EA2-82C8-33C4CA441275",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:18:23.998Z
+
+{
+  "id": "ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:18:20.136-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_EEB667FB-648E-4EA2-82C8-33C4CA441275",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:18:20.753-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_EEB667FB-648E-4EA2-82C8-33C4CA441275",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_4FCE586B-83F3-4B41-B7B0-AC929E666955/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:18:33.129Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "bXzMiVfNkYINP+xuYwEWvanq//YipfviKjOUJT1KyrCzF2srPdLLDofAyjgUhRI3UbN3Oogd5soTrWW0T5oCwc5R92C31QqwkB5iTQJ26LHpi4dmMBjcJiwJeg4oUvwTAaqUYcwBy0fHzpleXB2IbJuhO8cDWepBG936Sce5SAJ61402sm5VzRfcdJtI3dl82UgduYlRJ3U0MNWsYfoTBJA4PB7pbcgGgG9PyxFp5E97ePPIRUHpeySnp2mj1a6fvnIMCEQX86KI+xSEV2IaeKtu/cxP24DA0e6xMiN32q4A+hbqPjbrR6ttHwRfR5Zk/dtmuIKP5O0fjKD74vyTiQ==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:18:36.113Z
+Status: 201
+
+{
+  "id": "ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:18:33.825-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_47013B7B-AC46-4B13-95CB-CED570C813B8",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "PAID",
+      "created_at": "2026-04-24T19:18:34.289-03:00",
+      "paid_at": "2026-04-24T19:18:34.000-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO",
+        "reference": "032416400102",
+        "raw_data": {
+          "authorization_code": "145803",
+          "nsu": "032416400102",
+          "reason_code": "00"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "hipercard",
+          "first_digits": "606282",
+          "last_digits": "9021",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {
+            "name": "ITAU UNIBANCO S.A.",
+            "product": "Private Label 8"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_47013B7B-AC46-4B13-95CB-CED570C813B8",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_47013B7B-AC46-4B13-95CB-CED570C813B8/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:18:38.754Z
+
+{
+  "id": "ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D",
+  "reference_id": "1d581fce-dbad-43bc-be98-559e35207746",
+  "created_at": "2026-04-24T19:18:33.825-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "ez7cf5luhuovwr2vrblixg9q",
+      "name": "Hidratante Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "frete-1d581fce-dbad-43bc-be98-559e35207746",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_47013B7B-AC46-4B13-95CB-CED570C813B8",
+      "reference_id": "charge-1d581fce-dbad-43bc-be98-559e35207746",
+      "status": "PAID",
+      "created_at": "2026-04-24T19:18:34.289-03:00",
+      "paid_at": "2026-04-24T19:18:34.000-03:00",
+      "description": "Pedido Love Cosmetics #1d581fce-dbad-43bc-be98-559e35207746",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO",
+        "reference": "032416400102",
+        "raw_data": {
+          "authorization_code": "145803",
+          "nsu": "032416400102",
+          "reason_code": "00"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "hipercard",
+          "first_digits": "606282",
+          "last_digits": "9021",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "issuer": {
+            "name": "ITAU UNIBANCO S.A.",
+            "product": "Private Label 8"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_47013B7B-AC46-4B13-95CB-CED570C813B8",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_47013B7B-AC46-4B13-95CB-CED570C813B8/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_C0246E94-2E48-48C9-A6AE-CFC755BDA38D/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:19:16.826Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "UVSgM6Us3QuCfLCOvAZC+XsoM0LiTgFEDQZRs6AHdlJCf1cxLkQBSHklWnZE87Yq0vr5KP8E7dknekmC2lAJxk9e4JSklW0z2E2l3PhZAdueliRgVlNtr4XgM5iRAWN/ch/XCu8zwuCge7na499j+Etqe1+E5rkJIofGBz2FoiJa+ENTHeZneQV7hEtl8cKwHnzpTKj9SqBvr4od7ZuWwa404l1QkhJCvp7E1ZhPRi5GzDNA26s/tcPFhcCiUaxI4cUMaUMK7QGQJKWK8+hULLFe6qSj1KKWYrXOnJ8hXTPzvi7F1bLa1+t49rfl4mq59l+xuGVP/3qDpf6tbR7fuQ==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:19:18.866Z
+Status: 201
+
+{
+  "id": "ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2",
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "created_at": "2026-04-24T19:19:17.432-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_25156DEE-70B1-4365-9DBD-9DE9F1251AD3",
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:19:18.029-03:00",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_25156DEE-70B1-4365-9DBD-9DE9F1251AD3",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:19:20.284Z
+
+{
+  "id": "ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2",
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "created_at": "2026-04-24T19:19:17.432-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_25156DEE-70B1-4365-9DBD-9DE9F1251AD3",
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:19:18.029-03:00",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_25156DEE-70B1-4365-9DBD-9DE9F1251AD3",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_3D62EAEB-DD77-43CF-BC65-57207838A8B2/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:21:12.011Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "Imd2Dv4/EAcLUtsObBzztVK8dnNDdjuAFLWcto26rjfQA9csEly9B7VYkMGpuzLM58TXXf1/clTTNQit51TsGYLXOtl9pypwd7pCsCkGksvrjqGGEJ+Jwtd0Ac8sAX+VnqlPaMjtzQ6FD2sNp/dq6K01LcHWIXfw3yoIrE0s37aYGW7YJBeDdR9MZNlZWb6YqmE+46WVQIfD/hPjstpku0sIu3WPJCefNpl5NSB/TXk2dE+u6BM1qWZiNHpdupRiiOtMPqzb0kDRCKBCY9Y0dseLdfYYbs9JQlbEYvXz0KLv6v/0KNiuGfObY3Gq/bDcmEOwoTB+PEqAzBoNNCs0rg==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:21:16.236Z
+Status: 201
+
+{
+  "id": "ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4",
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "created_at": "2026-04-24T19:21:12.749-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_FE82C096-5352-463A-8866-F8FB215F7777",
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:21:13.497-03:00",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "hipercard",
+          "first_digits": "606282",
+          "last_digits": "4409",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {
+            "name": "ITAU UNIBANCO S.A.",
+            "product": "Private Label 8"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_FE82C096-5352-463A-8866-F8FB215F7777",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:21:26.548Z
+
+{
+  "id": "ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4",
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "created_at": "2026-04-24T19:21:12.749-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_FE82C096-5352-463A-8866-F8FB215F7777",
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:21:13.497-03:00",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "hipercard",
+          "first_digits": "606282",
+          "last_digits": "4409",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "issuer": {
+            "name": "ITAU UNIBANCO S.A.",
+            "product": "Private Label 8"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_FE82C096-5352-463A-8866-F8FB215F7777",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_E9FBDA38-CD79-44AE-9B40-C52FE5D159E4/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:21:41.034Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "UuL0reT1yGHNgQ+3+KHVheeCRMoBxPyHL+sKwGMM7RsfSOIQxowNE/jg9xk8NqsE7e8a8QqGNA1ZwekurPUXMJQtQnEmL9yW2U52qsML98sf8nhObpP7GxAcE4VTJzfIpbJN4i2JSqyaBE/ptzGv7D0/EA1+tu/Q/Wsjy6A9YlKFQhjzxmJh5pnSZztFrlzrbmUdDlu03SpnexXfkIuIX/gMgwuaiq6iVpkiKFbKS705faYu9wteezQXEgmaCXgujkRMW3y+qcsaMZbKbQ6FoFgBYoanyjC5gEe1b6bPLqX5rjEEhJgl+BKkeMG6w9gnnEPVqFtjGZSyM3Yue+VLOQ==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:21:42.811Z
+Status: 201
+
+{
+  "id": "ORDE_9C209335-16EB-4754-8E39-34076E469FAB",
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "created_at": "2026-04-24T19:21:41.691-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_73E2DBF8-4072-482D-A76E-053C945BA392",
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:21:41.911-03:00",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_9C209335-16EB-4754-8E39-34076E469FAB"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_73E2DBF8-4072-482D-A76E-053C945BA392",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_9C209335-16EB-4754-8E39-34076E469FAB",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_9C209335-16EB-4754-8E39-34076E469FAB/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:21:44.867Z
+
+{
+  "id": "ORDE_9C209335-16EB-4754-8E39-34076E469FAB",
+  "reference_id": "151b01e8-1d23-4c35-bf00-f1bce602e910",
+  "created_at": "2026-04-24T19:21:41.691-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_73E2DBF8-4072-482D-A76E-053C945BA392",
+      "reference_id": "charge-151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:21:41.911-03:00",
+      "description": "Pedido Love Cosmetics #151b01e8-1d23-4c35-bf00-f1bce602e910",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_73E2DBF8-4072-482D-A76E-053C945BA392",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_9C209335-16EB-4754-8E39-34076E469FAB"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_9C209335-16EB-4754-8E39-34076E469FAB",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_9C209335-16EB-4754-8E39-34076E469FAB/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:23:17.046Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-33004b77-0224-4b29-981d-8c26b94707bf",
+      "description": "Pedido Love Cosmetics #33004b77-0224-4b29-981d-8c26b94707bf",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "httFnJlbFFWSHq2cUyfN7uwN/aTYDjkWZ+2eXsrcW3FEyuzmC9EvIMZm4IKtNQUzDlM9Q/v8lTEYATzV0Cn1voPu8mRL0rqb/xB2LMMq6gtYIkYNPA44TT8oql5JGoHRctgltFtJmbcC+J63SrVaSwxEVbuBdu6lzxXS3+z1LC28xqlstU3Nerg2GQAY1isI28HceGCYDKJbVRWxspp2lZ5ILpZb+xkYRZSTFh/uJwv2uXqT0pDOrGbms1A910hG04Wh6R4R3VggYSzSNCRsLfowQhjpvL4Ta1gY6aH6C+vhi/ff0a5Yol/cDgCf/xl+MWP600Xb2ZH9fETAPV4bbw==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:23:19.542Z
+Status: 201
+
+{
+  "id": "ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:23:17.790-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_0A1B66B5-D9D6-4D3A-A676-B09242B2F4F8",
+      "reference_id": "charge-33004b77-0224-4b29-981d-8c26b94707bf",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:23:18.054-03:00",
+      "description": "Pedido Love Cosmetics #33004b77-0224-4b29-981d-8c26b94707bf",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL",
+        "summary": {
+          "total": 4810,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_0A1B66B5-D9D6-4D3A-A676-B09242B2F4F8",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:23:30.221Z
+
+{
+  "id": "ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:23:17.790-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_0A1B66B5-D9D6-4D3A-A676-B09242B2F4F8",
+      "reference_id": "charge-33004b77-0224-4b29-981d-8c26b94707bf",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:23:18.054-03:00",
+      "description": "Pedido Love Cosmetics #33004b77-0224-4b29-981d-8c26b94707bf",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL",
+        "summary": {
+          "total": 4810,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "mastercard",
+          "first_digits": "553006",
+          "last_digits": "3264",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_0A1B66B5-D9D6-4D3A-A676-B09242B2F4F8",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_D2AF286A-6014-4A0D-8E35-53F494917FC2/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== CARTAO - REQUEST ===
+Timestamp: 2026-04-24T22:25:27.829Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "reference_id": "charge-33004b77-0224-4b29-981d-8c26b94707bf",
+      "description": "Pedido Love Cosmetics #33004b77-0224-4b29-981d-8c26b94707bf",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL"
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "encrypted": "Q0U6KpYYU6FixsMnxXRiEHwlW6P83ASm8wrw1y3zk2kDivdqpq5NSI6TQhPQjSD05b3qKOjmp0TBw4GF6vGZyu7WU2t5pWHU3SQtAtCf4ljUC0Bl7QOk7nQJN19tEBUGe+Q1HuzHXgBiGH4TFBYTlxFEdKRtOJf3RYmbUOHD2Ym3xIZW4f+1hgl3j0GiDRCsaXa/cabsfHQS4QmTwD8u+lkOjaa99pxrlubiIECb+9mWtAlkk9oGHGP36Wmtt7AHEJnGQh7YBw12QmKJziK/3PTsfdXwcwFe3nK5xUkJBFw2g6UcSAjE0rNBEpC0hVgDAJgG/OcUN+fIY2YNuULtlQ==",
+          "store": false
+        },
+        "holder": {
+          "name": "Roberto Cruz",
+          "tax_id": "01055044248"
+        }
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== CARTAO - RESPONSE ===
+Timestamp: 2026-04-24T22:25:30.767Z
+Status: 201
+
+{
+  "id": "ORDE_7DB240A2-AA14-48BF-912B-6A364471B035",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:25:28.227-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_F8425025-649D-4083-B57E-4126819A76BF",
+      "reference_id": "charge-33004b77-0224-4b29-981d-8c26b94707bf",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:25:28.813-03:00",
+      "description": "Pedido Love Cosmetics #33004b77-0224-4b29-981d-8c26b94707bf",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL",
+        "summary": {
+          "total": 4810,
+          "paid": 0,
+          "refunded": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "visa",
+          "first_digits": "492929",
+          "last_digits": "0766",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "store": false,
+          "issuer": {},
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "metadata": {
+        "ps_order_id": "ORDE_7DB240A2-AA14-48BF-912B-6A364471B035"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_F8425025-649D-4083-B57E-4126819A76BF",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_7DB240A2-AA14-48BF-912B-6A364471B035",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_7DB240A2-AA14-48BF-912B-6A364471B035/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-04-24T22:25:35.676Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 4810,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-24T22:40:35.675Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-24T22:25:36.875Z
+Status: 201
+
+{
+  "id": "ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:25:35.822-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7",
+      "expiration_date": "2026-04-24T19:40:35.000-03:00",
+      "amount": {
+        "value": 4810
+      },
+      "text": "00020101021226850014br.gov.bcb.pix2563api-h.pagseguro.com/pix/v2/AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D727600016BR.COM.PAGSEGURO0136AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7520482205303986540548.105802BR5920LOVE COSMETICOS LTDA6006Manaus62070503***63048CA4",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:25:41.796Z
+
+{
+  "id": "ORDE_7DB240A2-AA14-48BF-912B-6A364471B035",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:25:28.227-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "shipping": {
+    "address": {
+      "street": "Rua Creuza Lopes Leitão",
+      "number": "10",
+      "locality": "Parque 10 de Novembro",
+      "city": "Manaus",
+      "region_code": "AM",
+      "country": "BRA",
+      "postal_code": "69050340"
+    }
+  },
+  "charges": [
+    {
+      "id": "CHAR_F8425025-649D-4083-B57E-4126819A76BF",
+      "reference_id": "charge-33004b77-0224-4b29-981d-8c26b94707bf",
+      "status": "DECLINED",
+      "created_at": "2026-04-24T19:25:28.813-03:00",
+      "description": "Pedido Love Cosmetics #33004b77-0224-4b29-981d-8c26b94707bf",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL",
+        "summary": {
+          "total": 4810,
+          "paid": 0,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "10002",
+        "message": "NAO AUTORIZADO PELO EMISSOR DO CARTAO",
+        "reference": "21146400006",
+        "raw_data": {
+          "authorization_code": "400006",
+          "nsu": "21146400006",
+          "reason_code": "70"
+        }
+      },
+      "payment_method": {
+        "type": "CREDIT_CARD",
+        "installments": 1,
+        "capture": true,
+        "card": {
+          "brand": "visa",
+          "first_digits": "492929",
+          "last_digits": "0766",
+          "exp_month": "12",
+          "exp_year": "2026",
+          "holder": {
+            "name": "TESTE SANDBOX"
+          },
+          "country": "BRA"
+        },
+        "soft_descriptor": "Cassianeminellide"
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://sandbox.api.pagseguro.com/charges/CHAR_F8425025-649D-4083-B57E-4126819A76BF",
+          "media": "application/json",
+          "type": "GET"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_7DB240A2-AA14-48BF-912B-6A364471B035"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_7DB240A2-AA14-48BF-912B-6A364471B035",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_7DB240A2-AA14-48BF-912B-6A364471B035/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-04-24T22:25:47.443Z
+POST https://sandbox.api.pagseguro.com/orders
+
+{
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 4810,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-24T22:40:47.443Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-24T22:25:49.051Z
+Status: 201
+
+{
+  "id": "ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:25:48.138-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA",
+      "expiration_date": "2026-04-24T19:40:47.000-03:00",
+      "amount": {
+        "value": 4810
+      },
+      "text": "00020101021226850014br.gov.bcb.pix2563api-h.pagseguro.com/pix/v2/0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA27600016BR.COM.PAGSEGURO01360F4E48C7-C2F3-4CEF-9C63-A3025FA258FA520482205303986540548.105802BR5920LOVE COSMETICOS LTDA6006Manaus62070503***630453A9",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:25:58.721Z
+
+{
+  "id": "ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:25:35.822-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7",
+      "expiration_date": "2026-04-24T19:40:35.000-03:00",
+      "amount": {
+        "value": 4810
+      },
+      "text": "00020101021226850014br.gov.bcb.pix2563api-h.pagseguro.com/pix/v2/AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D727600016BR.COM.PAGSEGURO0136AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7520482205303986540548.105802BR5920LOVE COSMETICOS LTDA6006Manaus62070503***63048CA4",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7",
+      "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+      "status": "PAID",
+      "created_at": "2026-04-24T19:25:53.436-03:00",
+      "paid_at": "2026-04-24T19:25:56.048-03:00",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL",
+        "summary": {
+          "total": 4810,
+          "paid": 4810,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_5E6A0595-2693-4018-95E7-D288FB7C0E89",
+          "end_to_end_id": "14335303e67848979da00d54545c2773",
+          "holder": {
+            "name": "API-PIX Payer Mock",
+            "tax_id": "***931180**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.sandbox.api.pagseguro.com/charges/CHAR_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.sandbox.api.pagseguro.com/charges/CHAR_AEEF9EA7-0AF1-47AB-9866-BC6C2EDF19D7/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_AC491ADD-283F-49D3-917A-D2CB891AA151/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-24T22:26:08.045Z
+
+{
+  "id": "ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E",
+  "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+  "created_at": "2026-04-24T19:25:48.138-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "327",
+      "name": "Manteiga Corporal",
+      "quantity": 1,
+      "unit_amount": 4800
+    },
+    {
+      "reference_id": "frete-33004b77-0224-4b29-981d-8c26b94707bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA",
+      "expiration_date": "2026-04-24T19:40:47.000-03:00",
+      "amount": {
+        "value": 4810
+      },
+      "text": "00020101021226850014br.gov.bcb.pix2563api-h.pagseguro.com/pix/v2/0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA27600016BR.COM.PAGSEGURO01360F4E48C7-C2F3-4CEF-9C63-A3025FA258FA520482205303986540548.105802BR5920LOVE COSMETICOS LTDA6006Manaus62070503***630453A9",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://sandbox.api.pagseguro.com/qrcode/QRCO_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA",
+      "reference_id": "33004b77-0224-4b29-981d-8c26b94707bf",
+      "status": "PAID",
+      "created_at": "2026-04-24T19:26:04.255-03:00",
+      "paid_at": "2026-04-24T19:26:05.972-03:00",
+      "amount": {
+        "value": 4810,
+        "currency": "BRL",
+        "summary": {
+          "total": 4810,
+          "paid": 4810,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_BB244F50-3898-4B4F-973F-A7C2D81AF2F4",
+          "end_to_end_id": "2901f5432abd4f909e26b98bdd71feb4",
+          "holder": {
+            "name": "API-PIX Payer Mock",
+            "tax_id": "***931180**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.sandbox.api.pagseguro.com/charges/CHAR_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.sandbox.api.pagseguro.com/charges/CHAR_0F4E48C7-C2F3-4CEF-9C63-A3025FA258FA/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://sandbox.api.pagseguro.com/orders/ORDE_FCB4127C-7CE4-49FF-ADF8-44994657C95E/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
