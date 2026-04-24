@@ -6,3 +6,5 @@ export * from "./PagamentoPix";
 export * from "./PagamentoCartao";
 export * from "./PagamentoSelecao";
 export * from "./PagamentoPixReal";
+export * from "./PagamentoRecusadoModal";
+export * from "./CupomIndisponivelModal";

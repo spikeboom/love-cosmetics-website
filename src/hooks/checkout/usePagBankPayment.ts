@@ -24,6 +24,22 @@ interface PaymentResult {
   status?: string;
   message?: string;
   qrCode?: QrCodeData;
+  // Presente quando o PagBank devolve a recusa de forma sincrona (caminho
+  // feliz para a UX: o front mostra o motivo imediatamente, sem polling).
+  paymentResponse?: {
+    code?: string;
+    message?: string;
+    reference?: string;
+    raw_data?: {
+      nsu?: string;
+      authorization_code?: string;
+      reason_code?: string;
+    };
+  } | null;
+  // Codigos de erro de negocio que o front usa para abrir UIs especificas.
+  errorCode?: string;
+  // Dados extras vindos com o erro (ex.: cupom indisponivel: novo_total, cupom).
+  errorDetails?: Record<string, unknown>;
 }
 
 export interface PollingTarget {
@@ -47,7 +63,8 @@ interface UsePagBankPaymentReturn {
   createCardPayment: (
     pedidoId: string,
     encryptedCard: string,
-    installments: number
+    installments: number,
+    options?: { skipCupom?: boolean }
   ) => Promise<PaymentResult>;
   createPixPayment: (pedidoId: string) => Promise<PaymentResult>;
   startPaymentPolling: (
@@ -171,7 +188,8 @@ export function usePagBankPayment(): UsePagBankPaymentReturn {
     async (
       pedidoId: string,
       encryptedCard: string,
-      installments: number
+      installments: number,
+      options?: { skipCupom?: boolean }
     ): Promise<PaymentResult> => {
       setLoading(true);
       setError(null);
@@ -194,12 +212,23 @@ export function usePagBankPayment(): UsePagBankPaymentReturn {
             paymentMethod: "credit_card",
             encryptedCard,
             installments,
+            skipCupom: options?.skipCupom ?? false,
           }),
         });
 
         const result = await response.json();
 
         if (!response.ok) {
+          // Erros de negocio identificados por code voltam estruturados para o
+          // caller decidir o que mostrar (ex.: COUPON_UNAVAILABLE -> modal).
+          if (result?.code) {
+            return {
+              success: false,
+              message: result.error || "Erro ao processar pagamento",
+              errorCode: result.code,
+              errorDetails: result,
+            };
+          }
           throw new Error(result.error || "Erro ao processar pagamento");
         }
 
@@ -208,6 +237,7 @@ export function usePagBankPayment(): UsePagBankPaymentReturn {
           orderId: result.orderId,
           chargeId: result.chargeId,
           status: result.status,
+          paymentResponse: result.payment_response ?? null,
         };
       } catch (err) {
         const message = err instanceof Error ? err.message : "Erro ao processar pagamento";

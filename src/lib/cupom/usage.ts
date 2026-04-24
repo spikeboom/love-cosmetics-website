@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { fetchAndValidateCupom } from "@/lib/strapi";
 
 type Tx = any;
 
@@ -108,4 +109,61 @@ export async function releaseCupomForPedido(pedidoId: string): Promise<void> {
       data: { status: "RELEASED", expiresAt: new Date(0) },
     })
     .catch(() => {});
+}
+
+/**
+ * Reservar novamente o cupom de um pedido que esta sendo retentado apos uma
+ * recusa de pagamento. A reserva original foi liberada pelo webhook de DECLINED
+ * para nao segurar a vaga global do cupom enquanto o cliente nao volta.
+ *
+ * Re-busca os dados do cupom no CMS porque os limites podem ter mudado entre
+ * a primeira tentativa e a retentativa. Se nao houver mais vaga, lanca
+ * CupomEsgotadoError para o caller decidir o que oferecer ao cliente.
+ *
+ * Idempotente: se a reserva ainda esta RESERVED e valida, nao mexe.
+ */
+export async function reReserveCupomOnRetry(pedidoId: string): Promise<{
+  reReserved: boolean;
+  codigo: string | null;
+}> {
+  if (!pedidoId) return { reReserved: false, codigo: null };
+
+  const reserva = await (prisma as any).cupomReserva.findUnique({
+    where: { pedidoId },
+  });
+
+  if (!reserva || !reserva.codigo) {
+    return { reReserved: false, codigo: null };
+  }
+
+  // Reserva ainda valida (RESERVED + nao expirada): nada a fazer.
+  if (reserva.status === "RESERVED" && reserva.expiresAt > new Date()) {
+    return { reReserved: false, codigo: reserva.codigo };
+  }
+
+  const cupomResult = await fetchAndValidateCupom(reserva.codigo);
+  if (!cupomResult.valido || !cupomResult.cupom) {
+    throw new CupomEsgotadoError(cupomResult.erro || "Cupom indisponivel");
+  }
+
+  const usosRestantes =
+    typeof cupomResult.cupom.usos_restantes === "number"
+      ? cupomResult.cupom.usos_restantes
+      : null;
+
+  // Cupom sem limite: nao precisa reservar.
+  if (usosRestantes === null) {
+    return { reReserved: false, codigo: reserva.codigo };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await reserveCupomForPedido({
+      tx,
+      codigo: reserva.codigo,
+      pedidoId,
+      maxUsos: usosRestantes,
+    });
+  });
+
+  return { reReserved: true, codigo: reserva.codigo };
 }

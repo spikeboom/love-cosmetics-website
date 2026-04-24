@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { CheckoutStepper } from "../../CheckoutStepper";
 import { BotaoVoltar } from "./BotaoVoltar";
@@ -34,6 +34,32 @@ interface PagamentoSelecaoProps {
   pedidoId?: string | null;
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  /**
+   * Disparado quando o PagBank retorna recusa de forma sincrona.
+   * O caller decide renderizar o modal com o motivo amigavel (decline-reasons.ts).
+   */
+  onDeclined?: (info: {
+    paymentResponse: {
+      code?: string;
+      message?: string;
+      reference?: string;
+      raw_data?: { reason_code?: string; nsu?: string; authorization_code?: string };
+    } | null;
+    pedidoId: string;
+  }) => void;
+  /**
+   * Disparado quando a retentativa retorna COUPON_UNAVAILABLE — o caller
+   * pergunta se o cliente quer seguir sem o cupom.
+   */
+  onCouponUnavailable?: (info: {
+    cupom: string | null;
+    novoTotal?: number;
+    totalAtual?: number;
+  }) => void;
+  /** Quando true, a proxima chamada de create-order ignora o cupom. */
+  skipCupomOnNextAttempt?: boolean;
+  /** Trigger externo: incrementar para forcar nova tentativa do cartao atual. */
+  retryNonce?: number;
 }
 
 export function PagamentoSelecao({
@@ -49,6 +75,10 @@ export function PagamentoSelecao({
   pedidoId,
   onSuccess,
   onError,
+  onDeclined,
+  onCouponUnavailable,
+  skipCupomOnNextAttempt = false,
+  retryNonce = 0,
 }: PagamentoSelecaoProps) {
   const [selected, setSelected] = useState<MetodoPagamento | null>(null);
   const [pulsing, setPulsing] = useState<MetodoPagamento | null>(null);
@@ -139,56 +169,112 @@ export function PagamentoSelecao({
     return Object.keys(newErrors).length === 0;
   };
 
+  // Guard contra double-submit (cliente clicando rapido em Finalizar Compra
+  // ou disparos concorrentes entre o useEffect e o handler do botao).
+  const processingRef = useRef(false);
+
+  // Callbacks via ref para que o useCallback abaixo nao precise re-criar a
+  // funcao quando o pai re-renderiza (e tambem para evitar que o closure
+  // capture uma versao antiga do callback).
+  const callbacksRef = useRef({ onSuccess, onError, onDeclined, onCouponUnavailable });
+  useEffect(() => {
+    callbacksRef.current = { onSuccess, onError, onDeclined, onCouponUnavailable };
+  }, [onSuccess, onError, onDeclined, onCouponUnavailable]);
+
+  const processCardPayment = useCallback(
+    async (effectivePedidoId: string, opts: { skipCupom: boolean }) => {
+      if (processingRef.current) return;
+      if (!cartaoData.numero) return;
+      processingRef.current = true;
+
+      try {
+        const [expMonth, expYearShort] = cartaoData.validade.split("/");
+        const expYear = `20${expYearShort}`;
+
+        const encryptedCard = await pagbank.encryptCard({
+          holder: cartaoData.nome.toUpperCase(),
+          number: cartaoData.numero.replace(/\s/g, ""),
+          expMonth,
+          expYear,
+          securityCode: cartaoData.cvv,
+        });
+
+        if (!encryptedCard) return;
+
+        const result = await pagbank.createCardPayment(
+          effectivePedidoId,
+          encryptedCard,
+          cartaoData.parcelas,
+          { skipCupom: opts.skipCupom },
+        );
+
+        // Cupom esgotou no momento da retentativa: caller pergunta se segue sem.
+        if (!result.success && result.errorCode === "COUPON_UNAVAILABLE") {
+          callbacksRef.current.onCouponUnavailable?.({
+            cupom: (result.errorDetails?.cupom as string | null) ?? null,
+            novoTotal: result.errorDetails?.novo_total as number | undefined,
+            totalAtual: result.errorDetails?.total_atual as number | undefined,
+          });
+          return;
+        }
+
+        if (result.success && result.orderId) {
+          if (result.status === "PAID" || result.status === "AUTHORIZED") {
+            callbacksRef.current.onSuccess?.();
+            return;
+          }
+          // PagBank ja respondeu DECLINED de forma sincrona: nao entrar em
+          // polling, apresentar o motivo imediatamente.
+          if (result.status === "DECLINED") {
+            callbacksRef.current.onDeclined?.({
+              paymentResponse: result.paymentResponse ?? null,
+              pedidoId: effectivePedidoId,
+            });
+            return;
+          }
+          // IN_ANALYSIS / outros: cair no polling padrao (webhook ainda nao chegou).
+          pagbank.startPaymentPolling(
+            { pedidoId: effectivePedidoId, pagbankOrderId: result.orderId },
+            () => callbacksRef.current.onSuccess?.(),
+            (err) => callbacksRef.current.onError?.(err),
+            3000,
+            2 * 60 * 1000,
+          );
+          return;
+        }
+
+        if (result.message) {
+          callbacksRef.current.onError?.(result.message);
+        }
+      } finally {
+        processingRef.current = false;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cartaoData.numero, cartaoData.nome, cartaoData.validade, cartaoData.cvv, cartaoData.parcelas],
+  );
+
   const handleFinalizarCompra = async () => {
     if (selected !== "cartao") return;
     if (!validateCardForm()) return;
 
-    // First create the order if not yet created
-    onSelecionarCartao();
+    // 1a tentativa: pedido ainda nao existe -> parent cria e o useEffect abaixo
+    // dispara o pagamento quando pedidoId chega. Retentativas: pedido ja existe,
+    // chamamos direto aqui (o useEffect nao re-dispara porque pedidoId nao muda).
+    if (pedidoId) {
+      processCardPayment(pedidoId, { skipCupom: skipCupomOnNextAttempt });
+    } else {
+      onSelecionarCartao();
+    }
   };
 
-  // When pedidoId becomes available and card is selected, process payment
+  // Quando pedidoId acaba de chegar (1a tentativa) ou retryNonce incrementa
+  // (cliente confirmou seguir sem cupom), dispara o pagamento.
   useEffect(() => {
-    if (!pedidoId || selected !== "cartao" || !cartaoData.numero) return;
-    // Only run when pedidoId just arrived (loading just finished)
-    if (loading) return;
-
-    const processCardPayment = async () => {
-      const [expMonth, expYearShort] = cartaoData.validade.split("/");
-      const expYear = `20${expYearShort}`;
-
-      const encryptedCard = await pagbank.encryptCard({
-        holder: cartaoData.nome.toUpperCase(),
-        number: cartaoData.numero.replace(/\s/g, ""),
-        expMonth,
-        expYear,
-        securityCode: cartaoData.cvv,
-      });
-
-      if (!encryptedCard) return;
-
-      const result = await pagbank.createCardPayment(pedidoId, encryptedCard, cartaoData.parcelas);
-
-      if (result.success && result.orderId) {
-        if (result.status === "PAID" || result.status === "AUTHORIZED") {
-          onSuccess?.();
-        } else {
-          pagbank.startPaymentPolling(
-            { pedidoId, pagbankOrderId: result.orderId },
-            () => onSuccess?.(),
-            (err) => onError?.(err),
-            3000,
-            2 * 60 * 1000
-          );
-        }
-      } else if (result.message) {
-        onError?.(result.message);
-      }
-    };
-
-    processCardPayment();
+    if (!pedidoId || selected !== "cartao") return;
+    processCardPayment(pedidoId, { skipCupom: skipCupomOnNextAttempt });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pedidoId]);
+  }, [pedidoId, retryNonce]);
 
   const handleSimulatePayment = async () => {
     if (!pedidoId) return;

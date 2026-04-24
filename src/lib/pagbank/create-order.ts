@@ -531,6 +531,11 @@ export function buildOrderUpdateData({
           first_digits: charge.payment_method.card.first_digits,
         });
       }
+
+      // Persiste o motivo da recusa para diagnostico (SAC, "Meus Pedidos", logs).
+      if (charge.status === "DECLINED" && charge.payment_response) {
+        updateData.pagbank_error = JSON.stringify(charge.payment_response);
+      }
     }
   }
 

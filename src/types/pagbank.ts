@@ -133,6 +133,12 @@ export interface PagBankChargeResponse {
   payment_response: {
     code: string;
     message: string;
+    reference?: string; // NSU para SAC
+    raw_data?: {
+      nsu?: string;
+      authorization_code?: string;
+      reason_code?: string; // ISO-8583 cru do emissor
+    };
   };
   payment_method: {
     type: "CREDIT_CARD" | "PIX";
