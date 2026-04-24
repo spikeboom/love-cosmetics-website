@@ -55,3 +55,7 @@ node_modules/
 /plano_auth
 # claude code
 .claude/
+
+# unlighthouse reports
+/.unlighthouse
+/.unlighthouse-*

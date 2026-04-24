@@ -3533,3 +3533,1057 @@ Status: 201
   ]
 }
 
+=== PIX - REQUEST ===
+Timestamp: 2026-04-22T01:05:36.091Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "b260f917-bc8c-41bd-876f-2daf34e5bd02",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "322-d",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "frete-b260f917-bc8c-41bd-876f-2daf34e5bd02",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-22T01:20:36.090Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-22T01:05:37.164Z
+Status: 201
+
+{
+  "id": "ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9",
+  "reference_id": "b260f917-bc8c-41bd-876f-2daf34e5bd02",
+  "created_at": "2026-04-21T22:05:35.837-03:00",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "322-d",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "frete-b260f917-bc8c-41bd-876f-2daf34e5bd02",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3",
+      "expiration_date": "2026-04-21T22:20:36.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/6846AD2F-ACA1-43C5-89DE-358E8EFD57F327600016BR.COM.PAGSEGURO01366846AD2F-ACA1-43C5-89DE-358E8EFD57F352045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***63049D35",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-22T01:06:02.348Z
+
+{
+  "id": "ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9",
+  "reference_id": "b260f917-bc8c-41bd-876f-2daf34e5bd02",
+  "created_at": "2026-04-21T22:05:35.837-03:00",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 50
+    },
+    {
+      "reference_id": "322-d",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 49
+    },
+    {
+      "reference_id": "frete-b260f917-bc8c-41bd-876f-2daf34e5bd02",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3",
+      "expiration_date": "2026-04-21T22:20:36.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/6846AD2F-ACA1-43C5-89DE-358E8EFD57F327600016BR.COM.PAGSEGURO01366846AD2F-ACA1-43C5-89DE-358E8EFD57F352045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***63049D35",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3",
+      "reference_id": "b260f917-bc8c-41bd-876f-2daf34e5bd02",
+      "status": "PAID",
+      "created_at": "2026-04-21T22:05:59.751-03:00",
+      "paid_at": "2026-04-21T22:06:00.335-03:00",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_C8D6B4FD-D89F-412B-A182-3748BC88E69E",
+          "end_to_end_id": "E00416968202604220105bYrTyvcCY7P",
+          "holder": {
+            "name": "ROBERTO DE ALMEIDA CRUZ NETO",
+            "tax_id": "***550442**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_6846AD2F-ACA1-43C5-89DE-358E8EFD57F3/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_C143EFC7-DAC6-45F9-A9F9-7EF54A13ABB9/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-04-22T01:10:04.328Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-22T01:25:04.327Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-22T01:10:04.936Z
+Status: 201
+
+{
+  "id": "ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D",
+  "reference_id": "bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+  "created_at": "2026-04-21T22:10:03.755-03:00",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_A9CC4D67-1039-4E29-8963-2E396C373DB0",
+      "expiration_date": "2026-04-21T22:25:04.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/A9CC4D67-1039-4E29-8963-2E396C373DB027600016BR.COM.PAGSEGURO0136A9CC4D67-1039-4E29-8963-2E396C373DB052045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304D783",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_A9CC4D67-1039-4E29-8963-2E396C373DB0/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_A9CC4D67-1039-4E29-8963-2E396C373DB0/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-22T01:10:26.809Z
+
+{
+  "id": "ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D",
+  "reference_id": "bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+  "created_at": "2026-04-21T22:10:03.755-03:00",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_A9CC4D67-1039-4E29-8963-2E396C373DB0",
+      "expiration_date": "2026-04-21T22:25:04.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/A9CC4D67-1039-4E29-8963-2E396C373DB027600016BR.COM.PAGSEGURO0136A9CC4D67-1039-4E29-8963-2E396C373DB052045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***6304D783",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_A9CC4D67-1039-4E29-8963-2E396C373DB0/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_A9CC4D67-1039-4E29-8963-2E396C373DB0/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_A9CC4D67-1039-4E29-8963-2E396C373DB0",
+      "reference_id": "bed097ec-4d4b-46f3-857a-1f9333d65eb6",
+      "status": "PAID",
+      "created_at": "2026-04-21T22:10:24.950-03:00",
+      "paid_at": "2026-04-21T22:10:25.213-03:00",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_7AEE97A9-4B16-4EB8-9519-F94511E007F1",
+          "end_to_end_id": "E00416968202604220110bV4TXLhGACh",
+          "holder": {
+            "name": "ROBERTO DE ALMEIDA CRUZ NETO",
+            "tax_id": "***550442**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_A9CC4D67-1039-4E29-8963-2E396C373DB0",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_A9CC4D67-1039-4E29-8963-2E396C373DB0/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_7B939FF0-3ACC-45D9-8005-12E5C0A5B51D/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-04-22T01:13:40.384Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-22T01:28:40.384Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-22T01:13:41.097Z
+Status: 201
+
+{
+  "id": "ORDE_D33756B7-4D44-4312-A044-0D894E7B320E",
+  "reference_id": "eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+  "created_at": "2026-04-21T22:13:39.944-03:00",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_ED01E66F-32F9-4BB6-B559-27BE48B14620",
+      "expiration_date": "2026-04-21T22:28:40.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/ED01E66F-32F9-4BB6-B559-27BE48B1462027600016BR.COM.PAGSEGURO0136ED01E66F-32F9-4BB6-B559-27BE48B1462052045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***630477CE",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_ED01E66F-32F9-4BB6-B559-27BE48B14620/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_ED01E66F-32F9-4BB6-B559-27BE48B14620/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_D33756B7-4D44-4312-A044-0D894E7B320E",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_D33756B7-4D44-4312-A044-0D894E7B320E/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-22T01:13:57.828Z
+
+{
+  "id": "ORDE_D33756B7-4D44-4312-A044-0D894E7B320E",
+  "reference_id": "eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+  "created_at": "2026-04-21T22:13:39.944-03:00",
+  "customer": {
+    "name": "Roberto Teste",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "68219472014",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_ED01E66F-32F9-4BB6-B559-27BE48B14620",
+      "expiration_date": "2026-04-21T22:28:40.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/ED01E66F-32F9-4BB6-B559-27BE48B1462027600016BR.COM.PAGSEGURO0136ED01E66F-32F9-4BB6-B559-27BE48B1462052045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***630477CE",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_ED01E66F-32F9-4BB6-B559-27BE48B14620/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_ED01E66F-32F9-4BB6-B559-27BE48B14620/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_ED01E66F-32F9-4BB6-B559-27BE48B14620",
+      "reference_id": "eb23b888-c1ad-450d-b1a8-0c42a11c93bf",
+      "status": "PAID",
+      "created_at": "2026-04-21T22:13:56.008-03:00",
+      "paid_at": "2026-04-21T22:13:56.282-03:00",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_D9A7597C-6E4D-4B21-9960-CE2CBD7B2F7E",
+          "end_to_end_id": "E00416968202604220113QBZX55yXJMh",
+          "holder": {
+            "name": "ROBERTO DE ALMEIDA CRUZ NETO",
+            "tax_id": "***550442**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_ED01E66F-32F9-4BB6-B559-27BE48B14620",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_ED01E66F-32F9-4BB6-B559-27BE48B14620/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_D33756B7-4D44-4312-A044-0D894E7B320E"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_D33756B7-4D44-4312-A044-0D894E7B320E",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_D33756B7-4D44-4312-A044-0D894E7B320E/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== PIX - REQUEST ===
+Timestamp: 2026-04-22T01:16:57.167Z
+POST https://api.pagseguro.com/orders
+
+{
+  "reference_id": "405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "country": "55",
+        "area": "92",
+        "number": "991397249",
+        "type": "MOBILE"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "amount": {
+        "value": 109,
+        "currency": "BRL"
+      },
+      "expiration_date": "2026-04-22T01:31:57.167Z"
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ]
+}
+
+=== PIX - RESPONSE ===
+Timestamp: 2026-04-22T01:16:57.824Z
+Status: 201
+
+{
+  "id": "ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389",
+  "reference_id": "405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+  "created_at": "2026-04-21T22:16:56.710-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE",
+      "expiration_date": "2026-04-21T22:31:57.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE27600016BR.COM.PAGSEGURO0136C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE52045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***63041498",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
+=== WEBHOOK NOTIFICATION - RECEIVED ===
+Timestamp: 2026-04-22T01:17:16.009Z
+
+{
+  "id": "ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389",
+  "reference_id": "405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+  "created_at": "2026-04-21T22:16:56.710-03:00",
+  "customer": {
+    "name": "Roberto Cruz",
+    "email": "spikeboom@gmail.com",
+    "tax_id": "01055044248",
+    "phones": [
+      {
+        "type": "MOBILE",
+        "country": "55",
+        "area": "92",
+        "number": "991397249"
+      }
+    ]
+  },
+  "items": [
+    {
+      "reference_id": "322",
+      "name": "Espuma Facial",
+      "quantity": 1,
+      "unit_amount": 99
+    },
+    {
+      "reference_id": "frete-405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+      "name": "Frete",
+      "quantity": 1,
+      "unit_amount": 10
+    }
+  ],
+  "qr_codes": [
+    {
+      "id": "QRCO_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE",
+      "expiration_date": "2026-04-21T22:31:57.000-03:00",
+      "amount": {
+        "value": 109
+      },
+      "text": "00020101021226830014br.gov.bcb.pix2561api.pagseguro.com/pix/v2/C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE27600016BR.COM.PAGSEGURO0136C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE52045977530398654041.095802BR592242.609.440 CASSIANE MI6006Manaus62070503***63041498",
+      "arrangements": [
+        "PIX"
+      ],
+      "links": [
+        {
+          "rel": "QRCODE.PNG",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE/png",
+          "media": "image/png",
+          "type": "GET"
+        },
+        {
+          "rel": "QRCODE.BASE64",
+          "href": "https://api.pagseguro.com/qrcode/QRCO_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE/base64",
+          "media": "text/plain",
+          "type": "GET"
+        }
+      ]
+    }
+  ],
+  "charges": [
+    {
+      "id": "CHAR_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE",
+      "reference_id": "405ef3a7-6223-48b0-baf2-176e6e9ff8c5",
+      "status": "PAID",
+      "created_at": "2026-04-21T22:17:14.206-03:00",
+      "paid_at": "2026-04-21T22:17:14.469-03:00",
+      "amount": {
+        "value": 109,
+        "currency": "BRL",
+        "summary": {
+          "total": 109,
+          "paid": 109,
+          "refunded": 0,
+          "incremented": 0
+        }
+      },
+      "payment_response": {
+        "code": "20000",
+        "message": "SUCESSO"
+      },
+      "payment_method": {
+        "type": "PIX",
+        "pix": {
+          "notification_id": "NTF_109E2DB8-657E-4155-BD1D-12F32177415F",
+          "end_to_end_id": "E00416968202604220117suLYNQbcoRK",
+          "holder": {
+            "name": "ROBERTO DE ALMEIDA CRUZ NETO",
+            "tax_id": "***550442**"
+          }
+        }
+      },
+      "links": [
+        {
+          "rel": "SELF",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE",
+          "media": "application/json",
+          "type": "GET"
+        },
+        {
+          "rel": "CHARGE.CANCEL",
+          "href": "https://internal.api.pagseguro.com/charges/CHAR_C3A89E06-6628-4B69-BAA9-4F2DC32CFBEE/cancel",
+          "media": "application/json",
+          "type": "POST"
+        }
+      ],
+      "metadata": {
+        "ps_order_id": "ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389"
+      }
+    }
+  ],
+  "notification_urls": [
+    "https://outmoded-clair-pectic.ngrok-free.dev/api/pagbank/webhook"
+  ],
+  "links": [
+    {
+      "rel": "SELF",
+      "href": "https://api.pagseguro.com/orders/ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389",
+      "media": "application/json",
+      "type": "GET"
+    },
+    {
+      "rel": "PAY",
+      "href": "https://api.pagseguro.com/orders/ORDE_1A99C91E-F29E-4D0B-9211-DBA126B2E389/pay",
+      "media": "application/json",
+      "type": "POST"
+    }
+  ]
+}
+
