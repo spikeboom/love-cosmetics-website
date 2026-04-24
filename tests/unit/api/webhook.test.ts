@@ -46,7 +46,7 @@ vi.mock("@/utils/pagbank-config", () => ({
 }));
 vi.mock("@/utils/logMessage", () => ({ createLogger: () => () => {} }));
 
-import { POST } from "@/app/api/pagbank/webhook/route";
+import { POST, GET } from "@/app/api/pagbank/webhook/route";
 
 function makeRequest(body: unknown, headers: Record<string, string> = {}): Request {
   return new Request("http://localhost/api/pagbank/webhook", {
@@ -235,6 +235,43 @@ describe("POST /api/pagbank/webhook — cupom", () => {
     );
     expect(consumeCupomForPedido).not.toHaveBeenCalled();
     expect(releaseCupomForPedido).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/pagbank/webhook — consulta de status no PagBank", () => {
+  function makeGet(url: string): any {
+    return { nextUrl: new URL(url) };
+  }
+
+  it("400 quando orderId ausente", async () => {
+    const res = await GET(makeGet("http://localhost/api/pagbank/webhook"));
+    const json = await res.json();
+    expect(res.status).toBe(400);
+    expect(json.error).toMatch(/orderId/i);
+    expect(fetchPagBankOrder).not.toHaveBeenCalled();
+  });
+
+  it("retorna order do PagBank quando fetch sucede", async () => {
+    fetchPagBankOrder.mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: { id: "ORDE_X", charges: [{ id: "CHAR_X", status: "PAID" }] },
+    });
+    const res = await GET(makeGet("http://localhost/api/pagbank/webhook?orderId=ORDE_X"));
+    const json = await res.json();
+    expect(res.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.order.id).toBe("ORDE_X");
+  });
+
+  it("propaga erro do PagBank com status original", async () => {
+    fetchPagBankOrder.mockResolvedValue({
+      ok: false,
+      status: 404,
+      data: { error_messages: [{ description: "not found" }] },
+    });
+    const res = await GET(makeGet("http://localhost/api/pagbank/webhook?orderId=naoexiste"));
+    expect(res.status).toBe(404);
   });
 });
 
