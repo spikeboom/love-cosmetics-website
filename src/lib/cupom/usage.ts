@@ -103,9 +103,11 @@ export async function consumeCupomForPedido({
 export async function releaseCupomForPedido(pedidoId: string): Promise<void> {
   if (!pedidoId) return;
 
+  // Defesa em profundidade: NUNCA reverter um cupom ja CONSUMED. Se o callsite
+  // esquecer o guard, o updateMany aqui simplesmente nao bate em nada.
   await (prisma as any).cupomReserva
-    .update({
-      where: { pedidoId },
+    .updateMany({
+      where: { pedidoId, status: "RESERVED" },
       data: { status: "RELEASED", expiresAt: new Date(0) },
     })
     .catch(() => {});

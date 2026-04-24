@@ -14,6 +14,7 @@ const {
     pedido: {
       findUnique: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
     },
     statusPagamento: {
       create: vi.fn(),
@@ -70,6 +71,7 @@ beforeEach(() => {
   validateWebhookSignature.mockResolvedValue({ valid: true });
   prismaMock.pedido.findUnique.mockResolvedValue(basePedido);
   prismaMock.pedido.update.mockResolvedValue({});
+  prismaMock.pedido.updateMany.mockResolvedValue({ count: 1 });
   prismaMock.statusPagamento.create.mockResolvedValue({ id: 1 });
   buildGtmPurchasePayload.mockResolvedValue({});
   sendGtmPurchaseEvent.mockResolvedValue(undefined);
@@ -120,8 +122,12 @@ describe("POST /api/pagbank/webhook — atualizacao de status", () => {
     );
 
     expect(res.status).toBe(200);
-    expect(prismaMock.pedido.update).toHaveBeenCalledWith({
-      where: { id: "pedido-1" },
+    // PAID/AUTHORIZED usa updateMany atomico com guard de idempotencia
+    expect(prismaMock.pedido.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "pedido-1",
+        status_pagamento: { notIn: ["PAID", "AUTHORIZED"] },
+      },
       data: { status_pagamento: "PAID" },
     });
     expect(sendGtmPurchaseEvent).toHaveBeenCalledOnce();
@@ -137,7 +143,7 @@ describe("POST /api/pagbank/webhook — atualizacao de status", () => {
       }) as any,
     );
     expect(sendGtmPurchaseEvent).not.toHaveBeenCalled();
-    expect(prismaMock.pedido.update).toHaveBeenCalled(); // status ainda atualiza
+    expect(prismaMock.pedido.updateMany).toHaveBeenCalled(); // status ainda atualiza
   });
 
   it("DECLINED atualiza status sem disparar GTM", async () => {
@@ -165,8 +171,11 @@ describe("POST /api/pagbank/webhook — atualizacao de status", () => {
         amount: { value: 22552, currency: "BRL" },
       }) as any,
     );
-    expect(prismaMock.pedido.update).toHaveBeenCalledWith({
-      where: { id: "pedido-1" },
+    expect(prismaMock.pedido.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "pedido-1",
+        status_pagamento: { notIn: ["PAID", "AUTHORIZED"] },
+      },
       data: { status_pagamento: "PAID" },
     });
     expect(sendGtmPurchaseEvent).toHaveBeenCalledOnce();
@@ -272,6 +281,66 @@ describe("GET /api/pagbank/webhook — consulta de status no PagBank", () => {
     });
     const res = await GET(makeGet("http://localhost/api/pagbank/webhook?orderId=naoexiste"));
     expect(res.status).toBe(404);
+  });
+});
+
+describe("POST /api/pagbank/webhook — IDEMPOTÊNCIA (PagBank pode reenviar)", () => {
+  it("[REGRESSAO] webhooks PAID concorrentes (race) — so um dispara GTM", async () => {
+    // Race real: dois POSTs simultaneos. Ambos leem o mesmo pedido em
+    // AWAITING_PAYMENT no findUnique (snapshot). O updateMany e atomico no
+    // banco — so um retorna count=1, o outro retorna count=0 e nao dispara GTM.
+    prismaMock.pedido.findUnique.mockResolvedValue({
+      ...basePedido,
+      status_pagamento: "AWAITING_PAYMENT",
+    });
+
+    // Simula concorrencia atomica do banco: 1a chamada count=1 (vence),
+    // 2a chamada count=0 (estado ja era PAID, no-op).
+    prismaMock.pedido.updateMany
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 0 });
+
+    const body = {
+      id: "ORDE_RACE",
+      reference_id: "pedido-1",
+      charges: [{ id: "CHAR_RACE", status: "PAID" }],
+    };
+
+    await Promise.all([
+      POST(makeRequest(body) as any),
+      POST(makeRequest(body) as any),
+    ]);
+
+    expect(sendGtmPurchaseEvent).toHaveBeenCalledOnce();
+  });
+
+  it("[REGRESSAO] reenvio do mesmo webhook PAID NAO deve disparar GTM duas vezes", async () => {
+    // Cenario real: PagBank reenvia webhook se o servidor demorou ou caiu
+    // brevemente. updateMany so retorna count=1 na primeira passagem; na
+    // segunda, status ja e PAID e o where notIn filtra fora.
+
+    prismaMock.pedido.findUnique.mockResolvedValueOnce({
+      ...basePedido,
+      status_pagamento: "AWAITING_PAYMENT",
+    });
+    prismaMock.pedido.findUnique.mockResolvedValueOnce({
+      ...basePedido,
+      status_pagamento: "PAID",
+    });
+    prismaMock.pedido.updateMany
+      .mockResolvedValueOnce({ count: 1 }) // 1a transiciona
+      .mockResolvedValueOnce({ count: 0 }); // 2a no-op (ja era PAID)
+
+    const body = {
+      id: "ORDE_DUP",
+      reference_id: "pedido-1",
+      charges: [{ id: "CHAR_DUP", status: "PAID" }],
+    };
+
+    await POST(makeRequest(body) as any);
+    await POST(makeRequest(body) as any);
+
+    expect(sendGtmPurchaseEvent).toHaveBeenCalledOnce();
   });
 });
 
