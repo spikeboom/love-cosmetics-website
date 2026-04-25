@@ -1,3 +1,5 @@
+// ⚠️ HOME ANTIGA — NÃO É MAIS A HOME PRINCIPAL.
+// A home atual está em: src/app/(figma)/(main)/figma/page.tsx
 import {
   fetchProdutosForHome_Kit,
   fetchProdutosForHome_NotKit,
@@ -25,6 +27,8 @@ export default async function HomeComponent() {
             loop
             muted
             playsInline
+            preload="metadata"
+            poster="/home/top-video-poster.webp"
           >
             {/* <source src="/home/top-video.webm" type="video/webm" /> */}
             <source src="/home/top-video.mp4" type="video/mp4" />

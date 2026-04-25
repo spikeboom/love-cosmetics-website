@@ -17,7 +17,7 @@ export function YouMayLikeSection({
     produtosStrapi,
     limite: 10,
     incluirSlug: true,
-  });
+  }).sort((a, b) => Number(!!a.esgotado) - Number(!!b.esgotado));
 
   const [currentPosition, setCurrentPosition] = useState(0);
   const cardWidth = 230;
@@ -78,6 +78,7 @@ export function YouMayLikeSection({
                   parcelas={produto.parcelas}
                   rating={produto.rating}
                   ultimasUnidades={produto.ultimasUnidades}
+                  esgotado={produto.esgotado}
                   tipo="produto-completo"
                   slug={produto.slug}
                   preco_de={produto.preco_de}
@@ -117,6 +118,7 @@ export function YouMayLikeSection({
                 parcelas={produto.parcelas}
                 rating={produto.rating}
                 ultimasUnidades={produto.ultimasUnidades}
+                esgotado={produto.esgotado}
                 tipo="produto-completo"
                 slug={produto.slug}
                 preco_de={produto.preco_de}

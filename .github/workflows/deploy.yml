@@ -1,69 +1,103 @@
-# name: Deploy to Server
-#
-# Pipeline desativado - deploy manual
-#
-# on:
-#   push:
-#     branches:
-#       - master # produção
-#       - develop # desenvolvimento
-#
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-#
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-#
-#       - name: Setup SSH
-#         uses: webfactory/ssh-agent@v0.9.0
-#         with:
-#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#
-#       - name: Add server to known_hosts
-#         run: ssh-keyscan -H 147.93.9.224 >> ~/.ssh/known_hosts
-#
-#       - name: Deploy code to server
-#         env:
-#           REF: ${{ github.ref }}
-#         run: |
-#           if [ "$REF" = "refs/heads/develop" ]; then
-#             BRANCH="develop"
-#           else
-#             BRANCH="master"
-#           fi
-#
-#           ssh root@147.93.9.224 "set -euo pipefail; \
-#             cd /root/wordpress/next_project && \
-#             git fetch origin && \
-#             git reset --hard origin/$BRANCH"
-#
-#       - name: Start docker-compose
-#         env:
-#           REF: ${{ github.ref }}
-#         run: |
-#           if [ "$REF" = "refs/heads/master" ]; then
-#             echo "Deploying to PRODUCTION with .env.master"
-#             ssh root@147.93.9.224 "set -euo pipefail; \
-#               cd /root/wordpress/next_project && \
-#               echo 'Using .env.master' && \
-#               docker-compose build --build-arg ENV_FILE=.env.master love-cosmetics && \
-#               docker builder prune -f && \
-#               docker-compose up -d love-cosmetics"
-#           elif [ "$REF" = "refs/heads/develop" ]; then
-#             echo "Deploying to DEVELOPMENT with .env.dev"
-#             ssh root@147.93.9.224 "set -euo pipefail; \
-#               cd /root/wordpress/next_project && \
-#               echo 'Using .env.dev' && \
-#               docker-compose build --build-arg ENV_FILE=.env.dev love-cosmetics-dev && \
-#               docker builder prune -f && \
-#               docker-compose up -d love-cosmetics-dev webserver"
-#           else
-#             echo "Deploying with .env (default)"
-#             ssh root@147.93.9.224 "set -euo pipefail; \
-#               cd /root/wordpress/next_project && \
-#               echo 'Using .env' && \
-#               docker-compose up -d --build love-cosmetics && \
-#               docker builder prune -f"
-#           fi
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      VPS_HOST: 147.93.9.224
+      VPS_USER: root
+      VPS_TAR_DIR: /root/wordpress/tar_to_vps
+      VPS_COMPOSE_DIR: /root/wordpress
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Resolve environment
+        id: env
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            echo "target=prod" >> "$GITHUB_OUTPUT"
+            echo "image=love-cosmetics:latest" >> "$GITHUB_OUTPUT"
+            echo "tar_name=love-cosmetics.tar" >> "$GITHUB_OUTPUT"
+            echo "compose_services=love-cosmetics webserver" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=dev" >> "$GITHUB_OUTPUT"
+            echo "image=love-cosmetics-dev:latest" >> "$GITHUB_OUTPUT"
+            echo "tar_name=love-cosmetics-dev.tar" >> "$GITHUB_OUTPUT"
+            echo "compose_services=love-cosmetics-dev webserver" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write .env file from secret
+        run: |
+          if [ "${{ steps.env.outputs.target }}" = "prod" ]; then
+            printf '%s' "${{ secrets.ENV_MASTER }}" > .env.master
+            cp .env.master .env
+          else
+            printf '%s' "${{ secrets.ENV_DEV }}" > .env.dev
+            cp .env.dev .env
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
+
+      - name: Build image
+        run: |
+          if [ "${{ steps.env.outputs.target }}" = "prod" ]; then
+            ENV_FILE=.env.master
+          else
+            ENV_FILE=.env.dev
+          fi
+          docker build \
+            --platform linux/amd64 \
+            --network=host \
+            --build-arg ENV_FILE=$ENV_FILE \
+            -t ${{ steps.env.outputs.image }} \
+            --load \
+            .
+
+      - name: Save image as tar
+        run: docker save ${{ steps.env.outputs.image }} -o ${{ steps.env.outputs.tar_name }}
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add VPS to known_hosts
+        run: ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
+
+      - name: Copy tar to VPS
+        run: |
+          scp ${{ steps.env.outputs.tar_name }} \
+            $VPS_USER@$VPS_HOST:$VPS_TAR_DIR/${{ steps.env.outputs.tar_name }}
+
+      - name: Load image and restart services on VPS
+        run: |
+          ssh $VPS_USER@$VPS_HOST "set -euo pipefail; \
+            docker load < $VPS_TAR_DIR/${{ steps.env.outputs.tar_name }} && \
+            cd $VPS_COMPOSE_DIR && \
+            docker-compose up -d ${{ steps.env.outputs.compose_services }} && \
+            docker image prune -f"
+
+      - name: Deploy summary
+        run: |
+          echo "### Deploy concluído :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "- Target: **${{ steps.env.outputs.target }}**" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ steps.env.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY

@@ -2,6 +2,7 @@ export interface CartTotalsState {
   total: number;
   descontos: number;
   subtotalOriginal: number; // Soma dos preco_de (preços originais riscados)
+  subtotalAfterCoupons: number; // Total dos itens após cupons, SEM frete
 }
 
 export interface CartValidationState {

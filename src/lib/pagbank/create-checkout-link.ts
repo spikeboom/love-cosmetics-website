@@ -41,6 +41,7 @@ interface CreateCheckoutLinkParams {
 interface CreateCheckoutLinkResult {
   success: boolean;
   link?: string;
+  checkoutId?: string;
   error?: string;
   details?: unknown;
 }
@@ -84,11 +85,8 @@ export async function createPagBankCheckoutLink(
       })),
       // URLs de callback
       redirect_url: `${baseURL}/confirmacao`,
-      notification_urls: [
-        `${baseURL}/api/checkout_notification`,
-      ],
       payment_notification_urls: [
-        `${baseURL}/api/payment_notification`,
+        `${baseURL}/api/pagbank/webhook`,
       ],
     };
 
@@ -131,11 +129,13 @@ export async function createPagBankCheckoutLink(
       };
     }
 
-    console.log("[PagBank Checkout] Link gerado com sucesso:", payLink);
+    const checkoutId = responseData.id; // CHEC_XXXX
+    console.log("[PagBank Checkout] Link gerado com sucesso:", payLink, "| checkoutId:", checkoutId);
 
     return {
       success: true,
       link: payLink,
+      checkoutId,
     };
 
   } catch (error) {

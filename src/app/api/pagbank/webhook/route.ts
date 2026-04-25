@@ -105,10 +105,6 @@ export async function POST(req: NextRequest) {
     const chargePaidAt = charge?.paid_at || (body as any).paid_at;
 
     if (chargeStatus) {
-      const updateData: any = {
-        status_pagamento: chargeStatus,
-      };
-
       logMessage("Atualizando status do pedido", {
         pedidoId: pedido.id,
         oldStatus: pedido.status_pagamento,
@@ -117,18 +113,44 @@ export async function POST(req: NextRequest) {
         webhookType: isChargeWebhook ? "/charges" : "/orders",
       });
 
-      await prisma.pedido.update({
-        where: { id: body.reference_id },
-        data: updateData,
-      });
+      // Idempotencia atomica: PAID so transiciona quando o status anterior NAO
+      // era PAID/AUTHORIZED. Em webhooks reenviados ou concorrentes (race), so
+      // UM dos updates retorna count=1 — o resto retorna 0 e nao dispara GTM.
+      // Sem isso, GA4 conta a mesma compra varias vezes.
+      //
+      // Failure events (DECLINED/CANCELED) tambem usam updateMany com guard:
+      // se o pedido ja transicionou para PAID/AUTHORIZED por uma retentativa
+      // bem sucedida, webhooks tardios da tentativa antiga NAO devem sobrescrever
+      // — senao um pedido ja pago vira "recusado" e a entrega nao sai.
+      const isPaidEvent = chargeStatus === "PAID" || chargeStatus === "AUTHORIZED";
+      let didTransitionToPaid = false;
+      if (isPaidEvent) {
+        const result = await prisma.pedido.updateMany({
+          where: {
+            id: body.reference_id,
+            status_pagamento: { notIn: ["PAID", "AUTHORIZED"] },
+          },
+          data: { status_pagamento: chargeStatus },
+        });
+        didTransitionToPaid = result.count > 0;
+      } else {
+        // Failure events nao sobrescrevem um pedido ja pago (race com retentativa).
+        await prisma.pedido.updateMany({
+          where: {
+            id: body.reference_id,
+            status_pagamento: { notIn: ["PAID", "AUTHORIZED"] },
+          },
+          data: { status_pagamento: chargeStatus },
+        });
+      }
 
       logMessage("Status do pedido atualizado com sucesso", {
         pedidoId: pedido.id,
         status: chargeStatus,
+        transitioned: didTransitionToPaid,
       });
 
-      // Se o pagamento foi confirmado (PAID), enviar evento para GTM
-      if (chargeStatus === "PAID") {
+      if (chargeStatus === "PAID" && didTransitionToPaid) {
         if (pedido.origem === "test") {
           logMessage("Evento Purchase bloqueado (test user)", { pedidoId: pedido.id });
         } else {

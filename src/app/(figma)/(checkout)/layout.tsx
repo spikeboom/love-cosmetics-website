@@ -9,10 +9,10 @@ export default function FigmaCheckoutLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* PagBank SDK */}
+      {/* PagBank SDK — só no checkout */}
       <Script
         src="https://assets.pagseguro.com.br/checkout-sdk-js/rc/dist/browser/pagseguro.min.js"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
       />
 
       <CheckoutHeader />

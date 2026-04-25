@@ -1,6 +1,7 @@
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { SearchPageClient } from "./SearchPageClient";
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { isEsgotado } from "@/config/produtos-esgotados";
 
 export const metadata = {
   title: "Lové Cosméticos - Busca de Produtos",
@@ -60,7 +61,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       id: produto.id?.toString(),
       slug: produto.slug,
       imagem: imagemUrl
-        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${imagemUrl}`
+        ? (imagemUrl.startsWith("http") ? imagemUrl : `${process.env.NEXT_PUBLIC_STRAPI_URL}${imagemUrl}`)
         : "/new-home/produtos/produto-1.png",
       nome: produto.nome || "Produto",
       descricao,
@@ -70,6 +71,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       parcelas,
       rating: produto.rating || 4.5,
       ultimasUnidades,
+      esgotado: isEsgotado(produto.slug),
       // Campos extras para o carrinho
       preco_de: precoOriginal,
       bling_number: produto.bling_number,

@@ -15,6 +15,7 @@ import {
   resolveNotificationUrls,
 } from "@/lib/pagbank/create-order";
 import { getPagBankApiUrl, getPagBankToken } from "@/utils/pagbank-config";
+import { CupomEsgotadoError, reReserveCupomOnRetry } from "@/lib/cupom/usage";
 
 const logMessage = createLogger();
 
@@ -87,6 +88,9 @@ export async function POST(req: NextRequest) {
     const paymentMethodRaw = body?.paymentMethod;
     const encryptedCard = body?.encryptedCard;
     const installments = Number(body?.installments ?? 1);
+    // Sinalizado pelo front quando o cliente concorda em retentar sem o cupom
+    // (apos receber o erro COUPON_UNAVAILABLE numa tentativa anterior).
+    const skipCupom = Boolean(body?.skipCupom);
 
     if (!pedidoId) {
       return NextResponse.json({ error: "pedidoId e obrigatorio" }, { status: 400 });
@@ -207,9 +211,69 @@ export async function POST(req: NextRequest) {
     }
 
     // Re-fetch pedido after lock.
-    const pedidoLocked = await getPedidoOr404(pedidoId);
+    let pedidoLocked = await getPedidoOr404(pedidoId);
     if (!pedidoLocked) {
       return NextResponse.json({ error: "Pedido nao encontrado" }, { status: 404 });
+    }
+
+    // Retentativa apos recusa: a reserva do cupom foi liberada pelo webhook de
+    // DECLINED para nao segurar a vaga global. Antes de criar a nova ordem,
+    // tentamos re-reservar (ou aceitar que o cliente desistiu do cupom).
+    const isRetry = isFailureStatus(pedido.status_pagamento);
+    if (isRetry) {
+      if (skipCupom && pedidoLocked.cupons && pedidoLocked.cupons.length > 0) {
+        // Cliente confirmou seguir sem o cupom apos receber COUPON_UNAVAILABLE.
+        const novoTotal =
+          (pedidoLocked.subtotal_produtos ?? pedidoLocked.total_pedido) +
+          (pedidoLocked.frete_calculado ?? 0);
+        await prisma.pedido.update({
+          where: { id: pedidoId },
+          data: {
+            cupons: [],
+            descontos: 0,
+            cupom_valor: null,
+            cupom_descricao: null,
+            total_pedido: novoTotal,
+          },
+        });
+        await prisma.cupomReserva
+          .delete({ where: { pedidoId } })
+          .catch(() => {
+            // sem reserva associada: ok
+          });
+        pedidoLocked = await getPedidoOr404(pedidoId);
+        if (!pedidoLocked) {
+          return NextResponse.json({ error: "Pedido nao encontrado" }, { status: 404 });
+        }
+      } else {
+        try {
+          await reReserveCupomOnRetry(pedidoId);
+        } catch (err) {
+          if (err instanceof CupomEsgotadoError) {
+            const codigo = pedidoLocked.cupons?.[0] || null;
+            // Devolver o pedido a um status de falha permite ao front retentar
+            // imediatamente (com skipCupom=true) sem ficar travado em CREATING.
+            await prisma.pedido.update({
+              where: { id: pedidoId },
+              data: { status_pagamento: "PAYMENT_FAILED" },
+            });
+            logMessage("Coupon unavailable on retry", { pedidoId, codigo });
+            return NextResponse.json(
+              {
+                error: "Cupom indisponivel",
+                code: "COUPON_UNAVAILABLE",
+                cupom: codigo,
+                novo_total:
+                  (pedidoLocked.subtotal_produtos ?? pedidoLocked.total_pedido) +
+                  (pedidoLocked.frete_calculado ?? 0),
+                total_atual: pedidoLocked.total_pedido,
+              },
+              { status: 409 },
+            );
+          }
+          throw err;
+        }
+      }
     }
 
     const customer = buildCustomerFromPedido(pedidoLocked);
@@ -336,14 +400,20 @@ export async function POST(req: NextRequest) {
     }
 
     const charge = orderResponse.charges?.[0];
+    const isDeclined = charge?.status === "DECLINED";
     return NextResponse.json({
       success: true,
       orderId: orderResponse.id,
       chargeId: charge?.id,
       paymentMethod: "credit_card",
       status: charge?.status,
-      message:
-        charge?.status === "PAID" || charge?.status === "AUTHORIZED"
+      // Quando recusado, devolve o payment_response cru para o front mapear o
+      // motivo amigavel (ver src/lib/pagbank/decline-reasons.ts) sem precisar
+      // ficar em polling esperando o webhook.
+      payment_response: isDeclined ? charge?.payment_response ?? null : undefined,
+      message: isDeclined
+        ? "Pagamento recusado pelo banco"
+        : charge?.status === "PAID" || charge?.status === "AUTHORIZED"
           ? "Pagamento aprovado!"
           : "Pagamento em analise",
     });

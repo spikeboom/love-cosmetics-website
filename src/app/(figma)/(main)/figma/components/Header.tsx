@@ -7,6 +7,8 @@ import { useCart } from "@/contexts";
 import { useAuth } from "@/contexts/AuthContext";
 import { Gift, Sparkles, LayoutGrid, BookOpen } from "lucide-react";
 import { SearchBar } from "./SearchBar";
+import RotatingAnnouncementBar from "./RotatingAnnouncementBar";
+import { useLojaConfig } from "@/contexts/LojaConfigContext";
 
 interface Produto {
   id: number;
@@ -22,6 +24,16 @@ interface HeaderProps {
 export function Header({ produtos = [] }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { qtdItemsCart } = useCart();
+  const { freteGratisValor } = useLojaConfig();
+  const ANNOUNCEMENT_MESSAGES = [
+    {
+      text: "Ciência da Amazônia na sua pele",
+      icon: "/new-home/header/eco.svg",
+    },
+    {
+      text: `🚚 Frete grátis acima de R$ ${Math.floor(freteGratisValor)}`,
+    },
+  ];
   const { isLoggedIn } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -59,8 +71,8 @@ export function Header({ produtos = [] }: HeaderProps) {
             src="/new-home/header/logo.png"
             alt="Lové Cosméticos"
             fill
+            sizes="(max-width: 1024px) 60px, 120px"
             className="object-contain"
-            priority
           />
         </Link>
 
@@ -223,14 +235,9 @@ export function Header({ produtos = [] }: HeaderProps) {
         </div>
       )}
 
-      {/* Aviso - Ciência e natureza */}
+      {/* Aviso rotativo */}
       <div className="bg-[#f8f3ed] w-full border-t-[1px] border-[#ba7900]">
-        <div className="flex gap-2 items-center justify-center py-2 lg:py-[10px] px-4 lg:px-[123px]">
-          <p className="font-cera-pro font-light text-xs lg:text-[16px] text-[#333333] text-center leading-[normal]">
-            Ciência da Amazônia na sua pele
-          </p>
-          <Image src="/new-home/header/eco.svg" alt="" width={20} height={20} className="lg:w-6 lg:h-6" />
-        </div>
+        <RotatingAnnouncementBar messages={ANNOUNCEMENT_MESSAGES} />
       </div>
     </header>
   );

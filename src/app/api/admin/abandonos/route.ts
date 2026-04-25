@@ -22,6 +22,19 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
+const TEST_EMAIL_FRAGMENTS = ["spikeboom", "adrianofne", "uconvert", "isabellejordanaa"];
+
+function excludeTestEmailsClause() {
+  return {
+    AND: TEST_EMAIL_FRAGMENTS.map((fragment) => ({
+      OR: [
+        { email: null },
+        { NOT: { email: { contains: fragment, mode: "insensitive" as const } } },
+      ],
+    })),
+  };
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -29,6 +42,7 @@ export async function GET(req: NextRequest) {
     const pageSize = Number(searchParams.get("pageSize") || 20);
     const filtro = searchParams.get("filtro") || "abandonados"; // "abandonados" | "convertidos" | "todos"
     const busca = searchParams.get("busca")?.trim() || "";
+    const incluirTestes = searchParams.get("incluirTestes") === "true";
 
     const offset = (page - 1) * pageSize;
 
@@ -46,6 +60,10 @@ export async function GET(req: NextRequest) {
         { nome: { contains: busca, mode: "insensitive" } },
         { telefone: { contains: busca.replace(/\D/g, "") } },
       ];
+    }
+
+    if (!incluirTestes) {
+      Object.assign(where, excludeTestEmailsClause());
     }
 
     const [abandonos, total] = await Promise.all([
@@ -67,14 +85,16 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Estatísticas rápidas
+    // Estatísticas rápidas (respeitam o filtro de testes)
+    const baseStatsWhere = incluirTestes ? {} : excludeTestEmailsClause();
     const [totalAbandonados, totalConvertidos, totalHoje] = await Promise.all([
-      prisma.checkoutAbandonado.count({ where: { convertido: false } }),
-      prisma.checkoutAbandonado.count({ where: { convertido: true } }),
+      prisma.checkoutAbandonado.count({ where: { convertido: false, ...baseStatsWhere } }),
+      prisma.checkoutAbandonado.count({ where: { convertido: true, ...baseStatsWhere } }),
       prisma.checkoutAbandonado.count({
         where: {
           convertido: false,
           createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+          ...baseStatsWhere,
         },
       }),
     ]);

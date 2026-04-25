@@ -7,7 +7,11 @@ import { BotaoVoltar } from "../pagamento/components/BotaoVoltar";
 import { useViaCep } from "@/hooks/checkout";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { useShipping, useCart } from "@/contexts";
+import { useCartTotals } from "@/contexts/cart-totals/CartTotalsContext";
 import { FreightOptions } from "@/components/figma-shared";
+import { FreeShippingBanner } from "@/components/figma-shared/FreeShippingBanner";
+import { useFreeShipping } from "@/hooks/useFreeShipping";
+import { isEconomicaService } from "@/core/pricing/shipping-constants";
 import { formatCEP } from "@/lib/formatters";
 import { ucAddShippingInfo, ucCheckoutStep, ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 
@@ -37,6 +41,15 @@ export function EntregaPageClient() {
   buscarCepRef.current = buscarCep;
   const viaCepFetchedCepRef = useRef<string>("");
   const firedStepEventRef = useRef(false);
+
+  let subtotalAfterCoupons = 0;
+  try {
+    const cartTotals = useCartTotals();
+    subtotalAfterCoupons = cartTotals.subtotalAfterCoupons;
+  } catch {
+    // fallback
+  }
+  const freeShipping = useFreeShipping(subtotalAfterCoupons, freight.availableServices);
 
   const [formData, setFormData] = useState<FormData>({
     cep: "",
@@ -305,8 +318,8 @@ export function EntregaPageClient() {
     const service = freight.availableServices[index];
     if (service) {
       setFormData((prev) => ({ ...prev, selectedFreightIndex: index }));
-      // Atualizar o Context com a nova selecao
-      freight.setSelectedFreight(service.price, service.deliveryTime, index);
+      const isFreeEconomica = freeShipping.qualifies && isEconomicaService(service.carrier, service.service);
+      freight.setSelectedFreight(isFreeEconomica ? 0 : service.price, service.deliveryTime, index);
     }
   };
 
@@ -526,12 +539,24 @@ export function EntregaPageClient() {
                   </span>
                 </div>
               ) : freight.availableServices.length > 0 ? (
-                <FreightOptions
-                  services={freight.availableServices}
-                  selectedIndex={formData.selectedFreightIndex}
-                  onSelect={handleSelectFreight}
-                  radioName="freight-option-checkout"
-                />
+                <>
+                  {freeShipping.economicaIndex !== null && (
+                    <FreeShippingBanner
+                      qualifies={freeShipping.qualifies}
+                      amountRemaining={freeShipping.amountRemaining}
+                      progressPercent={freeShipping.progressPercent}
+                      subtotal={subtotalAfterCoupons}
+                    />
+                  )}
+                  <FreightOptions
+                    services={freight.availableServices}
+                    selectedIndex={formData.selectedFreightIndex}
+                    onSelect={handleSelectFreight}
+                    radioName="freight-option-checkout"
+                    freeShippingQualified={freeShipping.qualifies}
+                    economicaOriginalPrice={freeShipping.economicaOriginalPrice}
+                  />
+                </>
               ) : (
                 <p className="font-cera-pro font-light text-[14px] text-[#666] py-2">
                   Nenhuma opção de frete disponível. Verifique o CEP informado.

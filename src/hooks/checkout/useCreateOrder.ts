@@ -118,9 +118,11 @@ export function useCreateOrder(): UseCreateOrderReturn {
 
         // Imagem do produto
         const imagemUrl = product.imagem ||
-          (product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
-            ? process.env.NEXT_PUBLIC_STRAPI_URL + product.carouselImagensPrincipal[0].imagem.formats.medium.url
-            : undefined);
+          (() => {
+            const u = product.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url;
+            if (!u) return undefined;
+            return u.startsWith("http") ? u : (process.env.NEXT_PUBLIC_STRAPI_URL || "") + u;
+          })();
 
         return {
           reference_id: product.documentId || id,

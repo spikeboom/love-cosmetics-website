@@ -3,6 +3,7 @@
  */
 
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
+import { isEsgotado } from "@/config/produtos-esgotados";
 
 interface TransformProdutosOptions {
   produtosStrapi: any[];
@@ -19,7 +20,8 @@ export function transformProdutosStrapi({
 
   return produtosStrapi.slice(0, limite).map((produto: any) => {
     const imagemUrl = produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.medium?.url
-      || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url;
+      || produto.carouselImagensPrincipal?.[0]?.imagem?.formats?.small?.url
+      || produto.carouselImagensPrincipal?.[0]?.imagem?.url;
 
     // Preço vindo do Strapi (já é o preço final)
     const precoStrapi = produto.preco || 0;
@@ -54,7 +56,9 @@ export function transformProdutosStrapi({
 
     const produtoTransformado: any = {
       id: produto.id?.toString(),
-      imagem: imagemUrl ? `${baseURL}${imagemUrl}` : "/new-home/produtos/produto-1.png",
+      imagem: imagemUrl
+        ? imagemUrl.startsWith("http") ? imagemUrl : `${baseURL}${imagemUrl}`
+        : "/new-home/produtos/produto-1.png",
       nome: produto.nome || "Produto",
       descricao,
       desconto,
@@ -64,6 +68,7 @@ export function transformProdutosStrapi({
       rating: produto.nota > 0 ? produto.nota : 4.5,
       // Últimas unidades apenas para Sérum e Espuma
       ultimasUnidades: /s[ée]rum|espuma/i.test(produto.nome || ''),
+      esgotado: isEsgotado(produto.slug),
       // Campos extras para o carrinho
       preco_de: precoOriginal,
       bling_number: produto.bling_number,

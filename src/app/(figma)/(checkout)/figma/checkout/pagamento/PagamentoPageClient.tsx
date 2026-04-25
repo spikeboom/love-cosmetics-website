@@ -13,6 +13,8 @@ import {
   ResumoProps,
   PagamentoSelecao,
   PagamentoPixReal,
+  PagamentoRecusadoModal,
+  CupomIndisponivelModal,
 } from "./components";
 import { formatPrice } from "@/lib/formatters";
 
@@ -60,6 +62,22 @@ export function PagamentoPageClient() {
   const [pixPreGenerated, setPixPreGenerated] = useState(false);
   const [pixOrderId, setPixOrderId] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [declineModal, setDeclineModal] = useState<{
+    paymentResponse: {
+      code?: string;
+      message?: string;
+      reference?: string;
+      raw_data?: { reason_code?: string; nsu?: string; authorization_code?: string };
+    } | null;
+    pedidoId: string;
+  } | null>(null);
+  const [couponModal, setCouponModal] = useState<{
+    cupom: string | null;
+    novoTotal?: number;
+    totalAtual?: number;
+  } | null>(null);
+  const [skipCupomOnNextAttempt, setSkipCupomOnNextAttempt] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     identificacao: null,
     entrega: null,
@@ -351,6 +369,44 @@ export function PagamentoPageClient() {
 
   const clearPaymentError = () => setPaymentError(null);
 
+  const handleDeclined = (info: {
+    paymentResponse: {
+      code?: string;
+      message?: string;
+      reference?: string;
+      raw_data?: { reason_code?: string; nsu?: string; authorization_code?: string };
+    } | null;
+    pedidoId: string;
+  }) => {
+    setDeclineModal(info);
+  };
+
+  const handleCouponUnavailable = (info: {
+    cupom: string | null;
+    novoTotal?: number;
+    totalAtual?: number;
+  }) => {
+    setCouponModal(info);
+  };
+
+  const handleTryOtherCardFromModal = () => {
+    setDeclineModal(null);
+    // Mantemos o pedido e o estado da tela; o cliente vai trocar os dados do
+    // cartao no proprio formulario aberto e clicar Finalizar compra de novo.
+  };
+
+  const handleUsePixFromModal = () => {
+    setDeclineModal(null);
+    // Reusa o pedido existente e dispara o fluxo Pix.
+    handleCriarPedidoEPagar("pix");
+  };
+
+  const handleContinueWithoutCoupon = () => {
+    setCouponModal(null);
+    setSkipCupomOnNextAttempt(true);
+    setRetryNonce((n) => n + 1);
+  };
+
   // Props compartilhadas para o resumo
   const resumoProps: ResumoProps = {
     cartArray,
@@ -469,16 +525,42 @@ export function PagamentoPageClient() {
         pedidoId={pedidoId}
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
+        onDeclined={handleDeclined}
+        onCouponUnavailable={handleCouponUnavailable}
+        skipCupomOnNextAttempt={skipCupomOnNextAttempt}
+        retryNonce={retryNonce}
       />
     );
   };
 
   return (
-    <div
-      className="transition-opacity duration-250 ease-in-out"
-      style={{ opacity: transitioning ? 0 : 1 }}
-    >
-      {renderTela()}
-    </div>
+    <>
+      <div
+        className="transition-opacity duration-250 ease-in-out"
+        style={{ opacity: transitioning ? 0 : 1 }}
+      >
+        {renderTela()}
+      </div>
+
+      {declineModal ? (
+        <PagamentoRecusadoModal
+          paymentResponse={declineModal.paymentResponse}
+          pedidoId={declineModal.pedidoId}
+          onTryOtherCard={handleTryOtherCardFromModal}
+          onUsePix={handleUsePixFromModal}
+          onClose={() => setDeclineModal(null)}
+        />
+      ) : null}
+
+      {couponModal ? (
+        <CupomIndisponivelModal
+          cupom={couponModal.cupom}
+          novoTotal={couponModal.novoTotal}
+          totalAtual={couponModal.totalAtual}
+          onContinueWithoutCoupon={handleContinueWithoutCoupon}
+          onClose={() => setCouponModal(null)}
+        />
+      ) : null}
+    </>
   );
 }

@@ -1,4 +1,6 @@
 import { fetchProdutoBySlug, fetchProdutosForDesign } from "@/modules/produto/domain";
+import { fetchDepoimentos } from "@/lib/cms/directus/depoimentos";
+import { fetchInstagramPosts } from "@/lib/cms/directus/instagram";
 import { ProductPageClient } from "./ProductPageClient";
 import { notFound } from "next/navigation";
 
@@ -38,17 +40,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
   try {
-    const { data } = await fetchProdutoBySlug({ slug });
-    const produto = data?.[0];
+    const [produtoResult, vitrineResult, depoimentos, instagramPosts] = await Promise.all([
+      fetchProdutoBySlug({ slug }),
+      fetchProdutosForDesign(),
+      fetchDepoimentos(),
+      fetchInstagramPosts(),
+    ]);
 
+    const produto = produtoResult.data?.[0];
     if (!produto) {
       notFound();
     }
 
-    // Busca produtos para a seção "Você pode gostar"
-    const { data: produtosVitrine } = await fetchProdutosForDesign();
-
-    return <ProductPageClient produto={produto} produtosVitrine={produtosVitrine} />;
+    return (
+      <ProductPageClient
+        produto={produto}
+        produtosVitrine={vitrineResult.data}
+        depoimentos={depoimentos}
+        instagramPosts={instagramPosts}
+      />
+    );
   } catch (error) {
     console.error("Erro ao buscar produto:", error);
     notFound();

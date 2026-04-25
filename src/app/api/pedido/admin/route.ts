@@ -237,6 +237,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Salvar CHEC_XXXX no pagbank_order_id para rastreabilidade
+    if (linkResult.checkoutId) {
+      await prisma.pedido.update({
+        where: { id: pedido.id },
+        data: { pagbank_order_id: linkResult.checkoutId },
+      });
+    }
+
     return NextResponse.json(
       {
         success: true,

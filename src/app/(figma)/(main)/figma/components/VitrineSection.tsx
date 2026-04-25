@@ -92,6 +92,7 @@ export function VitrineSection({
                   precoOriginal={produto.precoOriginal}
                   parcelas={produto.parcelas}
                   ultimasUnidades={produto.ultimasUnidades}
+                  esgotado={produto.esgotado}
                   slug={produto.slug}
                   ranking={showRanking ? index + 1 : undefined}
                   rating={produto.rating}
@@ -123,6 +124,7 @@ export function VitrineSection({
                 precoOriginal={produto.precoOriginal}
                 parcelas={produto.parcelas}
                 ultimasUnidades={produto.ultimasUnidades}
+                esgotado={produto.esgotado}
                 slug={produto.slug}
                 ranking={showRanking ? index + 1 : undefined}
                 rating={produto.rating}

@@ -1,8 +1,21 @@
+import dynamic from "next/dynamic";
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { ElogiouWidget } from "../components/ElogiouWidget";
-import { VitrineSection } from "../components/VitrineSection";
+import { DeployCheck } from "./DeployCheck";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
+import { fetchBannersHome } from "@/lib/cms/directus/banners";
+import { fetchInstagramPosts } from "@/lib/cms/directus/instagram";
+import { fetchDepoimentos } from "@/lib/cms/directus/depoimentos";
+
+const InstagramCarousel = dynamic(() =>
+  import("../components/InstagramCarousel").then((m) => m.InstagramCarousel),
+  { loading: () => <div className="w-full h-[360px]" /> }
+);
+const VitrineSection = dynamic(() =>
+  import("../components/VitrineSection").then((m) => m.VitrineSection),
+  { loading: () => <div className="w-full h-[480px]" /> }
+);
 
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
@@ -24,28 +37,82 @@ function ordenarProdutos(produtos: any[], ordem: string[]) {
 }
 
 export default async function FigmaHomePage() {
-  // Vitrine 1 - Comece sua rotina Lovè: Espuma, Sérum, Hidratante
-  const { data: produtosRotina } = await fetchProdutosForSearch({
-    termos: ["espuma", "sérum", "serum", "hidratante"]
-  });
-  const rotinaOrdenados = ordenarProdutos(produtosRotina || [], ["espuma", "sérum", "serum", "hidratante"]);
+  const [
+    banners,
+    instagramPosts,
+    depoimentos,
+    rotinaResult,
+    kitsResult,
+    tecnologiaResult,
+  ] = await Promise.all([
+    fetchBannersHome(),
+    fetchInstagramPosts(),
+    fetchDepoimentos(),
+    fetchProdutosForSearch({ termos: ["espuma", "sérum", "serum", "hidratante"] }),
+    fetchProdutosForSearch({ termos: ["kit"] }),
+    fetchProdutosForSearch({ termos: ["máscara", "mascara", "manteiga"] }),
+  ]);
 
-  // Vitrine 2 - Kits Lovè: Kit Uso Diário, Kit Full Lovè
-  const { data: produtosKits } = await fetchProdutosForSearch({
-    termos: ["kit"]
-  });
-  const kitsOrdenados = ordenarProdutos(produtosKits || [], ["kit uso diário", "kit full"]);
+  const rotinaOrdenados = ordenarProdutos(rotinaResult.data || [], ["espuma", "sérum", "serum", "hidratante"]);
+  const kitsOrdenados = ordenarProdutos(kitsResult.data || [], ["kit uso diário", "kit full"]);
+  const tecnologiaOrdenados = ordenarProdutos(tecnologiaResult.data || [], ["manteiga", "máscara", "mascara"]);
 
-  // Vitrine 3 - Tecnologia & Amazônia: Máscara de Argila, Manteiga Corporal
-  const { data: produtosTecnologia } = await fetchProdutosForSearch({
-    termos: ["máscara", "mascara", "manteiga"]
-  });
-  const tecnologiaOrdenados = ordenarProdutos(produtosTecnologia || [], ["máscara", "mascara", "manteiga"]);
+  const heroBanner = banners[0];
+
+  // Gera srcset/href compatíveis com o que <Image sizes="100vw" fill /> solicita,
+  // para que o preload bata na mesma URL do fetch real.
+  const nextImg = (url: string, w: number, q = 75) =>
+    `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=${q}`;
+  const mobileWidths = [640, 750, 828, 1080, 1200, 1920];
+  const desktopWidths = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+  const buildSrcSet = (url: string, widths: number[]) =>
+    widths.map((w) => `${nextImg(url, w)} ${w}w`).join(", ");
+
+  const heroMobileUrl = heroBanner?.imagemMobile || heroBanner?.imagemDesktop;
+  const heroDesktopUrl = heroBanner?.imagemDesktop;
 
   return (
     <div className="w-full max-w-[1440px] mx-auto">
+      {heroBanner && (
+        <>
+          {heroMobileUrl && (
+            <link
+              rel="preload"
+              as="image"
+              href={nextImg(heroMobileUrl, 1080)}
+              imageSrcSet={buildSrcSet(heroMobileUrl, mobileWidths)}
+              imageSizes="100vw"
+              media="(max-width: 1023px)"
+              fetchPriority="high"
+            />
+          )}
+          {heroDesktopUrl && (
+            <link
+              rel="preload"
+              as="image"
+              href={nextImg(heroDesktopUrl, 1920)}
+              imageSrcSet={buildSrcSet(heroDesktopUrl, desktopWidths)}
+              imageSizes="(min-width: 1440px) 1440px, 100vw"
+              media="(min-width: 1024px)"
+              fetchPriority="high"
+            />
+          )}
+        </>
+      )}
+      <DeployCheck />
+
       {/* Banner principal com produto em destaque */}
-      <BannerPrincipal />
+      <BannerPrincipal slides={banners} />
+
+      {/* Carrossel Instagram */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <InstagramCarousel posts={instagramPosts} />
+      </div>
+
+      {/* Avaliações Elogiou */}
+      <div className="w-full py-4">
+        <ElogiouWidget depoimentos={depoimentos} />
+      </div>
 
       {/* Vitrine 1 - Comece sua rotina Lovè */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
@@ -56,11 +123,6 @@ export default async function FigmaHomePage() {
           tipo="produto-completo"
           produtos={rotinaOrdenados}
         />
-      </div>
-
-      {/* Avaliações Elogiou */}
-      <div className="w-full py-4">
-        <ElogiouWidget />
       </div>
 
       {/* Vitrine 2 - Kits Lovè */}

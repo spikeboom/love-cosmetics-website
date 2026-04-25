@@ -8,6 +8,7 @@ import { ImageLightbox } from "./ImageLightbox";
 
 interface ProductGalleryProps {
   imagesMain: string[];
+  imagesZoom?: string[];
   imagesThumbs: string[];
   selectedImage: number;
   onSelectImage: (index: number) => void;
@@ -15,6 +16,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({
   imagesMain,
+  imagesZoom,
   imagesThumbs,
   selectedImage,
   onSelectImage,
@@ -47,6 +49,8 @@ export function ProductGallery({
                 alt={`Imagem ${index + 1}`}
                 width={94}
                 height={94}
+                sizes="94px"
+                quality={80}
                 className="w-full h-full object-cover"
               />
             </button>
@@ -59,6 +63,7 @@ export function ProductGallery({
           <div className="hidden md:block w-full h-full bg-white overflow-hidden">
             <ImageZoom
               src={imagesMain[selectedImage]}
+              zoomSrc={imagesZoom?.[selectedImage]}
               alt="Produto Love Cosmeticos"
               width={803}
               height={704}
@@ -69,7 +74,7 @@ export function ProductGallery({
           {/* Mobile: tap abre lightbox */}
           <button
             type="button"
-            className="md:hidden w-full h-full bg-white overflow-hidden"
+            className="md:hidden w-full h-full bg-white overflow-hidden relative"
             onClick={() => setLightboxOpen(true)}
             aria-label="Ampliar imagem"
           >
@@ -78,8 +83,10 @@ export function ProductGallery({
               alt="Produto Love Cosmeticos"
               width={803}
               height={704}
+              sizes="100vw"
+              quality={85}
               className="w-full h-full object-cover"
-              priority
+              priority={selectedImage === 0}
             />
             {/* Ícone de zoom - mobile */}
             <div className="absolute bottom-3 right-3 w-8 h-8 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center pointer-events-none">

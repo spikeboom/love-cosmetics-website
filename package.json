@@ -9,7 +9,15 @@
     "lint": "next lint",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "security": "bash scripts/security-scan.sh all",
+    "security:deps": "bash scripts/security-scan.sh deps",
+    "security:code": "bash scripts/security-scan.sh code",
+    "security:secrets": "bash scripts/security-scan.sh secrets",
+    "security:docker": "bash scripts/security-scan.sh docker",
+    "security:install": "bash scripts/security-install.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -48,19 +56,26 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^16.2.4",
     "@playwright/test": "^1.53.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.15",
     "@types/node": "^20",
     "@types/qs": "^6.14.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
+    "jsdom": "^29.0.2",
     "postcss": "^8",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   }
 }

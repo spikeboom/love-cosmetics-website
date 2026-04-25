@@ -26,7 +26,7 @@ export const getTipoDesconto = (cupons: any[]): string => {
   return tiposDesconto.join(' + ');
 };
 
-export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, setTotal: any, firstRun: any, handleAddCupom: any, freightValue: number = 15) => {
+export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, setTotal: any, firstRun: any, handleAddCupom: any, freightValue: number = 15, setSubtotalAfterCoupons?: any) => {
   if (!firstRun) return;
 
   const items = Object.values(cart) as any[];
@@ -41,6 +41,10 @@ export const calculateCartTotals = (cart: any, cupons: any, setDescontos: any, s
 
   const descontoAplicado = centsToReais(totals.couponDiscountCents);
   setDescontos(descontoAplicado);
+
+  if (setSubtotalAfterCoupons) {
+    setSubtotalAfterCoupons(centsToReais(totals.itemsTotalAfterCouponCents));
+  }
 
   // Persist state
   localStorage.setItem("cart", JSON.stringify(cart));

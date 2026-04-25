@@ -1,33 +1,46 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getCmsProvider } from "@/lib/cms/client";
 
-export const fetchCupom = async ({ code }: { code: string }): Promise<any> => {
-  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
-  const codigo = String(code || "").trim().toUpperCase();
-
-  if (!codigo) {
-    return { data: [] };
+async function fetchCupomRaw(codigo: string): Promise<any> {
+  if (getCmsProvider() === "directus") {
+    const { getDirectusConfig } = await import("@/lib/cms/client");
+    const config = getDirectusConfig();
+    const queryParams = `filter[codigo][_eq]=${encodeURIComponent(codigo)}&fields=codigo,multiplacar,diminuir,ativo,data_expiracao,usos_restantes&limit=1`;
+    const r = await fetch(`${config.baseUrl}/items/cupoms?${queryParams}`, {
+      headers: config.getHeaders(),
+      cache: "no-store",
+    });
+    if (!r.ok) throw new Error("Failed to fetch cupom from Directus");
+    const d = await r.json();
+    // Normalizar para o formato Strapi {data: [...]}
+    return { data: d.data || [] };
   }
 
-  const endpoint = `${baseURL}/api/cupoms?filters[codigo][$eq]=${encodeURIComponent(
-    codigo,
-  )}&populate=*`;
-
+  // Strapi
+  const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+  const endpoint = `${baseURL}/api/cupoms?filters[codigo][$eq]=${encodeURIComponent(codigo)}&populate=*`;
   const response = await fetch(endpoint, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
     },
-    cache: "no-store", // Ajuste conforme necessário: "no-store" para evitar cache em SSR
+    cache: "no-store",
   });
+  if (!response.ok) throw new Error("Failed to fetch cupom from Strapi");
+  return response.json();
+}
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch cupom by code");
+export const fetchCupom = async ({ code }: { code: string }): Promise<any> => {
+  const codigo = String(code || "").trim().toUpperCase();
+
+  if (!codigo) {
+    return { data: [] };
   }
 
-  const result = await response.json();
+  const result = await fetchCupomRaw(codigo);
   const cupom = result?.data?.[0];
 
   if (!cupom) return result;

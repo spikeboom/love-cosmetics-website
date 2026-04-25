@@ -1,4 +1,3 @@
-import { Roboto, Libre_Baskerville } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
@@ -17,70 +16,57 @@ import localFont from "next/font/local";
  */
 
 // Cera Pro SV - fonte original do Figma (carregada localmente)
+// Apenas 4 pesos efetivamente usados, em woff2 (gerados via scripts/convert-fonts.py).
+// Italic é aplicado via CSS (oblique sintético) sobre weight 400 em poucos lugares.
 export const ceraPro = localFont({
   src: [
     {
-      path: "../../../public/fonts/downloaded/CeraPro-Thin.ttf",
-      weight: "100",
-      style: "normal",
-    },
-    {
-      path: "../../../public/fonts/downloaded/CeraPro-Light.ttf",
+      path: "../../../public/fonts/downloaded/CeraPro-Light.woff2",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../../../public/fonts/downloaded/CeraPro-Regular.ttf",
+      path: "../../../public/fonts/downloaded/CeraPro-Regular.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../../public/fonts/downloaded/CeraPRO-Medium.ttf",
+      path: "../../../public/fonts/downloaded/CeraPRO-Medium.woff2",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../../../public/fonts/downloaded/Cera Pro Bold.ttf",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../../../public/fonts/downloaded/Cera Pro Bold.ttf",
+      path: "../../../public/fonts/downloaded/Cera Pro Bold.woff2",
       weight: "700",
       style: "normal",
-    },
-    {
-      path: "../../../public/fonts/downloaded/CeraPRO-Black.ttf",
-      weight: "900",
-      style: "normal",
-    },
-    {
-      path: "../../../public/fonts/cera-pro-sv/Cera Pro Regular Italic.otf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../../../public/fonts/cera-pro-sv/Cera Pro Black Italic.otf",
-      weight: "900",
-      style: "italic",
     },
   ],
   variable: "--font-cera-pro",
   display: "swap",
 });
 
-// Roboto - para elementos Material Design
-export const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["500"],
+// Roboto - para elementos Material Design (baixado localmente para evitar dependência de rede no build)
+export const roboto = localFont({
+  src: [
+    {
+      path: "../../../public/fonts/downloaded/Roboto-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+  ],
   variable: "--font-roboto",
   display: "swap",
 });
 
-// Libre Baskerville - substitui Times para títulos grandes
-export const libreBaskerville = Libre_Baskerville({
-  subsets: ["latin"],
-  weight: ["700"],
+// Libre Baskerville - substitui Times para títulos grandes (baixado localmente)
+export const libreBaskerville = localFont({
+  src: [
+    {
+      path: "../../../public/fonts/downloaded/LibreBaskerville-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-libre-baskerville",
   display: "swap",
 });

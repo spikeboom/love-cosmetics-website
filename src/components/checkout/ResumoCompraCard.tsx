@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { formatPrice } from '@/lib/formatters';
 import { calculateCartResumoCompra, calculatePedidoResumoCompra } from '@/core/pricing/resumo-compra';
 import { getTipoDesconto } from '@/utils/cart-calculations';
@@ -459,11 +460,16 @@ export function ResumoCompraCard({
               <div key={i} className="flex items-start gap-3">
                 {/* Imagem */}
                 {(item.image_url || item.imagem) && (
-                  <img
-                    src={item.image_url || item.imagem}
-                    alt={item.name || item.nome}
-                    className="w-12 h-12 object-cover rounded-md flex-shrink-0"
-                  />
+                  <div className="relative w-12 h-12 flex-shrink-0 rounded-md overflow-hidden">
+                    <Image
+                      src={item.image_url || item.imagem}
+                      alt={item.name || item.nome}
+                      fill
+                      sizes="48px"
+                      quality={80}
+                      className="object-cover"
+                    />
+                  </div>
                 )}
                 <div className="flex flex-1 flex-col gap-1 min-w-0">
                   <span className="font-cera-pro font-light text-[14px] lg:text-[16px] text-[#111]">

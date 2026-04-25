@@ -1,13 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import { YouMayLikeSection } from "../../components/YouMayLikeSection";
-import { CertificadosSection } from "../../components/CertificadosSection";
 import { ElogiouWidget } from "../../components/ElogiouWidget";
 import { ShippingCalculator } from "../../components/ShippingCalculator";
+
+const YouMayLikeSection = dynamic(
+  () => import("../../components/YouMayLikeSection").then((m) => m.YouMayLikeSection),
+  { loading: () => <div className="w-full h-[480px]" /> },
+);
+const InstagramCarousel = dynamic(
+  () => import("../../components/InstagramCarousel").then((m) => m.InstagramCarousel),
+  { loading: () => <div className="w-full h-[360px]" /> },
+);
+const CertificadosSection = dynamic(
+  () => import("../../components/CertificadosSection").then((m) => m.CertificadosSection),
+  { loading: () => <div className="w-full h-[200px]" /> },
+);
 import { ProductActionButtons } from "../../components/ProductActionButtons";
 import { FloatingProductCTA } from "../../components/FloatingProductCTA";
 import { ProductGallery, ProductFilters, useShareProduct } from "./components";
@@ -15,18 +27,24 @@ import { calculateProductPrices } from "@/utils/calculate-prices";
 import { useCart } from "@/contexts";
 import { useNotifications } from "@/core/notifications/NotificationContext";
 import { ucAddToCart, ucViewItem } from "../../../../_tracking/uc-ecommerce";
+import { isEsgotado } from "@/config/produtos-esgotados";
+import type { Depoimento } from "@/lib/cms/directus/depoimentos";
+import type { InstagramPost } from "@/lib/cms/directus/instagram";
 
 interface ProductPageClientProps {
   produto: any;
   produtosVitrine: any[];
+  depoimentos: Depoimento[];
+  instagramPosts: InstagramPost[];
 }
 
-export function ProductPageClient({ produto, produtosVitrine }: ProductPageClientProps) {
+export function ProductPageClient({ produto, produtosVitrine, depoimentos, instagramPosts }: ProductPageClientProps) {
   const baseURL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
   const router = useRouter();
   const { addProductToCart } = useCart();
   const { enqueueSnackbar } = useNotifications();
   const { handleShare } = useShareProduct({ productName: produto?.nome || "Produto" });
+  const esgotado = isEsgotado(produto?.slug);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
@@ -58,7 +76,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
 
   const productThumb = produto?.carouselImagensPrincipal?.[0]?.imagem?.formats?.thumbnail?.url
     || produto?.carouselImagensPrincipal?.[0]?.imagem?.url;
-  const productImageUrl = productThumb ? `${baseURL}${productThumb}` : "/new-home/produtos/produto-pdp.png";
+  const productImageUrl = productThumb ? (productThumb.startsWith("http") ? productThumb : `${baseURL}${productThumb}`) : "/new-home/produtos/produto-pdp.png";
 
   const showAddedToCartToast = () => {
     enqueueSnackbar("", {
@@ -118,7 +136,17 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         const imgUrl = item?.imagem?.formats?.large?.url ||
                        item?.imagem?.formats?.xlarge?.url ||
                        item?.imagem?.url;
-        return imgUrl ? `${baseURL}${imgUrl}` : "/new-home/produtos/produto-pdp.png";
+        return imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${baseURL}${imgUrl}`) : "/new-home/produtos/produto-pdp.png";
+      })
+    : Array(5).fill("/new-home/produtos/produto-pdp.png");
+
+  // URLs de alta resolução para zoom (xlarge > large > url original)
+  const productImagesZoom = produto?.carouselImagensPrincipal?.length > 0
+    ? produto.carouselImagensPrincipal.map((item: any) => {
+        const imgUrl = item?.imagem?.formats?.xlarge?.url ||
+                       item?.imagem?.formats?.large?.url ||
+                       item?.imagem?.url;
+        return imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${baseURL}${imgUrl}`) : "/new-home/produtos/produto-pdp.png";
       })
     : Array(5).fill("/new-home/produtos/produto-pdp.png");
 
@@ -127,7 +155,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         const imgUrl = item?.imagem?.formats?.thumbnail?.url ||
                        item?.imagem?.formats?.small?.url ||
                        item?.imagem?.url;
-        return imgUrl ? `${baseURL}${imgUrl}` : "/new-home/produtos/produto-pdp.png";
+        return imgUrl ? (imgUrl.startsWith("http") ? imgUrl : `${baseURL}${imgUrl}`) : "/new-home/produtos/produto-pdp.png";
       })
     : Array(5).fill("/new-home/produtos/produto-pdp.png");
 
@@ -140,6 +168,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
           <div className="flex flex-col gap-[24px] items-start w-full md:w-[921px]">
             <ProductGallery
               imagesMain={productImagesMain}
+              imagesZoom={productImagesZoom}
               imagesThumbs={productImagesThumbs}
               selectedImage={selectedImage}
               onSelectImage={setSelectedImage}
@@ -235,11 +264,12 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
                 onBuy={handleBuy}
                 onShare={handleShare}
                 onAddToCart={handleAddToCart}
+                esgotado={esgotado}
               />
 
               {/* Avaliações Elogiou */}
               <div className="w-full overflow-hidden mx-[-12px]">
-                <ElogiouWidget />
+                <ElogiouWidget depoimentos={depoimentos} />
               </div>
 
               {/* Mobile Filters */}
@@ -257,6 +287,11 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
       {/* Voce pode gostar Section */}
       <YouMayLikeSection produtos={produtosVitrine} />
 
+      {/* Carrossel Instagram */}
+      <div className="w-screen -mx-[calc((100vw-100%)/2)]">
+        <InstagramCarousel posts={instagramPosts} />
+      </div>
+
       {/* Cards de certificados */}
       <div className="w-screen -mx-[calc((100vw-100%)/2)]">
         <CertificadosSection />
@@ -269,6 +304,7 @@ export function ProductPageClient({ produto, produtosVitrine }: ProductPageClien
         desconto={priceInfo.desconto ?? undefined}
         parcelas={priceInfo.parcelas}
         onBuy={handleBuy}
+        esgotado={esgotado}
       />
     </div>
   );
@@ -351,8 +387,8 @@ function ProductDescription({ produto }: { produto: any }) {
 
           {produto?.listaDescricao?.length > 0 && (
             <ul className="list-disc list-inside space-y-[4px]">
-              {produto.listaDescricao.map((item: any) => (
-                <li key={item.id}>{item.texto}</li>
+              {produto.listaDescricao.map((item: any, idx: number) => (
+                <li key={item.id ?? idx}>{item.descricao ?? item.texto}</li>
               ))}
             </ul>
           )}

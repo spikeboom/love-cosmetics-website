@@ -17,10 +17,12 @@ interface CardProdutoProps {
   parcelas?: string;
   rating?: number;
   ultimasUnidades?: boolean;
+  esgotado?: boolean;
   tipo?: "mini-banner" | "produto-completo";
   ranking?: number;
   fullWidth?: boolean;
   slug?: string;
+  imageSizes?: string;
   // Campos extras para o carrinho
   preco_de?: number;
   bling_number?: string;
@@ -41,10 +43,12 @@ export function CardProduto({
   parcelas,
   rating = 3.5,
   ultimasUnidades = false,
+  esgotado = false,
   tipo = "produto-completo",
   ranking,
   fullWidth = false,
   slug,
+  imageSizes,
   preco_de,
   bling_number,
   peso_gramas,
@@ -52,12 +56,19 @@ export function CardProduto({
   largura,
   comprimento,
 }: CardProdutoProps) {
+  // vitrine fixa: 230px no desktop; grid fullWidth: ocupa 1/3 do container (~460px) ou 1/2 em sm
+  const defaultSizes = fullWidth
+    ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+    : "(max-width: 1024px) 77vw, 230px";
+  const resolvedSizes = imageSizes ?? defaultSizes;
   const { addProductToCart } = useCart();
   const { notify, enqueueSnackbar } = useNotifications();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (esgotado) return;
 
     if (!id) {
       notify("Erro ao adicionar produto", { variant: "error" });
@@ -105,6 +116,8 @@ export function CardProduto({
           src={imagem}
           alt={nome}
           fill
+          sizes={resolvedSizes}
+          quality={82}
           className="object-cover rounded-t-2xl"
         />
       </div>
@@ -138,8 +151,34 @@ export function CardProduto({
             src={imagem}
             alt={nome}
             fill
+            sizes={resolvedSizes}
+            quality={82}
             className="object-cover pointer-events-none"
           />
+
+          {/* Overlay esgotado */}
+          {esgotado && (
+            <div className="absolute inset-0 bg-black/40 rounded-t-[16px] z-10 flex flex-col items-center justify-center gap-[2px]">
+              <p className="font-cera-pro font-bold text-white text-[18px] leading-[1.2] text-center">
+                Indisponível<br />no momento
+              </p>
+              <p className="font-cera-pro font-medium text-white/80 text-[10px] uppercase tracking-[0.05em] text-center leading-[1.4]">
+                Alta demanda — Reposição em breve
+              </p>
+            </div>
+          )}
+
+          {/* Badge esgotado - canto superior esquerdo */}
+          {esgotado && (
+            <div className="absolute top-[8px] left-[8px] z-20 bg-[#254333] text-white font-cera-pro font-bold text-[11px] uppercase tracking-wider px-[10px] py-[5px] rounded-full flex items-center gap-[5px]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              ESGOTADO
+            </div>
+          )}
         </div>
 
         {/* Badge de ranking para mais vendidos */}
@@ -155,8 +194,8 @@ export function CardProduto({
           </div>
         )}
 
-        {/* Tag de últimas unidades */}
-        {ultimasUnidades && (
+        {/* Tag últimas unidades */}
+        {!esgotado && ultimasUnidades ? (
           <div className="absolute content-stretch flex flex-col gap-[10px] items-center left-1/2 bottom-[8px] w-[90%] max-w-[214px] translate-x-[-50%]">
             <div className="bg-[#f8f3ed] box-border content-stretch flex gap-[4px] items-center justify-center px-[16px] py-[4px] relative rounded-[4px] shrink-0 w-full">
               <div className="relative shrink-0 size-[16px]">
@@ -173,7 +212,7 @@ export function CardProduto({
               </p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Conteúdo */}
@@ -245,19 +284,33 @@ export function CardProduto({
           </div>
         </div>
 
-        {/* Botão Comprar */}
+        {/* Botão Comprar / Esgotado */}
         {id && (
-          <button
-            onClick={handleAddToCart}
-            className="w-full py-[12px] px-[16px] bg-[#254333] hover:bg-[#1a3025] text-white font-cera-pro font-medium text-[14px] rounded-[8px] transition-all duration-200 flex items-center justify-center gap-[8px]"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Comprar
-          </button>
+          esgotado ? (
+            <button
+              disabled
+              className="w-full py-[12px] px-[16px] bg-[#d4d4d4] text-[#666666] font-cera-pro font-medium text-[14px] rounded-[8px] cursor-not-allowed flex items-center justify-center gap-[8px]"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              ESGOTADO
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="w-full py-[12px] px-[16px] bg-[#254333] hover:bg-[#1a3025] text-white font-cera-pro font-medium text-[14px] rounded-[8px] transition-all duration-200 flex items-center justify-center gap-[8px]"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Comprar
+            </button>
+          )
         )}
       </div>
     </div>

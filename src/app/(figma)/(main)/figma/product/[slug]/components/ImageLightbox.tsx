@@ -23,6 +23,7 @@ export function ImageLightbox({
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Refs para gesture tracking
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +60,7 @@ export function ImageLightbox({
   const goTo = useCallback(
     (idx: number) => {
       resetTransform();
+      setImageLoaded(false);
       setCurrentIndex(idx);
     },
     [resetTransform],
@@ -339,14 +341,24 @@ export function ImageLightbox({
             transformOrigin: "center center",
           }}
         >
+          {/* Spinner enquanto a imagem do lightbox carrega */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
+
           <Image
             src={images[currentIndex]}
             alt={`Imagem ${currentIndex + 1}`}
             width={1200}
             height={1200}
-            className="w-[100vw] md:max-w-[90vw] max-h-[85vh] md:w-auto h-auto object-contain pointer-events-none"
+            sizes="(max-width: 768px) 100vw, 90vw"
+            quality={88}
+            className={`w-[100vw] md:max-w-[90vw] max-h-[85vh] md:w-auto h-auto object-contain pointer-events-none transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
             draggable={false}
             priority
+            onLoad={() => setImageLoaded(true)}
           />
         </div>
       </div>

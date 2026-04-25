@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+
+const TEST_EMAIL_FRAGMENTS = ["spikeboom", "adrianofne", "uconvert", "isabellejordanaa"];
+
+function excludeTestEmailsClause() {
+  return {
+    AND: TEST_EMAIL_FRAGMENTS.map((fragment) => ({
+      OR: [
+        { email: null },
+        { NOT: { email: { contains: fragment, mode: "insensitive" as const } } },
+      ],
+    })),
+  };
+}
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -29,6 +43,7 @@ export async function GET(req: NextRequest) {
     const pageSize = Number(searchParams.get("pageSize") || 20);
     const busca = searchParams.get("busca")?.trim() || "";
     const estado = searchParams.get("estado")?.trim() || "";
+    const incluirTestes = searchParams.get("incluirTestes") === "true";
 
     const offset = (page - 1) * pageSize;
 
@@ -47,6 +62,10 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    if (!incluirTestes) {
+      Object.assign(where, excludeTestEmailsClause());
+    }
+
     const [consultas, total] = await Promise.all([
       prisma.consultaCep.findMany({
         where,
@@ -57,19 +76,31 @@ export async function GET(req: NextRequest) {
       prisma.consultaCep.count({ where }),
     ]);
 
-    // Estatísticas
+    // Estatísticas (respeitam o filtro de testes)
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
+    const baseStatsWhere = incluirTestes ? {} : excludeTestEmailsClause();
+
+    const testEmailFilterSql = incluirTestes
+      ? Prisma.empty
+      : Prisma.sql`AND (${Prisma.join(
+          TEST_EMAIL_FRAGMENTS.map(
+            (f) => Prisma.sql`(email IS NULL OR email NOT ILIKE ${"%" + f + "%"})`,
+          ),
+          " AND ",
+        )})`;
+
     const [totalConsultas, consultasHoje, topEstadosRaw] = await Promise.all([
-      prisma.consultaCep.count(),
+      prisma.consultaCep.count({ where: baseStatsWhere }),
       prisma.consultaCep.count({
-        where: { createdAt: { gte: hoje } },
+        where: { createdAt: { gte: hoje }, ...baseStatsWhere },
       }),
       prisma.$queryRaw`
         SELECT estado, COUNT(*)::int as total
         FROM "ConsultaCep"
         WHERE estado IS NOT NULL
+        ${testEmailFilterSql}
         GROUP BY estado
         ORDER BY total DESC
         LIMIT 5
@@ -79,6 +110,7 @@ export async function GET(req: NextRequest) {
     // CEPs únicos
     const cepsUnicosResult = await prisma.$queryRaw`
       SELECT COUNT(DISTINCT cep)::int as total FROM "ConsultaCep"
+      WHERE 1=1 ${testEmailFilterSql}
     ` as Array<{ total: number }>;
     const cepsUnicos = cepsUnicosResult[0]?.total || 0;
 

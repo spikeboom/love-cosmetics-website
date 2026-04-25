@@ -30,6 +30,7 @@ export const CartTotalsProvider = ({
   const [total, setTotal] = useState(0);
   const [descontos, setDescontos] = useState(0);
   const [subtotalOriginal, setSubtotalOriginal] = useState(0);
+  const [subtotalAfterCoupons, setSubtotalAfterCoupons] = useState(0);
   const [firstRun, setFirstRun] = useState(false);
 
   const { notify } = useNotifications();
@@ -42,7 +43,7 @@ export const CartTotalsProvider = ({
 
   // Calcular totais quando cart, cupons ou frete mudam
   useEffect(() => {
-    calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom, freightValue);
+    calculateCartTotals(cart, cupons, setDescontos, setTotal, firstRun, handleAddCupom, freightValue, setSubtotalAfterCoupons);
   }, [cart, cupons, freightValue, firstRun, handleAddCupom]);
 
   // Calcular subtotal original (soma dos preco_de riscados)
@@ -127,6 +128,7 @@ export const CartTotalsProvider = ({
     total,
     descontos,
     subtotalOriginal,
+    subtotalAfterCoupons,
     isValidating: cartValidation.isValidating,
     isValid: cartValidation.isValid,
     produtosDesatualizados: cartValidation.produtosDesatualizados,
