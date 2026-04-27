@@ -42,12 +42,15 @@ jobs:
           fi
 
       - name: Write .env file from secret
+        env:
+          ENV_MASTER: ${{ secrets.ENV_MASTER }}
+          ENV_DEV: ${{ secrets.ENV_DEV }}
         run: |
           if [ "${{ steps.env.outputs.target }}" = "prod" ]; then
-            printf '%s' "${{ secrets.ENV_MASTER }}" > .env.master
+            printf '%s' "$ENV_MASTER" > .env.master
             cp .env.master .env
           else
-            printf '%s' "${{ secrets.ENV_DEV }}" > .env.dev
+            printf '%s' "$ENV_DEV" > .env.dev
             cp .env.dev .env
           fi
 
