@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./_global/globals.css";
 import { GoogleTagManager } from "@next/third-parties/google";
 import MyLogFrontError from "@/components/common/LogErrorFront/log-error-front";
+import { BuildVersionGuard } from "@/components/common/BuildVersionGuard";
 import { SnackbarProviderComponent } from "@/components/common/Context/snack-provider";
 import { UIContextProvider } from "@/core/ui/UIContext";
 import { NotificationProvider } from "@/core/notifications/NotificationContext";
@@ -74,6 +75,7 @@ export default function RootLayout({
           </NotificationProvider>
         </SnackbarProviderComponent>
         <MyLogFrontError />
+        <BuildVersionGuard />
       </body>
     </html>
   );
