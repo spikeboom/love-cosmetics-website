@@ -94,36 +94,26 @@ export const CartTotalsProvider = ({
       const novoPreco = produtoAtualizado.precoAtual;
       const precoMudou = Math.abs(cartItem.preco - novoPreco) > 0.01;
 
-      // Detectar diferença de peso/dimensões (qualquer valor != ou ausente vira atualização)
-      const dimsAtuais = {
-        peso_gramas: cartItem.peso_gramas,
-        altura: cartItem.altura,
-        largura: cartItem.largura,
-        comprimento: cartItem.comprimento,
-      };
-      const dimsNovas = {
-        peso_gramas: produtoAtualizado.peso_gramas,
-        altura: produtoAtualizado.altura,
-        largura: produtoAtualizado.largura,
-        comprimento: produtoAtualizado.comprimento,
-      };
-      const dimsMudaram =
-        dimsNovas.peso_gramas !== undefined && (
-          dimsAtuais.peso_gramas !== dimsNovas.peso_gramas ||
-          dimsAtuais.altura !== dimsNovas.altura ||
-          dimsAtuais.largura !== dimsNovas.largura ||
-          dimsAtuais.comprimento !== dimsNovas.comprimento
-        );
+      // Cada campo de frete é avaliado independentemente: se o CMS define um
+      // valor, atualiza; se vier undefined, preserva o que está no cart.
+      const updates: Partial<typeof cartItem> = {};
+      let dimsMudaram = false;
+      const fields = ["peso_gramas", "altura", "largura", "comprimento"] as const;
+      for (const f of fields) {
+        const novo = (produtoAtualizado as any)[f];
+        if (novo === undefined) continue;
+        if ((cartItem as any)[f] !== novo) {
+          (updates as any)[f] = novo;
+          dimsMudaram = true;
+        }
+      }
 
       if (precoMudou || dimsMudaram) {
         newCart[produtoAtualizado.id] = {
           ...cartItem,
           preco: novoPreco,
           documentId: produtoAtualizado.documentId,
-          ...(dimsNovas.peso_gramas !== undefined && { peso_gramas: dimsNovas.peso_gramas }),
-          ...(dimsNovas.altura !== undefined && { altura: dimsNovas.altura }),
-          ...(dimsNovas.largura !== undefined && { largura: dimsNovas.largura }),
-          ...(dimsNovas.comprimento !== undefined && { comprimento: dimsNovas.comprimento }),
+          ...updates,
         };
         if (precoMudou) houveAtualizacaoPreco = true;
         if (dimsMudaram) houveAtualizacaoDimensoes = true;
