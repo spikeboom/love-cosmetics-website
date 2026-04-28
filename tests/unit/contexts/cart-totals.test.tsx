@@ -467,6 +467,181 @@ describe("CartTotalsContext — auto-refresh ao hidratar", () => {
   });
 });
 
+// ─── repro do fluxo manual em /cart com peso editado no Directus ────────────
+describe("CartTotalsContext — fluxo: peso do kit editado no Directus", () => {
+  // Reproduz a sequência relatada: kit no cart com peso bom → admin zera no
+  // Directus → hard refresh em /cart sincroniza o cart com o CMS → admin
+  // restaura o peso → próxima sincronização devolve o valor correto.
+  // O teste fixa o contrato: o que o CMS retornar no momento do refresh é
+  // EXATAMENTE o que fica no cart, sem state grudado entre ciclos.
+  it("peso 678 → CMS=0 → CMS=678: cart espelha o último valor do CMS", async () => {
+    // Cart inicial: kit com peso correto (já estava no carrinho).
+    const cartState: Record<string, CartItem> = {
+      "25": { ...kitItem, peso_gramas: 678, altura: 22, largura: 12, comprimento: 7 },
+    };
+
+    // setCart simulando o useState real: aplica o updater e atualiza o ref.
+    const setCart = vi.fn((updater: any) => {
+      const next = typeof updater === "function" ? updater(cartState) : updater;
+      for (const k of Object.keys(cartState)) delete cartState[k];
+      Object.assign(cartState, next);
+    });
+
+    // Wrapper que sempre lê o cart mais recente do ref (simula re-render do React).
+    function LiveWrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <CartTotalsProvider
+          cart={cartState as any}
+          setCart={setCart as any}
+          cupons={[]}
+          setCupons={vi.fn() as any}
+          freightValue={0}
+          handleAddCupom={async () => {}}
+        >
+          {children}
+        </CartTotalsProvider>
+      );
+    }
+
+    const { result, rerender } = renderHook(() => useCartTotals(), { wrapper: LiveWrapper });
+
+    // Etapa 1: admin zera o peso no Directus. Hard refresh → auto-refresh
+    // do CartTotalsProvider chama validateCart, que devolve peso=0.
+    validateCart.mockResolvedValueOnce({
+      atualizado: true,
+      produtosDesatualizados: [],
+      cuponsDesatualizados: [],
+      produtosAtualizados: [
+        {
+          id: "25",
+          documentId: "kit-doc",
+          nome: "Kit Completo",
+          precoAtual: kitItem.preco,
+          precoComCupom: kitItem.preco,
+          peso_gramas: 0,
+          altura: 0,
+          largura: 0,
+          comprimento: 0,
+        },
+      ],
+    });
+
+    await act(async () => {
+      await result.current.refreshCartPrices({ silent: true });
+    });
+
+    expect(cartState["25"].peso_gramas).toBe(0);
+    expect(cartState["25"].altura).toBe(0);
+    expect(cartState["25"].largura).toBe(0);
+    expect(cartState["25"].comprimento).toBe(0);
+    expect(cartState["25"].bling_number).toBe(9999); // bling preservado
+
+    // Etapa 2 (ação do usuário fora do contexto): remove e re-adiciona da home.
+    // Após re-adicionar, o cart guardaria peso_gramas=0 (valor atual do CMS na
+    // listagem). Simulamos isso direto:
+    cartState["25"] = { ...kitItem, peso_gramas: 0, altura: 0, largura: 0, comprimento: 0 };
+    rerender();
+
+    // Etapa 3: admin restaura o peso no Directus para 678. Hard refresh em
+    // /cart → auto-refresh → validateCart agora retorna o valor correto.
+    validateCart.mockResolvedValueOnce({
+      atualizado: true,
+      produtosDesatualizados: [],
+      cuponsDesatualizados: [],
+      produtosAtualizados: [
+        {
+          id: "25",
+          documentId: "kit-doc",
+          nome: "Kit Completo",
+          precoAtual: kitItem.preco,
+          precoComCupom: kitItem.preco,
+          peso_gramas: 678,
+          altura: 22,
+          largura: 12,
+          comprimento: 7,
+        },
+      ],
+    });
+
+    await act(async () => {
+      await result.current.refreshCartPrices({ silent: true });
+    });
+
+    // Estado final esperado: cart espelha o CMS atual. Se isso falha aqui, o
+    // bug está no provider; se passa, o "frete continua quebrado" observado em
+    // produção vem de outra camada (cache de produto na home, cotação não
+    // re-disparada no ShippingCalculator, ou erro grudado em useShipping).
+    expect(cartState["25"].peso_gramas).toBe(678);
+    expect(cartState["25"].altura).toBe(22);
+    expect(cartState["25"].largura).toBe(12);
+    expect(cartState["25"].comprimento).toBe(7);
+    expect(cartState["25"].bling_number).toBe(9999);
+  });
+
+  it("dois ciclos consecutivos com peso=0 não acumulam state stale", async () => {
+    // Defesa contra regressão: se uma versão futura introduzir merge bizarro
+    // (ex.: preservar valor antigo quando novo é 0 por confundir 0 com falsy),
+    // este teste pega.
+    const cartState: Record<string, CartItem> = {
+      "25": { ...kitItem, peso_gramas: 678, altura: 22, largura: 12, comprimento: 7 },
+    };
+    const setCart = vi.fn((updater: any) => {
+      const next = typeof updater === "function" ? updater(cartState) : updater;
+      for (const k of Object.keys(cartState)) delete cartState[k];
+      Object.assign(cartState, next);
+    });
+
+    function LiveWrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <CartTotalsProvider
+          cart={cartState as any}
+          setCart={setCart as any}
+          cupons={[]}
+          setCupons={vi.fn() as any}
+          freightValue={0}
+          handleAddCupom={async () => {}}
+        >
+          {children}
+        </CartTotalsProvider>
+      );
+    }
+
+    const { result } = renderHook(() => useCartTotals(), { wrapper: LiveWrapper });
+
+    const respostaCmsZerado = {
+      atualizado: true,
+      produtosDesatualizados: [],
+      cuponsDesatualizados: [],
+      produtosAtualizados: [
+        {
+          id: "25",
+          documentId: "kit-doc",
+          nome: "Kit Completo",
+          precoAtual: kitItem.preco,
+          precoComCupom: kitItem.preco,
+          peso_gramas: 0,
+          altura: 0,
+          largura: 0,
+          comprimento: 0,
+        },
+      ],
+    };
+    validateCart.mockResolvedValue(respostaCmsZerado);
+
+    await act(async () => {
+      await result.current.refreshCartPrices({ silent: true });
+    });
+    expect(cartState["25"].peso_gramas).toBe(0);
+
+    await act(async () => {
+      await result.current.refreshCartPrices({ silent: true });
+    });
+    // Um segundo refresh com a mesma resposta não pode "ressuscitar" o 678.
+    expect(cartState["25"].peso_gramas).toBe(0);
+    expect(cartState["25"].altura).toBe(0);
+  });
+});
+
 // ─── concorrência: cart muda durante a hidratação ────────────────────────────
 describe("CartTotalsContext — concorrência", () => {
   it("auto-refresh roda só uma vez mesmo se cart for atualizado durante a chamada", async () => {
