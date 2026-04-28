@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { calculateFreightFrenet } from "@/lib/freight/frenet";
+import { logError, logWarn } from "@/utils/logMessage";
 
 export const runtime = "nodejs";
 
@@ -24,18 +25,18 @@ export async function POST(req: NextRequest) {
   try {
     const parsed = quoteSchema.safeParse(await req.json());
     if (!parsed.success) {
-      console.warn("[checkout_issue]", JSON.stringify({
+      logWarn("checkout_issue", {
         step: "entrega",
         kind: "freight_quote_invalid_payload",
         severity: "warning",
         issues: parsed.error.issues,
-      }));
+      });
       return NextResponse.json({ success: false, error: "Dados de frete invalidos" }, { status: 400 });
     }
 
     const result = await calculateFreightFrenet(parsed.data.cep, parsed.data.items);
     if (!result.success) {
-      console.warn("[checkout_issue]", {
+      logWarn("checkout_issue", {
         step: "entrega",
         kind: "freight_quote_failed",
         severity: "warning",
@@ -46,11 +47,11 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json(result, { status: result.success ? 200 : 400 });
   } catch (error) {
-    console.error("[checkout_issue]", {
+    logError("checkout_issue", {
       step: "entrega",
       kind: "freight_quote_exception",
       severity: "error",
-      error,
+      error: error instanceof Error ? error.message : String(error),
     });
     return NextResponse.json(
       { success: false, error: "Erro ao calcular frete. Por favor, tente novamente." },
