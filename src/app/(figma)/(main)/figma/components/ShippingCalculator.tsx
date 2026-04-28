@@ -83,11 +83,13 @@ export function ShippingCalculator({
     return [];
   };
 
-  // Chave estável: só muda quando itens, quantidades ou preços mudam
-  // Flags de cupom (cupom_applied, tag_desconto_*) não afetam o frete
+  // Chave estável: muda quando itens, quantidades, preços OU dimensões/peso mudam.
+  // Flags de cupom (cupom_applied, tag_desconto_*) não afetam o frete e ficam de fora.
+  // Inclui peso/dim porque o auto-refresh do CartTotalsProvider corrige esses campos
+  // depois que o cart hidrata do localStorage — e o frete precisa recalcular.
   const cartFreightKey = useMemo(() => {
     const items = Object.entries(cart).map(([id, item]: [string, any]) =>
-      `${id}:${item.quantity}:${item.preco}`
+      `${id}:${item.quantity}:${item.preco}:${item.peso_gramas ?? ''}:${item.altura ?? ''}:${item.largura ?? ''}:${item.comprimento ?? ''}`
     );
     items.sort();
     return items.join('|');
@@ -104,8 +106,12 @@ export function ShippingCalculator({
       return;
     }
 
-    // Se tem CEP e já calculou antes, recalcular silenciosamente
-    if (cep && hasCalculated) {
+    // Recalcular silenciosamente quando o cart muda. Inclui o caso de cotação
+    // anterior com erro (hasCalculated=false, error setado) — resolve o cenário
+    // onde o auto-refresh do CartTotalsProvider corrige o cart depois de uma
+    // cotação automática feita com cart velho. Sem hasCalculated nem error,
+    // o outro useEffect [cep, isCartHydrated] já cuida da cotação inicial.
+    if (cep && (hasCalculated || error)) {
       const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length === 8) {
         console.log(`📦 [SHIPPING-CALC] Recalculando frete — cartFreightKey mudou, CEP: ${cleanCep}`);
