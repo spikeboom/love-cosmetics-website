@@ -2,7 +2,6 @@ import dynamic from "next/dynamic";
 import { BannerPrincipal } from "../components/BannerPrincipal";
 import { CertificadosSection } from "../components/CertificadosSection";
 import { ElogiouWidget } from "../components/ElogiouWidget";
-import { DeployCheck } from "./DeployCheck";
 import { fetchProdutosForSearch } from "@/modules/produto/domain";
 import { fetchBannersHome } from "@/lib/cms/directus/banners";
 import { fetchInstagramPosts } from "@/lib/cms/directus/instagram";
@@ -99,8 +98,6 @@ export default async function FigmaHomePage() {
           )}
         </>
       )}
-      <DeployCheck />
-
       {/* Banner principal com produto em destaque */}
       <BannerPrincipal slides={banners} />
 
