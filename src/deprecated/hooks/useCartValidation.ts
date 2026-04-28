@@ -24,6 +24,10 @@ interface ProdutoAtualizado {
   nome: string;
   precoAtual: number;
   precoComCupom: number;
+  peso_gramas?: number;
+  altura?: number;
+  largura?: number;
+  comprimento?: number;
 }
 
 interface ValidationResult {

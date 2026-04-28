@@ -3,6 +3,7 @@ export interface CartTotalsState {
   descontos: number;
   subtotalOriginal: number; // Soma dos preco_de (preços originais riscados)
   subtotalAfterCoupons: number; // Total dos itens após cupons, SEM frete
+  isCartHydrated: boolean; // true após o auto-refresh inicial concluir (sucesso ou falha)
 }
 
 export interface CartValidationState {
@@ -16,7 +17,7 @@ export interface CartValidationState {
 }
 
 export interface CartTotalsOperations {
-  refreshCartPrices: () => Promise<boolean>;
+  refreshCartPrices: (options?: { silent?: boolean }) => Promise<boolean>;
   validateCart: (cart: Record<string, any>, cupons: any[]) => Promise<any>;
   clearValidation: () => void;
 }

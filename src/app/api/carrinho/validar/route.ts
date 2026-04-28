@@ -99,6 +99,10 @@ export async function POST(req: NextRequest) {
       nome: string;
       precoAtual: number;
       precoComCupom: number;
+      peso_gramas?: number;
+      altura?: number;
+      largura?: number;
+      comprimento?: number;
     }> = [];
 
     for (const item of items) {
@@ -141,6 +145,10 @@ export async function POST(req: NextRequest) {
         nome: produtoReal.nome,
         precoAtual,
         precoComCupom: precoAtual, // mantém compatibilidade
+        peso_gramas: produtoReal.peso_gramas,
+        altura: produtoReal.altura,
+        largura: produtoReal.largura,
+        comprimento: produtoReal.comprimento,
       });
     }
 

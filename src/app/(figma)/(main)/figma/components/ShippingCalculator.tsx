@@ -56,9 +56,11 @@ export function ShippingCalculator({
   } = useShipping();
 
   let subtotalAfterCoupons = 0;
+  let isCartHydrated = true; // default: contextos sem CartTotalsProvider não bloqueiam
   try {
     const cartTotals = useCartTotals();
     subtotalAfterCoupons = cartTotals.subtotalAfterCoupons;
+    isCartHydrated = cartTotals.isCartHydrated;
   } catch {
     // CartTotalsProvider pode nao estar disponivel em todos os contextos
   }
@@ -93,6 +95,7 @@ export function ShippingCalculator({
 
   // Recalcular frete automaticamente quando itens/quantidades/preços mudam
   useEffect(() => {
+    if (!isCartHydrated) return;
     const items = getEffectiveItems();
 
     // Se não tem itens (carrinho vazio e sem fallback), limpar valores de frete
@@ -109,10 +112,11 @@ export function ShippingCalculator({
         calculateFreight(cep, items, { silent: true });
       }
     }
-  }, [cartFreightKey]);
+  }, [cartFreightKey, isCartHydrated]);
 
   // Auto-calcular quando CEP tiver 8 dígitos
   useEffect(() => {
+    if (!isCartHydrated) return;
     const items = getEffectiveItems();
     const cleanCep = cep.replace(/\D/g, '');
 
@@ -126,7 +130,7 @@ export function ShippingCalculator({
       console.log(`📦 [SHIPPING-CALC] Auto-calculando frete — CEP completo: ${cleanCep}, hasCalculated: false`);
       calculateFreight(cep, items, { silent: true });
     }
-  }, [cep]);
+  }, [cep, isCartHydrated]);
 
   const handleCalculate = () => {
     if (cep) {
@@ -233,7 +237,7 @@ export function ShippingCalculator({
 
         <button
           onClick={handleCalculate}
-          disabled={isLoading || cleanCep.length < 8}
+          disabled={isLoading || cleanCep.length < 8 || !isCartHydrated}
           className="bg-[#254333] hover:bg-[#1a3226] disabled:bg-[#999999] flex flex-col h-[32px] items-center justify-center overflow-hidden rounded-[4px] flex-shrink-0 transition-colors"
         >
           <div className="flex gap-[8px] items-center justify-center px-3 md:px-[16px] py-[10px]">
