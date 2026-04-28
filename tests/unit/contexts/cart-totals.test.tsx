@@ -444,4 +444,67 @@ describe("CartTotalsContext — auto-refresh ao hidratar", () => {
 
     expect(validateCart).not.toHaveBeenCalled();
   });
+
+  it("hidrata mesmo se produtosAtualizados vier vazio", async () => {
+    // Edge case: API retorna OK mas sem produtos (ex: cart com itens deletados do CMS)
+    validateCart.mockResolvedValue({
+      atualizado: true,
+      produtosDesatualizados: [],
+      cuponsDesatualizados: [],
+      produtosAtualizados: [],
+    });
+
+    const setCart = vi.fn();
+    cartLoadedRef.current = true;
+    const wrapper = makeWrapper({
+      initialCart: { "25": kitItem },
+      setCartSpy: setCart,
+    });
+    const { result } = renderHook(() => useCartTotals(), { wrapper });
+
+    await waitFor(() => expect(result.current.isCartHydrated).toBe(true));
+    expect(setCart).not.toHaveBeenCalled();
+  });
+});
+
+// ─── concorrência: cart muda durante a hidratação ────────────────────────────
+describe("CartTotalsContext — concorrência", () => {
+  it("auto-refresh roda só uma vez mesmo se cart for atualizado durante a chamada", async () => {
+    // Simula validateCart lento; durante a janela, o cart muda (re-render).
+    let resolveValidate: ((v: any) => void) | null = null;
+    validateCart.mockImplementation(
+      () =>
+        new Promise((res) => {
+          resolveValidate = res;
+        }),
+    );
+
+    cartLoadedRef.current = true;
+    const setCart = vi.fn();
+    const wrapper = makeWrapper({
+      initialCart: { "25": kitItem },
+      setCartSpy: setCart,
+    });
+    const { rerender, result } = renderHook(() => useCartTotals(), { wrapper });
+
+    // Re-renders enquanto a validação está pendente
+    rerender();
+    rerender();
+
+    // Resolve a validação
+    resolveValidate!({
+      atualizado: true,
+      produtosDesatualizados: [],
+      cuponsDesatualizados: [],
+      produtosAtualizados: [kitItemAtualizadoMock],
+    });
+
+    await waitFor(() => expect(result.current.isCartHydrated).toBe(true));
+
+    // O auto-refresh disparou apenas um validateCart inicial, independentemente
+    // dos re-renders durante a hidratação.
+    const initialCalls = validateCart.mock.calls.length;
+    rerender();
+    expect(validateCart).toHaveBeenCalledTimes(initialCalls);
+  });
 });
