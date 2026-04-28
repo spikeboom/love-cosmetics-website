@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from "react";
 import { calculateCartTotals } from "@/utils/cart-calculations";
 import { useCartValidation } from "@/deprecated/hooks/useCartValidation";
 import { useNotifications } from "@/core/notifications/NotificationContext";
+import { useCart } from "@/contexts/cart";
 import type { CartTotalsContextType } from "./types";
 
 const CartTotalsContext = createContext<CartTotalsContextType | null>(null);
@@ -32,9 +33,12 @@ export const CartTotalsProvider = ({
   const [subtotalOriginal, setSubtotalOriginal] = useState(0);
   const [subtotalAfterCoupons, setSubtotalAfterCoupons] = useState(0);
   const [firstRun, setFirstRun] = useState(false);
+  const [isCartHydrated, setIsCartHydrated] = useState(false);
 
   const { notify } = useNotifications();
   const cartValidation = useCartValidation();
+  const { isCartLoaded } = useCart();
+  const autoRefreshTriggeredRef = useRef(false);
 
   // Marcar que já carregou após primeiro render
   useEffect(() => {
@@ -60,51 +64,82 @@ export const CartTotalsProvider = ({
     setSubtotalOriginal(subtotal);
   }, [cart]);
 
-  // Função para atualizar preços do carrinho com valores atuais do Strapi
-  const refreshCartPrices = useCallback(async (): Promise<boolean> => {
+  // Função para atualizar preços e dimensões do carrinho com valores atuais do CMS
+  const refreshCartPrices = useCallback(async (options?: { silent?: boolean }): Promise<boolean> => {
     if (Object.keys(cart).length === 0) return false;
+    const silent = options?.silent === true;
 
     const result = await cartValidation.validateCart(cart, cupons);
     if (!result) return false;
 
     let newCupons = cupons;
     let newCart = { ...cart };
-    let houveAtualizacao = false;
+    let houveAtualizacaoPreco = false;
+    let houveAtualizacaoDimensoes = false;
 
     // Se há cupons inválidos, removê-los
     if (result.cuponsDesatualizados.length > 0) {
       newCupons = cupons.filter(
         (c: any) => !result.cuponsDesatualizados.some((cd: any) => cd.codigo === c.codigo)
       );
-      houveAtualizacao = true;
-      notify("Cupom removido pois não é mais válido", { variant: "warning" });
+      houveAtualizacaoPreco = true;
+      if (!silent) notify("Cupom removido pois não é mais válido", { variant: "warning" });
     }
 
-    // Atualizar preços dos produtos no carrinho (sempre preço base, sem cupom)
+    // Atualizar preços e dimensões dos produtos no carrinho (sempre preço base, sem cupom)
     for (const produtoAtualizado of result.produtosAtualizados) {
       const cartItem = newCart[produtoAtualizado.id];
-      if (cartItem) {
-        const novoPreco = produtoAtualizado.precoAtual;
+      if (!cartItem) continue;
 
-        if (Math.abs(cartItem.preco - novoPreco) > 0.01) {
-          newCart[produtoAtualizado.id] = {
-            ...cartItem,
-            preco: novoPreco,
-            documentId: produtoAtualizado.documentId,
-          };
-          houveAtualizacao = true;
-        }
+      const novoPreco = produtoAtualizado.precoAtual;
+      const precoMudou = Math.abs(cartItem.preco - novoPreco) > 0.01;
 
-        // Se cupom foi removido, limpar flags
-        if (result.cuponsDesatualizados.length > 0) {
-          newCart[produtoAtualizado.id] = {
-            ...newCart[produtoAtualizado.id],
-            cupom_applied: null,
-            cupom_applied_codigo: null,
-          };
-        }
+      // Detectar diferença de peso/dimensões (qualquer valor != ou ausente vira atualização)
+      const dimsAtuais = {
+        peso_gramas: cartItem.peso_gramas,
+        altura: cartItem.altura,
+        largura: cartItem.largura,
+        comprimento: cartItem.comprimento,
+      };
+      const dimsNovas = {
+        peso_gramas: produtoAtualizado.peso_gramas,
+        altura: produtoAtualizado.altura,
+        largura: produtoAtualizado.largura,
+        comprimento: produtoAtualizado.comprimento,
+      };
+      const dimsMudaram =
+        dimsNovas.peso_gramas !== undefined && (
+          dimsAtuais.peso_gramas !== dimsNovas.peso_gramas ||
+          dimsAtuais.altura !== dimsNovas.altura ||
+          dimsAtuais.largura !== dimsNovas.largura ||
+          dimsAtuais.comprimento !== dimsNovas.comprimento
+        );
+
+      if (precoMudou || dimsMudaram) {
+        newCart[produtoAtualizado.id] = {
+          ...cartItem,
+          preco: novoPreco,
+          documentId: produtoAtualizado.documentId,
+          ...(dimsNovas.peso_gramas !== undefined && { peso_gramas: dimsNovas.peso_gramas }),
+          ...(dimsNovas.altura !== undefined && { altura: dimsNovas.altura }),
+          ...(dimsNovas.largura !== undefined && { largura: dimsNovas.largura }),
+          ...(dimsNovas.comprimento !== undefined && { comprimento: dimsNovas.comprimento }),
+        };
+        if (precoMudou) houveAtualizacaoPreco = true;
+        if (dimsMudaram) houveAtualizacaoDimensoes = true;
+      }
+
+      // Se cupom foi removido, limpar flags
+      if (result.cuponsDesatualizados.length > 0) {
+        newCart[produtoAtualizado.id] = {
+          ...newCart[produtoAtualizado.id],
+          cupom_applied: null,
+          cupom_applied_codigo: null,
+        };
       }
     }
+
+    const houveAtualizacao = houveAtualizacaoPreco || houveAtualizacaoDimensoes;
 
     if (houveAtualizacao) {
       cartValidation.clearValidation();
@@ -115,7 +150,11 @@ export const CartTotalsProvider = ({
         await cartValidation.validateCart(newCart, newCupons);
       }, 100);
 
-      notify("Carrinho atualizado com os preços atuais", { variant: "success" });
+      // Só notifica quando preço mudou ou cupom removido — atualização silenciosa de dimensões
+      // não merece notificação (é correção interna pra cálculo de frete)
+      if (!silent && houveAtualizacaoPreco) {
+        notify("Carrinho atualizado com os preços atuais", { variant: "success" });
+      }
     } else {
       cartValidation.clearValidation();
       await cartValidation.validateCart(cart, cupons);
@@ -123,6 +162,23 @@ export const CartTotalsProvider = ({
 
     return true;
   }, [cart, cupons, cartValidation, notify, setCart, setCupons]);
+
+  // Auto-refresh do carrinho ao hidratar: sincroniza preço/dimensões com o CMS uma vez
+  // por sessão. Resolve o caso "produto editado no CMS depois de já ter sido adicionado".
+  useEffect(() => {
+    if (!isCartLoaded) return;
+    if (autoRefreshTriggeredRef.current) return;
+    autoRefreshTriggeredRef.current = true;
+
+    if (Object.keys(cart).length === 0) {
+      setIsCartHydrated(true);
+      return;
+    }
+
+    refreshCartPrices({ silent: true })
+      .catch(() => { /* falha silenciosa: cart antigo continua válido */ })
+      .finally(() => setIsCartHydrated(true));
+  }, [isCartLoaded, cart, refreshCartPrices]);
 
   const value: CartTotalsContextType = {
     total,
@@ -139,6 +195,7 @@ export const CartTotalsProvider = ({
     refreshCartPrices,
     validateCart: cartValidation.validateCart,
     clearValidation: cartValidation.clearValidation,
+    isCartHydrated,
   };
 
   return <CartTotalsContext.Provider value={value}>{children}</CartTotalsContext.Provider>;
