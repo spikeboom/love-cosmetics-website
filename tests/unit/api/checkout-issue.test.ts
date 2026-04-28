@@ -13,6 +13,22 @@ function makeRequest(body: unknown, headers: Record<string, string> = {}): any {
 
 let warnSpy: ReturnType<typeof vi.spyOn>;
 
+// Logs agora são single-line JSON via logWarn — encontra a chamada com
+// label "checkout_issue" e devolve o objeto `data`.
+function getLoggedData(): any {
+  for (const call of warnSpy.mock.calls) {
+    const arg = call[0];
+    if (typeof arg !== "string") continue;
+    try {
+      const parsed = JSON.parse(arg);
+      if (parsed?.label === "checkout_issue") return parsed.data;
+    } catch {
+      // ignora
+    }
+  }
+  return undefined;
+}
+
 beforeEach(() => {
   warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 });
@@ -49,7 +65,7 @@ describe("POST /api/checkout/issue", () => {
 
   it("default severity = warning", async () => {
     await POST(makeRequest({ step: "entrega", kind: "k" }));
-    const logged = warnSpy.mock.calls.find((c) => c[0] === "[checkout_issue]")?.[1] as any;
+    const logged = getLoggedData();
     expect(logged.severity).toBe("warning");
   });
 
@@ -69,7 +85,7 @@ describe("POST /api/checkout/issue", () => {
         },
       }),
     );
-    const logged = warnSpy.mock.calls.find((c) => c[0] === "[checkout_issue]")?.[1] as any;
+    const logged = getLoggedData();
     expect(logged.metadata.cpf).toBe("123***01");
     expect(logged.metadata.telefone).toBe("11***21");
     // keepEnd=0 -> slice(-0) retorna string inteira; CEP fica concatenado
@@ -87,7 +103,7 @@ describe("POST /api/checkout/issue", () => {
         metadata: { cpf: "abc", telefone: "", cep: "" },
       }),
     );
-    const logged = warnSpy.mock.calls.find((c) => c[0] === "[checkout_issue]")?.[1] as any;
+    const logged = getLoggedData();
     expect(logged.metadata.cpf).toBeUndefined();
     expect(logged.metadata.telefone).toBeUndefined();
     expect(logged.metadata.cep).toBeUndefined();
@@ -100,14 +116,14 @@ describe("POST /api/checkout/issue", () => {
         { referer: "https://app/checkout/entrega", "user-agent": "Mozilla/5.0" },
       ),
     );
-    const logged = warnSpy.mock.calls.find((c) => c[0] === "[checkout_issue]")?.[1] as any;
+    const logged = getLoggedData();
     expect(logged.path).toBe("https://app/checkout/entrega");
     expect(logged.userAgent).toBe("Mozilla/5.0");
   });
 
   it("metadata ausente -> sanitized = undefined no log", async () => {
     await POST(makeRequest({ step: "entrega", kind: "k" }));
-    const logged = warnSpy.mock.calls.find((c) => c[0] === "[checkout_issue]")?.[1] as any;
+    const logged = getLoggedData();
     expect(logged.metadata).toBeUndefined();
   });
 
@@ -122,7 +138,7 @@ describe("POST /api/checkout/issue", () => {
 
   it("severity custom e propagada para o log", async () => {
     await POST(makeRequest({ step: "pagamento", kind: "k", severity: "error" }));
-    const logged = warnSpy.mock.calls.find((c) => c[0] === "[checkout_issue]")?.[1] as any;
+    const logged = getLoggedData();
     expect(logged.severity).toBe("error");
   });
 });

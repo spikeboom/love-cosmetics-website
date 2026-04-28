@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logWarn } from "@/utils/logMessage";
 
 export const runtime = "nodejs";
 
@@ -36,12 +37,12 @@ export async function POST(req: NextRequest) {
   try {
     const parsed = issueSchema.safeParse(await req.json());
     if (!parsed.success) {
-      console.warn("[checkout_issue] invalid payload", parsed.error.issues);
+      logWarn("checkout_issue_invalid_payload", { issues: parsed.error.issues });
       return NextResponse.json({ success: false }, { status: 400 });
     }
 
     const data = parsed.data;
-    console.warn("[checkout_issue]", {
+    logWarn("checkout_issue", {
       step: data.step,
       kind: data.kind,
       severity: data.severity,
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.warn("[checkout_issue] failed to log", error);
+    logWarn("checkout_issue_failed_to_log", error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
