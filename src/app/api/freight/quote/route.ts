@@ -4,14 +4,15 @@ import { calculateFreightFrenet } from "@/lib/freight/frenet";
 
 export const runtime = "nodejs";
 
+// Directus retorna campos decimais como string; coagimos para número na borda.
 const freightItemSchema = z.object({
-  quantity: z.number().int().positive().max(100),
-  peso_gramas: z.number().positive().optional(),
-  altura: z.number().positive().optional(),
-  largura: z.number().positive().optional(),
-  comprimento: z.number().positive().optional(),
-  bling_number: z.number().optional(),
-  preco: z.number().nonnegative(),
+  quantity: z.coerce.number().int().positive().max(100),
+  peso_gramas: z.coerce.number().positive().optional(),
+  altura: z.coerce.number().positive().optional(),
+  largura: z.coerce.number().positive().optional(),
+  comprimento: z.coerce.number().positive().optional(),
+  bling_number: z.coerce.number().optional(),
+  preco: z.coerce.number().nonnegative(),
 });
 
 const quoteSchema = z.object({
@@ -23,12 +24,12 @@ export async function POST(req: NextRequest) {
   try {
     const parsed = quoteSchema.safeParse(await req.json());
     if (!parsed.success) {
-      console.warn("[checkout_issue]", {
+      console.warn("[checkout_issue]", JSON.stringify({
         step: "entrega",
         kind: "freight_quote_invalid_payload",
         severity: "warning",
         issues: parsed.error.issues,
-      });
+      }));
       return NextResponse.json({ success: false, error: "Dados de frete invalidos" }, { status: 400 });
     }
 
