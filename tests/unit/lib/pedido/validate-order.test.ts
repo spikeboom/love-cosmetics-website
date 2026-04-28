@@ -17,7 +17,7 @@ vi.mock("@/lib/strapi", () => ({
   fetchProdutosComFallback,
   PRICE_TOLERANCE: 0.01,
 }));
-vi.mock("@/app/actions/freight-actions", () => ({ calculateFreightFrenet }));
+vi.mock("@/lib/freight/frenet", () => ({ calculateFreightFrenet }));
 vi.mock("@/lib/cms/directus/configuracoes", () => ({ fetchConfiguracoesLoja }));
 vi.mock("@/config/produtos-esgotados", () => ({ PRODUTOS_ESGOTADOS_SLUGS: ["esgotado-slug"] }));
 

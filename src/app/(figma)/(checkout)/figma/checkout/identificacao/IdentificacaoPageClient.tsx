@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { useIdentificacaoForm, IdentificacaoFormData } from "@/hooks/checkout/useIdentificacaoForm";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
@@ -9,12 +10,15 @@ import { ucCheckoutStep, ucUserDataUpdate } from "../../../../_tracking/uc-ecomm
 import { useCart, useShipping } from "@/contexts";
 import { useViaCep } from "@/hooks/checkout";
 import { formatCEP } from "@/lib/formatters";
+import { reportCheckoutIssue } from "@/lib/checkout/report-checkout-issue";
 import Image from "next/image";
 
 export function IdentificacaoPageClient() {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const { cart, isCartLoaded } = useCart();
   const firedStepEventRef = useRef(false);
+  const lastCepErrorRef = useRef<string | null>(null);
   const { cep: shippingCep, setCep: setShippingCep } = useShipping();
   const { buscarCep, loading: loadingCep, error: errorCep, endereco } = useViaCep();
   const {
@@ -56,10 +60,40 @@ export function IdentificacaoPageClient() {
     }
   }, [formData.cep]);
 
+  useEffect(() => {
+    if (!errorCep || lastCepErrorRef.current === errorCep) return;
+    lastCepErrorRef.current = errorCep;
+    enqueueSnackbar("Nao encontramos esse CEP. Confira se ele esta correto.", {
+      variant: "warning",
+    });
+    reportCheckoutIssue({
+      step: "identificacao",
+      kind: "viacep_lookup_failed",
+      severity: "warning",
+      message: errorCep,
+      metadata: { cep: formData.cep },
+    });
+  }, [enqueueSnackbar, errorCep, formData.cep]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
+    if (!validateForm()) {
+      enqueueSnackbar("Confira os dados para continuar.", { variant: "warning" });
+      reportCheckoutIssue({
+        step: "identificacao",
+        kind: "client_validation_failed",
+        severity: "info",
+        message: "Identification form validation failed",
+        metadata: {
+          cpf: formData.cpf,
+          email: formData.email,
+          telefone: formData.telefone,
+          cep: formData.cep,
+        },
+      });
+      return;
+    }
       // Garantir que o CEP usado no checkout reflita no ShippingContext antes de avanÃ§ar.
       if (formData.cep) {
         setShippingCep(formData.cep);
@@ -78,7 +112,6 @@ export function IdentificacaoPageClient() {
       });
 
       router.push("/figma/checkout/entrega");
-    }
   };
 
   if (isLoading) {

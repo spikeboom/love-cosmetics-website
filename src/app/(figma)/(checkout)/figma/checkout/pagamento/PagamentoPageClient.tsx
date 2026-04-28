@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { useCreateOrder, usePagBankPayment } from "@/hooks/checkout";
 import { useCheckoutSync } from "@/hooks/checkout/useCheckoutSync";
 import { ucAddPaymentInfo, ucCheckoutStep, ucPurchase } from "../../../../_tracking/uc-ecommerce";
+import { reportCheckoutIssue } from "@/lib/checkout/report-checkout-issue";
 import {
   TelaAtual,
   FormaPagamento,
@@ -20,6 +22,7 @@ import { formatPrice } from "@/lib/formatters";
 
 export function PagamentoPageClient() {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const { cart, clearCart, isCartLoaded } = useCart();
   const { cupons, clearCupons, handleCupom } = useCoupon();
   const { freightValue } = useShipping();
@@ -53,6 +56,13 @@ export function PagamentoPageClient() {
   // Códigos de erro relacionados a cupom
   const couponErrorCodes = ["COUPON_FIRST_PURCHASE_ONLY", "INVALID_COUPON", "COUPON_EXHAUSTED"];
   const isCouponError = orderErrorCode && couponErrorCodes.includes(orderErrorCode);
+  const softPaymentMessage =
+    "Nao conseguimos iniciar o pagamento agora. Revise os dados e tente novamente.";
+  const softOrderMessage = isCartOutdated
+    ? "Os valores do pedido foram atualizados. Revise o carrinho e tente continuar novamente."
+    : isCouponError
+      ? "Esse cupom nao esta disponivel agora. Retire o cupom ou tente outro."
+      : "Nao conseguimos concluir essa etapa agora. Confira os dados e tente novamente.";
 
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
   const [telaAtual, setTelaAtual] = useState<TelaAtual>("selecao");
@@ -250,6 +260,19 @@ export function PagamentoPageClient() {
         currentPedidoId = result.pedidoId;
         setPedidoId(result.pedidoId);
       } else {
+        enqueueSnackbar(softOrderMessage, { variant: "warning" });
+        reportCheckoutIssue({
+          step: "pagamento",
+          kind: "order_create_failed",
+          severity: "warning",
+          message: result.error || orderError || undefined,
+          metadata: {
+            code: result.code || orderErrorCode,
+            cartItems: Object.keys(cart || {}).length,
+            total: valorTotal,
+            freight: valorFrete,
+          },
+        });
         return;
       }
     }
@@ -264,7 +287,19 @@ export function PagamentoPageClient() {
         setPixPreGenerated(true);
         transitionTo("pix");
       } else {
-        setPaymentError(pixResult.message || "Erro ao gerar PIX");
+        enqueueSnackbar(softPaymentMessage, { variant: "warning" });
+        setPaymentError(softPaymentMessage);
+        reportCheckoutIssue({
+          step: "pagamento",
+          kind: "pix_create_failed",
+          severity: "warning",
+          message: pixResult.message,
+          metadata: {
+            pedidoId: currentPedidoId,
+            orderId: pixResult.orderId,
+            status: pixResult.status,
+          },
+        });
       }
     } else {
       // Cartão: order created, PagamentoSelecao handles card form inline
@@ -364,7 +399,18 @@ export function PagamentoPageClient() {
   };
 
   const handlePaymentError = (error: string) => {
-    setPaymentError(error);
+    enqueueSnackbar(softPaymentMessage, { variant: "warning" });
+    setPaymentError(softPaymentMessage);
+    reportCheckoutIssue({
+      step: "pagamento",
+      kind: "payment_failed",
+      severity: "warning",
+      message: error,
+      metadata: {
+        pedidoId,
+        paymentMethod: formaPagamento,
+      },
+    });
   };
 
   const clearPaymentError = () => setPaymentError(null);
@@ -439,7 +485,7 @@ export function PagamentoPageClient() {
           <p className={`font-cera-pro font-bold text-[18px] ${isCartOutdated || isCouponError ? 'text-[#856404]' : 'text-red-600'} mb-2`}>
             {isCartOutdated ? 'Carrinho desatualizado' : isCouponError ? 'Cupom indisponível' : 'Erro ao criar pedido'}
           </p>
-          <p className={`font-cera-pro text-[14px] ${isCartOutdated || isCouponError ? 'text-[#856404]' : 'text-red-500'} mb-4`}>{orderError}</p>
+          <p className={`font-cera-pro text-[14px] ${isCartOutdated || isCouponError ? 'text-[#856404]' : 'text-red-500'} mb-4`}>{softOrderMessage}</p>
 
           {isCouponError ? (
             <div className="flex flex-col gap-3">

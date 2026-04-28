@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
 import { CheckoutStepper } from "../CheckoutStepper";
 import { BotaoVoltar } from "../pagamento/components/BotaoVoltar";
 import { useViaCep } from "@/hooks/checkout";
@@ -13,6 +14,7 @@ import { FreeShippingBanner } from "@/components/figma-shared/FreeShippingBanner
 import { useFreeShipping } from "@/hooks/useFreeShipping";
 import { isEconomicaService } from "@/core/pricing/shipping-constants";
 import { formatCEP } from "@/lib/formatters";
+import { reportCheckoutIssue } from "@/lib/checkout/report-checkout-issue";
 import { ucAddShippingInfo, ucCheckoutStep, ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 
 interface FormData {
@@ -29,6 +31,7 @@ interface FormData {
 
 export function EntregaPageClient() {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const { cart, isCartLoaded } = useCart();
   const { buscarCep, endereco } = useViaCep();
   const { syncToServer } = useCheckoutSync();
@@ -41,6 +44,7 @@ export function EntregaPageClient() {
   buscarCepRef.current = buscarCep;
   const viaCepFetchedCepRef = useRef<string>("");
   const firedStepEventRef = useRef(false);
+  const lastFreightErrorRef = useRef<string | null>(null);
 
   let subtotalAfterCoupons = 0;
   try {
@@ -313,6 +317,24 @@ export function EntregaPageClient() {
     }
   }, [formData.cep]);
 
+  useEffect(() => {
+    if (!freight.error || lastFreightErrorRef.current === freight.error) return;
+    lastFreightErrorRef.current = freight.error;
+    enqueueSnackbar("Nao conseguimos calcular o frete agora. Confira o CEP ou tente novamente.", {
+      variant: "warning",
+    });
+    reportCheckoutIssue({
+      step: "entrega",
+      kind: "freight_calculation_failed",
+      severity: "warning",
+      message: freight.error,
+      metadata: {
+        cep: formData.cep,
+        itemsCount: Object.keys(cart || {}).length,
+      },
+    });
+  }, [cart, enqueueSnackbar, formData.cep, freight.error]);
+
   // Selecionar opcao de frete
   const handleSelectFreight = (index: number) => {
     const service = freight.availableServices[index];
@@ -357,7 +379,36 @@ export function EntregaPageClient() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
+    if (!validateForm()) {
+      enqueueSnackbar("Confira o endereco para continuar.", { variant: "warning" });
+      reportCheckoutIssue({
+        step: "entrega",
+        kind: "client_validation_failed",
+        severity: "info",
+        message: "Delivery form validation failed",
+        metadata: { cep: formData.cep },
+      });
+      return;
+    }
+
+    if (freight.availableServices.length === 0) {
+      enqueueSnackbar("Nao conseguimos calcular o frete agora. Confira o CEP ou tente novamente.", {
+        variant: "warning",
+      });
+      reportCheckoutIssue({
+        step: "entrega",
+        kind: "missing_freight_options",
+        severity: "warning",
+        message: "User tried to continue without freight options",
+        metadata: {
+          cep: formData.cep,
+          itemsCount: Object.keys(cart || {}).length,
+          freightError: freight.error,
+        },
+      });
+      return;
+    }
+
       localStorage.setItem("checkoutEntrega", JSON.stringify(formData));
       syncToServer({ entrega: formData, step: "entrega" });
 
@@ -426,7 +477,6 @@ export function EntregaPageClient() {
       }
 
       router.push("/figma/checkout/pagamento");
-    }
   };
 
   if (isLoading) {

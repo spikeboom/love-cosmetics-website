@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FreightService } from '@/services/freight-service';
-import { calculateFreightFrenet } from '@/app/actions/freight-actions';
 import { ucShippingCalculate } from '@/app/(figma)/_tracking/uc-ecommerce';
 import type { CartProduct } from './useModalCart';
+import type { FrenetCalculationResponse } from '@/lib/freight/frenet';
 
 interface UseFreightReturn {
   cep: string;
@@ -54,28 +54,14 @@ export function useFreight(): UseFreightReturn {
   const [selectedServiceIndex, setSelectedServiceIndex] = useState<number>(0);
   const [addressLabel, setAddressLabel] = useState<string | null>(null);
 
-  // Carregar dados salvos do localStorage
+  // Carregar apenas o CEP salvo. Resultado de frete nao deve ser cacheado no client.
   useEffect(() => {
     const savedCep = localStorage.getItem(STORAGE_KEY);
-    const savedFreightData = localStorage.getItem(FREIGHT_DATA_KEY);
 
     if (savedCep) {
       setCep(savedCep);
     }
-
-    if (savedFreightData) {
-      try {
-        const data = JSON.parse(savedFreightData);
-        setFreightValue(data.freightValue || DEFAULT_FREIGHT);
-        setDeliveryTime(data.deliveryTime || '3-5 dias úteis');
-        setAvailableServices(data.availableServices || []);
-        setSelectedServiceIndex(data.selectedServiceIndex || 0);
-        setHasCalculated(data.hasCalculated || false);
-        setAddressLabel(data.addressLabel || null);
-      } catch (error) {
-        console.error('Erro ao carregar dados de frete:', error);
-      }
-    }
+    localStorage.removeItem(FREIGHT_DATA_KEY);
   }, []);
 
   // Salvar dados no localStorage quando mudarem
@@ -84,20 +70,6 @@ export function useFreight(): UseFreightReturn {
       localStorage.setItem(STORAGE_KEY, cep);
     }
   }, [cep]);
-
-  useEffect(() => {
-    if (hasCalculated) {
-      const freightData = {
-        freightValue,
-        deliveryTime,
-        availableServices,
-        selectedServiceIndex,
-        hasCalculated,
-        addressLabel
-      };
-      localStorage.setItem(FREIGHT_DATA_KEY, JSON.stringify(freightData));
-    }
-  }, [freightValue, deliveryTime, availableServices, selectedServiceIndex, hasCalculated, addressLabel]);
 
   // Guard contra chamadas concorrentes de calculateFreight
   const calculateInFlightRef = React.useRef<string | null>(null);
@@ -143,7 +115,12 @@ export function useFreight(): UseFreightReturn {
         preco: item.preco
       }));
 
-      const result = await calculateFreightFrenet(cepValue, items);
+      const response = await fetch('/api/freight/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cep: cepValue, items }),
+      });
+      const result = (await response.json()) as FrenetCalculationResponse;
 
       if (result.success) {
         const cheapestIndex = result.services.reduce((minIndex, service, index) => {

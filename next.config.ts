@@ -5,9 +5,18 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+// BUILD_ID estável para o ciclo do processo. Em build é "congelado" no bundle
+// via NEXT_PUBLIC_BUILD_ID; em runtime, /api/version lê o mesmo valor (env)
+// — então cliente e servidor concordam quando o usuário ainda tem JS antigo
+// e o servidor já foi redeployado.
+const BUILD_ID = process.env.BUILD_ID || String(Date.now());
+process.env.NEXT_PUBLIC_BUILD_ID = BUILD_ID;
+process.env.BUILD_ID = BUILD_ID;
+
 const nextConfig: NextConfig = {
   /* config options here */
   output: 'standalone',
+  generateBuildId: async () => BUILD_ID,
   eslint: {
     ignoreDuringBuilds: true,
   },
