@@ -1,4 +1,4 @@
-import { calculateFreightFrenet } from "@/app/actions/freight-actions";
+import { calculateFreightFrenet } from "@/lib/freight/frenet";
 import { calculateOrderTotals, centsToReais } from "@/core/pricing/order-totals";
 import { applyKitDiscountFromFinalPrice } from "@/core/pricing/kits";
 import { fetchAndValidateCupom, fetchProdutosComFallback, PRICE_TOLERANCE } from "@/lib/strapi";
