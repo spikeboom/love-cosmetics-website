@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 
 interface ProdutoDesatualizado {
   id: string;
@@ -58,18 +58,10 @@ export function useCartValidation() {
     error: null,
   });
 
-  // Ref para evitar chamadas duplicadas
-  const isValidatingRef = useRef(false);
-
   const validateCart = useCallback(async (
     cart: Record<string, any>,
     cupons: any[]
   ): Promise<ValidationResult | null> => {
-    // Evitar chamadas duplicadas
-    if (isValidatingRef.current) {
-      return null;
-    }
-
     const cartItems = Object.values(cart);
     if (cartItems.length === 0) {
       setState(prev => ({
@@ -88,7 +80,6 @@ export function useCartValidation() {
       };
     }
 
-    isValidatingRef.current = true;
     setState(prev => ({ ...prev, isValidating: true, error: null }));
 
     try {
@@ -137,8 +128,6 @@ export function useCartValidation() {
         error: errorMessage,
       }));
       return null;
-    } finally {
-      isValidatingRef.current = false;
     }
   }, []);
 
