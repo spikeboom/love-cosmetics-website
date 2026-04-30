@@ -104,12 +104,24 @@ export async function GET(req: NextRequest) {
       testSessionIds = [...new Set(testCheckouts.map((r) => r.sessionId))];
     }
 
+    // GA4 export creates two table prefixes: `events_YYYYMMDD` (final, D+1) and
+    // `events_intraday_YYYYMMDD` (live, replaced by the final table when ready).
+    // The `events_*` wildcard does NOT match intraday tables, so today and yesterday
+    // would show zero. We UNION both to cover live days; once the final table is
+    // created the intraday table is dropped, so there is no double counting.
+    const eventsSource = `(
+      SELECT * FROM \`${dataset}.events_*\`
+      WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+      UNION ALL
+      SELECT * FROM \`${dataset}.events_intraday_*\`
+      WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+    )`;
+
     const excludedCTE = testSessionIds.length > 0
       ? `excluded_users AS (
         SELECT DISTINCT user_pseudo_id
-        FROM \`${dataset}.events_*\` events
-        WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
-          AND (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_session_id')
+        FROM ${eventsSource} events
+        WHERE (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_session_id')
             IN UNNEST(@testSessionIds)
       ),`
       : "";
@@ -137,9 +149,8 @@ export async function GET(req: NextRequest) {
           (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'checkout_step') AS checkout_step_name,
           traffic_source.source AS user_source,
           traffic_source.medium AS user_medium
-        FROM \`${dataset}.events_*\` events
-        WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
-          AND IFNULL(
+        FROM ${eventsSource} events
+        WHERE IFNULL(
             (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location'),
             ''
           ) NOT LIKE '%localhost%'
