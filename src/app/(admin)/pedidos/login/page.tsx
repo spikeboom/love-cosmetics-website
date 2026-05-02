@@ -1,9 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 export default function LoginPedidosPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPedidosForm />
+    </Suspense>
+  );
+}
+
+function sanitizeRedirect(raw: string | null): string {
+  // Only allow same-origin paths starting with "/" and not "//", to avoid open-redirects.
+  if (!raw) return "/pedidos";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/pedidos";
+  return raw;
+}
+
+function LoginPedidosForm() {
+  const searchParams = useSearchParams();
+  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +42,7 @@ export default function LoginPedidosPage() {
       });
 
       if (res.ok) {
-        window.location.href = "/pedidos";
+        window.location.href = redirectTarget;
       } else {
         const data = await res.json();
         setError(data.error || "Erro ao fazer login");

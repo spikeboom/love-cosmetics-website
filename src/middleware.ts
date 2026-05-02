@@ -25,7 +25,14 @@ export async function middleware(request: NextRequest) {
     const adminPayload = adminToken ? await verifyAdminJWTOnly(adminToken) : null;
 
     if (!adminPayload) {
-      return NextResponse.redirect(new URL("/pedidos/login", request.url));
+      const loginUrl = new URL("/pedidos/login", request.url);
+      // Preserve the original path + querystring so filters (e.g. /pedidos?tab=funil&funil_*)
+      // can be restored after re-login.
+      const redirectTarget = pathname + (request.nextUrl.search || "");
+      if (redirectTarget && redirectTarget !== "/pedidos/login") {
+        loginUrl.searchParams.set("redirect", redirectTarget);
+      }
+      return NextResponse.redirect(loginUrl);
     }
   }
 
