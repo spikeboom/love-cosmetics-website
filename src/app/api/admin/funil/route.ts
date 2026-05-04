@@ -36,6 +36,20 @@ function isValidDateISO(value: string): boolean {
   return Number.isFinite(d.getTime()) && d.toISOString().startsWith(value);
 }
 
+async function tableExists(bq: BigQuery, dataset: string, tableName: string): Promise<boolean> {
+  const [rows] = await bq.query({
+    query: `
+      SELECT 1
+      FROM \`${dataset}.INFORMATION_SCHEMA.TABLES\`
+      WHERE table_name = @tableName
+      LIMIT 1
+    `,
+    params: { tableName },
+  });
+
+  return rows.length > 0;
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const channel = searchParams.get("channel") || "all";
@@ -105,12 +119,12 @@ export async function GET(req: NextRequest) {
       testSessionIds = [...new Set(testCheckouts.map((r) => r.sessionId))];
     }
 
-    // GA4 export creates two table prefixes: `events_YYYYMMDD` (final, D+1) and
-    // `events_intraday_YYYYMMDD` (live, replaced by the final table when ready).
-    // The `events_*` wildcard does NOT match intraday tables, so today and yesterday
-    // would show zero. We UNION both to cover live days; once the final table is
-    // created the intraday table is dropped, so there is no double counting.
-    const intradaySource = endDateBQ >= todayBQ ? `
+    // GA4 export can also create `events_intraday_YYYYMMDD`, but BigQuery fails
+    // if a wildcard table prefix matches no tables. Check today's intraday table first.
+    const includeIntraday = endDateBQ >= todayBQ
+      && await tableExists(bq, dataset, `events_intraday_${todayBQ}`);
+
+    const intradaySource = includeIntraday ? `
       UNION ALL
       SELECT * FROM \`${dataset}.events_intraday_*\`
       WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
