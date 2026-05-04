@@ -70,6 +70,7 @@ export async function GET(req: NextRequest) {
 
   const startDateBQ = formatDateBQ(dataInicio);
   const endDateBQ = formatDateBQ(dataFim);
+  const todayBQ = formatDateBQ(now.toISOString().slice(0, 10));
 
   try {
     const bq = getBigQueryClient();
@@ -109,12 +110,16 @@ export async function GET(req: NextRequest) {
     // The `events_*` wildcard does NOT match intraday tables, so today and yesterday
     // would show zero. We UNION both to cover live days; once the final table is
     // created the intraday table is dropped, so there is no double counting.
-    const eventsSource = `(
-      SELECT * FROM \`${dataset}.events_*\`
-      WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+    const intradaySource = endDateBQ >= todayBQ ? `
       UNION ALL
       SELECT * FROM \`${dataset}.events_intraday_*\`
       WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+    ` : "";
+
+    const eventsSource = `(
+      SELECT * FROM \`${dataset}.events_*\`
+      WHERE _TABLE_SUFFIX BETWEEN '${startDateBQ}' AND '${endDateBQ}'
+      ${intradaySource}
     )`;
 
     const excludedCTE = testSessionIds.length > 0
