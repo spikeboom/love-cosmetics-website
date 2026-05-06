@@ -14,9 +14,12 @@ const REVALIDATE_SECONDS = 3600; // 1 hora
 
 const DIRECTUS_PUBLIC = "https://directus.lovecosmeticos.xyz";
 const DIRECTUS_TOKEN = "love-directus-api-token-2025-static";
+const BANNER_DESKTOP_SOURCE_WIDTH = 1920;
+const BANNER_MOBILE_SOURCE_WIDTH = 1440;
+const BANNER_IMAGE_QUALITY = 90;
 
 function fallbackAsset(fileId: string, width: number) {
-  return `${DIRECTUS_PUBLIC}/assets/${fileId}?width=${width}&quality=82&format=webp&fit=cover&access_token=${DIRECTUS_TOKEN}`;
+  return `${DIRECTUS_PUBLIC}/assets/${fileId}?width=${width}&quality=${BANNER_IMAGE_QUALITY}&format=webp&fit=cover&access_token=${DIRECTUS_TOKEN}`;
 }
 
 const FALLBACK_BANNERS: BannerHome[] = [
@@ -26,8 +29,8 @@ const FALLBACK_BANNERS: BannerHome[] = [
     descricao: "",
     ctaTexto: "Compre agora",
     ctaUrl: "/figma/search",
-    imagemDesktop: fallbackAsset("3130f514-ac50-40a3-9094-8f7e5fb61260", 1600),
-    imagemMobile: fallbackAsset("7e0a6cb9-ccfc-4567-9c6d-06f0a4cf041e", 800),
+    imagemDesktop: fallbackAsset("3130f514-ac50-40a3-9094-8f7e5fb61260", BANNER_DESKTOP_SOURCE_WIDTH),
+    imagemMobile: fallbackAsset("7e0a6cb9-ccfc-4567-9c6d-06f0a4cf041e", BANNER_MOBILE_SOURCE_WIDTH),
   },
   {
     id: "fallback-2",
@@ -35,8 +38,8 @@ const FALLBACK_BANNERS: BannerHome[] = [
     descricao: "Em compras acima de R$149.",
     ctaTexto: "Aproveitar ofertas",
     ctaUrl: "/figma/search",
-    imagemDesktop: fallbackAsset("5c57bc6f-1d16-4fa9-ad78-9d6801a3d273", 1600),
-    imagemMobile: fallbackAsset("6f6f6c8f-9804-4a8c-b228-3b915c5bf5c4", 800),
+    imagemDesktop: fallbackAsset("5c57bc6f-1d16-4fa9-ad78-9d6801a3d273", BANNER_DESKTOP_SOURCE_WIDTH),
+    imagemMobile: fallbackAsset("6f6f6c8f-9804-4a8c-b228-3b915c5bf5c4", BANNER_MOBILE_SOURCE_WIDTH),
   },
   {
     id: "fallback-3",
@@ -44,8 +47,8 @@ const FALLBACK_BANNERS: BannerHome[] = [
     descricao: "Ativos amazônicos com ciência para cuidar da sua pele.",
     ctaTexto: "Ver todos os produtos",
     ctaUrl: "/figma/search",
-    imagemDesktop: fallbackAsset("7e507a3b-0476-4faa-a028-c4119415e917", 1600),
-    imagemMobile: fallbackAsset("5eda0e4e-b0af-4d38-9aa2-753219322bea", 800),
+    imagemDesktop: fallbackAsset("7e507a3b-0476-4faa-a028-c4119415e917", BANNER_DESKTOP_SOURCE_WIDTH),
+    imagemMobile: fallbackAsset("5eda0e4e-b0af-4d38-9aa2-753219322bea", BANNER_MOBILE_SOURCE_WIDTH),
   },
 ];
 
@@ -58,7 +61,7 @@ function assetUrl(
   const token = process.env.DIRECTUS_API_TOKEN;
   const params = new URLSearchParams({
     width: String(width),
-    quality: "82",
+    quality: String(BANNER_IMAGE_QUALITY),
     format: "webp",
     fit: "cover",
     ...(token ? { access_token: token } : {}),
@@ -90,8 +93,8 @@ export async function fetchBannersHome(): Promise<BannerHome[]> {
       descricao: r.descricao ?? undefined,
       ctaTexto: r.cta_texto ?? "",
       ctaUrl: r.cta_url ?? "/figma/search",
-      imagemDesktop: assetUrl(r.imagem_desktop, 1600, publicUrl) ?? "",
-      imagemMobile: assetUrl(r.imagem_mobile ?? r.imagem_desktop, 800, publicUrl),
+      imagemDesktop: assetUrl(r.imagem_desktop, BANNER_DESKTOP_SOURCE_WIDTH, publicUrl) ?? "",
+      imagemMobile: assetUrl(r.imagem_mobile ?? r.imagem_desktop, BANNER_MOBILE_SOURCE_WIDTH, publicUrl),
     }));
   } catch (e) {
     console.warn("[banners_home] Directus indisponível, usando fallback hardcoded:", e);

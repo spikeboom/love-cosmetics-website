@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { BannerHome } from "@/lib/cms/directus/banners";
 
 const TRANSITION_DURATION = 500;
+const BANNER_IMAGE_QUALITY = 90;
 
 const CLICK_THRESHOLD = 5; // px — abaixo disso é clique, acima é drag
 
@@ -168,6 +169,7 @@ export function BannerPrincipal({ slides }: BannerPrincipalProps) {
                   fill
                   className="object-cover"
                   sizes="100vw"
+                  quality={BANNER_IMAGE_QUALITY}
                   priority={idx === 0}
                   fetchPriority={idx === 0 ? "high" : "auto"}
                 />
@@ -239,6 +241,7 @@ export function BannerPrincipal({ slides }: BannerPrincipalProps) {
                   fill
                   className="object-cover"
                   sizes="(min-width: 1440px) 1440px, 100vw"
+                  quality={BANNER_IMAGE_QUALITY}
                   priority={idx === 0}
                   fetchPriority={idx === 0 ? "high" : "auto"}
                 />
