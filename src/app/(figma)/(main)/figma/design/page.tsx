@@ -16,6 +16,8 @@ const VitrineSection = dynamic(() =>
   { loading: () => <div className="w-full h-[480px]" /> }
 );
 
+const HERO_IMAGE_QUALITY = 90;
+
 export const metadata = {
   title: "Lové Cosméticos - Sua beleza natural",
   description: "Hidratação profunda, alívio das inflamações e rachaduras com produtos naturais e sustentáveis",
@@ -60,7 +62,7 @@ export default async function FigmaHomePage() {
 
   // Gera srcset/href compatíveis com o que <Image sizes="100vw" fill /> solicita,
   // para que o preload bata na mesma URL do fetch real.
-  const nextImg = (url: string, w: number, q = 75) =>
+  const nextImg = (url: string, w: number, q = HERO_IMAGE_QUALITY) =>
     `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=${q}`;
   const mobileWidths = [640, 750, 828, 1080, 1200, 1920];
   const desktopWidths = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
