@@ -23,6 +23,35 @@ interface FunnelData {
   dataFim: string;
 }
 
+interface IdentificacaoStep {
+  key: string;
+  label: string;
+  events: number;
+  sessions: number;
+  tests: number;
+}
+
+interface IdentificacaoData {
+  totals: {
+    events: number;
+    sessions: number;
+    tests: number;
+  };
+  steps: IdentificacaoStep[];
+  extras: IdentificacaoStep[];
+  invalidFields: Array<{ field: string; count: number }>;
+  recentErrors: Array<{
+    eventName: string;
+    label: string;
+    severity: string;
+    checkoutSessionId: string | null;
+    isTest: boolean;
+    elapsedMs: number | null;
+    payload: Record<string, unknown>;
+    createdAt: string;
+  }>;
+}
+
 const STEP_COLORS = [
   "#254333",
   "#2b4e3d",
@@ -69,6 +98,7 @@ export function FunilPanel() {
   const urlChannel = searchParams.get("funil_channel");
   const urlViewMode = searchParams.get("funil_viewMode");
   const urlExcludeTests = searchParams.get("funil_excludeTests");
+  const urlIdentIncludeTests = searchParams.get("ident_includeTests");
   const urlAutoApply = searchParams.get("funil_apply") === "1";
 
   const initialDataInicio = urlDataInicio && ISO_DATE_RE.test(urlDataInicio) ? urlDataInicio : defaultInicio;
@@ -76,15 +106,20 @@ export function FunilPanel() {
   const initialChannel = urlChannel && VALID_CHANNELS.has(urlChannel) ? urlChannel : "all";
   const initialViewMode: ViewMode = urlViewMode && VALID_VIEW_MODES.has(urlViewMode as ViewMode) ? (urlViewMode as ViewMode) : "sessions";
   const initialExcludeTests = urlExcludeTests === null ? true : urlExcludeTests === "1";
+  const initialIdentIncludeTests = urlIdentIncludeTests === "1";
 
   const [data, setData] = useState<FunnelData | null>(null);
+  const [identData, setIdentData] = useState<IdentificacaoData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [identLoading, setIdentLoading] = useState(false);
   const [error, setError] = useState("");
+  const [identError, setIdentError] = useState("");
   const [dataInicio, setDataInicio] = useState(initialDataInicio);
   const [dataFim, setDataFim] = useState(initialDataFim);
   const [channel, setChannel] = useState(initialChannel);
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const [excludeTests, setExcludeTests] = useState(initialExcludeTests);
+  const [identIncludeTests, setIdentIncludeTests] = useState(initialIdentIncludeTests);
 
   const fetchFunnel = useCallback(async (filters: {
     dataInicio: string;
@@ -111,12 +146,37 @@ export function FunilPanel() {
     }
   }, []);
 
+  const fetchIdentificacao = useCallback(async (filters: {
+    dataInicio: string;
+    dataFim: string;
+    includeTests: boolean;
+  }) => {
+    setIdentLoading(true);
+    setIdentError("");
+    try {
+      const res = await fetch(
+        `/api/admin/checkout-identificacao?dataInicio=${filters.dataInicio}&dataFim=${filters.dataFim}&includeTests=${filters.includeTests}`,
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Erro ao buscar diagnostico da identificacao");
+      }
+      const json = await res.json();
+      setIdentData(json);
+    } catch (err: unknown) {
+      setIdentError(err instanceof Error ? err.message : "Erro desconhecido");
+    } finally {
+      setIdentLoading(false);
+    }
+  }, []);
+
   const writeFiltersToUrl = useCallback((filters: {
     dataInicio: string;
     dataFim: string;
     channel: string;
     viewMode: ViewMode;
     excludeTests: boolean;
+    identIncludeTests: boolean;
   }) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", "funil");
@@ -125,14 +185,16 @@ export function FunilPanel() {
     params.set("funil_channel", filters.channel);
     params.set("funil_viewMode", filters.viewMode);
     params.set("funil_excludeTests", filters.excludeTests ? "1" : "0");
+    params.set("ident_includeTests", filters.identIncludeTests ? "1" : "0");
     params.set("funil_apply", "1");
     router.replace(`/pedidos?${params.toString()}`, { scroll: false });
   }, [router, searchParams]);
 
   const handleApply = useCallback(() => {
-    writeFiltersToUrl({ dataInicio, dataFim, channel, viewMode, excludeTests });
+    writeFiltersToUrl({ dataInicio, dataFim, channel, viewMode, excludeTests, identIncludeTests });
     fetchFunnel({ dataInicio, dataFim, channel, excludeTests });
-  }, [writeFiltersToUrl, fetchFunnel, dataInicio, dataFim, channel, viewMode, excludeTests]);
+    fetchIdentificacao({ dataInicio, dataFim, includeTests: identIncludeTests });
+  }, [writeFiltersToUrl, fetchFunnel, fetchIdentificacao, dataInicio, dataFim, channel, viewMode, excludeTests, identIncludeTests]);
 
   // Recover from re-login: if the URL already has funil_apply=1 (filters were
   // persisted before an auth redirect), auto-run the query once on mount.
@@ -147,8 +209,13 @@ export function FunilPanel() {
         channel: initialChannel,
         excludeTests: initialExcludeTests,
       });
+      fetchIdentificacao({
+        dataInicio: initialDataInicio,
+        dataFim: initialDataFim,
+        includeTests: initialIdentIncludeTests,
+      });
     }
-  }, [urlAutoApply, initialDataInicio, initialDataFim, initialChannel, initialExcludeTests, fetchFunnel]);
+  }, [urlAutoApply, initialDataInicio, initialDataFim, initialChannel, initialExcludeTests, initialIdentIncludeTests, fetchFunnel, fetchIdentificacao]);
 
   const numDays = diffDays(dataInicio, dataFim);
 
@@ -240,6 +307,24 @@ export function FunilPanel() {
                 )}
               </svg>
               Excluir testes
+            </button>
+
+            <button
+              onClick={() => setIdentIncludeTests(!identIncludeTests)}
+              className={`flex items-center gap-2 px-4 py-2 border rounded-[8px] font-cera-pro font-medium text-[14px] transition-colors cursor-pointer ${
+                identIncludeTests
+                  ? "border-[#254333] bg-[#D8F9E7] text-[#254333]"
+                  : "border-[#d2d2d2] bg-white text-[#999999]"
+              }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {identIncludeTests ? (
+                  <><rect x="3" y="3" width="18" height="18" rx="3" /><path d="M9 12l2 2 4-4" /></>
+                ) : (
+                  <rect x="3" y="3" width="18" height="18" rx="3" />
+                )}
+              </svg>
+              Ver testes identificacao
             </button>
 
             <select
@@ -453,6 +538,151 @@ export function FunilPanel() {
               })()}
             </div>
           </div>
+        </div>
+      )}
+
+      {(identData || identLoading || identError) && (
+        <div className={`bg-white rounded-[16px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3),0px_1px_3px_1px_rgba(0,0,0,0.15)] p-6 lg:p-8 transition-opacity ${identLoading ? "opacity-60" : ""}`}>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-5">
+            <div>
+              <p className="font-cera-pro font-bold text-[18px] lg:text-[20px] text-black">
+                Diagnostico da Identificacao
+              </p>
+              <p className="font-cera-pro font-light text-[12px] text-[#666666]">
+                Eventos first-party salvos no Postgres{identIncludeTests ? " incluindo testes" : " sem testes"}
+              </p>
+            </div>
+            {identData && (
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-[#f8f3ed] rounded-[8px] font-cera-pro text-[12px] text-[#333333]">
+                  {identData.totals.sessions.toLocaleString("pt-BR")} sessoes
+                </span>
+                <span className="px-3 py-1 bg-[#f8f3ed] rounded-[8px] font-cera-pro text-[12px] text-[#333333]">
+                  {identData.totals.events.toLocaleString("pt-BR")} eventos
+                </span>
+                <span className="px-3 py-1 bg-[#D8F9E7] rounded-[8px] font-cera-pro text-[12px] text-[#254333]">
+                  {identData.totals.tests.toLocaleString("pt-BR")} testes
+                </span>
+              </div>
+            )}
+          </div>
+
+          {identLoading && (
+            <div className="flex items-center py-8">
+              <SpinnerIcon className="h-6 w-6 text-[#254333]" />
+              <span className="ml-3 font-cera-pro font-light text-[14px] text-[#666666]">
+                Consultando identificacao...
+              </span>
+            </div>
+          )}
+
+          {identError && (
+            <div className="bg-red-50 rounded-[8px] p-3 mb-4">
+              <p className="font-cera-pro font-light text-[14px] text-[#B3261E]">{identError}</p>
+            </div>
+          )}
+
+          {identData && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {identData.steps.map((step) => (
+                  <div key={step.key} className="bg-[#f8f3ed] rounded-[12px] p-4">
+                    <p className="font-cera-pro font-medium text-[13px] text-[#333333]">{step.label}</p>
+                    <div className="flex items-end gap-3 mt-2">
+                      <p className="font-cera-pro font-bold text-[24px] text-[#254333]">
+                        {step.sessions.toLocaleString("pt-BR")}
+                      </p>
+                      <p className="font-cera-pro font-light text-[11px] text-[#666666] pb-1">
+                        sessoes / {step.events.toLocaleString("pt-BR")} eventos
+                      </p>
+                    </div>
+                    {step.tests > 0 && (
+                      <p className="font-cera-pro font-light text-[11px] text-[#009142] mt-1">
+                        {step.tests.toLocaleString("pt-BR")} eventos de teste
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="border border-[#e5e5e5] rounded-[12px] p-4">
+                  <p className="font-cera-pro font-bold text-[15px] text-[#333333] mb-3">
+                    Campos invalidos
+                  </p>
+                  {identData.invalidFields.length === 0 ? (
+                    <p className="font-cera-pro font-light text-[13px] text-[#666666]">
+                      Nenhuma falha de validacao registrada.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {identData.invalidFields.map((item) => (
+                        <div key={item.field} className="flex items-center justify-between">
+                          <span className="font-cera-pro font-medium text-[13px] text-[#333333]">{item.field}</span>
+                          <span className="font-cera-pro font-bold text-[13px] text-[#B3261E]">
+                            {item.count.toLocaleString("pt-BR")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border border-[#e5e5e5] rounded-[12px] p-4">
+                  <p className="font-cera-pro font-bold text-[15px] text-[#333333] mb-3">
+                    Eventos extras
+                  </p>
+                  {identData.extras.length === 0 ? (
+                    <p className="font-cera-pro font-light text-[13px] text-[#666666]">
+                      Nenhum evento extra registrado.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {identData.extras.slice(0, 8).map((item) => (
+                        <div key={item.key} className="flex items-center justify-between">
+                          <span className="font-cera-pro font-medium text-[13px] text-[#333333]">{item.label}</span>
+                          <span className="font-cera-pro font-bold text-[13px] text-[#254333]">
+                            {item.events.toLocaleString("pt-BR")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border border-[#e5e5e5] rounded-[12px] overflow-hidden">
+                <div className="px-4 py-3 bg-[#f8f3ed]">
+                  <p className="font-cera-pro font-bold text-[15px] text-[#333333]">Falhas recentes</p>
+                </div>
+                {identData.recentErrors.length === 0 ? (
+                  <p className="font-cera-pro font-light text-[13px] text-[#666666] p-4">
+                    Nenhuma falha tecnica registrada.
+                  </p>
+                ) : (
+                  <div className="divide-y divide-[#e5e5e5]">
+                    {identData.recentErrors.map((item, index) => (
+                      <div key={`${item.createdAt}-${index}`} className="grid grid-cols-1 lg:grid-cols-[1fr_120px_120px] gap-2 px-4 py-3">
+                        <div>
+                          <p className="font-cera-pro font-medium text-[13px] text-[#333333]">{item.label}</p>
+                          <p className="font-cera-pro font-light text-[11px] text-[#666666]">
+                            {new Date(item.createdAt).toLocaleString("pt-BR")}
+                            {item.elapsedMs !== null ? ` - ${item.elapsedMs}ms` : ""}
+                          </p>
+                        </div>
+                        <span className={`font-cera-pro font-medium text-[12px] ${item.severity === "error" ? "text-[#B3261E]" : "text-[#666666]"}`}>
+                          {item.severity}
+                        </span>
+                        <span className="font-cera-pro font-medium text-[12px] text-[#254333]">
+                          {item.isTest ? "teste" : "real"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
