@@ -15,6 +15,7 @@ import { useFreeShipping } from "@/hooks/useFreeShipping";
 import { isEconomicaService } from "@/core/pricing/shipping-constants";
 import { formatCEP } from "@/lib/formatters";
 import { reportCheckoutIssue } from "@/lib/checkout/report-checkout-issue";
+import { trackIdentificacaoEvent } from "@/lib/checkout/track-identificacao-event";
 import { ucAddShippingInfo, ucCheckoutStep, ucUserDataUpdate } from "../../../../_tracking/uc-ecommerce";
 
 interface FormData {
@@ -85,6 +86,10 @@ export function EntregaPageClient() {
     if (!isCartLoaded) return;
     if (firedStepEventRef.current) return;
     firedStepEventRef.current = true;
+    trackIdentificacaoEvent({
+      eventName: "identificacao_entrega_arrived",
+      payload: { has_identificacao_storage: true },
+    });
     ucCheckoutStep({ step: "entrega" });
   }, [router, cart, isCartLoaded]);
 

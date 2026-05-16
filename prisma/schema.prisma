@@ -155,6 +155,35 @@ model CheckoutAbandonado {
   @@index([step])
 }
 
+model CheckoutIdentificacaoEvent {
+  id                String   @id @default(uuid())
+  eventId           String   @unique
+  checkoutSessionId String?
+  pageInstanceId    String
+  sequenceNumber    Int?
+
+  eventName         String
+  severity          String   @default("info")
+
+  path              String?
+  referrer          String?
+  buildId           String?
+  userAgent         String?
+  ipHash            String?
+  isTest            Boolean  @default(false)
+
+  elapsedMs         Int?
+  payload           Json     @default("{}")
+  clientCreatedAt   DateTime?
+  createdAt         DateTime @default(now())
+
+  @@index([eventName, createdAt])
+  @@index([checkoutSessionId, createdAt])
+  @@index([pageInstanceId, sequenceNumber])
+  @@index([isTest, createdAt])
+  @@map("checkout_identificacao_events")
+}
+
 model ConsultaCep {
   id              String   @id @default(uuid())
 

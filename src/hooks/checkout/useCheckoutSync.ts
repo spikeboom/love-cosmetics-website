@@ -83,26 +83,32 @@ export function useCheckoutSync() {
   const inFlightRef = useRef<Set<string>>(new Set());
 
   const syncToServer = useCallback(
-    (data: CheckoutSyncData) => {
+    async (data: CheckoutSyncData) => {
+      const requests: Promise<unknown>[] = [];
+
       // Sync para o perfil do cliente logado (comportamento original)
       if (isAuthenticated && (data.identificacao || data.entrega)) {
-        fetch("/api/cliente/checkout-sync", {
+        requests.push(fetch("/api/cliente/checkout-sync", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(data),
-        }).catch(() => {});
+        }));
       }
 
       // Tracking de abandono para TODOS (logados e não-logados)
       const requestKey = `${data.step}:${data.convertido ? "1" : "0"}`;
-      if (inFlightRef.current.has(requestKey)) return;
+      if (inFlightRef.current.has(requestKey)) {
+        const results = await Promise.allSettled(requests);
+        return { ok: results.every((result) => result.status === "fulfilled") };
+      }
       inFlightRef.current.add(requestKey);
 
       const sessionId = getOrCreateSessionId();
       if (!sessionId) {
         inFlightRef.current.delete(requestKey);
-        return;
+        const results = await Promise.allSettled(requests);
+        return { ok: results.every((result) => result.status === "fulfilled") };
       }
 
       // Montar items do carrinho
@@ -158,16 +164,19 @@ export function useCheckoutSync() {
         } catch {}
       }
 
-      fetch("/api/checkout/track", {
+      requests.push(fetch("/api/checkout/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         keepalive: true,
         body: JSON.stringify(trackPayload),
-      })
-        .catch(() => {})
-        .finally(() => {
-          inFlightRef.current.delete(requestKey);
-        });
+      }));
+
+      try {
+        const results = await Promise.allSettled(requests);
+        return { ok: results.every((result) => result.status === "fulfilled") };
+      } finally {
+        inFlightRef.current.delete(requestKey);
+      }
     },
     [isAuthenticated, cart, cupons, total]
   );

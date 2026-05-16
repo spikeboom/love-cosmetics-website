@@ -2,6 +2,10 @@ import Script from "next/script";
 import { CheckoutHeader } from "./figma/checkout/CheckoutHeader";
 import { CheckoutFooter } from "./figma/checkout/CheckoutFooter";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export default function FigmaCheckoutLayout({
   children,
 }: {
