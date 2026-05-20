@@ -179,6 +179,7 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
       headers: {
         "Authorization": `Basic ${encodedCredentials}`,
         "Content-Type": "application/x-www-form-urlencoded",
+        "enable-jwt": "1",
       },
       body: requestBody,
     });
@@ -244,6 +245,7 @@ export async function refreshAccessToken(): Promise<string> {
       headers: {
         "Authorization": `Basic ${encodedCredentials}`,
         "Content-Type": "application/x-www-form-urlencoded",
+        "enable-jwt": "1",
       },
       body: requestBody,
     });

@@ -14,7 +14,7 @@ async function refreshTokenFlow(prisma, refreshToken) {
   const credentials = Buffer.from(`${BLING_CLIENT_ID}:${BLING_CLIENT_SECRET}`).toString('base64');
   const res = await fetch(BLING_TOKEN_URL, {
     method: 'POST',
-    headers: { Authorization: `Basic ${credentials}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { Authorization: `Basic ${credentials}`, 'Content-Type': 'application/x-www-form-urlencoded', 'enable-jwt': '1' },
     body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }),
   });
   const text = await res.text();
