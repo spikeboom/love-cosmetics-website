@@ -2,6 +2,7 @@
 import argon2 from "argon2";
 import { SignJWT } from "jose";
 import { NextResponse } from "next/server";
+import { getAdminCredentials } from "@/lib/admin/credentials";
 
 export const runtime = "nodejs";
 
@@ -15,9 +16,10 @@ function isProductionEnv() {
 export async function POST(req: Request) {
   const { username, password } = await req.json();
 
-  const expectedUsername = process.env.ADMIN_USERNAME || "admin";
-  const passwordHash = process.env.ADMIN_PASSWORD_HASH;
-  const passwordPlain = process.env.ADMIN_PASSWORD;
+  const credentials = await getAdminCredentials();
+  const expectedUsername = credentials.username;
+  const passwordHash = credentials.passwordHash;
+  const passwordPlain = credentials.passwordPlain;
   const jwtSecretRaw = process.env.ADMIN_JWT_SECRET;
 
   // Fail-fast in production if auth is not configured.
@@ -65,4 +67,3 @@ export async function POST(req: Request) {
 
   return response;
 }
-
