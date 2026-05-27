@@ -25,6 +25,7 @@ async function refreshTokenFlow(prisma, refreshToken) {
     headers: {
       Authorization: `Basic ${credentials}`,
       'Content-Type': 'application/x-www-form-urlencoded',
+      'enable-jwt': '1',
     },
     body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }),
   });
