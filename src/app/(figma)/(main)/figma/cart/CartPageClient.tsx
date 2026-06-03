@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useCart, useCoupon, useShipping, useCartTotals } from "@/contexts";
 import { VitrineSection } from "../components/VitrineSection";
 import { CertificadosSection } from "../components/CertificadosSection";
@@ -13,19 +12,13 @@ import { CartSummary } from "./CartSummary";
 import { CartLoadingSkeleton } from "@/components/cart/CartLoadingSkeleton";
 import Link from "next/link";
 import { ucBeginCheckout, ucViewCart } from "../../../_tracking/uc-ecommerce";
-
-function getCupomCodigo(cupom: unknown): string | undefined {
-  if (!cupom || typeof cupom !== "object") return undefined;
-  const codigo = (cupom as Record<string, unknown>).codigo;
-  return typeof codigo === "string" ? codigo : undefined;
-}
+import { buildYampiCheckoutUrl } from "@/lib/yampi/checkout-url";
 
 interface CartPageClientProps {
   produtos: unknown[];
 }
 
 export function CartPageClient({ produtos }: CartPageClientProps) {
-  const router = useRouter();
   const firedViewCartRef = useRef(false);
 
   // Novos hooks segmentados
@@ -79,13 +72,25 @@ export function CartPageClient({ produtos }: CartPageClientProps) {
   }, [isCartLoaded, cartItemsForTracking, total]);
 
   const handleCheckout = () => {
+    const coupon = "99";
+    const checkoutUrl = buildYampiCheckoutUrl(cartArray as any[], coupon);
+
+    if (!checkoutUrl) {
+      console.error("[Yampi Checkout] Nao foi possivel montar a URL de checkout", {
+        cart: cartArray,
+        coupon,
+      });
+      window.alert("Nao foi possivel iniciar o checkout. Verifique os produtos do carrinho.");
+      return;
+    }
+
     ucBeginCheckout({
       items: cartItemsForTracking,
       value: total,
-      coupon: cupons?.map(getCupomCodigo).filter(Boolean).join(",") || undefined,
+      coupon,
       shipping: hasCalculated ? freightValue : undefined,
     });
-    router.push("/figma/checkout");
+    window.location.assign(checkoutUrl);
   };
 
   // Mostrar loading enquanto carrega do localStorage
