@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/contexts";
-import { useAuth } from "@/contexts/AuthContext";
 import { Gift, Sparkles, LayoutGrid, BookOpen } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import RotatingAnnouncementBar from "./RotatingAnnouncementBar";
@@ -34,7 +33,6 @@ export function Header({ produtos = [] }: HeaderProps) {
       text: `🚚 Frete grátis acima de R$ ${Math.floor(freteGratisValor)}`,
     },
   ];
-  const { isLoggedIn } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -86,24 +84,22 @@ export function Header({ produtos = [] }: HeaderProps) {
 
         {/* Ações - Menu/Carrinho (mobile) / Entrar e Carrinho (desktop) */}
         <div className="flex lg:gap-[32px] gap-3 items-center shrink-0">
-          {/* Entrar/Minha Conta - Desktop only */}
+          {/* Entrar - Desktop only */}
           <Link
-            href={isLoggedIn ? "/figma/minha-conta/pedidos" : "/figma/entrar"}
+            href="https://seguro.lovecosmetics.com.br/minha-conta"
             className="hidden lg:flex gap-[4px] items-center"
           >
             <div className="w-[21px] h-[21px] relative shrink-0">
               <Image
                 src="/new-home/header/person-icon.svg"
-                alt={isLoggedIn ? "Minha Conta" : "Entrar"}
+                alt="Entrar"
                 width={32}
                 height={32}
               />
             </div>
-            {!isLoggedIn && (
-              <p className="font-cera-pro font-bold text-[20px] text-white whitespace-nowrap leading-[normal]">
-                Entrar
-              </p>
-            )}
+            <p className="font-cera-pro font-bold text-[20px] text-white whitespace-nowrap leading-[normal]">
+              Entrar
+            </p>
           </Link>
 
           {/* Carrinho com badge */}
@@ -186,13 +182,13 @@ export function Header({ produtos = [] }: HeaderProps) {
           {/* Links Mobile */}
           <nav className="flex flex-col">
             <Link
-              href={isLoggedIn ? "/figma/minha-conta/pedidos" : "/figma/entrar"}
+              href="https://seguro.lovecosmetics.com.br/minha-conta"
               className="flex gap-3 items-center px-4 py-3 border-b border-gray-100 active:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
               <Image src="/new-home/header/person-icon.svg" alt="" width={20} height={20} />
               <span className="font-cera-pro font-light text-base text-black">
-                {isLoggedIn ? "Minha Conta" : "Entrar"}
+                Entrar
               </span>
             </Link>
 
