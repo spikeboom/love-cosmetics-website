@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/utils/logMessage";
 import { validateYampiWebhookSignature } from "@/lib/yampi/webhook-signature";
@@ -42,9 +43,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: unknown;
+  let body: Prisma.InputJsonValue;
   try {
-    body = JSON.parse(rawBody);
+    body = JSON.parse(rawBody) as Prisma.InputJsonValue;
   } catch {
     logMessage("Webhook Yampi recebido com body nao-JSON", {
       bodyPreview: rawBody.slice(0, 200),
@@ -54,15 +55,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const event = getWebhookEvent(body);
+    const info: Prisma.InputJsonObject = {
+      provider: "yampi",
+      event,
+      signature_validated: true,
+      payload: body,
+    };
 
     await prisma.statusCheckout.create({
       data: {
-        info: {
-          provider: "yampi",
-          event,
-          signature_validated: true,
-          payload: body,
-        },
+        info,
       },
     });
 
