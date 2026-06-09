@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import CoCriacaoFormClient from "./CoCriacaoFormClient";
+import FormularioOptionsClient from "./FormularioOptionsClient";
 
 export const metadata: Metadata = {
   title: "Pesquisa Nova Lovè",
@@ -41,7 +41,7 @@ export default function FormularioLandingPagesPage() {
           </p>
         </div>
 
-        <CoCriacaoFormClient />
+        <FormularioOptionsClient />
       </section>
     </main>
   );
