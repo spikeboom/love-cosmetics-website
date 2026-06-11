@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Gift, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ctaLabel, type LandingVariant } from "./content";
 
 interface CoCriacaoLandingClientProps {
@@ -39,75 +39,72 @@ export default function CoCriacaoLandingClient({
         </div>
       </header>
 
-      <section className="relative isolate min-h-[calc(100svh-89px)] overflow-hidden lg:min-h-[calc(100vh-105px)]">
-        <Image
-          src={variant.heroImage.mobile}
-          alt={variant.heroImage.alt}
-          fill
-          priority
-          className="object-cover md:hidden"
-          sizes="100vw"
-        />
-        <Image
-          src={variant.heroImage.desktop}
-          alt={variant.heroImage.alt}
-          fill
-          priority
-          className="hidden object-cover md:block"
-          sizes="100vw"
-        />
+      <section className="relative w-full bg-white">
+        <div className="lg:hidden">
+          <div className="relative h-[234px] w-full overflow-hidden sm:h-[320px]">
+            <Image
+              src={variant.heroImage.mobile}
+              alt={variant.heroImage.alt}
+              fill
+              priority
+              className="object-cover object-center"
+              sizes="100vw"
+            />
+          </div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-[#07150f]/72 via-[#07150f]/38 to-[#07150f]/78 md:bg-gradient-to-r md:from-[#07150f]/78 md:via-[#07150f]/42 md:to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#f7f3ee] to-transparent" />
-
-        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-89px)] max-w-[1200px] items-end px-4 pb-10 pt-12 lg:min-h-[calc(100vh-105px)] lg:items-center lg:px-8 lg:py-16">
-          <div className="max-w-[760px] text-white">
-            <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-lg border border-white/25 bg-white/12 px-3 py-2 font-cera-pro text-sm font-bold text-white backdrop-blur-md">
-              <CheckCircle2 size={18} aria-hidden="true" />
-              Movimento de Co-criação da Nova Lovè
+          <div className="flex flex-col gap-5 px-4 pb-8 pt-5">
+            <div className="flex flex-col gap-4">
+              <h1 className="font-times text-[32px] font-bold leading-none text-black">
+                {variant.headline}
+              </h1>
+              <p className="font-cera-pro text-[15px] font-light leading-[1.55] text-[#40544b]">
+                {variant.subheadline}
+              </p>
             </div>
 
-            <h1 className="font-times text-[40px] font-bold leading-[1.03] text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.35)] lg:text-[72px]">
-              {variant.headline}
-            </h1>
-
-            <p className="mt-5 max-w-[620px] font-cera-pro text-lg font-light leading-[1.55] text-white/90 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] lg:text-xl">
-              {variant.subheadline}
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 href={formHref}
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-white px-6 py-4 font-cera-pro text-base font-bold text-[#254333] shadow-lg shadow-black/20 transition hover:bg-[#f7f3ee]"
+                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#254333] px-5 py-3 font-cera-pro text-sm font-bold leading-5 text-white transition hover:bg-[#1a3024]"
               >
                 {ctaLabel}
-                <ArrowRight size={20} aria-hidden="true" />
+                <ArrowRight size={18} aria-hidden="true" />
               </Link>
+            </div>
+          </div>
+        </div>
 
-              <a
-                href="#movimento"
-                className="inline-flex min-h-[52px] items-center justify-center rounded-lg border border-white/35 bg-white/10 px-6 py-4 font-cera-pro text-base font-bold text-white backdrop-blur-md transition hover:bg-white/18"
-              >
-                Entender o movimento
-              </a>
+        <div className="hidden lg:block">
+          <div className="relative h-[534px] w-full">
+            <div className="relative h-[500px] w-full overflow-hidden">
+              <Image
+                src={variant.heroImage.desktop}
+                alt={variant.heroImage.alt}
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="(min-width: 1440px) 1440px, 100vw"
+              />
             </div>
 
-            <div className="mt-7 grid max-w-[520px] grid-cols-2 gap-3">
-              <div className="rounded-lg border border-white/20 bg-white/12 p-3 backdrop-blur-md">
-                <p className="font-cera-pro text-xs font-light text-white/75">
-                  Pesquisa
-                </p>
-                <p className="font-cera-pro text-sm font-bold">
-                  Skincare e inovação
+            <div className="absolute right-[32px] top-[48px] flex w-[600px] max-w-[calc(100%-64px)] flex-col gap-5 bg-white/80 p-7 backdrop-blur-sm xl:right-[80px]">
+              <div className="flex flex-col gap-5">
+                <h1 className="font-times text-[52px] font-bold leading-none text-black">
+                  {variant.headline}
+                </h1>
+                <p className="font-cera-pro text-[24px] font-light leading-[1.18] text-black">
+                  {variant.subheadline}
                 </p>
               </div>
-              <div className="rounded-lg border border-white/20 bg-white/12 p-3 backdrop-blur-md">
-                <p className="font-cera-pro text-xs font-light text-white/75">
-                  Seleção
-                </p>
-                <p className="font-cera-pro text-sm font-bold">
-                  Produto para testar
-                </p>
+
+              <div className="flex items-center gap-5">
+                <Link
+                  href={formHref}
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#254333] px-6 py-4 font-cera-pro text-base font-normal leading-6 tracking-[0.15px] text-white transition hover:bg-[#1a3024]"
+                >
+                  {ctaLabel}
+                  <ArrowRight size={20} aria-hidden="true" />
+                </Link>
               </div>
             </div>
           </div>
@@ -138,49 +135,7 @@ export default function CoCriacaoLandingClient({
               Os participantes selecionados receberão um produto Lovè para
               testar e compartilhar sua opinião.
             </p>
-
-            <div className="grid gap-3 pt-2 sm:grid-cols-3">
-              <div className="rounded-lg border border-[#254333]/12 bg-[#f7f3ee] p-4">
-                <Users className="mb-3 text-[#254333]" size={24} aria-hidden="true" />
-                <p className="font-cera-pro text-sm font-bold text-[#254333]">
-                  Pesquisa com consumidoras reais
-                </p>
-              </div>
-              <div className="rounded-lg border border-[#254333]/12 bg-[#f7f3ee] p-4">
-                <Gift className="mb-3 text-[#a56c34]" size={24} aria-hidden="true" />
-                <p className="font-cera-pro text-sm font-bold text-[#254333]">
-                  Produto Lovè para selecionadas
-                </p>
-              </div>
-              <div className="rounded-lg border border-[#254333]/12 bg-[#f7f3ee] p-4">
-                <CheckCircle2 className="mb-3 text-[#2f7d58]" size={24} aria-hidden="true" />
-                <p className="font-cera-pro text-sm font-bold text-[#254333]">
-                  Opinião aplicada no desenvolvimento
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-[1200px] px-4 py-12 lg:px-8">
-        <div className="flex flex-col items-start justify-between gap-5 rounded-lg bg-[#254333] p-6 text-white lg:flex-row lg:items-center lg:p-8">
-          <div>
-            <p className="font-cera-pro text-sm font-bold uppercase tracking-[0.12em] text-white/65">
-              Pesquisa Lovè
-            </p>
-            <h2 className="mt-2 font-times text-[30px] font-bold leading-[1.1] lg:text-[42px]">
-              Participe da construção da Nova Lovè
-            </h2>
-          </div>
-
-          <Link
-            href={formHref}
-            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-white px-6 py-4 font-cera-pro text-base font-bold text-[#254333] transition hover:bg-[#f7f3ee]"
-          >
-            Responder pesquisa
-            <ArrowRight size={20} aria-hidden="true" />
-          </Link>
         </div>
       </section>
     </main>

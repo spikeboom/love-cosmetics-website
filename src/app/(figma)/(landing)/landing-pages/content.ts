@@ -23,8 +23,8 @@ export const landingVariants: Record<LandingVariantId, LandingVariant> = {
     headline: "Biotecnologia Amazônica de Alta Performance",
     subheadline: "Transformando a Amazônia em Ciência aplicada à pele.",
     heroImage: {
-      desktop: "/landing-pages/biotecnologia-desktop.png",
-      mobile: "/landing-pages/biotecnologia-mobile.png",
+      desktop: "/landing-pages/hero/biotecnologia-amazonica-desktop.webp",
+      mobile: "/landing-pages/hero/biotecnologia-amazonica-mobile.webp",
       alt: "Banner conceitual de biotecnologia amazônica aplicada ao skincare",
     },
   },
@@ -36,8 +36,8 @@ export const landingVariants: Record<LandingVariantId, LandingVariant> = {
     subheadline:
       "Menos produtos, mais resultados: uma rotina essencial enriquecida pelos bioativos mais poderosos da Amazônia.",
     heroImage: {
-      desktop: "/landing-pages/amazonia-desktop.png",
-      mobile: "/landing-pages/amazonia-mobile.png",
+      desktop: "/landing-pages/hero/poder-da-amazonia-desktop.webp",
+      mobile: "/landing-pages/hero/poder-da-amazonia-mobile.webp",
       alt: "Banner conceitual de rotina de skincare com bioativos amazônicos",
     },
   },
@@ -49,36 +49,9 @@ export const landingVariants: Record<LandingVariantId, LandingVariant> = {
     subheadline:
       "O encontro entre pesquisa científica e biodiversidade amazônica para criar uma nova geração de skincare.",
     heroImage: {
-      desktop: "/landing-pages/ciencia-desktop.png",
-      mobile: "/landing-pages/ciencia-mobile.png",
+      desktop: "/landing-pages/hero/ciencia-da-amazonia-desktop.webp",
+      mobile: "/landing-pages/hero/ciencia-da-amazonia-mobile.webp",
       alt: "Banner conceitual de pesquisa científica amazônica para skincare",
     },
   },
 };
-
-export const purchaseInfluenceOptions = [
-  "Resultados visíveis na pele",
-  "Confiança científica nos produtos",
-  "Ingredientes amazônicos exclusivos",
-  "Uma rotina mais simples e prática",
-  "Sustentabilidade da marca",
-  "Exclusividade e experiência premium",
-];
-
-export const proposalOptions = [
-  {
-    value: "A",
-    title: "Biotecnologia Amazônica de Alta Performance",
-    description: "Resultados comprovados por ciência e inovação.",
-  },
-  {
-    value: "B",
-    title: "O Poder da Amazônia no seu Skincare Diário",
-    description: "Uma rotina simples conectada à riqueza da Amazônia.",
-  },
-  {
-    value: "C",
-    title: "Ciência da Amazônia para a Sua Pele",
-    description: "A união entre pesquisa científica e biodiversidade amazônica.",
-  },
-];
