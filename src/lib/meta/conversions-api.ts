@@ -19,6 +19,9 @@ type LandingPageVisitRecord = {
   utmCampaign: string | null;
   utmContent: string | null;
   utmTerm: string | null;
+  utmId: string | null;
+  metaAdId: string | null;
+  metaAdsetId: string | null;
   siteOrigin: string | null;
 };
 
@@ -39,6 +42,9 @@ type MetaCompleteRegistrationArgs = {
     utmCampaign?: string;
     utmContent?: string;
     utmTerm?: string;
+    utmId?: string;
+    metaAdId?: string;
+    metaAdsetId?: string;
   };
 };
 
@@ -76,6 +82,16 @@ function pickEventSourceUrl(visit: LandingPageVisitRecord | null, args: MetaComp
   return undefined;
 }
 
+function pickUrlSearchParam(url: string | null | undefined, key: string) {
+  if (!url) return undefined;
+
+  try {
+    return new URL(url).searchParams.get(key) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function findLandingPageVisit(visitorId: string | undefined) {
   if (!visitorId) return null;
 
@@ -97,6 +113,9 @@ async function findLandingPageVisit(visitorId: string | undefined) {
       "utmCampaign",
       "utmContent",
       "utmTerm",
+      "utmId",
+      "metaAdId",
+      "metaAdsetId",
       "siteOrigin"
     FROM "landing_page_visits"
     WHERE "visitorId" = ${visitorId}
@@ -145,6 +164,16 @@ export async function sendMetaCompleteRegistration(
     ? Math.floor(new Date(args.submittedAt).getTime() / 1000)
     : Math.floor(Date.now() / 1000);
   const eventSourceUrl = pickEventSourceUrl(visit, args);
+  const utmId =
+    visit?.utmId || pickUrlSearchParam(visit?.landingUrl, "utm_id") || args.fallback.utmId;
+  const metaAdId =
+    visit?.metaAdId ||
+    pickUrlSearchParam(visit?.landingUrl, "meta_ad_id") ||
+    args.fallback.metaAdId;
+  const metaAdsetId =
+    visit?.metaAdsetId ||
+    pickUrlSearchParam(visit?.landingUrl, "meta_adset_id") ||
+    args.fallback.metaAdsetId;
 
   const userData = stripUndefined({
     em: args.email ? [await sha256Hex(args.email)] : undefined,
@@ -177,6 +206,9 @@ export async function sendMetaCompleteRegistration(
       utm_campaign: visit?.utmCampaign || args.fallback.utmCampaign,
       utm_content: visit?.utmContent || args.fallback.utmContent,
       utm_term: visit?.utmTerm || args.fallback.utmTerm,
+      utm_id: utmId,
+      meta_ad_id: metaAdId,
+      meta_adset_id: metaAdsetId,
     },
   });
 

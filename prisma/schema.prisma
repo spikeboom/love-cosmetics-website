@@ -203,6 +203,9 @@ model LandingPageVisit {
   utmCampaign     String?
   utmContent      String?
   utmTerm         String?
+  utmId           String?
+  metaAdId        String?
+  metaAdsetId     String?
   siteEnvironment String?
   siteHost        String?
   siteOrigin      String?
@@ -215,6 +218,9 @@ model LandingPageVisit {
   @@index([visitorId])
   @@index([utmCampaign])
   @@index([utmContent])
+  @@index([utmId])
+  @@index([metaAdId])
+  @@index([metaAdsetId])
   @@index([createdAt])
   @@map("landing_page_visits")
 }

@@ -58,6 +58,10 @@ function getUtmProperties() {
     utm_campaign: params.get("utm_campaign") || undefined,
     utm_content: params.get("utm_content") || undefined,
     utm_term: params.get("utm_term") || undefined,
+    utm_id: params.get("utm_id") || undefined,
+    meta_ad_id: params.get("meta_ad_id") || undefined,
+    meta_adset_id: params.get("meta_adset_id") || undefined,
+    fbclid: params.get("fbclid") || undefined,
   };
 }
 
@@ -105,6 +109,9 @@ function getLandingVisitPayload(properties: LandingVisitProperties) {
     utmCampaign: params.get("utm_campaign") || undefined,
     utmContent: params.get("utm_content") || undefined,
     utmTerm: params.get("utm_term") || undefined,
+    utmId: params.get("utm_id") || undefined,
+    metaAdId: params.get("meta_ad_id") || undefined,
+    metaAdsetId: params.get("meta_adset_id") || undefined,
     siteEnvironment: properties.site_environment,
     siteHost: properties.site_host,
     siteOrigin: properties.site_origin,

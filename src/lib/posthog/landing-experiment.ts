@@ -66,6 +66,10 @@ export function buildLandingUtmProperties(
     utm_campaign: pickFirstSearchParam(params.utm_campaign),
     utm_content: pickFirstSearchParam(params.utm_content),
     utm_term: pickFirstSearchParam(params.utm_term),
+    utm_id: pickFirstSearchParam(params.utm_id),
+    meta_ad_id: pickFirstSearchParam(params.meta_ad_id),
+    meta_adset_id: pickFirstSearchParam(params.meta_adset_id),
+    fbclid: pickFirstSearchParam(params.fbclid),
   };
 }
 
