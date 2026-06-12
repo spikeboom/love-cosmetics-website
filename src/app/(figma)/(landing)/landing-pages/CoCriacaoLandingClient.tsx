@@ -16,25 +16,20 @@ export default function CoCriacaoLandingClient({
 
   return (
     <main className="min-h-screen bg-[#f7f3ee] text-[#1b1b1b]">
-      <header className="border-b border-[#254333]/10 bg-[#254333]">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 lg:px-8">
-          <Link href="/" className="inline-flex items-center">
-            <Image
-              src="/new-home/header/logo.png"
-              alt="Lovè Cosméticos"
-              width={92}
-              height={74}
-              priority
-              className="h-[56px] w-auto object-contain lg:h-[72px]"
-            />
-          </Link>
-
+      <header className="w-full bg-[#254333]">
+        <div className="relative flex h-[64px] w-full items-center justify-start px-4 py-0 lg:h-[120px] lg:px-[32px]">
           <Link
-            href={formHref}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 font-cera-pro text-sm font-bold text-[#254333] transition hover:bg-[#f7f3ee]"
+            href="/"
+            className="relative h-[34px] w-[72px] shrink-0 lg:h-[67px] lg:w-[141px]"
           >
-            Participar
-            <ArrowRight size={16} aria-hidden="true" />
+            <Image
+              src="/landing-pages/logo-love-cosmeticos-amazonia.webp"
+              alt="Love Cosméticos da Amazônia"
+              priority
+              className="object-contain"
+              fill
+              sizes="(max-width: 1024px) 72px, 141px"
+            />
           </Link>
         </div>
       </header>
@@ -61,16 +56,6 @@ export default function CoCriacaoLandingClient({
                 {variant.subheadline}
               </p>
             </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link
-                href={formHref}
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#254333] px-5 py-3 font-cera-pro text-sm font-bold leading-5 text-white transition hover:bg-[#1a3024]"
-              >
-                {ctaLabel}
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
           </div>
         </div>
 
@@ -95,16 +80,6 @@ export default function CoCriacaoLandingClient({
                 <p className="font-cera-pro text-[24px] font-light leading-[1.18] text-black">
                   {variant.subheadline}
                 </p>
-              </div>
-
-              <div className="flex items-center gap-5">
-                <Link
-                  href={formHref}
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#254333] px-6 py-4 font-cera-pro text-base font-normal leading-6 tracking-[0.15px] text-white transition hover:bg-[#1a3024]"
-                >
-                  {ctaLabel}
-                  <ArrowRight size={20} aria-hidden="true" />
-                </Link>
               </div>
             </div>
           </div>
@@ -136,6 +111,18 @@ export default function CoCriacaoLandingClient({
               testar e compartilhar sua opinião.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className="bg-[#254333] px-4 py-10 lg:px-8 lg:py-14">
+        <div className="mx-auto flex max-w-[1200px] justify-center">
+          <Link
+            href={formHref}
+            className="inline-flex min-h-[56px] w-full max-w-[560px] items-center justify-center gap-2 rounded-lg bg-white px-5 py-4 text-center font-cera-pro text-sm font-bold leading-5 text-[#254333] transition hover:bg-[#f7f3ee] sm:text-base"
+          >
+            {ctaLabel}
+            <ArrowRight size={18} aria-hidden="true" />
+          </Link>
         </div>
       </section>
     </main>

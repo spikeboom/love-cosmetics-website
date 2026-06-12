@@ -13,7 +13,8 @@ export interface LandingVariant {
   };
 }
 
-export const ctaLabel = "Quero participar da construção da Nova Lovè";
+export const ctaLabel =
+  "Quero ajudar a criar os novos cosméticos da Amazônia";
 
 export const landingVariants: Record<LandingVariantId, LandingVariant> = {
   lp1: {
