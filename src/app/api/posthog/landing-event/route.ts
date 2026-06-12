@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { captureLandingEvent } from "@/lib/posthog/server";
 import {
+  buildLandingSiteProperties,
   LANDING_EXPERIMENT_COOKIE_NAME,
   landingExperimentProposalByVariant,
 } from "@/lib/posthog/landing-experiment";
@@ -18,6 +19,9 @@ const landingEventSchema = z.object({
   destination: z.string().trim().max(300).optional(),
   referrer: z.string().trim().max(500).optional(),
   device: z.enum(["mobile", "tablet", "desktop"]).optional(),
+  site_environment: z.enum(["local", "dev", "production", "unknown"]).optional(),
+  site_host: z.string().trim().max(180).optional(),
+  site_origin: z.string().trim().max(300).optional(),
   utm_source: z.string().trim().max(120).optional(),
   utm_medium: z.string().trim().max(120).optional(),
   utm_campaign: z.string().trim().max(160).optional(),
@@ -47,6 +51,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = parsed.data;
+  const siteProperties = buildLandingSiteProperties({
+    host: request.headers.get("x-forwarded-host") || request.headers.get("host"),
+    protocol: request.headers.get("x-forwarded-proto"),
+    origin: request.headers.get("origin"),
+  });
   const variant = body.variant;
   if (!variant) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -68,6 +77,9 @@ export async function POST(request: NextRequest) {
       destination: body.destination,
       referrer: body.referrer,
       device: body.device,
+      site_environment: body.site_environment || siteProperties.site_environment,
+      site_host: body.site_host || siteProperties.site_host,
+      site_origin: body.site_origin || siteProperties.site_origin,
       utm_source: body.utm_source,
       utm_medium: body.utm_medium,
       utm_campaign: body.utm_campaign,

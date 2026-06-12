@@ -9,6 +9,7 @@ import {
   initLandingPostHog,
   trackLandingClientEvent,
 } from "@/lib/posthog/landing-client";
+import type { LandingSiteProperties } from "@/lib/posthog/landing-experiment";
 
 interface CoCriacaoLandingClientProps {
   variant: LandingVariant;
@@ -17,6 +18,7 @@ interface CoCriacaoLandingClientProps {
     assignmentSource: string;
     distinctId?: string;
     pathname: string;
+    siteProperties: LandingSiteProperties;
   };
 }
 
@@ -142,6 +144,7 @@ export default function CoCriacaoLandingClient({
                 assignment_source: trackingContext?.assignmentSource,
                 pathname: trackingContext?.pathname,
                 destination: formHref,
+                ...trackingContext?.siteProperties,
               })
             }
             className="inline-flex min-h-[56px] w-full max-w-[560px] items-center justify-center gap-2 rounded-lg bg-white px-5 py-4 text-center font-cera-pro text-sm font-bold leading-5 text-[#254333] transition hover:bg-[#f7f3ee] sm:text-base"

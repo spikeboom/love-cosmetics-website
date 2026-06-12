@@ -4,6 +4,7 @@ import posthog from "posthog-js";
 import {
   isLandingExperimentVariant,
   landingExperimentProposalByVariant,
+  type LandingSiteEnvironment,
   type LandingExperimentVariantId,
 } from "./landing-experiment";
 
@@ -14,6 +15,9 @@ type LandingClientEventProperties = {
   assignment_source?: string;
   pathname?: string;
   destination?: string;
+  site_environment?: LandingSiteEnvironment;
+  site_host?: string;
+  site_origin?: string;
 };
 
 let postHogInitialized = false;
@@ -78,6 +82,9 @@ export function trackLandingClientEvent(
       : undefined,
     pathname: properties.pathname || window.location.pathname,
     destination: properties.destination,
+    site_environment: properties.site_environment,
+    site_host: properties.site_host,
+    site_origin: properties.site_origin,
     referrer: document.referrer || undefined,
     device: getDevice(),
     ...getUtmProperties(),

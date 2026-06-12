@@ -3,6 +3,7 @@
 import { ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { trackLandingClientEvent } from "@/lib/posthog/landing-client";
+import { buildLandingSiteProperties } from "@/lib/posthog/landing-experiment";
 
 const defaultGoogleFormViewUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSeKrVlVskWt-YYfFVMRZEMKGtoHpZe01st9f7q9JzTCeS0fRA/viewform?usp=header";
@@ -38,6 +39,11 @@ export default function FormularioOptionsClient({
     const params = new URLSearchParams(window.location.search);
     const variant = params.get("variant");
     const url = new URL(googleFormEmbedUrl);
+    const siteProperties = buildLandingSiteProperties({
+      host: window.location.host,
+      protocol: window.location.protocol.replace(":", ""),
+      origin: window.location.origin,
+    });
 
     if (variant) {
       url.searchParams.set("usp", "pp_url");
@@ -52,6 +58,7 @@ export default function FormularioOptionsClient({
       utm_content: params.get("utm_content"),
       utm_term: params.get("utm_term"),
       return_url: googleFormsReturnUrl,
+      ...siteProperties,
     };
 
     if (googleFormTrackingContextEntryId) {
@@ -66,6 +73,7 @@ export default function FormularioOptionsClient({
       trackLandingClientEvent("form_started", {
         variant,
         pathname: window.location.pathname,
+        ...siteProperties,
       });
     }
 

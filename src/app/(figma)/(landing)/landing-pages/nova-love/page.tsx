@@ -4,6 +4,7 @@ import CoCriacaoLandingClient from "../CoCriacaoLandingClient";
 import { landingVariants } from "../content";
 import {
   buildFormQueryString,
+  buildLandingSiteProperties,
   buildLandingUtmProperties,
   LANDING_EXPERIMENT_COOKIE_NAME,
   LANDING_EXPERIMENT_ROUTE,
@@ -37,6 +38,11 @@ export default async function NovaLovePage({ searchParams }: NovaLovePageProps) 
   const params = await searchParams;
   const requestHeaders = await headers();
   const cookieStore = await cookies();
+  const siteProperties = buildLandingSiteProperties({
+    host:
+      requestHeaders.get("x-forwarded-host") || requestHeaders.get("host"),
+    protocol: requestHeaders.get("x-forwarded-proto"),
+  });
   const distinctId =
     requestHeaders.get("x-nl-variant-user-id") ||
     cookieStore.get(LANDING_EXPERIMENT_COOKIE_NAME)?.value ||
@@ -58,6 +64,7 @@ export default async function NovaLovePage({ searchParams }: NovaLovePageProps) 
       proposal: landingExperimentProposalByVariant[assignment.variant],
       assignment_source: assignment.source,
       pathname: LANDING_EXPERIMENT_ROUTE,
+      ...siteProperties,
       ...utmProperties,
     },
   });
@@ -74,6 +81,7 @@ export default async function NovaLovePage({ searchParams }: NovaLovePageProps) 
         assignmentSource: assignment.source,
         distinctId,
         pathname: LANDING_EXPERIMENT_ROUTE,
+        siteProperties,
       }}
     />
   );

@@ -32,13 +32,14 @@ function ensureTrackingFields() {
   const legacyTrackingTitles = [
     "visitor_id",
     "variant",
+    "tracking_context",
     "utm_source",
     "utm_medium",
     "utm_campaign",
     "utm_content",
     "utm_term",
   ];
-  const trackingTitles = ["tracking_context"];
+  const trackingTitles = ["NAO PREENCHA - TRACKING_CONTEXT"];
 
   const existingTitles = {};
   form.getItems().forEach(function (item) {
@@ -65,7 +66,7 @@ function logTrackingPrefillUrl() {
 
   const form = FormApp.getActiveForm();
   const values = {
-    tracking_context: JSON.stringify({
+    "NAO PREENCHA - TRACKING_CONTEXT": JSON.stringify({
       visitor_id: "VISITOR_ID_TEST",
       variant: "VARIANT_TEST",
       utm_source: "UTM_SOURCE_TEST",
@@ -74,6 +75,9 @@ function logTrackingPrefillUrl() {
       utm_content: "UTM_CONTENT_TEST",
       utm_term: "UTM_TERM_TEST",
       return_url: "https://outmoded-clair-pectic.ngrok-free.dev/api/posthog/google-form-submit",
+      site_environment: "local",
+      site_host: "localhost:3000",
+      site_origin: "http://localhost:3000",
     }),
   };
 
@@ -89,7 +93,7 @@ function logTrackingPrefillUrl() {
 }
 
 function getWebhookUrlFromAnswers(answers, fallbackUrl) {
-  const rawTrackingContext = answers.tracking_context;
+  const rawTrackingContext = getTrackingContextFromAnswers(answers);
   if (!rawTrackingContext) return fallbackUrl;
 
   let trackingContext;
@@ -109,6 +113,35 @@ function getWebhookUrlFromAnswers(answers, fallbackUrl) {
   ];
 
   return allowedUrls.indexOf(returnUrl) >= 0 ? returnUrl : fallbackUrl;
+}
+
+function normalizeAnswerKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function getTrackingContextFromAnswers(answers) {
+  const preferredKeys = [
+    "NAO PREENCHA - TRACKING_CONTEXT",
+    "tracking_context",
+    "tracking context",
+  ];
+
+  for (let i = 0; i < preferredKeys.length; i += 1) {
+    if (answers[preferredKeys[i]]) return answers[preferredKeys[i]];
+  }
+
+  const keys = Object.keys(answers);
+  for (let j = 0; j < keys.length; j += 1) {
+    const normalizedKey = normalizeAnswerKey(keys[j]);
+    if (normalizedKey.indexOf("tracking_context") >= 0) {
+      return answers[keys[j]];
+    }
+  }
+
+  return undefined;
 }
 
 function onFormSubmitPostHog(event) {

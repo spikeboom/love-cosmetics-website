@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { captureLandingEvent } from "@/lib/posthog/server";
 import {
+  buildLandingSiteProperties,
+  buildLandingSitePropertiesFromUrl,
   isLandingExperimentVariant,
   landingExperimentProposalByVariant,
   type LandingExperimentVariantId,
@@ -54,6 +56,9 @@ const trackingContextSchema = z
     utm_content: z.string().trim().optional(),
     utm_term: z.string().trim().optional(),
     return_url: z.string().trim().optional(),
+    site_environment: z.enum(["local", "dev", "production", "unknown"]).optional(),
+    site_host: z.string().trim().optional(),
+    site_origin: z.string().trim().optional(),
   })
   .passthrough();
 
@@ -150,6 +155,12 @@ function pickDistinctId({
   );
 }
 
+function pickKnownSiteEnvironment(
+  ...values: Array<"local" | "dev" | "production" | "unknown" | undefined>
+) {
+  return values.find((value) => value && value !== "unknown") || "unknown";
+}
+
 export async function POST(request: NextRequest) {
   const contentLengthHeader = request.headers.get("content-length");
   if (contentLengthHeader) {
@@ -198,6 +209,30 @@ export async function POST(request: NextRequest) {
   const variant = isLandingExperimentVariant(rawVariant)
     ? rawVariant
     : inferVariantFromProposal(proposalSelected);
+  const returnUrlSiteProperties = buildLandingSitePropertiesFromUrl(
+    trackingContext.return_url,
+  );
+  const requestSiteProperties = buildLandingSiteProperties({
+    host: request.headers.get("x-forwarded-host") || request.headers.get("host"),
+    protocol: request.headers.get("x-forwarded-proto"),
+    origin: request.headers.get("origin"),
+  });
+  const siteProperties = {
+    site_environment: pickKnownSiteEnvironment(
+      trackingContext.site_environment ||
+      requestSiteProperties.site_environment,
+      returnUrlSiteProperties.site_environment,
+      requestSiteProperties.site_environment,
+    ),
+    site_host:
+      trackingContext.site_host ||
+      returnUrlSiteProperties.site_host ||
+      requestSiteProperties.site_host,
+    site_origin:
+      trackingContext.site_origin ||
+      returnUrlSiteProperties.site_origin ||
+      requestSiteProperties.site_origin,
+  };
   const distinctId = pickDistinctId({
     visitorId,
     respondentEmail: body.respondent_email,
@@ -227,6 +262,7 @@ export async function POST(request: NextRequest) {
       visitor_id: visitorId,
       pathname: "/landing-pages/formulario",
       return_url: trackingContext.return_url,
+      ...siteProperties,
       utm_source:
         trackingContext.utm_source || findAnswer(answers, answerAliases.utmSource),
       utm_medium:
