@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { captureLandingEvent } from "@/lib/posthog/server";
+import { sendMetaCompleteRegistration } from "@/lib/meta/conversions-api";
 import {
   buildLandingSiteProperties,
   buildLandingSitePropertiesFromUrl,
@@ -239,6 +240,13 @@ export async function POST(request: NextRequest) {
     answers,
     responseId: body.response_id,
   });
+  const respondentEmail =
+    body.respondent_email || findAnswer(answers, ["e-mail", "email"]);
+  const respondentWhatsapp = findAnswer(answers, [
+    "whatsapp",
+    "telefone",
+    "phone",
+  ]);
 
   if (!variant || !distinctId) {
     return NextResponse.json(
@@ -276,6 +284,36 @@ export async function POST(request: NextRequest) {
         trackingContext.utm_term || findAnswer(answers, answerAliases.utmTerm),
     },
   });
+
+  try {
+    await sendMetaCompleteRegistration({
+      visitorId,
+      variant,
+      proposal: landingExperimentProposalByVariant[variant],
+      email: respondentEmail,
+      phone: respondentWhatsapp,
+      responseId: body.response_id,
+      submittedAt: body.submitted_at,
+      proposalSelected,
+      fallback: {
+        returnUrl: trackingContext.return_url,
+        siteOrigin: siteProperties.site_origin,
+        utmSource:
+          trackingContext.utm_source || findAnswer(answers, answerAliases.utmSource),
+        utmMedium:
+          trackingContext.utm_medium || findAnswer(answers, answerAliases.utmMedium),
+        utmCampaign:
+          trackingContext.utm_campaign ||
+          findAnswer(answers, answerAliases.utmCampaign),
+        utmContent:
+          trackingContext.utm_content || findAnswer(answers, answerAliases.utmContent),
+        utmTerm:
+          trackingContext.utm_term || findAnswer(answers, answerAliases.utmTerm),
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao enviar CompleteRegistration para Meta CAPI:", error);
+  }
 
   return NextResponse.json({ ok: true });
 }

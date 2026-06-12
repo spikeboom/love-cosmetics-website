@@ -8,6 +8,7 @@ import { ctaLabel, type LandingVariant } from "./content";
 import {
   initLandingPostHog,
   trackLandingClientEvent,
+  trackLandingVisit,
 } from "@/lib/posthog/landing-client";
 import type { LandingSiteProperties } from "@/lib/posthog/landing-experiment";
 
@@ -32,7 +33,14 @@ export default function CoCriacaoLandingClient({
   useEffect(() => {
     if (!trackingContext) return;
     initLandingPostHog(trackingContext?.distinctId);
-  }, [trackingContext]);
+    trackLandingVisit({
+      visitorId: trackingContext.distinctId,
+      variant: variant.id,
+      assignment_source: trackingContext.assignmentSource,
+      pathname: trackingContext.pathname,
+      ...trackingContext.siteProperties,
+    });
+  }, [trackingContext, variant.id]);
 
   return (
     <main className="min-h-screen bg-[#f7f3ee] text-[#1b1b1b]">
