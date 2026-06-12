@@ -184,6 +184,47 @@ model CheckoutIdentificacaoEvent {
   @@map("checkout_identificacao_events")
 }
 
+model LandingPageVisit {
+  id              String    @id @default(uuid())
+  visitorId       String    @unique
+  variant         String?
+  proposal        String?
+  assignmentSource String?
+  landingPath     String?
+  landingUrl      String?   @db.Text
+  referrer        String?   @db.Text
+  userAgent       String?   @db.Text
+  clientIpAddress String?
+  fbp             String?
+  fbc             String?
+  fbclid          String?   @db.Text
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  utmContent      String?
+  utmTerm         String?
+  utmId           String?
+  metaAdId        String?
+  metaAdsetId     String?
+  siteEnvironment String?
+  siteHost        String?
+  siteOrigin      String?
+  metaEventId     String?
+  metaSentAt      DateTime?
+  metaResponse    Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([visitorId])
+  @@index([utmCampaign])
+  @@index([utmContent])
+  @@index([utmId])
+  @@index([metaAdId])
+  @@index([metaAdsetId])
+  @@index([createdAt])
+  @@map("landing_page_visits")
+}
+
 model ConsultaCep {
   id              String   @id @default(uuid())
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { captureLandingEvent } from "@/lib/posthog/server";
+import { sendMetaCompleteRegistration } from "@/lib/meta/conversions-api";
+import { prisma } from "@/lib/prisma";
 import {
   buildLandingSiteProperties,
   buildLandingSitePropertiesFromUrl,
@@ -38,6 +40,9 @@ const answerAliases = {
   utmCampaign: ["utm_campaign", "utm campaign"],
   utmContent: ["utm_content", "utm content"],
   utmTerm: ["utm_term", "utm term"],
+  utmId: ["utm_id", "utm id"],
+  metaAdId: ["meta_ad_id", "meta ad id"],
+  metaAdsetId: ["meta_adset_id", "meta adset id"],
   proposalSelected: [
     "proposal_selected",
     "proposal selected",
@@ -55,6 +60,9 @@ const trackingContextSchema = z
     utm_campaign: z.string().trim().optional(),
     utm_content: z.string().trim().optional(),
     utm_term: z.string().trim().optional(),
+    utm_id: z.string().trim().optional(),
+    meta_ad_id: z.string().trim().optional(),
+    meta_adset_id: z.string().trim().optional(),
     return_url: z.string().trim().optional(),
     site_environment: z.enum(["local", "dev", "production", "unknown"]).optional(),
     site_host: z.string().trim().optional(),
@@ -118,6 +126,54 @@ function parseTrackingContext(answers: Record<string, unknown>) {
   } catch {
     return {};
   }
+}
+
+type LandingPageVisitAttribution = {
+  landingUrl: string | null;
+  fbc: string | null;
+  fbclid: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  utmId: string | null;
+  metaAdId: string | null;
+  metaAdsetId: string | null;
+};
+
+function pickUrlSearchParam(url: string | null | undefined, key: string) {
+  if (!url) return undefined;
+
+  try {
+    return new URL(url).searchParams.get(key) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function findLandingPageVisitAttribution(visitorId: string | undefined) {
+  if (!visitorId) return null;
+
+  const rows = await prisma.$queryRaw<LandingPageVisitAttribution[]>`
+    SELECT
+      "landingUrl",
+      "fbc",
+      "fbclid",
+      "utmSource",
+      "utmMedium",
+      "utmCampaign",
+      "utmContent",
+      "utmTerm",
+      "utmId",
+      "metaAdId",
+      "metaAdsetId"
+    FROM "landing_page_visits"
+    WHERE "visitorId" = ${visitorId}
+    LIMIT 1
+  `;
+
+  return rows[0] || null;
 }
 
 function inferVariantFromProposal(
@@ -239,6 +295,52 @@ export async function POST(request: NextRequest) {
     answers,
     responseId: body.response_id,
   });
+  const respondentEmail =
+    body.respondent_email || findAnswer(answers, ["e-mail", "email"]);
+  const respondentWhatsapp = findAnswer(answers, [
+    "whatsapp",
+    "telefone",
+    "phone",
+  ]);
+  const visitAttribution = await findLandingPageVisitAttribution(visitorId);
+  const utmSource =
+    visitAttribution?.utmSource ||
+    trackingContext.utm_source ||
+    findAnswer(answers, answerAliases.utmSource);
+  const utmMedium =
+    visitAttribution?.utmMedium ||
+    trackingContext.utm_medium ||
+    findAnswer(answers, answerAliases.utmMedium);
+  const utmCampaign =
+    visitAttribution?.utmCampaign ||
+    trackingContext.utm_campaign ||
+    findAnswer(answers, answerAliases.utmCampaign);
+  const utmContent =
+    visitAttribution?.utmContent ||
+    trackingContext.utm_content ||
+    findAnswer(answers, answerAliases.utmContent);
+  const utmTerm =
+    visitAttribution?.utmTerm ||
+    trackingContext.utm_term ||
+    findAnswer(answers, answerAliases.utmTerm);
+  const utmId =
+    visitAttribution?.utmId ||
+    pickUrlSearchParam(visitAttribution?.landingUrl, "utm_id") ||
+    trackingContext.utm_id ||
+    findAnswer(answers, answerAliases.utmId);
+  const metaAdId =
+    visitAttribution?.metaAdId ||
+    pickUrlSearchParam(visitAttribution?.landingUrl, "meta_ad_id") ||
+    trackingContext.meta_ad_id ||
+    findAnswer(answers, answerAliases.metaAdId);
+  const metaAdsetId =
+    visitAttribution?.metaAdsetId ||
+    pickUrlSearchParam(visitAttribution?.landingUrl, "meta_adset_id") ||
+    trackingContext.meta_adset_id ||
+    findAnswer(answers, answerAliases.metaAdsetId);
+  const fbclid =
+    visitAttribution?.fbclid ||
+    pickUrlSearchParam(visitAttribution?.landingUrl, "fbclid");
 
   if (!variant || !distinctId) {
     return NextResponse.json(
@@ -263,19 +365,46 @@ export async function POST(request: NextRequest) {
       pathname: "/landing-pages/formulario",
       return_url: trackingContext.return_url,
       ...siteProperties,
-      utm_source:
-        trackingContext.utm_source || findAnswer(answers, answerAliases.utmSource),
-      utm_medium:
-        trackingContext.utm_medium || findAnswer(answers, answerAliases.utmMedium),
-      utm_campaign:
-        trackingContext.utm_campaign ||
-        findAnswer(answers, answerAliases.utmCampaign),
-      utm_content:
-        trackingContext.utm_content || findAnswer(answers, answerAliases.utmContent),
-      utm_term:
-        trackingContext.utm_term || findAnswer(answers, answerAliases.utmTerm),
+      landing_url: visitAttribution?.landingUrl,
+      fbc: visitAttribution?.fbc,
+      fbclid,
+      utm_source: utmSource,
+      utm_medium: utmMedium,
+      utm_campaign: utmCampaign,
+      utm_content: utmContent,
+      utm_term: utmTerm,
+      utm_id: utmId,
+      meta_ad_id: metaAdId,
+      meta_adset_id: metaAdsetId,
     },
   });
+
+  try {
+    await sendMetaCompleteRegistration({
+      visitorId,
+      variant,
+      proposal: landingExperimentProposalByVariant[variant],
+      email: respondentEmail,
+      phone: respondentWhatsapp,
+      responseId: body.response_id,
+      submittedAt: body.submitted_at,
+      proposalSelected,
+      fallback: {
+        returnUrl: trackingContext.return_url,
+        siteOrigin: siteProperties.site_origin,
+        utmSource,
+        utmMedium,
+        utmCampaign,
+        utmContent,
+        utmTerm,
+        utmId,
+        metaAdId,
+        metaAdsetId,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao enviar CompleteRegistration para Meta CAPI:", error);
+  }
 
   return NextResponse.json({ ok: true });
 }
