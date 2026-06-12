@@ -1,0 +1,245 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { captureLandingEvent } from "@/lib/posthog/server";
+import {
+  isLandingExperimentVariant,
+  landingExperimentProposalByVariant,
+  type LandingExperimentVariantId,
+} from "@/lib/posthog/landing-experiment";
+
+export const runtime = "nodejs";
+
+const MAX_BODY_BYTES = 50_000;
+
+const bodySchema = z.object({
+  secret: z.string().optional(),
+  form_id: z.string().trim().max(160).optional(),
+  form_title: z.string().trim().max(300).optional(),
+  response_id: z.string().trim().max(300).optional(),
+  submitted_at: z.string().trim().max(80).optional(),
+  respondent_email: z.string().trim().email().max(254).optional(),
+  answers: z.record(z.string(), z.unknown()).default({}),
+});
+
+const answerAliases = {
+  trackingContext: ["tracking_context", "tracking context"],
+  visitorId: [
+    "visitor_id",
+    "visitor id",
+    "tracking_id",
+    "tracking id",
+    "nl_variant_user_id",
+  ],
+  variant: ["variant", "variante", "landing_variant", "landing variant"],
+  utmSource: ["utm_source", "utm source"],
+  utmMedium: ["utm_medium", "utm medium"],
+  utmCampaign: ["utm_campaign", "utm campaign"],
+  utmContent: ["utm_content", "utm content"],
+  utmTerm: ["utm_term", "utm term"],
+  proposalSelected: [
+    "proposal_selected",
+    "proposal selected",
+    "proposta selecionada",
+    "qual dessas propostas mais te faria comprar um produto de skincare?",
+  ],
+};
+
+const trackingContextSchema = z
+  .object({
+    visitor_id: z.string().trim().optional(),
+    variant: z.string().trim().optional(),
+    utm_source: z.string().trim().optional(),
+    utm_medium: z.string().trim().optional(),
+    utm_campaign: z.string().trim().optional(),
+    utm_content: z.string().trim().optional(),
+    utm_term: z.string().trim().optional(),
+    return_url: z.string().trim().optional(),
+  })
+  .passthrough();
+
+function normalizeKey(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function stringifyAnswer(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    const text = value.map((item) => String(item)).join(", ").trim();
+    return text || undefined;
+  }
+
+  if (value === null || value === undefined) return undefined;
+
+  const text = String(value).trim();
+  return text || undefined;
+}
+
+function findAnswer(
+  answers: Record<string, unknown>,
+  aliases: string[],
+): string | undefined {
+  const normalizedAliases = aliases.map(normalizeKey);
+
+  for (const [key, value] of Object.entries(answers)) {
+    const normalizedKey = normalizeKey(key);
+    if (
+      normalizedAliases.some(
+        (alias) => normalizedKey === alias || normalizedKey.includes(alias),
+      )
+    ) {
+      return stringifyAnswer(value);
+    }
+  }
+
+  return undefined;
+}
+
+function parseTrackingContext(answers: Record<string, unknown>) {
+  const rawTrackingContext = findAnswer(
+    answers,
+    answerAliases.trackingContext,
+  );
+  if (!rawTrackingContext) return {};
+
+  try {
+    const parsed = trackingContextSchema.safeParse(
+      JSON.parse(rawTrackingContext),
+    );
+    return parsed.success ? parsed.data : {};
+  } catch {
+    return {};
+  }
+}
+
+function inferVariantFromProposal(
+  proposal: string | undefined,
+): LandingExperimentVariantId | undefined {
+  if (!proposal) return undefined;
+
+  const normalized = normalizeKey(proposal);
+  if (normalized.includes("biotecnologia")) return "lp1";
+  if (normalized.includes("poder da amazonia")) return "lp2";
+  if (normalized.includes("ciencia da amazonia")) return "lp3";
+
+  return undefined;
+}
+
+function pickDistinctId({
+  visitorId,
+  respondentEmail,
+  answers,
+  responseId,
+}: {
+  visitorId?: string;
+  respondentEmail?: string;
+  answers: Record<string, unknown>;
+  responseId?: string;
+}) {
+  const email = respondentEmail || findAnswer(answers, ["e-mail", "email"]);
+  const whatsapp = findAnswer(answers, ["whatsapp", "telefone", "phone"]);
+
+  return (
+    visitorId ||
+    email ||
+    whatsapp ||
+    (responseId ? `google_form_${responseId}` : undefined)
+  );
+}
+
+export async function POST(request: NextRequest) {
+  const contentLengthHeader = request.headers.get("content-length");
+  if (contentLengthHeader) {
+    const contentLength = Number(contentLengthHeader);
+    if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+  }
+
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const expectedSecret = process.env.GOOGLE_FORMS_WEBHOOK_SECRET?.trim();
+  const headerSecret = request.headers
+    .get("x-google-forms-webhook-secret")
+    ?.trim();
+  const bodySecret =
+    typeof rawBody === "object" && rawBody !== null && "secret" in rawBody
+      ? String((rawBody as { secret?: unknown }).secret || "").trim()
+      : undefined;
+
+  if (
+    !expectedSecret ||
+    (headerSecret !== expectedSecret && bodySecret !== expectedSecret)
+  ) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const parsed = bodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  }
+
+  const body = parsed.data;
+  const answers = body.answers;
+  const trackingContext = parseTrackingContext(answers);
+  const visitorId =
+    trackingContext.visitor_id || findAnswer(answers, answerAliases.visitorId);
+  const rawVariant =
+    trackingContext.variant || findAnswer(answers, answerAliases.variant);
+  const proposalSelected = findAnswer(answers, answerAliases.proposalSelected);
+  const variant = isLandingExperimentVariant(rawVariant)
+    ? rawVariant
+    : inferVariantFromProposal(proposalSelected);
+  const distinctId = pickDistinctId({
+    visitorId,
+    respondentEmail: body.respondent_email,
+    answers,
+    responseId: body.response_id,
+  });
+
+  if (!variant || !distinctId) {
+    return NextResponse.json(
+      { error: "Missing variant or distinct id" },
+      { status: 400 },
+    );
+  }
+
+  await captureLandingEvent({
+    distinctId,
+    event: "form_submitted",
+    properties: {
+      variant,
+      proposal: landingExperimentProposalByVariant[variant],
+      proposal_selected: proposalSelected,
+      form_id: body.form_id,
+      form_title: body.form_title,
+      response_id: body.response_id,
+      respondent_email: body.respondent_email,
+      submitted_at: body.submitted_at,
+      visitor_id: visitorId,
+      pathname: "/landing-pages/formulario",
+      return_url: trackingContext.return_url,
+      utm_source:
+        trackingContext.utm_source || findAnswer(answers, answerAliases.utmSource),
+      utm_medium:
+        trackingContext.utm_medium || findAnswer(answers, answerAliases.utmMedium),
+      utm_campaign:
+        trackingContext.utm_campaign ||
+        findAnswer(answers, answerAliases.utmCampaign),
+      utm_content:
+        trackingContext.utm_content || findAnswer(answers, answerAliases.utmContent),
+      utm_term:
+        trackingContext.utm_term || findAnswer(answers, answerAliases.utmTerm),
+    },
+  });
+
+  return NextResponse.json({ ok: true });
+}

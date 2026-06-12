@@ -1,7 +1,8 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { trackLandingClientEvent } from "@/lib/posthog/landing-client";
 
 const defaultGoogleFormViewUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSeKrVlVskWt-YYfFVMRZEMKGtoHpZe01st9f7q9JzTCeS0fRA/viewform?usp=header";
@@ -15,8 +16,18 @@ const googleFormViewUrl =
   process.env.NEXT_PUBLIC_COCREATE_GOOGLE_FORM_VIEW_URL ||
   defaultGoogleFormViewUrl;
 
-export default function FormularioOptionsClient() {
+const googleFormTrackingContextEntryId =
+  process.env.NEXT_PUBLIC_COCREATE_GOOGLE_FORM_ENTRY_TRACKING_CONTEXT;
+const googleFormsReturnUrl =
+  process.env.NEXT_PUBLIC_COCREATE_GOOGLE_FORMS_RETURN_URL;
+
+export default function FormularioOptionsClient({
+  visitorId,
+}: {
+  visitorId?: string;
+}) {
   const [googleUrlWithVariant, setGoogleUrlWithVariant] = useState("");
+  const startedTrackedRef = useRef(false);
 
   useEffect(() => {
     if (!googleFormEmbedUrl) {
@@ -32,8 +43,34 @@ export default function FormularioOptionsClient() {
       url.searchParams.set("usp", "pp_url");
     }
 
+    const trackingValues = {
+      visitor_id: params.get("visitor_id") || visitorId,
+      variant,
+      utm_source: params.get("utm_source"),
+      utm_medium: params.get("utm_medium"),
+      utm_campaign: params.get("utm_campaign"),
+      utm_content: params.get("utm_content"),
+      utm_term: params.get("utm_term"),
+      return_url: googleFormsReturnUrl,
+    };
+
+    if (googleFormTrackingContextEntryId) {
+      url.searchParams.set(
+        googleFormTrackingContextEntryId,
+        JSON.stringify(trackingValues),
+      );
+    }
+
+    if (variant && !startedTrackedRef.current) {
+      startedTrackedRef.current = true;
+      trackLandingClientEvent("form_started", {
+        variant,
+        pathname: window.location.pathname,
+      });
+    }
+
     setGoogleUrlWithVariant(url.toString());
-  }, []);
+  }, [visitorId]);
 
   return (
     <GoogleFormEmbed

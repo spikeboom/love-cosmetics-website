@@ -3,16 +3,34 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useEffect } from "react";
 import { ctaLabel, type LandingVariant } from "./content";
+import {
+  initLandingPostHog,
+  trackLandingClientEvent,
+} from "@/lib/posthog/landing-client";
 
 interface CoCriacaoLandingClientProps {
   variant: LandingVariant;
+  formQueryString?: string;
+  trackingContext?: {
+    assignmentSource: string;
+    distinctId?: string;
+    pathname: string;
+  };
 }
 
 export default function CoCriacaoLandingClient({
   variant,
+  formQueryString,
+  trackingContext,
 }: CoCriacaoLandingClientProps) {
-  const formHref = `/landing-pages/formulario?variant=${variant.id}`;
+  const formHref = `/landing-pages/formulario?${formQueryString || `variant=${variant.id}`}`;
+
+  useEffect(() => {
+    if (!trackingContext) return;
+    initLandingPostHog(trackingContext?.distinctId);
+  }, [trackingContext]);
 
   return (
     <main className="min-h-screen bg-[#f7f3ee] text-[#1b1b1b]">
@@ -118,6 +136,14 @@ export default function CoCriacaoLandingClient({
         <div className="mx-auto flex max-w-[1200px] justify-center">
           <Link
             href={formHref}
+            onClick={() =>
+              trackLandingClientEvent("landing_cta_clicked", {
+                variant: variant.id,
+                assignment_source: trackingContext?.assignmentSource,
+                pathname: trackingContext?.pathname,
+                destination: formHref,
+              })
+            }
             className="inline-flex min-h-[56px] w-full max-w-[560px] items-center justify-center gap-2 rounded-lg bg-white px-5 py-4 text-center font-cera-pro text-sm font-bold leading-5 text-[#254333] transition hover:bg-[#f7f3ee] sm:text-base"
           >
             {ctaLabel}

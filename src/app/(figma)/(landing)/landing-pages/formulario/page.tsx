@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import FormularioOptionsClient from "./FormularioOptionsClient";
+import {
+  LANDING_EXPERIMENT_COOKIE_NAME,
+  createLandingVisitorId,
+} from "@/lib/posthog/landing-experiment";
 
 export const metadata: Metadata = {
   title: "Pesquisa Nova Lovè",
@@ -9,7 +14,14 @@ export const metadata: Metadata = {
     "Formulário de participação na pesquisa de co-criação da Nova Lovè.",
 };
 
-export default function FormularioLandingPagesPage() {
+export default async function FormularioLandingPagesPage() {
+  const requestHeaders = await headers();
+  const cookieStore = await cookies();
+  const visitorId =
+    requestHeaders.get("x-nl-variant-user-id") ||
+    cookieStore.get(LANDING_EXPERIMENT_COOKIE_NAME)?.value ||
+    createLandingVisitorId();
+
   return (
     <main className="min-h-screen bg-[#f7f3ee] text-[#1b1b1b]">
       <header className="bg-[#254333]">
@@ -41,7 +53,7 @@ export default function FormularioLandingPagesPage() {
           </p>
         </div>
 
-        <FormularioOptionsClient />
+        <FormularioOptionsClient visitorId={visitorId} />
       </section>
     </main>
   );
