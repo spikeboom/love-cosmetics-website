@@ -2,10 +2,45 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJWTOnly } from "@/lib/cliente/auth-edge";
 import { verifyAdminJWTOnly } from "@/lib/admin/auth-edge";
+import {
+  createLandingVisitorId,
+  LANDING_EXPERIMENT_COOKIE_NAME,
+  LANDING_EXPERIMENT_ROUTE,
+  LANDING_FORM_ROUTE,
+} from "@/lib/posthog/landing-experiment";
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = request.nextUrl.pathname;
+
+  // ===== EXPERIMENTO LANDING NOVA LOVE =====
+  if (pathname === LANDING_EXPERIMENT_ROUTE || pathname === LANDING_FORM_ROUTE) {
+    const requestHeaders = new Headers(request.headers);
+    const existingVisitorId = request.cookies.get(
+      LANDING_EXPERIMENT_COOKIE_NAME,
+    )?.value;
+    const visitorId = existingVisitorId || createLandingVisitorId();
+
+    requestHeaders.set("x-nl-variant-user-id", visitorId);
+
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+    if (!existingVisitorId) {
+      response.cookies.set(LANDING_EXPERIMENT_COOKIE_NAME, visitorId, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 180,
+      });
+    }
+
+    return response;
+  }
   
 
   // ===== PROTEÇÃO ADMIN =====
@@ -116,5 +151,7 @@ export const config = {
     "/minha-conta/:path*",
     "/conta/:path*",
     "/api/cliente/conta/:path*",
+    "/landing-pages/nova-love",
+    "/landing-pages/formulario",
   ],
 };
