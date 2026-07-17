@@ -4,6 +4,7 @@ import { refreshAccessToken } from "@/lib/bling/simple-auth";
 
 export const runtime = "nodejs";
 
+// This endpoint is called by the VPS scheduler and is never public.
 function hasValidCronSecret(req: NextRequest): boolean {
   const expectedSecret = process.env.CRON_SECRET;
   const authorization = req.headers.get("authorization");
