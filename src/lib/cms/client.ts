@@ -29,6 +29,7 @@ export function getStrapiConfig() {
 }
 
 export function getDirectusConfig() {
+  // In Docker, DIRECTUS_INTERNAL_URL must use the service hostname (directus), never a container IP.
   // Em SSR usamos URL interna (sem sair pela internet); no browser, URL pública
   const isServer = typeof window === "undefined";
   const baseUrl = isServer
